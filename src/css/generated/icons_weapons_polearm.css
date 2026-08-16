@@ -23,6 +23,10 @@
 .weapon-icon-polearm-mountain-bracing-bolt {background-image: url("../../images/weapons/polearm/pole_umpakati.png")}
 .weapon-icon-polearm-footprint-of-the-rainbow {background-image: url("../../images/weapons/polearm/pole_isikhulu.png")}
 .weapon-icon-polearm-tamayuratei-no-ohanashi {background-image: url("../../images/weapons/polearm/pole_aoandon.png")}
+.weapon-icon-polearm-prospectors-shovel {background-image: url("../../images/weapons/polearm/pole_ilmarinen.png")}
+.weapon-icon-polearm-sacrificers-staff {background-image: url("../../images/weapons/polearm/pole_krivule.png")}
+.weapon-icon-polearm-frostbreath {background-image: url("../../images/weapons/polearm/pole_faescrystalle.png")}
+.weapon-icon-polearm-song-of-the-vigil {background-image: url("../../images/weapons/polearm/pole_glintstonepolearm.png")}
 .weapon-icon-polearm-staff-of-homa {background-image: url("../../images/weapons/polearm/pole_homa.png")}
 .weapon-icon-polearm-skyward-spine {background-image: url("../../images/weapons/polearm/pole_dvalin.png")}
 .weapon-icon-polearm-vortex-vanquisher {background-image: url("../../images/weapons/polearm/pole_kunwu.png")}
@@ -34,54 +38,62 @@
 .weapon-icon-polearm-lumidouce-elegy {background-image: url("../../images/weapons/polearm/pole_muguet.png")}
 .weapon-icon-polearm-symphonist-of-scents {background-image: url("../../images/weapons/polearm/pole_trident.png")}
 .weapon-icon-polearm-fractured-halo {background-image: url("../../images/weapons/polearm/pole_perdix.png")}
+.weapon-icon-polearm-bloodsoaked-ruins {background-image: url("../../images/weapons/polearm/pole_tummalyhty.png")}
+.weapon-icon-polearm-disaster-and-remorse {background-image: url("../../images/weapons/polearm/pole_carbine.png")}
 .sprite-weapon-polearm.sprite-24 {
-	background-image: url("../../images/sprites/weapon_polearm_3b677cca46967073a7e63fbe2d34228a.png");
-	background-size: 144px 144px;
+	background-image: url("../../images/sprites/weapon_polearm_612bf298f096f02b3b0e0f27c570a58a.png");
+	background-size: 120px 264px;
 }
 .sprite-weapon-polearm.sprite-40 {
-	background-image: url("../../images/sprites/weapon_polearm_541d3cbd16ce1f401db18b047dc4f7ec.png");
-	background-size: 240px 240px;
+	background-image: url("../../images/sprites/weapon_polearm_80fc43cd8e6887420a791a6b108e9e87.png");
+	background-size: 200px 440px;
 }
 .sprite-weapon-polearm.sprite-60 {
-	background-image: url("../../images/sprites/weapon_polearm_1c22ed3e98773481fa2bc886275c456f.png");
-	background-size: 360px 360px;
+	background-image: url("../../images/sprites/weapon_polearm_d557848e75bc441c059c0656880815d6.png");
+	background-size: 300px 660px;
 }
-.sprite.weapon-icon-polearm-unknown {background-position: 0% 0%}
-.sprite.weapon-icon-polearm-white-tassel {background-position: 20% 0%}
-.sprite.weapon-icon-polearm-halberd {background-position: 40% 0%}
-.sprite.weapon-icon-polearm-black-tassel {background-position: 60% 0%}
-.sprite.weapon-icon-polearm-dragons-bane {background-position: 80% 0%}
-.sprite.weapon-icon-polearm-prototype-starglitter {background-position: 100% 0%}
-.sprite.weapon-icon-polearm-crescent-pike {background-position: 0% 20%}
-.sprite.weapon-icon-polearm-blackcliff-pole {background-position: 20% 20%}
-.sprite.weapon-icon-polearm-deathmatch {background-position: 40% 20%}
-.sprite.weapon-icon-polearm-lithic-spear {background-position: 60% 20%}
-.sprite.weapon-icon-polearm-favonius-lance {background-position: 80% 20%}
-.sprite.weapon-icon-polearm-royal-spear {background-position: 100% 20%}
-.sprite.weapon-icon-polearm-dragonspine-spear {background-position: 0% 40%}
-.sprite.weapon-icon-polearm-kitain-cross-spear {background-position: 20% 40%}
-.sprite.weapon-icon-polearm-the-catch {background-position: 40% 40%}
-.sprite.weapon-icon-polearm-wavebreakers-fin {background-position: 60% 40%}
-.sprite.weapon-icon-polearm-moonpiercer {background-position: 80% 40%}
-.sprite.weapon-icon-polearm-missive-windspear {background-position: 100% 40%}
-.sprite.weapon-icon-polearm-ballad-of-the-fjords {background-position: 0% 60%}
-.sprite.weapon-icon-polearm-rightful-reward {background-position: 20% 60%}
-.sprite.weapon-icon-polearm-dialogues-of-the-desert-sages {background-position: 40% 60%}
-.sprite.weapon-icon-polearm-prospectors-drill {background-position: 60% 60%}
-.sprite.weapon-icon-polearm-mountain-bracing-bolt {background-position: 80% 60%}
-.sprite.weapon-icon-polearm-footprint-of-the-rainbow {background-position: 100% 60%}
-.sprite.weapon-icon-polearm-tamayuratei-no-ohanashi {background-position: 0% 80%}
-.sprite.weapon-icon-polearm-staff-of-homa {background-position: 20% 80%}
-.sprite.weapon-icon-polearm-skyward-spine {background-position: 40% 80%}
-.sprite.weapon-icon-polearm-vortex-vanquisher {background-position: 60% 80%}
-.sprite.weapon-icon-polearm-primordial-jade-winged-spear {background-position: 80% 80%}
-.sprite.weapon-icon-polearm-calamity-queller {background-position: 100% 80%}
-.sprite.weapon-icon-polearm-engulfing-lightning {background-position: 0% 100%}
-.sprite.weapon-icon-polearm-staff-of-the-scarlet-sands {background-position: 20% 100%}
-.sprite.weapon-icon-polearm-crimson-moons-semblance {background-position: 40% 100%}
-.sprite.weapon-icon-polearm-lumidouce-elegy {background-position: 60% 100%}
-.sprite.weapon-icon-polearm-symphonist-of-scents {background-position: 80% 100%}
-.sprite.weapon-icon-polearm-fractured-halo {background-position: 100% 100%}
+.sprite.weapon-icon-polearm-unknown {background-position: 0 0}
+.sprite.weapon-icon-polearm-white-tassel {background-position: 25% 0}
+.sprite.weapon-icon-polearm-halberd {background-position: 50% 0}
+.sprite.weapon-icon-polearm-black-tassel {background-position: 75% 0}
+.sprite.weapon-icon-polearm-dragons-bane {background-position: 100% 0}
+.sprite.weapon-icon-polearm-prototype-starglitter {background-position: 0 10%}
+.sprite.weapon-icon-polearm-crescent-pike {background-position: 25% 10%}
+.sprite.weapon-icon-polearm-blackcliff-pole {background-position: 50% 10%}
+.sprite.weapon-icon-polearm-deathmatch {background-position: 75% 10%}
+.sprite.weapon-icon-polearm-lithic-spear {background-position: 100% 10%}
+.sprite.weapon-icon-polearm-favonius-lance {background-position: 0 20%}
+.sprite.weapon-icon-polearm-royal-spear {background-position: 25% 20%}
+.sprite.weapon-icon-polearm-dragonspine-spear {background-position: 50% 20%}
+.sprite.weapon-icon-polearm-kitain-cross-spear {background-position: 75% 20%}
+.sprite.weapon-icon-polearm-the-catch {background-position: 100% 20%}
+.sprite.weapon-icon-polearm-wavebreakers-fin {background-position: 0 30%}
+.sprite.weapon-icon-polearm-moonpiercer {background-position: 25% 30%}
+.sprite.weapon-icon-polearm-missive-windspear {background-position: 50% 30%}
+.sprite.weapon-icon-polearm-ballad-of-the-fjords {background-position: 75% 30%}
+.sprite.weapon-icon-polearm-rightful-reward {background-position: 100% 30%}
+.sprite.weapon-icon-polearm-dialogues-of-the-desert-sages {background-position: 0 40%}
+.sprite.weapon-icon-polearm-prospectors-drill {background-position: 25% 40%}
+.sprite.weapon-icon-polearm-mountain-bracing-bolt {background-position: 50% 40%}
+.sprite.weapon-icon-polearm-footprint-of-the-rainbow {background-position: 75% 40%}
+.sprite.weapon-icon-polearm-tamayuratei-no-ohanashi {background-position: 100% 40%}
+.sprite.weapon-icon-polearm-prospectors-shovel {background-position: 0 50%}
+.sprite.weapon-icon-polearm-sacrificers-staff {background-position: 25% 50%}
+.sprite.weapon-icon-polearm-frostbreath {background-position: 50% 50%}
+.sprite.weapon-icon-polearm-song-of-the-vigil {background-position: 75% 50%}
+.sprite.weapon-icon-polearm-staff-of-homa {background-position: 100% 50%}
+.sprite.weapon-icon-polearm-skyward-spine {background-position: 0 60%}
+.sprite.weapon-icon-polearm-vortex-vanquisher {background-position: 25% 60%}
+.sprite.weapon-icon-polearm-primordial-jade-winged-spear {background-position: 50% 60%}
+.sprite.weapon-icon-polearm-calamity-queller {background-position: 75% 60%}
+.sprite.weapon-icon-polearm-engulfing-lightning {background-position: 100% 60%}
+.sprite.weapon-icon-polearm-staff-of-the-scarlet-sands {background-position: 0 70%}
+.sprite.weapon-icon-polearm-crimson-moons-semblance {background-position: 25% 70%}
+.sprite.weapon-icon-polearm-lumidouce-elegy {background-position: 50% 70%}
+.sprite.weapon-icon-polearm-symphonist-of-scents {background-position: 75% 70%}
+.sprite.weapon-icon-polearm-fractured-halo {background-position: 100% 70%}
+.sprite.weapon-icon-polearm-bloodsoaked-ruins {background-position: 0 80%}
+.sprite.weapon-icon-polearm-disaster-and-remorse {background-position: 25% 80%}
 
 @media
 only screen and (-webkit-min-device-pixel-ratio: 2),
@@ -115,6 +127,10 @@ only screen and (                min-resolution: 2dppx) {
 	.weapon-icon-polearm-mountain-bracing-bolt {background-image: url("../../images/weapons/polearm/pole_umpakati_2x.png")}
 	.weapon-icon-polearm-footprint-of-the-rainbow {background-image: url("../../images/weapons/polearm/pole_isikhulu_2x.png")}
 	.weapon-icon-polearm-tamayuratei-no-ohanashi {background-image: url("../../images/weapons/polearm/pole_aoandon_2x.png")}
+	.weapon-icon-polearm-prospectors-shovel {background-image: url("../../images/weapons/polearm/pole_ilmarinen_2x.png")}
+	.weapon-icon-polearm-sacrificers-staff {background-image: url("../../images/weapons/polearm/pole_krivule_2x.png")}
+	.weapon-icon-polearm-frostbreath {background-image: url("../../images/weapons/polearm/pole_faescrystalle_2x.png")}
+	.weapon-icon-polearm-song-of-the-vigil {background-image: url("../../images/weapons/polearm/pole_glintstonepolearm_2x.png")}
 	.weapon-icon-polearm-staff-of-homa {background-image: url("../../images/weapons/polearm/pole_homa_2x.png")}
 	.weapon-icon-polearm-skyward-spine {background-image: url("../../images/weapons/polearm/pole_dvalin_2x.png")}
 	.weapon-icon-polearm-vortex-vanquisher {background-image: url("../../images/weapons/polearm/pole_kunwu_2x.png")}
@@ -126,7 +142,9 @@ only screen and (                min-resolution: 2dppx) {
 	.weapon-icon-polearm-lumidouce-elegy {background-image: url("../../images/weapons/polearm/pole_muguet_2x.png")}
 	.weapon-icon-polearm-symphonist-of-scents {background-image: url("../../images/weapons/polearm/pole_trident_2x.png")}
 	.weapon-icon-polearm-fractured-halo {background-image: url("../../images/weapons/polearm/pole_perdix_2x.png")}
-	.sprite-weapon-polearm.sprite-24 {background-image: url("../../images/sprites/weapon_polearm_dc452be99fbbdca7d646e85b663b83d4.png")}
-	.sprite-weapon-polearm.sprite-40 {background-image: url("../../images/sprites/weapon_polearm_2e8af27eb5b914b19ff2e82526b9c2bd.png")}
-	.sprite-weapon-polearm.sprite-60 {background-image: url("../../images/sprites/weapon_polearm_fdeae30f9c59f87709ed59ee375f5255.png")}
+	.weapon-icon-polearm-bloodsoaked-ruins {background-image: url("../../images/weapons/polearm/pole_tummalyhty_2x.png")}
+	.weapon-icon-polearm-disaster-and-remorse {background-image: url("../../images/weapons/polearm/pole_carbine_2x.png")}
+	.sprite-weapon-polearm.sprite-24 {background-image: url("../../images/sprites/weapon_polearm_5f08cd6c5ddbb32efe1fc2006c053c04.png")}
+	.sprite-weapon-polearm.sprite-40 {background-image: url("../../images/sprites/weapon_polearm_d75228555efd5b915b8af231132d9acd.png")}
+	.sprite-weapon-polearm.sprite-60 {background-image: url("../../images/sprites/weapon_polearm_a41b69e29d8aec55e858cbd4e0f67a7a.png")}
 }

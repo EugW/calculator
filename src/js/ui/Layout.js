@@ -30,6 +30,7 @@ export class Layout {
         UI.CharTab.init(app);
         UI.WeaponTab.init(app);
         UI.ArtifactsTab.init(app);
+        UI.ArtifactUpgradePredictorTab.init(app);
         UI.BestArtifactTab.init(app);
         UI.EnemyTab.init(app);
         UI.BuffsTab.init(app);
@@ -46,6 +47,7 @@ export class Layout {
 
         this.addRightSpacer();
 
+        UI.PresetTab.init(app);
         UI.ShareTab.init(app);
         UI.SettingsTab.init(app);
 
@@ -84,7 +86,7 @@ export class Layout {
         tab2.addClass('tab-narrow');
         tab2.appendTo('.gi-layout-left-tabs');
 
-        let container = $('<div class="gi-tab-right gi-tab-container '+ containerClass +'" data-tab="'+ tabClass +'"></div>')
+        let container = $('<div class="gi-tab-right gi-tab-container '+ containerClass +'" data-tab="'+ tabClass +'"></div>');
         container.appendTo('.gi-layout-right-content');
 
         if ($('.gi-layout-right-tabs .gi-tab-item').length == 1) {
@@ -105,11 +107,11 @@ export class Layout {
     }
 
     addRightSpacer() {
-        $('.gi-layout-right-tabs').append('<div class="flex-spacer"></div>')
+        $('.gi-layout-right-tabs').append('<div class="flex-spacer"></div>');
     }
 
     addLeftSpacer() {
-        $('.gi-layout-left-tabs').append('<div class="flex-spacer"></div>')
+        $('.gi-layout-left-tabs').append('<div class="flex-spacer"></div>');
     }
 
     refresh(opts) {
@@ -118,7 +120,7 @@ export class Layout {
             return;
         }
 
-        let changed = this.toggleLayout($(window).width() < 1150)
+        let changed = this.toggleLayout($(window).width() < 1150);
         if (!changed) {
             this.refreshActiveTabs(opts);
         }
@@ -189,15 +191,6 @@ export class Layout {
 
             if (lastVersion) {
                 UI.WindowHelp.show(UI.Lang.get('modal_window.changelog'), 'changelog');
-            }
-        } else {
-            let cur = new Date();
-            let dateStr = cur.toDateString();
-            let lastDate = localStorage.last_date || '';
-
-            if (lastDate != dateStr) {
-                UI.WindowMessage.show('layout.announce', 'layout.not_supported');
-                localStorage.setItem('last_date', dateStr)
             }
         }
     }
@@ -279,8 +272,8 @@ export class Layout {
         $(window).resize(function() {
             $('.gi-main-container').height( $(window).height() - 35 );
             $('.tooltip-wrapper').hide();
-            that.toggleLayout($(window).width() < 1150)
-        })
+            that.toggleLayout($(window).width() < 1150);
+        });
 
         $('.gi-lang-switch').on('click', function() {
             localStorage.lang = $(this).hasClass('lang-rus') ? 'rus' : 'eng';

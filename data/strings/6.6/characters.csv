@@ -1,0 +1,46 @@
+category;name;rus;eng
+feature_skill;lohen_masterstroke_normal_hit_1;Урон 1-й атаки Мастерского хода;Masterstroke 1-Hit DMG
+feature_skill;lohen_masterstroke_normal_hit_2;Урон 2-й атаки Мастерского хода;Masterstroke 2-Hit DMG
+feature_skill;lohen_masterstroke_normal_hit_3;Урон 3-й атаки Мастерского хода;Masterstroke 3-Hit DMG
+feature_skill;lohen_masterstroke_normal_hit_4;Урон 4-й атаки Мастерского хода;Masterstroke 4-Hit DMG
+feature_skill;lohen_masterstroke_normal_hit_5;Урон 5-й атаки Мастерского хода;Masterstroke 5-Hit DMG
+feature_skill;lohen_masterstroke_normal_hit_5_1;Урон 5-й атаки Мастерского хода 1;Masterstroke 5-Hit DMG 1
+feature_skill;lohen_masterstroke_normal_hit_5_2;Урон 5-й атаки Мастерского хода 2;Masterstroke 5-Hit DMG 2
+feature_skill;lohen_masterstroke_charged_hit;Урон заряженной атаки Мастерского хода;Masterstroke Charged Attack DMG
+feature_skill;lohen_masterstroke_plunge;Урон атаки в падении Мастерского хода;Masterstroke Plunge DMG
+feature_skill;lohen_masterstroke_plunge_low;Урон низкой атаки в падении Мастерского хода;Masterstroke Low Plunge DMG
+feature_skill;lohen_masterstroke_plunge_high;Урон высокой атаки в падении Мастерского хода;Masterstroke High Plunge DMG
+feature_skill;lohen_masterstroke_stamina_cost;Потребление выносливости Мастерского хода;Masterstroke Stamina Cost
+feature_skill;lohen_masterstroke_duration;Длительность Мастерского хода;Masterstroke Duration
+feature_skill;lohen_etched_into_bone_and_soul;Урон Врезано в кость и сердце;Etched Into Bone and Soul DMG
+feature_skill;lohen_will_to_win_dmg_increase;Увеличение урона от Жажды победы;Will to Win DMG Increase
+feature_other;lohen_evilsbane_blade;Урон Истребляющего зло клинка;Evilsbane Blade DMG
+feature_burst;lohen_manifest_judgment;Урон Вынесения приговора;Manifest Judgment DMG
+feature_burst;lohen_manifest_judgment_will_to_win_dmg_increase;Увеличение урона от Жажды победы;Will to Win DMG Increase
+talent_name;lohen_when_the_mood_strikes;Когда нахлынет вдохновение;When the Mood Strikes
+talent_descr;lohen_when_the_mood_strikes;После использования элементального навыка skill{Непредвиденный удар} Лоэн на 9 сек. получает эффект «Воодушевление»: уровень элементального навыка skill{Непредвиденный удар} повышается на 1.<br>Если во время использования элементального навыка уровень обычной атаки, элементального навыка или взрыва стихии любого другого персонажа отряда не ниже уровня элементального навыка Лоэна, длительность этого эффекта «Воодушевление» дополнительно увеличивается на 6 сек.<br>Воодушевление можно получить раз в 18 сек.;Lohen gains "High Spirits" for 9s after he unleashes the Elemental Skill skill{Unforeseen Strike}: Increases the Skill Level of skill{Unforeseen Strike} by 1.<br>When unleashing an Elemental Skill, if the Level of any other party member's Normal Attack, Elemental Skill, or Elemental Burst is not lower than Lohen's Elemental Skill Level, the duration of this instance of High Spirits will be increased by an additional 6s.<br>High Spirits can be gained once every 18s.
+feature_skill;nicole_uncreated_light;Урон Несотворённого света;Uncreated Light DMG
+feature_skill;nicole_shield_of_blazing_light;Щит пылающего сияния;Shield of Blazing Light
+feature_skill;nicole_shield_duration;Длительность щита;Shield Duration
+feature_skill;nicole_grace_of_kenosis_atk_bonus_ratio;Бонус атаки Благодати кенозиса;Grace of Kenosis ATK Bonus Ratio
+feature_skill;nicole_grace_of_kenosis_max_atk_bonus;Макс. бонус атаки Благодати кенозиса;Grace of Kenosis Max ATK Bonus
+feature_skill;nicole_grace_of_kenosis_duration;Длительность Благодати кенозиса;Grace of Kenosis Duration
+feature_burst;nicole_ladder_of_divine_ascent;Урон Лествицы Божественного восхождения;Ladder of Divine Ascent DMG
+feature_burst;nicole_arcane_projection;Урон Проекции священного таинства;Arcane Projection DMG
+feature_other;nicole_arcane_projection;Урон Проекции священного таинства;Arcane Projection DMG
+feature_burst;nicole_arcane_projection_count;Количество атак Проекции священного таинства;Arcane Projection Attack Count
+feature_burst;nicole_silent_contemplation_duration;Длительность Безмолвного созерцания;Silent Contemplation Duration
+feature_other;nicole_arcane_projection_unity;Урон Проекции священного таинства: Единство;Arcane Projection: Unity DMG
+feature_other;nicole_grace_atk_bonus;Бонус атаки Благодати кенозиса;Grace of Kenosis ATK Bonus
+feature_other;nicole_pathfinder_blessing;Бонус Путеводного оберега;Pathfinder's Blessing Bonus
+feature_skill;prune_skill_1_hit_dmg;Урон 1-го удара навыка;Skill 1-Hit DMG
+feature_skill;prune_skill_2_hit_dmg;Урон 2-го удара навыка;Skill 2-Hit DMG
+feature_burst;prune_burst_dmg;Урон навыка;Skill DMG
+feature_burst;prune_witchlure_bell_dmg;Урон колокольчика-приманки;Witchlure Bell DMG
+feature_burst;prune_hunter_seeker_mode_duration;Длительность режима охотника-ловца;Hunter-Seeker Mode Duration
+feature_burst;prune_banehunter_oathhammer;Урон Клятвенного молота истребителя бедствий;Banehunter Oathhammer DMG
+feature_other;prune_banehunter_ricochet;Урон отскока Клятвенного молота;Banehunter Ricochet DMG
+talent_name;prune_witchseekers_vow_reaction;Ведьмовство: Тайный обряд - Элементальная реакция;Hexerei: Secret Rite - Elemental Reaction
+talent_descr;prune_witchseekers_vow_reaction;После того как Ведьмовской персонаж отряда под воздействием Вдохновения колоколов активирует на противнике элементальную реакцию, name{сила атаки} Прюн повышается на %{atk_percent} на 5 сек.;After a Hexerei character in the party affected by Tolling Rally triggers an name{Elemental Reaction} on an opponent, Prune's name{ATK} is increased by %{atk_percent} for 5s.
+talent_name;prune_witchseekers_vow_swirl;Ведьмовство: Тайный обряд - Рассеивание;Hexerei: Secret Rite - Swirl Reaction
+talent_descr;prune_witchseekers_vow_swirl;Если активированная реакция - anemo{Рассеивание}, то name{сила атаки} активировавшего её персонажа дополнительно повышается на %{atk_percent} на 5 сек.;If that reaction is anemo{Swirl}, the triggering character's name{ATK} is additionally increased by %{atk_percent} for 5s.

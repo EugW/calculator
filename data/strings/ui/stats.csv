@@ -61,7 +61,27 @@ stat;move_speed;Cкорость передвижения;Movement SPD
 
 stat;dmg_reaction_swirl;Урон Рассеивания;Swirl DMG
 stat;dmg_reaction_rupture;Урон Бутонизации;Bloom DMG
+stat;dmg_reaction_lunar;Урон Лунных реакций;Lunar Reaction DMG
+stat;dmg_reaction_lunarbloom;Урон Лунной бутонизации;Lunar-Bloom DMG
+stat;dmg_reaction_lunarcharged;Урон Лунного заряда;Lunar-Charged DMG
+stat;dmg_reaction_lunarcrystallize;Урон Лунной кристаллизации;Lunar-Crystallize DMG
 stat;lunarcharged_multi;Базовый урон Лунного заряда;Lunar-Charged Base Bonus
+stat;lunarbloom_multi;Базовый урон Лунной бутонизации;Lunar-Bloom Base Bonus
+stat;lunarcrystallize_multi;Базовый урон Лунной кристаллизации;Lunar-Crystallize Base Bonus
+stat;dmg_lunar_special;Возвышение Лунных реакций;Lunar Elevate
+stat;dmg_lunarbloom_special;Возвышение Лунной бутонизации;Lunar-Bloom Elevate
+stat;dmg_lunarcharged_special;Возвышение Лунного заряда;Lunar-Charged Elevate
+stat;dmg_lunarcrystallize_special;Возвышение Лунной кристаллизации;Lunar-Crystallize Elevate
+stat;dmg_stellarconduct;Урон Звёздного проводника;Stellar-Conduct DMG
+stat;stellarconduct_multi;Базовый урон Звёздного проводника;Stellar-Conduct Base Bonus
+stat;stellarconduct_base_multiplier;Базовый множитель Звёздного проводника;Stellar-Conduct Base Multiplier
+stat;dmg_stellarconduct_special;Возвышение Звёздного проводника;Stellar-Conduct Elevate
+stat;dmg_stellarglimmer;Урон Звёздного блеска;Stellar Glimmer DMG
+stat;stellarglimmer_multi;Базовый урон Звёздного блеска;Stellar Glimmer Base Bonus
+stat;dmg_stellarglimmer_special;Возвышение Звёздного блеска;Stellar Glimmer Elevate
+stat;dmg_stellarswirl;Урон Звёздного рассеивания;Stellar Swirl DMG
+stat;stellarswirl_multi;Базовый урон Звёздного рассеивания;Stellar Swirl Base Bonus
+stat;dmg_stellarswirl_special;Возвышение Звёздного рассеивания;Stellar Swirl Elevate
 
 stat_short;mastery;М. стихий;EM
 stat_short;hp;HP;HP
@@ -125,6 +145,7 @@ stat;crit_rate_nahida;Очищение трикармы;Tri-Karma Purification
 stat;crit_rate_freminet;Давление дрейфующего льда: Дробящее давление;Pressurized Floe: Shattering Pressure
 stat;crit_dmg_anemo;Анемо урон;Anemo DMG
 stat;crit_dmg_cryo;Крио урон;Cryo DMG
+stat;crit_dmg_dendro;Дендро урон;Dendro DMG
 stat;crit_dmg_electro;Электро урон;Electro DMG
 stat;crit_dmg_geo;Гео урон;Geo DMG
 stat;crit_dmg_hydro;Гидро урон;Hydro DMG
@@ -135,6 +156,20 @@ stat;crit_dmg_charged;Заряженная атака;Charged Attack
 stat;crit_dmg_plunge;Атака в падении;Plunge attack
 stat;crit_dmg_skill;Элементальный навык;Elemental Skill
 stat;crit_dmg_burst;Взрыв стихий;Elemental Burst
+stat;crit_rate_lunar;Лунная реакция;Lunar Reaction
+stat;crit_rate_lunarbloom;Лунное цветение;Lunar-Bloom
+stat;crit_rate_lunarcharged;Лунный заряд;Lunar-Charged
+stat;crit_rate_lunarcrystallize;Лунная кристаллизация;Lunar-Crystallize
+stat;crit_dmg_lunar;Лунная реакция;Lunar Reaction
+stat;crit_dmg_lunarbloom;Лунное цветение;Lunar-Bloom
+stat;crit_dmg_lunarcharged;Лунный заряд;Lunar-Charged
+stat;crit_dmg_lunarcrystallize;Лунная кристаллизация;Lunar-Crystallize
+stat;crit_rate_stellarconduct;Шанс крит. попадания Звёздного проводника;Stellar-Conduct CRIT Rate
+stat;crit_dmg_stellarconduct;Крит. урон Звёздного проводника;Stellar-Conduct CRIT DMG
+stat;crit_rate_stellarglimmer;Шанс крит. попадания Звёздного блеска;Stellar Glimmer CRIT Rate
+stat;crit_dmg_stellarglimmer;Крит. урон Звёздного блеска;Stellar Glimmer CRIT DMG
+stat;crit_rate_stellarswirl;Шанс крит. попадания Звёздного рассеивания;Stellar Swirl CRIT Rate
+stat;crit_dmg_stellarswirl;Крит. урон Звёздного рассеивания;Stellar Swirl CRIT DMG
 
 stat;crit_rate_normal_arlecchino;Приглашение на казнь;Invitation to a Beheading
 stat;crit_rate_burst_arlecchino;Восхождение роковой луны;Balemoon Rising

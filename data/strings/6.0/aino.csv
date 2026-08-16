@@ -1,0 +1,17 @@
+category;name;rus;eng
+
+feature_attack;charged_hit_loop;Заряженный урон (цикл);Charged DMG (Loop)
+feature_attack;charged_hit_final;Заряженный урон (финал);Charged DMG (Final)
+
+feature_skill;aino_stage_1_dmg;Урон стадии 1;Stage 1 DMG
+feature_skill;aino_stage_2_dmg;Урон стадии 2;Stage 2 DMG
+feature_burst;aino_water_ball_dmg;Урон водяного снаряда;Water Ball DMG
+feature_burst;aino_duration;Длительность;Duration
+feature_burst;aino_c2_water_ball_dmg;Урон водяного снаряда С2;C2 Water Ball DMG
+feature_burst;aino_c2_atk_dmg;Бонус от Силы атаки;ATK DMG Bonus
+feature_burst;aino_c2_em_dmg;Бонус от Мастерства стихий;EM DMG Bonus
+feature_other;aino_burst_em_bonus;Бонус взрыва от МС;Burst EM Bonus
+
+talent_name;aino_force_limit_analysis;Дар лунного знамения: Анализ предела мощности;Moonsign Benediction: Force Limit Analysis
+talent_descr;aino_force_limit_analysis;Когда Айно в отряде, уровень skill{Лунного знамения} отряда повышается на 1.;When Aino is in the party, the party's skill{Moonsign} will increase by 1 level.
+

@@ -16,11 +16,16 @@ import { Tab } from "../Tab";
 import { WeaponSuggestListModal } from './WeaponSuggest/ListModal';
 import { WeaponSuggestResult } from './WeaponSuggest/Result';
 import { WeaponSuggestSettingsModal } from './WeaponSuggest/Settings';
+import { cloneWeaponSuggestData, getWeaponScenarioDefaultSettings, getWeaponSuggestItems, isWeaponScenarioCustomized, normalizeWeaponScenarioList } from './WeaponSuggest/utils';
 import { WorkerFactorySuggestArtifacts } from '../../classes/WorkerFactory/SuggestArtifacts';
 import { WorkerFactorySuggestWeapons } from '../../classes/WorkerFactory/SuggestWeapons';
 
 
 let lang = new Lang();
+
+function isObject(data) {
+    return data && typeof data == 'object' && !Array.isArray(data);
+}
 
 export class WeaponSuggestTab extends Tab {
     constructor(params) {
@@ -45,11 +50,11 @@ export class WeaponSuggestTab extends Tab {
     createContent() {
         return (
             <WeaponSuggestView
-                ref={element => { this.component = element }}
+                ref={element => { this.component = element; }}
                 app={this.app}
                 title={this.title}
             />
-        )
+        );
     }
 }
 
@@ -87,16 +92,19 @@ export class WeaponSuggestView extends React.Component {
             partialCallback: (data) => this.completePartialCallback(data),
             progressCallback: (data) => this.progressCallback(data),
             subProgressCallback: (items) => this.subProgressCallback(items),
+            errorCallback: (data) => this.workerErrorCallback(data),
         });
 
         this.suggestFactory = new WorkerFactorySuggestArtifacts({
             callback: (data) => this.storageCompleteCallback(data),
             progressCallback: (data) => this.subProgressSuggesterCallback(data),
+            errorCallback: (data) => this.workerErrorCallback(data),
         });
     }
 
     loadDefaultListSettings() {
         let savedSettings = this.loadWeaponSettings();
+        let buildSettings = this.props.app.currentSet().getSettings();
         let showBeta = this.props.app.showBetaContent();
 
         for (let type of DB.Weapons.getKeys(showBeta)) {
@@ -112,41 +120,17 @@ export class WeaponSuggestView extends React.Component {
                 let weapon = weapons.get(weaponName);
                 let rarity = weapon.getRarity();
 
-                let suggestItems = weapon.getSuggesterSettings();
-                let defaultRefine = {1: rarity == 5, 2: false, 3: false, 4: false, 5: rarity < 5};
-                let items = {};
-
-                let savedSettings = defSettings[weaponName];
-                if (typeof savedSettings !== 'object') {
-                    savedSettings = {};
+                let savedWeaponSettings = defSettings[weaponName];
+                if (!isObject(savedWeaponSettings)) {
+                    savedWeaponSettings = {};
                 }
 
-                if (suggestItems.length == 0) {
-                    suggestItems = [{name: ''}];
-                }
-
-                for (let item of suggestItems) {
-                    let itemSettings = savedSettings[item.name];
-                    if (typeof itemSettings !== 'object') {
-                        itemSettings = {refine: {}};
-                    }
-
-                    if (typeof itemSettings.refine !== 'object') {
-                        itemSettings.refine = {};
-                    }
-
-                    let refine = {};
-                    for (let r = 1; r <= 5; ++r) {
-                        refine[r] = itemSettings.refine[r] == undefined ? defaultRefine[r] : !!itemSettings.refine[r];
-                    }
-
-                    items[item.name] = {
-                        show: itemSettings.show === undefined ? rarity >= 4 : !!itemSettings.show,
-                        refine: refine,
-                    };
-                }
-
-                settings[weaponName] = items;
+                settings[weaponName] = normalizeWeaponScenarioList(
+                    weapon,
+                    savedWeaponSettings,
+                    buildSettings,
+                    rarity
+                );
             }
 
             this.state.weaponList[type] = settings;
@@ -162,14 +146,14 @@ export class WeaponSuggestView extends React.Component {
     }
 
     dataWeaponList() {
-        return []
+        return [];
     }
 
     loadWeaponSettings() {
         let result = {};
         try {
             result = JSON.parse(this.props.app.getSetting('suggester_weapon'));
-            if (!Object.isObject(result)) {
+            if (!isObject(result)) {
                 result = {};
             }
         } catch {}
@@ -186,7 +170,7 @@ export class WeaponSuggestView extends React.Component {
                 artifactMode: this.state.artifactMode,
                 settings: this.state.generatorSettings,
             },
-            (data) => {this.handleGeneratorSettingsChange(data)}
+            (data) => {this.handleGeneratorSettingsChange(data);}
         );
     }
 
@@ -199,8 +183,9 @@ export class WeaponSuggestView extends React.Component {
                 weaponType: weaponType,
                 showBeta: showBeta,
                 settings: this.state.weaponList[weaponType],
+                contextSettings: this.props.app.currentSet().getSettings(),
             },
-            (data) => {this.handleListChange(data)}
+            (data) => {this.handleListChange(data);}
         );
     }
 
@@ -246,17 +231,19 @@ export class WeaponSuggestView extends React.Component {
         let weapon = DB.Weapons.getById(data.weaponId);
 
         let build = this.props.app.currentSet();
-        let settings = {};
+        let settings = cloneWeaponSuggestData(data.settings);
 
-        if (data.suggestName) {
-            for (let item of weapon.getSuggesterSettings()) {
+        if (!isObject(settings) || Object.keys(settings).length == 0) {
+            let suggestItem = null;
+
+            for (let item of getWeaponSuggestItems(weapon)) {
                 if (item.name == data.suggestName) {
-                    settings = item.settings;
+                    suggestItem = item;
                     break;
                 }
             }
-        } else {
-            settings = Condition.allConditionsOn(weapon.getConditions());
+
+            settings = getWeaponScenarioDefaultSettings(weapon, suggestItem, build.getSettings());
         }
 
         build.setWeapon(weapon);
@@ -307,33 +294,40 @@ export class WeaponSuggestView extends React.Component {
         let showBeta = this.props.app.showBetaContent();
 
         for (let weaponName of weaponDb.getKeys(showBeta)) {
-            let weaponSettings = this.state.weaponList[weaponType][weaponName];
+            let weaponSettings = this.state.weaponList[weaponType][weaponName] || {};
             let weapon = weaponDb.get(weaponName);
-            let suggesterSettings = weapon.getSuggesterSettings();
+            let suggesterSettings = getWeaponSuggestItems(weapon);
+            let suggestItemHash = {};
 
-            if (suggesterSettings.length == 0) {
-                suggesterSettings = [{name: ''}];
+            for (const suggestItem of suggesterSettings) {
+                suggestItemHash[suggestItem.name] = suggestItem;
             }
 
-            for (let suggestItem of suggesterSettings) {
-                let settings = weaponSettings[suggestItem.name];
+            for (let scenarioId of Object.keys(weaponSettings)) {
+                let settings = weaponSettings[scenarioId];
+                let suggestItem = suggestItemHash[settings.sourceName] || null;
 
                 if (!settings.show) {
                     continue;
                 }
 
-                if (suggestItem.settings === undefined) {
-                    suggestItem.settings = Condition.allConditionsOn(weapon.getConditions());
-                }
-
                 for (let refine = 1; refine <= 5; ++refine) {
                     if (settings.refine[refine]) {
                         items.push({
+                            scenarioId: scenarioId,
                             level: 90,
                             ascension: 6,
                             weaponId: weapon.getId(),
-                            suggestName: suggestItem.name,
-                            settings: suggestItem.settings,
+                            suggestName: settings.sourceName,
+                            isCustom: !!settings.isCustom,
+                            customName: settings.customName || '',
+                            isCustomized: !!settings.isCustom ? false : isWeaponScenarioCustomized(
+                                weapon,
+                                suggestItem,
+                                settings.settings,
+                                this.props.app.currentSet().getSettings()
+                            ),
+                            settings: cloneWeaponSuggestData(settings.settings),
                             refine: refine,
                         });
                     }
@@ -360,6 +354,7 @@ export class WeaponSuggestView extends React.Component {
     startGenerate() {
         if (this.state.isLoading) {
             this.factory.terminate();
+            this.suggestFactory.terminate();
         }
 
         let build = this.props.app.currentSet();
@@ -412,11 +407,22 @@ export class WeaponSuggestView extends React.Component {
         });
     }
 
+    workerErrorCallback(data) {
+        console.error('Weapon suggestion worker error:', data.error);
+        this.storageQueueWeapons = [];
+        this.setState({
+            isLoading: false,
+            result: [],
+            progress: {},
+            subProgress: [],
+        });
+    }
+
     completePartialCallback(result) {
         let stateResult = this.state.result;
         stateResult.push(result);
 
-        stateResult = stateResult.sort((a, b) => {return b.result.average - a.result.average});
+        stateResult = stateResult.sort((a, b) => {return b.result.average - a.result.average;});
 
         if (this.state.isLoading) {
             this.setState({
@@ -458,6 +464,8 @@ export class WeaponSuggestView extends React.Component {
             featureType: this.storageQueueSettings.featureType,
             calcset: build,
             maxThreads: this.storageQueueSettings.maxThreads,
+            useGPU: this.storageQueueSettings.useGPU,
+            gpuBatchSize: this.storageQueueSettings.gpuBatchSize,
             showBeta: showBeta,
         });
     }
@@ -492,8 +500,13 @@ export class WeaponSuggestView extends React.Component {
         let result = build.getFeatureResultByName(this.state.feature);
 
         stateResult.push({
+            scenarioId: item.scenarioId,
             weaponId: item.weaponId,
             suggestName: item.suggestName,
+            isCustom: item.isCustom,
+            customName: item.customName,
+            isCustomized: item.isCustomized,
+            settings: cloneWeaponSuggestData(item.settings),
             level: item.level,
             ascension: item.ascension,
             refine: item.refine,
@@ -502,7 +515,7 @@ export class WeaponSuggestView extends React.Component {
             artifacts: results[0].artifacts,
         });
 
-        stateResult = stateResult.sort((a, b) => {return b.value - a.value});
+        stateResult = stateResult.sort((a, b) => {return b.value - a.value;});
 
         this.setState({
             result: stateResult,

@@ -1,7 +1,7 @@
 import {CalcObject} from "../CalcObject";
 import { StatTable } from "../StatTable";
 
-export const SKILL_LEVELS = new StatTable('', [1, 2, 4, 6, 8, 10])
+export const SKILL_LEVELS = new StatTable('', [1, 2, 4, 6, 8, 10]);
 
 export class CalcObjectCharacter extends CalcObject {
     constructor() {
@@ -138,7 +138,7 @@ export class CalcObjectCharacter extends CalcObject {
             return null;
         }
 
-        result.push(this.object.getId())
+        result.push(this.object.getId());
         result.push(this.levels.level, this.levels.ascension, this.levels.constellation);
         result.push(this.skills.attack, this.skills.elemental, this.skills.burst);
 
@@ -152,7 +152,7 @@ export class CalcObjectCharacter extends CalcObject {
         if (!char) return null;
 
         let level = input.shift();
-        if (level < 1 || level > 90) return null;
+        if (level < 1 || level > 100) return null;
 
         let ascension = input.shift();
         if (ascension < 0 || ascension > 6) return null;
@@ -184,7 +184,7 @@ export class CalcObjectCharacter extends CalcObject {
         });
 
         let settings = result.deserializeConditions(input);
-        if (!settings) return null
+        if (!settings) return null;
 
         result.setSettings(settings);
 

@@ -9,6 +9,7 @@ import { RotationList } from "./List";
 import { Rotation } from "../../../classes/Rotation";
 import { RotationStorageModal } from "./StorageModal";
 import { RotationBlockModal } from "./BlockModal";
+import { RotationArtifactConditionModal } from "./ArtifactConditionModal";
 
 const lang = new Lang();
 
@@ -70,6 +71,17 @@ export class RotationEditor extends React.Component {
             }
 
             this.triggerRotationUpdate();
+        });
+    }
+
+    handleCreateArtifacts() {
+        this.artifactConditionModal.show({}, (items) => {
+            if (items && items.length) {
+                for (const item of items) {
+                    this.rotation.addItem(item);
+                }
+                this.triggerRotationUpdate();
+            }
         });
     }
 
@@ -202,7 +214,7 @@ export class RotationEditor extends React.Component {
 
     handleEditRotationIcon(hash, charId) {
         this.props.storage.updateIconByHash(hash, charId);
-        this.refreshModal()
+        this.refreshModal();
     }
 
     dataRotationItems() {
@@ -225,6 +237,11 @@ export class RotationEditor extends React.Component {
                 icon: 'icon-add',
                 title: lang.get('rotation_view.add_block'),
                 onClick: () => this.handleCreateBlock(),
+            },
+            {
+                icon: 'icon-add',
+                title: lang.get('rotation_view.add_artifacts'),
+                onClick: () => this.handleCreateArtifacts(),
             },
             {
                 icon: 'icon-delete',
@@ -294,6 +311,10 @@ export class RotationEditor extends React.Component {
                 />
                 <RotationBlockModal
                     ref={obj => this.blockModal = obj}
+                />
+                <RotationArtifactConditionModal
+                    ref={obj => this.artifactConditionModal = obj}
+                    build={this.props.build}
                 />
             </FullHeight>
         );

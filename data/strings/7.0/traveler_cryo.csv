@@ -1,0 +1,24 @@
+category;name;rus;eng
+feature_skill;traveler_cryo_skill_dmg;Урон навыка;Skill DMG
+feature_skill;traveler_cryo_ice_crystal_dmg;Урон ледяного кристалла;Ice Crystal DMG
+feature_skill;traveler_cryo_frostpierce_star_duration;Длительность Леденящей звезды;Frostpierce Star Duration
+feature_attack;traveler_cryo_freezing_ice;Заряженная атака: Застывающий лёд;Charged Attack: Freezing Ice
+feature_attack;traveler_cryo_freezing_ice_stellarconduct;Застывающий лёд: Звёздный проводник;Freezing Ice: Stellar-Conduct
+feature_attack;traveler_cryo_freezing_ice_stellarswirl;Застывающий лёд: Звёздное рассеивание;Freezing Ice: Stellar Swirl
+feature_burst;traveler_cryo_ice_javelin;Урон одного ледяного копья;Single Ice Javelin DMG
+feature_burst;traveler_cryo_frostglow_dmg_bonus;Бонус урона Морозного сияния;Frostglow DMG Bonus
+feature_burst;traveler_cryo_frostbound_javelin_total;Общий урон Морозного копья;Frostbound Javelin Total DMG
+feature_burst;traveler_cryo_ice_javelin_stellarconduct;Один удар копья: Звёздный проводник;Single Javelin Strike: Stellar-Conduct
+feature_burst;traveler_cryo_frostglow_stellarconduct_dmg_bonus;Бонус Морозного сияния: Звёздный проводник;Frostglow Bonus: Stellar-Conduct
+feature_burst;traveler_cryo_frostbound_javelin_stellarconduct_total;Общий урон копья: Звёздный проводник;Javelin Total DMG: Stellar-Conduct
+feature_burst;traveler_cryo_ice_javelin_stellarswirl;Один удар копья: Звёздное рассеивание;Single Javelin Strike: Stellar Swirl
+feature_burst;traveler_cryo_frostglow_stellarswirl_dmg_bonus;Бонус Морозного сияния: Звёздное рассеивание;Frostglow Bonus: Stellar Swirl
+feature_burst;traveler_cryo_frostbound_javelin_stellarswirl_total;Общий урон копья: Звёздное рассеивание;Javelin Total DMG: Stellar Swirl
+feature_burst;traveler_cryo_strikes;Количество ударов;Number of Strikes
+feature_burst;traveler_cryo_extra_strikes_max_frostglow;Дополнительные удары при 8 уровнях Морозного сияния;Additional Strikes at 8 Frostglow
+feature_other;traveler_cryo_freezing_ice_frostglow;Уровни Морозного сияния от Застывающего льда;Frostglow Granted by Freezing Ice
+feature_other;traveler_cryo_freezing_ice_cooldown;Откат Застывающего льда;Freezing Ice Cooldown
+feature_other;traveler_cryo_somber_freeze_energy;Восстановление энергии путешественника;Traveler Energy Restored
+feature_other;traveler_cryo_lucent_ice_mastery;Мастерство стихий от Прозрачного льда;Lucent Ice Elemental Mastery
+feature_other;traveler_cryo_illusory_frostmirror_base_dmg;Бонус базового урона Звёздного блеска;Stellar Glimmer Base DMG Bonus
+talent_name;traveler_cryo_icepoint;Заледенелый клинок;Icepoint

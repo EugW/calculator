@@ -8,6 +8,9 @@ rotation_view;add_condition;Условие;Condition
 rotation_view;add_buff_uptime;Действие бафов;Buffs uptime
 rotation_view;add_repeat;Повтор;Repeat
 rotation_view;add_block;Блок;Block
+rotation_view;add_artifacts;Артефакты;Artifacts
+rotation_view;add_artifacts_disable_all;Отключить все артефакты;Disable all artifacts
+modal_window;rotation_artifacts;Условие артефакта;Artifact Condition
 rotation_view;save_load;Загрузить/Сохранить;Save/Load
 rotation_view;feature_count;Ударов;Hits
 rotation_view;section_char;Персонаж;Character

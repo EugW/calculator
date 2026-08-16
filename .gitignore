@@ -1,7 +1,8 @@
 **/node_modules/*
 /dimrepo/
+/dimrepo_rel/
+/dimrepo-beta/
 /dist/*
-/data/images/*
 /v8-compile-cache*
 /npm-debug.log
 /src/js/lang/*.js
@@ -15,3 +16,7 @@ __pycache__/
 *.py[cod]
 .env
 node_modules
+.idea
+.agents/
+backend/
+md/

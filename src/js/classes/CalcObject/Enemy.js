@@ -1,12 +1,18 @@
 import {CalcObject} from '../CalcObject';
 import {Stats} from '../Stats';
 
+const RAW_RESISTANCES = ['anemo', 'cryo', 'dendro', 'electro', 'geo', 'hydro', 'phys', 'pyro'];
+const RAW_RESISTANCES_TYPE_LEGACY = 1;
+const RAW_RESISTANCES_TYPE = 3;
+const RAW_RESISTANCES_LEGACY_OFFSET = 100;
+const RAW_RESISTANCES_OFFSET = 300;
+
 export class CalcObjectEnemy extends CalcObject {
     constructor() {
         super();
         this.levels = {
             level : 1,
-        },
+        };
         this.resistances = {
             phys: 0,
             anemo: 0,
@@ -24,14 +30,14 @@ export class CalcObjectEnemy extends CalcObject {
     }
 
     setResistances(data) {
-        for (const res of ['anemo', 'cryo', 'dendro', 'electro', 'geo', 'hydro', 'phys', 'pyro']) {
+        for (const res of RAW_RESISTANCES) {
             this.resistances[res] = parseInt(data[res]) || 0;
         }
     }
 
     getResistances() {
         if (this.object) {
-            return this.object.getResistances()
+            return this.object.getResistances();
         }
 
         return this.resistances;
@@ -41,7 +47,7 @@ export class CalcObjectEnemy extends CalcObject {
         return {
             stats: new Stats(),
             settings: {},
-        }
+        };
     }
 
     getSettings() {
@@ -83,20 +89,15 @@ export class CalcObjectEnemy extends CalcObject {
         result.push(this.levels.level);
 
         if (this.object) {
-            result.push(2) // 2 - mob DB
+            result.push(2); // 2 - mob DB
 
             result.push(this.object.getId());
         } else {
-            result.push(1) // 1 -raw resists
+            result.push(RAW_RESISTANCES_TYPE); // raw resists
 
-            result.push(this.resistances.anemo+100);
-            result.push(this.resistances.cryo+100);
-            result.push(this.resistances.dendro+100);
-            result.push(this.resistances.electro+100);
-            result.push(this.resistances.geo+100);
-            result.push(this.resistances.hydro+100);
-            result.push(this.resistances.phys+100);
-            result.push(this.resistances.pyro+100);
+            for (const res of RAW_RESISTANCES) {
+                result.push(this.resistances[res] + RAW_RESISTANCES_OFFSET);
+            }
         }
 
         let condData = this.serializeConditions(settings);
@@ -111,12 +112,15 @@ export class CalcObjectEnemy extends CalcObject {
         let result = new CalcObjectEnemy();
         result.setLevels({level: level});
 
-        if (type == 1) {
+        if (type == RAW_RESISTANCES_TYPE_LEGACY || type == RAW_RESISTANCES_TYPE) {
+            let offset = type == RAW_RESISTANCES_TYPE_LEGACY
+                ? RAW_RESISTANCES_LEGACY_OFFSET
+                : RAW_RESISTANCES_OFFSET;
             let resists = {};
 
-            for (const res of ['anemo', 'cryo', 'dendro', 'electro', 'geo', 'hydro', 'phys', 'pyro']) {
-                let value = input.shift() - 100;
-                if (value < -100 || value > 1000) return null;
+            for (const res of RAW_RESISTANCES) {
+                let value = input.shift() - offset;
+                if (value < -300 || value > 1000) return null;
 
                 resists[res] = value;
             }
@@ -132,7 +136,7 @@ export class CalcObjectEnemy extends CalcObject {
         }
 
         let settings = result.deserializeConditions(input);
-        if (!settings) return null
+        if (!settings) return null;
 
         result.setSettings(settings);
 

@@ -1,3 +1,5 @@
+import csv
+import os
 from collections import OrderedDict
 
 from lib.genshin.datafiles.lang import LangData
@@ -8,6 +10,27 @@ from lib.genshin.strings.templates.names import names_eng, names_rus, keywords_e
 from lib.genshin.strings.csv import CsvDumper
 
 IGNORED_SETS = [215004, 215012]
+MANUAL_STRINGS_PATH = os.path.join(os.path.dirname(__file__), '..', 'data', 'strings', 'artifacts', 'manual.csv')
+
+
+def load_manual_string_keys():
+    keys = set()
+    if not os.path.exists(MANUAL_STRINGS_PATH):
+        return keys
+
+    with open(MANUAL_STRINGS_PATH, encoding='utf-8') as csvfile:
+        for row in csv.DictReader(csvfile, delimiter=';'):
+            keys.add((row['category'], row['name']))
+    return keys
+
+
+manual_string_keys = load_manual_string_keys()
+
+
+def append_generated_item(target, item):
+    key = (item['category'], item['name'])
+    if key not in manual_string_keys:
+        target.append(item)
 
 lang_data = {
     'rus': {
@@ -69,7 +92,7 @@ for set in sets.get_list():
     for lang_name in lang_data:
         lang = lang_data[lang_name]['lang']
         set_name_item[lang_name] = lang.get(bonuses[0]['nameTextMapHash'])
-    set_names.append(set_name_item)
+    append_generated_item(set_names, set_name_item)
 
 for set_id in sorted(set_data.keys()):
     # print(set_id)
@@ -88,7 +111,7 @@ for set_id in sorted(set_data.keys()):
             value = lang.get(bonus['nameTextMapHash'])
             res_item[lang_name] = f'{value} ({pstr[cnt]})'
 
-        result.append(res_item)
+        append_generated_item(result, res_item)
 
         res_lang = {
             'rus': [],
@@ -122,13 +145,14 @@ for set_id in sorted(set_data.keys()):
             namei = setnb
             if len(res_lang['rus']) > 1:
                 namei = f'{setnb}_{index}'
-            result.append(
+            append_generated_item(
+                result,
                 OrderedDict(
                     category='set_descr',
                     name=namei,
                     rus=rus,
                     eng=eng,
-                )
+                ),
             )
 
 CsvDumper().dump(result, 'artifact_set_bonuses.csv')

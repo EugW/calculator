@@ -1,0 +1,25 @@
+category;name;rus;eng
+
+feature_attack;illuga_normal_1;Урон атаки 1;1-Hit DMG
+feature_attack;illuga_normal_2;Урон атаки 2;2-Hit DMG
+feature_attack;illuga_normal_3;Урон атаки 3;3-Hit DMG
+feature_attack;illuga_normal_4;Урон атаки 4;4-Hit DMG
+feature_attack;illuga_charged;Урон заряженной атаки;Charged Attack DMG
+feature_attack;illuga_plunge_collision;Урон в падении;Plunge DMG
+feature_attack;illuga_plunge_low;Урон низкого удара;Low Plunge DMG
+feature_attack;illuga_plunge_high;Урон высокого удара;High Plunge DMG
+feature_skill;illuga_skill_tap;Урон быстрого нажатия;Press DMG
+feature_skill;illuga_skill_hold;Урон долгого нажатия;Hold DMG
+feature_skill;illuga_skill_tap_em;Урон быстрого нажатия (МС);Press DMG (EM)
+feature_skill;illuga_skill_tap_def;Урон быстрого нажатия (ЗЩ);Press DMG (DEF)
+feature_skill;illuga_skill_hold_em;Урон долгого нажатия (МС);Hold DMG (EM)
+feature_skill;illuga_skill_hold_def;Урон долгого нажатия (ЗЩ);Hold DMG (DEF)
+feature_burst;illuga_burst;Урон навыка;Skill DMG
+feature_burst;illuga_burst_em;Урон навыка (МС);Skill DMG (EM)
+feature_burst;illuga_burst_def;Урон навыка (ЗЩ);Skill DMG (DEF)
+feature_burst;illuga_geo_dmg_bonus;Бонус Гео урона;Geo DMG Bonus
+feature_burst;illuga_lunar_crystallize_bonus;Бонус Лунной кристаллизации;Lunar-Crystallize Reaction DMG Bonus
+feature_burst;illuga_nightingale_stacks;Заряды Песни соловья;Nightingale's Song Stacks
+feature_burst;illuga_nightingale_stacks_geo;Заряды от Гео конструкций;Stacks from Geo Constructs
+feature_burst;illuga_c2_aedon;Урон Эдона (С2);Aedon DMG (C2)
+

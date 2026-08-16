@@ -37,7 +37,7 @@ char_yumemizuki_mizuki = TemplateList(
     in_mist_like_waters=Template(
         sentences=[
             ['3:ignore', '3.5:ignore'],
-            ['1100:text_percent_dmg'],
+            ['1100:text_percent_dmg', '550:ignore'],
         ],
     ),
     your_echo_i_meet_in_dreams=Template(
@@ -56,9 +56,18 @@ char_yumemizuki_mizuki = TemplateList(
             ['5:ignore', '4:ignore'],
         ],
     ),
-    the_heart_lingers_long=Template(
+    the_heart_lingers_long_rus=Template(
+        sentences=[
+            [
+                '30:crit_rate_swirl', '100:crit_dmg_swirl',
+                '10:ignore', '20:ignore',
+            ],
+        ],
+    ),
+    the_heart_lingers_long_eng=Template(
         sentences=[
             ['30:crit_rate_swirl', '100:crit_dmg_swirl'],
+            ['10:ignore', '20:ignore'],
         ],
     ),
 )

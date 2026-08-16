@@ -1,0 +1,10 @@
+category;name;rus;eng
+talent_name;weapon_heretics_molten_blade_distance;Расстояние за предыдущую секунду;Distance traveled during the previous second
+talent_name;weapon_exaiphanes_blade_resonated_elements;Элементы резонанса Путешественника;Elements the Traveler has resonated with
+talent_name;weapon_forged_by_the_golden_melody_active;Текущий 10-секундный эффект;Current 10s effect
+talent_name;weapon_forged_by_the_golden_melody_copied;Скопированный 12-секундный эффект;Copied 12s effect
+talent_name;weapon_forged_by_the_golden_melody_atk;Сила атаки;ATK
+talent_name;weapon_forged_by_the_golden_melody_mastery;Мастерство стихий;Elemental Mastery
+talent_name;weapon_forged_by_the_golden_melody_stellarglimmer;Урон Звёздного блеска;Stellar Glimmer DMG
+talent_descr;weapon_forged_by_the_golden_melody_active;Выберите эффект, активный в текущей части автоматического 10-секундного цикла.;Select the effect active during the current 10s phase of the automatic cycle.
+talent_descr;weapon_forged_by_the_golden_melody_copied;Выберите эффект, скопированный на 12 сек. после активации реакции Звёздного блеска.;Select the effect copied for 12s after triggering a Stellar Glimmer reaction.

@@ -1,0 +1,23 @@
+category;name;rus;eng
+
+feature_attack;lauma_spiritcall_prayer_dmg;Урон Духовного моления;Spiritcall Prayer DMG
+feature_skill;lauma_press_dmg;Урон нажатия;Press DMG
+feature_skill;lauma_hold_1_dmg;Урон удержания 1;Hold DMG 1
+feature_skill;lauma_hold_2_dmg;Урон удержания 2;Hold DMG 2
+feature_skill;lauma_sanctuary_dmg;Урон убежища;Sanctuary DMG
+feature_skill;lauma_sanctuary_enhanced_dmg;Урон улучшенного убежища;Enhanced Sanctuary DMG
+feature_skill;lauma_sanctuary_duration;Длительность убежища;Sanctuary Duration
+feature_skill;lauma_res_decrease;Снижение сопротивления;RES Decrease
+feature_burst;lauma_pale_hymn_stacks;Заряды Бледного гимна;Pale Hymn Stacks
+feature_burst;lauma_bloom_dmg_increase;Повышение урона Бутонизации;Bloom DMG Increase
+feature_burst;lauma_lunarbloom_dmg_increase;Повышение урона Лунной бутонизации;Lunar-Bloom DMG Increase
+feature_burst;lauma_pale_hymn_duration;Длительность Бледного гимна;Pale Hymn Duration
+feature_skill;lauma_c6_sanctuary_dmg;Урон убежища С6;C6 Sanctuary DMG
+feature_attack;lauma_c6_normal_dmg;Урон обычной атаки С6;C6 Normal Attack DMG
+feature_other;lauma_lunarbloom_bonus;Базовый бонус Лунной бутонизации;Lunar-Bloom Base Bonus
+feature_other;lauma_skill_em_bonus;Бонус урона навыка от МС;Skill EM DMG Bonus
+
+talent_name;lauma_natures_chorus;Дар лунного знамения: Хор природы;Moonsign Benediction: Nature's Chorus
+
+talent_descr;lauma_natures_chorus;Базовый урон dendro{Лунной бутонизации} повышается на 0,0175% за каждую ед. name{МС} Лаумы. Максимум 14%.;dendro{Lunar-Bloom} Base DMG increased by 0.0175% per name{EM} Lauma has. Max 14%.
+

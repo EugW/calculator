@@ -68,6 +68,7 @@ from .neuvillette import char_neuvillette  # noqa
 from .nilou import char_nilou  # noqa
 from .ningguang import char_ningguang  # noqa
 from .noelle import char_noelle  # noqa
+from .odette import char_odette  # noqa
 from .ororon import char_ororon  # noqa
 from .qiqi import char_qiqi  # noqa
 from .raiden_shogun import char_raiden_shogun  # noqa
@@ -84,11 +85,14 @@ from .sucrose import char_sucrose  # noqa
 from .tartaglia import char_tartaglia  # noqa
 from .thoma import char_thoma  # noqa
 from .tighnari import char_tighnari  # noqa
+from .traveler_cryo import char_traveler_cryo  # noqa
 from .traveler_hydro import char_traveler_hydro  # noqa
 from .traveler_pyro import char_traveler_pyro  # noqa
 # from .traveler import char_traveler  # noqa
 from .varesa import char_varesa  # noqa
 from .venti import char_venti  # noqa
+from .vesna import char_vesna  # noqa
+from .vodyanitsa import char_vodyanitsa  # noqa
 from .wanderer import char_wanderer  # noqa
 from .wriothesley import char_wriothesley  # noqa
 from .xiangling import char_xiangling  # noqa
@@ -109,6 +113,9 @@ from .zhongli import char_zhongli  # noqa
 
 templates = Template(
     patterns=[
+        # Some source rows contain a duplicated opening angle bracket. Normalize
+        # it before converting color markup so no stray "<" reaches the UI.
+        (r'<<color=', '<color='),
         # (r'<color=\#99FFFFFF>([^<]*?)<\/color>', 'cryo{\\1}'),
         # (r'<color=\#FFE699FF>([^<]*?)<\/color>', 'geo{\\1}'),
         # (r'<color=\#FF9999FF>([^<]*?)<\/color>', 'pyro{\\1}'),
@@ -118,6 +125,7 @@ templates = Template(
         # (r'<color=\#99FF88FF>([^<]*?)<\/color>', '\\1'),
         (r'{LAYOUT_PC#(.*?)}', '\\1'),
         (r'{LAYOUT_\w+#.*?}', ''),
+        (r'{LINK\#N\d+}{/LINK}', ''),
         (r'{LINK\#N(\d+)}<color=\#\w+>(.*?)<\/color>{/LINK}', 'skill{n\\1:\\2}'),
         (r'{LINK\#N(\d+)}<color style=\'color\:\#\w+;\'>(.*?)<\/color>{/LINK}', 'skill{n\\1:\\2}'),
         (r'{LINK\#N(\d+)}(.*?){/LINK}', 'skill{n\\1:\\2}'),
@@ -131,5 +139,11 @@ templates = Template(
         (r'{M#(.*?)}', '\\1'),
         (r'{F#(.*?)}', ''),
         (r'^#', ''),
+        # A linked glossary term may itself be wrapped in gold source markup.
+        # Keep the semantic link and discard the invalid outer wrapper.
+        (r'(?:name|skill)\{(skill\{n\d+:[^{}]+\})\}', '\\1'),
+        # Keep the numeric glossary key when the link's display text was
+        # independently converted into calculator markup.
+        (r'(skill\{n\d+:)(?:name|skill)\{([^{}]+)\}\}', '\\1\\2}'),
     ]
 )

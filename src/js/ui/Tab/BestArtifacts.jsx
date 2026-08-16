@@ -48,24 +48,27 @@ export class BestArtifactTab extends Tab {
     }
 
     getSuggestData() {
+        const useGPU = this.component.state.gpuAvailable && this.component.state.useGPU;
         return {
             artifacts: this.component.getFilteredArtifacts(),
             settings: this.component.getSettings(),
             featureType: this.component.state.featureType,
-            maxThreads: this.component.state.maxThreads,
+            maxThreads: useGPU ? 1 : this.component.state.maxThreads,
+            useGPU: useGPU,
+            gpuBatchSize: this.app.getSetting('artifact_suggest_gpu_batch_size') || 'auto',
         };
     }
 
     createContent() {
         return (
             <BestArtifact
-                ref={BestArtifact => { this.component = BestArtifact }}
+                ref={BestArtifact => { this.component = BestArtifact; }}
                 app={this.app}
                 feature={this.app.getFeature()}
                 displayMode={this.app.getDisplayMode()}
                 onFeatureChanged={(feature) => this.app.setFeature(feature)}
             />
-        )
+        );
     }
 }
 
@@ -80,6 +83,7 @@ class BestArtifact extends React.Component {
             startCallback: (data) => this.suggestStartCallback(data),
             terminateCallback: (data) => this.suggestTerminateCallback(data),
             progressCallback: (data) => this.suggestProgressCallback(data),
+            errorCallback: (data) => this.suggestErrorCallback(data),
         });
 
         this.state = {
@@ -105,8 +109,10 @@ class BestArtifact extends React.Component {
                 },
                 required_sets: {},
             },
-            maxThreads: 5,
+            maxThreads: getBrowserNavigator().hardwareConcurrency || 4,
             artifactFilter: false,
+            gpuAvailable: false,
+            useGPU: false,
         };
 
         this.setInitialSettings();
@@ -131,10 +137,24 @@ class BestArtifact extends React.Component {
         };
 
         this.featureTypeValues = [
-            {value: 'normal',  text: this.lang.get('pool_view.type_normal')},
-            {value: 'crit',    text: this.lang.get('pool_view.type_crit')},
-            {value: 'average', text: this.lang.get('pool_view.type_average')},
+            { value: 'normal', text: this.lang.get('pool_view.type_normal') },
+            { value: 'crit', text: this.lang.get('pool_view.type_crit') },
+            { value: 'average', text: this.lang.get('pool_view.type_average') },
         ];
+    }
+
+    componentDidMount() {
+        this.isMountedForGPUCheck = true;
+        checkWebGPUAvailability().then((available) => {
+            if (this.isMountedForGPUCheck) {
+                this.setState({ gpuAvailable: available, useGPU: available });
+            }
+        });
+    }
+
+    componentWillUnmount() {
+        this.isMountedForGPUCheck = false;
+        this.factory.terminate();
     }
 
     setInitialSettings() {
@@ -150,7 +170,7 @@ class BestArtifact extends React.Component {
         let setSettings = {};
         for (let setName of Object.keys(setData)) {
             for (let piece of setData[setName].pieces) {
-                this.state.settings.sets[setName +'-'+ piece] = true;
+                this.state.settings.sets[setName + '-' + piece] = true;
             }
 
             let localSettings = Condition.allConditionsOn(setData[setName].conditions);
@@ -186,12 +206,12 @@ class BestArtifact extends React.Component {
         let groups = [];
         for (let groupName of Object.keys(this.state.settings.groups)) {
             if (this.state.settings.groups[groupName]) {
-                groups.push(groupName)
+                groups.push(groupName);
             }
         }
 
         let slots = this.state.settings.slots;
-        let mainStats = this.state.settings.filter.main_stats
+        let mainStats = this.state.settings.filter.main_stats;
         let minLevel = this.state.settings.filter.min_level;
         let maxLevel = this.state.settings.filter.max_level;
         let hasSlots = {};
@@ -213,8 +233,6 @@ class BestArtifact extends React.Component {
                 continue;
             }
 
-            hasSlots[slot] = 1;
-
             let level = art.getLevel();
             if (level < minLevel || level > maxLevel) {
                 this.counts.filtered++;
@@ -228,6 +246,7 @@ class BestArtifact extends React.Component {
                 }
             }
 
+            hasSlots[slot] = 1;
             this.filteredArtifacts.push(art);
         }
 
@@ -246,9 +265,9 @@ class BestArtifact extends React.Component {
     }
 
     modifySettings(key, data) {
-        let settings = this.state.settings
+        let settings = this.state.settings;
         settings[key] = data;
-        this.setState({settings: settings});
+        this.setState({ settings: settings });
     }
 
     dataFeaturesItems() {
@@ -273,12 +292,12 @@ class BestArtifact extends React.Component {
 
     handleFeature(selectedItem) {
         let feature = selectedItem.value;
-        this.setState({feature: feature});
+        this.setState({ feature: feature });
         this.props.app.setFeature(feature);
     }
 
     handleFeatureType(selectedItem) {
-        this.setState({featureType: selectedItem.value});
+        this.setState({ featureType: selectedItem.value });
     }
 
     handleStatSetting(stat, value) {
@@ -383,12 +402,12 @@ class BestArtifact extends React.Component {
 
     handleFeaturesSelect() {
         UI.WindowSelectFeatureList.show((items) => {
-            this.setState({otherFeatures: items});
+            this.setState({ otherFeatures: items });
         }, this.state.otherFeatures);
     }
 
     handleDisplayMode(mode) {
-        this.setState({displayMode: mode});
+        this.setState({ displayMode: mode });
         this.props.app.setDisplayMode(mode);
     }
 
@@ -406,7 +425,7 @@ class BestArtifact extends React.Component {
                 for (let slot of Object.keys(arts)) {
                     let buildArt = arts[slot];
                     if (!buildArt) {
-                        continue
+                        continue;
                     }
 
                     if (hash == buildArt.getHash()) {
@@ -415,12 +434,12 @@ class BestArtifact extends React.Component {
                 }
             }
 
-            this.setState({view: this.state.view})
+            this.setState({ view: this.state.view });
         }
     }
 
     handleMaxThreads(value) {
-        this.setState({maxThreads: Math.max(MIN_THREADS, Math.min(MAX_THREADS, value))});
+        this.setState({ maxThreads: Math.max(MIN_THREADS, Math.min(MAX_THREADS, value)) });
     }
 
     handleLockWindowOpen() {
@@ -440,7 +459,7 @@ class BestArtifact extends React.Component {
         let result = {};
 
         for (const art of this.storage.listArtifacts()) {
-            let set  = art.getSetName();
+            let set = art.getSetName();
             let slot = art.getSlot();
 
             if (!slotData[set]) {
@@ -461,7 +480,7 @@ class BestArtifact extends React.Component {
                 if (i <= pieces && conds[i].length) {
                     valueble.push(i);
 
-                    let settingName = setName +'-'+ i;
+                    let settingName = setName + '-' + i;
                     if (this.state.settings.sets[settingName] === undefined) {
                         this.state.settings.sets[settingName] = true;
                         updateCond = true;
@@ -474,7 +493,7 @@ class BestArtifact extends React.Component {
             for (let i in conds) {
                 for (let cond of conds[i]) {
                     if (cond && cond.isSerializable()) {
-                        activeConds.push(cond)
+                        activeConds.push(cond);
                     }
                 }
             }
@@ -508,6 +527,9 @@ class BestArtifact extends React.Component {
             }
             build.setArtifactsSettings(Object.assign({}, this.state.settings.sets_settings));
             build.artifacts.removeInvalidSettings();
+            build.suggesterWorkerValue = item.value;
+            build.suggesterWorkerFeature = this.state.feature;
+            build.suggesterWorkerFeatureType = this.state.featureType;
             results.push(build);
         }
 
@@ -526,6 +548,21 @@ class BestArtifact extends React.Component {
 
     suggestTerminateCallback() {
         UI.Layout.unlockClosing();
+    }
+
+    suggestErrorCallback(data) {
+        UI.Layout.unlockClosing();
+        if (!this.progressModal.state.isVisible) {
+            this.progressModal.show({
+                threads: 0,
+                closeCallback: () => {
+                    this.progressModal.hide();
+                    this.factory.terminate();
+                },
+            });
+        }
+        this.progressModal.showError && this.progressModal.showError(data.error);
+        console.error('Artifact optimization error:', data.error);
     }
 
     suggestStartCallback(data) {
@@ -549,23 +586,27 @@ class BestArtifact extends React.Component {
     }
 
     startSuggest() {
+        const useGPU = this.state.gpuAvailable && this.state.useGPU;
         this.factory.run({
             artifacts: this.filteredArtifacts,
             settings: this.state.settings,
             feature: this.state.feature,
             featureType: this.state.featureType,
             calcset: this.props.app.currentSet(),
-            maxThreads: this.state.maxThreads,
+            maxThreads: useGPU ? 1 : this.state.maxThreads,
             fastFilter: this.state.artifactFilter,
+            useGPU: useGPU,
+            gpuBatchSize: this.props.app.getSetting('artifact_suggest_gpu_batch_size') || 'auto',
+            showBeta: this.props.app.showBetaContent(),
         });
     }
 
     showDefault() {
-        this.setState({view: ''});
+        this.setState({ view: '' });
     }
 
     showResults() {
-        this.setState({view: 'result'});
+        this.setState({ view: 'result' });
     }
 
     render() {
@@ -594,6 +635,7 @@ class BestArtifact extends React.Component {
                     onFeatureSelect={() => this.handleFeaturesSelect()}
                     otherFeatures={this.state.otherFeatures}
                     displayMode={this.state.displayMode}
+                    showWorkerValues={!!parseInt(this.props.app.getSetting('artifact_suggest_worker_value_output') || 0)}
                     onDisplayModeChange={(mode) => this.handleDisplayMode(mode)}
                     onLock={(art, locked) => this.handleArtifactLock(art, locked)}
                 />
@@ -646,19 +688,30 @@ class BestArtifact extends React.Component {
                             <div className="value">{this.counts.combinations}</div>
                             <div className="title">{this.strings.total_combinations}</div>
                         </div>
-                        <div className="line">
-                            <div className="value">{this.lang.get('artifacts_ui.max_threads')}</div>
-                            <div className="title">
-                                <NumberInput
-                                    addClass="inputs-2digit"
-                                    value={this.state.maxThreads}
-                                    onChange={(value) => this.handleMaxThreads(value)}
-                                    minValue={MIN_THREADS}
-                                    maxValue={MAX_THREADS}
-                                    showButtons={true}
+                        {!this.state.useGPU ? (
+                            <div className="line">
+                                <div className="value">{this.lang.get('artifacts_ui.max_threads')}</div>
+                                <div className="title">
+                                    <NumberInput
+                                        addClass="inputs-2digit"
+                                        value={this.state.maxThreads}
+                                        onChange={(value) => this.handleMaxThreads(value)}
+                                        minValue={MIN_THREADS}
+                                        maxValue={MAX_THREADS}
+                                        showButtons={true}
+                                    />
+                                </div>
+                            </div>
+                        ) : null}
+                        {this.state.gpuAvailable ? <div className="line">
+                            <div className="value right">
+                                <Checkbox
+                                    checked={this.state.useGPU}
+                                    onChange={(checked) => this.setState({ useGPU: checked })}
                                 />
                             </div>
-                        </div>
+                            <div className="title">GPU</div>
+                        </div> : null}
                         {/* <div className="line">
                             <div className="value right">
                                 <Checkbox
@@ -677,10 +730,10 @@ class BestArtifact extends React.Component {
                         {
                             this.state.result.items.length ?
                                 <TitledButton
-                                icon="icon-ok"
-                                title={this.strings.show_results}
-                                onClick={() => this.showResults()}
-                            /> : ''
+                                    icon="icon-ok"
+                                    title={this.strings.show_results}
+                                    onClick={() => this.showResults()}
+                                /> : ''
                         }
                         <TitledButton
                             icon="icon-lock"
@@ -724,6 +777,7 @@ class BestArtifact extends React.Component {
                                 sets={this.listSets()}
                                 settings={this.state.settings.sets}
                                 setsSettings={this.state.settings.sets_settings}
+                                showBeta={this.props.app.showBetaContent()}
                                 onChange={(param, value) => this.handleSetBonuses(param, value)}
                                 onSettingChange={(param, value) => this.handleSetBonusesSettings(param, value)}
                                 enableAction={() => this.handleSetBonusesEnable()}
@@ -753,6 +807,23 @@ function validateStatValue(value) {
         value = value.substring(0, 9);
     }
     return value || '';
+}
+
+function getBrowserNavigator() {
+    return typeof navigator === 'undefined' ? {} : navigator;
+}
+
+async function checkWebGPUAvailability() {
+    const gpu = getBrowserNavigator().gpu;
+    if (!gpu || typeof gpu.requestAdapter !== 'function') {
+        return false;
+    }
+
+    try {
+        return !!(await gpu.requestAdapter());
+    } catch (error) {
+        return false;
+    }
 }
 
 function calcCombinations(items) {

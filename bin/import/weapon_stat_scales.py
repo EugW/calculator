@@ -3,9 +3,10 @@ import os
 import re
 import static # type: ignore
 import accumulator # type: ignore
+from source_config import get_excel_dir, load_text_map
 
 dirname  = os.path.dirname(__file__)
-data_dir = os.path.join(dirname, '../../dimrepo/ExcelBinOutput/')
+data_dir = str(get_excel_dir()) + os.sep
 out_dir  = os.path.join(dirname, '../../src/js/db/generated/')
 
 weapon_names = {
@@ -33,12 +34,16 @@ weapon_names = {
     11416: "KagotsurubeIsshin",
     11417: "SapwoodBlade",
     11418: "XiphosMoonlight",
+    # 11419: 'PrizedIsshinBlade',
+    # 11420: 'PrizedIsshinBlade',
+    # 11421: 'PrizedIsshinBlade',
     11422: 'ToukabouShigure',
     11424: 'WolfFang',
     11425: 'FinaleOfTheDeep',
     11426: 'FleuveCendreFerryman',
     11427: 'TheDockhandsAssistant',
     11428: 'SwordOfNarzissenkreuz',
+    # 11429: 'SwordOfNarzissenkreuz',
     11430: 'SturdyBone',
     11431: 'FlamebreathFlute',
     11432: 'CalamityOfEshu',
@@ -58,6 +63,17 @@ weapon_names = {
     11515: "Absolution",
     11516: "PeakPatrolSong",
     11517: "Azurelight",
+    11518: "AthameArtis",
+    11519: 'LightbearingMoonshard',
+    11433: "SerenitysCall",
+    11434: "MoonweaversDawn",
+    11435: "HereticsMoltenBlade",
+    11436: "Emberwell",
+    11437: "SpikedStake",
+    11438: "Fajian",
+    11520: "WhitelakeFrostfeather",
+    11521: "ExaiphanesBlade",
+    11522: "Samosvist",
     11509: "MistsplitterReforged",
     12301: "FerrousShadow",
     12302: "BloodtaintedGreatsword",
@@ -102,6 +118,11 @@ weapon_names = {
     12512: 'Verdict',
     12513: 'MountainKingsFang',
     12514: 'AThousandBlazingSuns',
+    12515: 'GestOfTheMightyWolf',
+    12516: 'ATeaspoonOfTranscendence',
+    12433: 'MasterKey',
+    12435: 'ForgedByTheGoldenMelody',
+    12436: 'BladeOfAtonement',
     13301: "WhiteTassel",
     13302: "Halberd",
     13303: "BlackTassel",
@@ -140,6 +161,12 @@ weapon_names = {
     13513: 'LumidouceElegy',
     13514: 'SymphonistofScents',
     13515: 'FracturedHalo',
+    13516: 'BloodsoakedRuins',
+    13517: 'DisasterAndRemorse',
+    13433: 'ProspectorsShovel',
+    13434: 'SacrificersStaff',
+    13435: 'Frostbreath',
+    13436: 'SongOfTheVigil',
     14301: "MagicGuide",
     14302: "ThrillingTalesofDragonSlayers",
     14303: "OtherworldlyStory",
@@ -186,6 +213,17 @@ weapon_names = {
     14517: 'StarcallersWatch',
     14518: 'MorningHibernation',
     14519: 'VividNotions',
+    14520: 'NightweaversLookingGlass',
+    14521: 'ReliquaryOfTruth',
+    14522: 'NocturnesCurtainCall',
+    14523: 'AngelosHeptades',
+    14432: 'EtherlightSpindlelute',
+    14433: 'BlackmarrowLantern',
+    14434: 'DawningFrost',
+    14435: 'ClashOfKings',
+    14436: 'EchoesOfTheHeart',
+    14437: 'FrostScepter',
+    14524: 'Bludnye',
     15301: "RavenBow",
     15302: "SharpshootersOath",
     15303: "RecurveBow",
@@ -231,16 +269,22 @@ weapon_names = {
     15512: "TheFirstGreatMagic",
     15513: "SilvershowerHeartstrings",
     15514: "AstralVulturesCrimsonPlumage",
+    15515: "TheDaybreakChronicles",
+    15516: "GoldenFrostboundOath",
+    15433: "SnareHook",
+    15434: "RainbowSerpentsRainBow",
+    15435: "JadeVista",
+    15436: "CovenantOfFrostAndSnow",
+    15437: "Windtalker",
     # 20001: "",
 }
 
 def parse_lang():
-    file   = open(data_dir + '../TextMap/TextMapEN.json', 'r')
-    return json.load(file)
+    return load_text_map('EN')
 
 def parse_curves():
-    file   = open(data_dir + 'WeaponCurveExcelConfigData.json', 'r')
-    out    = open(out_dir + 'WeaponScale.js', 'w', encoding='utf-8')
+    file   = open(data_dir + 'WeaponCurveExcelConfigData.json', 'r', encoding='utf-8')
+    out    = open(out_dir + 'WeaponScale.js', 'w', encoding='utf-8', newline='\n')
     curves = {}
 
     for item in json.load(file):
@@ -259,7 +303,10 @@ def parse_curves():
 
     for curve_name in sorted(curves):
         stat_name = static.getCurveName(curve_name)
-        values    = list(curves[curve_name].values())
+        values = [
+            curves[curve_name][level]
+            for level in sorted(curves[curve_name])
+        ]
 
         out.write("\t%s: new StatTable('', [" % (stat_name))
         out.write(", ".join(values))
@@ -271,7 +318,7 @@ def parse_curves():
     return curves
 
 def parse_ascension():
-    file = open(data_dir + 'WeaponPromoteExcelConfigData.json', 'r')
+    file = open(data_dir + 'WeaponPromoteExcelConfigData.json', 'r', encoding='utf-8')
     table = {}
     result = {}
 
@@ -307,8 +354,8 @@ def parse_ascension():
     return result
 
 def parse_weapons():
-    file = open(data_dir + 'WeaponExcelConfigData.json', 'r')
-    out  = open(out_dir + 'WeaponStatTables.js', 'w', encoding='utf-8')
+    file = open(data_dir + 'WeaponExcelConfigData.json', 'r', encoding='utf-8')
+    out  = open(out_dir + 'WeaponStatTables.js', 'w', encoding='utf-8', newline='\n')
 
     result = []
 

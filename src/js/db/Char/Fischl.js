@@ -1,6 +1,10 @@
 import { Condition } from "../../classes/Condition";
+import { ConditionAnd } from "../../classes/Condition/And";
 import { ConditionAscensionChar } from "../../classes/Condition/Ascension/Char";
+import { ConditionBoolean } from "../../classes/Condition/Boolean";
 import { ConditionConstellation } from "../../classes/Condition/Constellation";
+import { ConditionHexereiResonance } from "../../classes/Condition/HexereiResonance";
+import { ConditionNot } from "../../classes/Condition/Not";
 import { ConditionStatic } from "../../classes/Condition/Static";
 import { DbObjectChar } from "../../classes/DbObject/Char";
 import { DbObjectConstellation } from "../../classes/DbObject/Constellation";
@@ -107,6 +111,12 @@ const TalentValues = {
     C4BurstHeal: 20,
     C6OzDmg: 30,
 };
+
+const condWitchHomeworkOn  = new ConditionBoolean({name: 'fischl_witch_homework'});
+const condWitchHomeworkOff = new ConditionNot([condWitchHomeworkOn]);
+const condPartyWitchHomeworkOn  = new ConditionBoolean({name: 'party.fischl_witch_homework'});
+const condPartyWitchHomeworkOff = new ConditionNot([condPartyWitchHomeworkOn]);
+const condHexereiResonance = new ConditionHexereiResonance({});
 
 export const Fischl = new DbObjectChar({
     name: 'fischl',
@@ -319,6 +329,53 @@ export const Fischl = new DbObjectChar({
         }),
     ],
     conditions: [
+        new ConditionBoolean({
+            name: 'fischl_witch_homework',
+            serializeId: 1,
+            title: 'talent_name.fischl_phantasmal_nocturne',
+            description: 'talent_descr.fischl_phantasmal_nocturne',
+            info: {hexerei: true},
+        }),
+        new ConditionBoolean({
+            name: 'fischl_overloaded_buff',
+            serializeId: 3,
+            title: 'talent_name.fischl_overloaded_buff',
+            hideCondition: [
+                new ConditionNot([
+                    new ConditionAnd([
+                        condWitchHomeworkOn,
+                        condHexereiResonance
+                    ])
+                ])
+            ],
+            condition: new ConditionAnd([
+                condWitchHomeworkOn,
+                condHexereiResonance
+            ]),
+            stats: {
+                atk_percent: 22.5,
+            },
+        }),
+        new ConditionBoolean({
+            name: 'fischl_electrocharged_buff',
+            serializeId: 4,
+            title: 'talent_name.fischl_electrocharged_buff',
+            hideCondition: [
+                new ConditionNot([
+                    new ConditionAnd([
+                        condWitchHomeworkOn,
+                        condHexereiResonance
+                    ])
+                ])
+            ],
+            condition: new ConditionAnd([
+                condWitchHomeworkOn,
+                condHexereiResonance
+            ]),
+            stats: {
+                mastery: 90,
+            },
+        }),
         new ConditionStatic({
             title: 'talent_name.fischl_stellar_predator',
             description: 'talent_descr.fischl_stellar_predator',
@@ -400,11 +457,130 @@ export const Fischl = new DbObjectChar({
                 new ConditionStatic({
                     title: 'talent_name.fischl_evernight_raven',
                     description: 'talent_descr.fischl_evernight_raven',
+                    hideCondition: [condWitchHomeworkOn],
                     stats: {
                         text_percent_dmg: TalentValues.C6OzDmg,
                     },
                 }),
+                new ConditionBoolean({
+                    name: 'fischl_evernight_raven',
+                    serializeId: 2,
+                    title: 'talent_name.fischl_evernight_raven',
+                    description: 'talent_descr.fischl_evernight_raven_buffed',
+                    hideCondition: [condWitchHomeworkOff],
+                    condition: condWitchHomeworkOn,
+                    stats: {
+                        text_percent_dmg: TalentValues.C6OzDmg,
+                    },
+                    info: {constellation: 6},
+                }),
+                new Condition({
+                    condition: new ConditionAnd([
+                        condWitchHomeworkOn,
+                        condHexereiResonance,
+                        new ConditionBoolean({name: 'fischl_evernight_raven'}),
+                        new ConditionBoolean({name: 'fischl_overloaded_buff'}),
+                    ]),
+                    stats: { atk_percent: 22.5 },
+                    info: {constellation: 6},
+                }),
+                new Condition({
+                    condition: new ConditionAnd([
+                        condWitchHomeworkOn,
+                        condHexereiResonance,
+                        new ConditionBoolean({name: 'fischl_evernight_raven'}),
+                        new ConditionBoolean({name: 'fischl_electrocharged_buff'}),
+                    ]),
+                    stats: { mastery: 90 },
+                    info: {constellation: 6},
+                }),
             ],
         },
     ]),
+    partyData: {
+        conditions: [
+            new ConditionBoolean({
+                name: 'party.fischl_witch_homework',
+                serializeId: 3,
+                rotation: 'party',
+                title: 'talent_name.fischl_phantasmal_nocturne',
+                description: 'talent_descr.fischl_phantasmal_nocturne',
+                info: {hexerei: true},
+            }),
+            new ConditionBoolean({
+                name: 'party.fischl_overloaded_buff',
+                serializeId: 4,
+                rotation: 'party',
+                title: 'talent_name.fischl_overloaded_buff',
+                hideCondition: [
+                    new ConditionNot([
+                        new ConditionAnd([
+                            condPartyWitchHomeworkOn,
+                            condHexereiResonance
+                        ])
+                    ])
+                ],
+                condition: new ConditionAnd([
+                    condPartyWitchHomeworkOn,
+                    condHexereiResonance
+                ]),
+                stats: {
+                    atk_percent: 22.5,
+                },
+                info: {hexerei: true},
+            }),
+            new ConditionBoolean({
+                name: 'party.fischl_electrocharged_buff',
+                serializeId: 5,
+                rotation: 'party',
+                title: 'talent_name.fischl_electrocharged_buff',
+                hideCondition: [
+                    new ConditionNot([
+                        new ConditionAnd([
+                            condPartyWitchHomeworkOn,
+                            condHexereiResonance
+                        ])
+                    ])
+                ],
+                condition: new ConditionAnd([
+                    condPartyWitchHomeworkOn,
+                    condHexereiResonance
+                ]),
+                stats: {
+                    mastery: 90,
+                },
+                info: {hexerei: true},
+            }),
+            new ConditionBoolean({
+                name: 'party.fischl_evernight_raven',
+                serializeId: 6,
+                rotation: 'party',
+                title: 'talent_name.fischl_evernight_raven',
+                description: 'talent_descr.fischl_evernight_raven_buffed',
+                hideCondition: [condPartyWitchHomeworkOff],
+                condition: condPartyWitchHomeworkOn,
+                info: { constellation: 6 },
+            }),
+            new Condition({
+                condition: new ConditionAnd([
+                    condPartyWitchHomeworkOn,
+                    condHexereiResonance,
+                    new ConditionBoolean({name: 'party.fischl_evernight_raven'}),
+                    new ConditionBoolean({name: 'party.fischl_overloaded_buff'}),
+                ]),
+                stats: { atk_percent: 22.5 },
+                info: { constellation: 6 },
+            }),
+            new Condition({
+                condition: new ConditionAnd([
+                    condPartyWitchHomeworkOn,
+                    condHexereiResonance,
+                    new ConditionBoolean({name: 'party.fischl_evernight_raven'}),
+                    new ConditionBoolean({name: 'party.fischl_electrocharged_buff'}),
+                ]),
+                stats: { mastery: 90 },
+                info: { constellation: 6 },
+            }),
+        ],
+    },
 });

@@ -1,0 +1,17 @@
+category;name;rus;eng
+
+feature_skill;zibai_lunar_phase_shift_hit_1;Урон атаки 1 Сдвига лунных фаз;Lunar Phase Shift 1-Hit DMG
+feature_skill;zibai_lunar_phase_shift_hit_2;Урон атаки 2 Сдвига лунных фаз;Lunar Phase Shift 2-Hit DMG
+feature_skill;zibai_lunar_phase_shift_hit_3;Урон атаки 3 Сдвига лунных фаз;Lunar Phase Shift 3-Hit DMG
+feature_skill;zibai_lunar_phase_shift_hit_4;Урон атаки 4 Сдвига лунных фаз;Lunar Phase Shift 4-Hit DMG
+feature_skill;zibai_lunar_phase_shift_charged;Урон заряженной атаки Сдвига лунных фаз;Lunar Phase Shift Charged Attack DMG
+feature_skill;zibai_lunar_phase_shift_4th_additional;Дополнительный урон атаки 4 Сдвига лунных фаз;Lunar Phase Shift 4-Hit Additional DMG
+feature_skill;zibai_spirit_steed_hit_1;Урон атаки 1 Поступи проворной кобылицы;Spirit Steed's Stride 1-Hit DMG
+feature_skill;zibai_spirit_steed_hit_2;Урон атаки 2 Поступи проворной кобылицы;Spirit Steed's Stride 2-Hit DMG
+feature_skill;zibai_lunar_phase_shift_duration;Длительность Сдвига лунных фаз;Lunar Phase Shift Duration
+feature_burst;zibai_burst_hit_1;Урон 1-й атаки навыка;Skill 1-Hit DMG
+feature_burst;zibai_burst_hit_2;Урон 2-й атаки навыка;Skill 2-Hit DMG
+feature_other;zibai_lunar_bonus;Базовый бонус Лунной кристаллизации;Lunar-Crystallize Base Bonus
+
+talent_name;zibai_moonsign_benediction;Дар лунного знамения: Ход солнца и луны;Moonsign Benediction: The Coursing Sun and Moon
+talent_descr;zibai_moonsign_benediction;При активации Гидро-кристаллизации она преобразуется в geo{Лунную кристаллизацию}. Базовый урон увеличивается на %{text_percent} за каждые 100 ед. name{защиты}, максимум %{text_percent_max}.;When triggering Hydro Crystallize, it is converted into geo{Lunar-Crystallize}. Base DMG is increased by %{text_percent} per 100 name{DEF}, max %{text_percent_max}.

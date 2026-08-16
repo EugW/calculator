@@ -1,0 +1,112 @@
+.gi-artifact-upgrade-tab .gi-tab-item-inner {
+    background-image: url("../../../images/icons/tab_artifact_upgrade_light.png");
+}
+
+.gi-artifact-upgrade-tab.active .gi-tab-item-inner {
+    background-image: url("../../../images/icons/tab_artifact_upgrade_dark.png");
+}
+
+.artifact-upgrade-summary .controls-bar {
+    padding: 0;
+}
+
+.artifact-upgrade-candidates-inline {
+    display: flex;
+    align-items: center;
+    white-space: nowrap;
+}
+
+.artifact-upgrade-candidates-inline .value {
+    font-family: GenshinN;
+    font-size: 20px;
+    line-height: 24px;
+}
+
+.artifact-upgrade-candidates-inline .title {
+    padding-left: 8px;
+    color: #BEAEA9;
+}
+
+.artifact-upgrade-instructions {
+    margin: 0;
+    padding-left: 22px;
+}
+
+.artifact-upgrade-instructions li + li {
+    margin-top: 10px;
+}
+
+.artifact-upgrade-instructions-note {
+    margin-top: 6px;
+    color: #BEAEA9;
+    line-height: 18px;
+}
+
+.artifact-upgrade-instructions a {
+    color: #D3BC8E;
+}
+
+.artifact-upgrade-outdated {
+    color: #c77963;
+    padding-top: 10px;
+    text-align: right;
+}
+
+.artifact-upgrade-block .line.main-stat {
+    height: 24px;
+    line-height: 24px;
+    font-size: 16px;
+}
+
+.artifact-upgrade-block .line.main-stat .value {
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.artifact-upgrade-block {
+    cursor: pointer;
+}
+
+.artifact-upgrade-block.equipped {
+    background: rgba(236, 229, 216, 0.08);
+    border-radius: 8px;
+    padding: 8px;
+    box-sizing: border-box;
+}
+
+.artifact-upgrade-score {
+    margin-left: auto;
+    min-width: 170px;
+    text-align: right;
+    padding-left: 10px;
+}
+
+.artifact-upgrade-score.positive .artifact-upgrade-score-value {
+    color: #92c47c;
+}
+
+.artifact-upgrade-score.negative .artifact-upgrade-score-value {
+    color: #e4957d;
+}
+
+.artifact-upgrade-score-title,
+.artifact-upgrade-score-rem {
+    color: #BEAEA9;
+    font-size: 13px;
+    line-height: 18px;
+}
+
+.artifact-upgrade-score-value {
+    font-size: 22px;
+    line-height: 26px;
+    font-family: GenshinN;
+}
+
+.narrow .artifact-upgrade-score {
+    min-width: 130px;
+}
+
+.narrow .artifact-upgrade-score-value {
+    font-size: 18px;
+}

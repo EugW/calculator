@@ -36,7 +36,7 @@ export class ShareTab extends Tab {
     createContent() {
         return (
             <ShareView
-                ref={element => { this.component = element }}
+                ref={element => { this.component = element; }}
                 app={this.app}
                 title={this.title}
             />
@@ -65,7 +65,6 @@ export class ShareView extends React.Component {
         this.needFiltering = true;
         this.items = [];
 
-        let index = 0;
         let prefix = Math.random();
         let showBeta = this.props.app.showBetaContent();
 
@@ -73,13 +72,12 @@ export class ShareView extends React.Component {
             let title = item.title || lang.get(item.data.getChar().object.getName());
 
             this.items.push({
-                key: index +' '+ prefix,
-                callbackData: {index: index},
+                key: item.index +' '+ prefix,
+                callbackData: {index: item.index},
                 title: title,
                 sortTitle: title.toLocaleUpperCase(),
                 set: item.data,
             });
-            ++index;
         }
 
         this.items = this.items.sort((a, b) => {
@@ -151,7 +149,7 @@ export class ShareView extends React.Component {
 
     handleLoadBuild(build) {
         UI.ConfirmWindow.show('modal.confirm', 'share_view.confirm_load', () => {
-            this.props.app.replaceSet(build)
+            this.props.app.replaceSet(build);
         });
     }
 

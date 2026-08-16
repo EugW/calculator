@@ -16,7 +16,7 @@ export class MessageModal extends NonAppModal {
             <MessageComponent
                 ref={(obj) => this.modal = obj}
             />
-        )
+        );
     }
 }
 
@@ -30,11 +30,16 @@ export class MessageComponent extends React.Component {
     }
 
     show(title, message, callback) {
+        let buttonTitle = arguments.length > 3 ? arguments[3] : 'modal_buttons.confirm';
+        let width = arguments.length > 4 ? arguments[4] : 510;
+
         this.callback = callback;
 
         this.setState({
             title: title,
             message: message,
+            buttonTitle: buttonTitle,
+            width: width,
             isVisible: true,
         });
     }
@@ -54,7 +59,7 @@ export class MessageComponent extends React.Component {
         return (
             <DialogContainer
                 addClass="gi-window-confirm"
-                width={510}
+                width={this.state.width || 510}
                 isVisible={this.state.isVisible}
                 title={lang.get(this.state.title)}
                 closeCallback={() => this.handleClose()}
@@ -65,7 +70,7 @@ export class MessageComponent extends React.Component {
                     <ControlsBarDivider />
                     <TitledButton
                         icon="button-icon-ok"
-                        title={lang.get('modal_buttons.confirm')}
+                        title={lang.get(this.state.buttonTitle || 'modal_buttons.confirm')}
                         onClick={() => this.handleConfirm()}
                     />
                 </ControlsBar>

@@ -45,6 +45,17 @@ import { PeakPatrolSong } from "./Sword/PeakPatrolSong";
 import { SturdyBone } from "./Sword/SturdyBone";
 import { CalamityOfEshu } from "./Sword/CalamityOfEshu";
 import { Azurelight } from "./Sword/Azurelight";
+import { AthameArtis } from "./Sword/AthameArtis";
+import { SerenitysCall } from "./Sword/SerenitysCall";
+import { MoonweaversDawn } from "./Sword/MoonweaversDawn";
+import { LightbearingMoonshard } from "./Sword/LightbearingMoonshard";
+import { HereticsMoltenBlade } from "./Sword/HereticsMoltenBlade";
+import { Emberwell } from "./Sword/Emberwell";
+import { WhitelakeFrostfeather } from "./Sword/WhitelakeFrostfeather";
+import { ExaiphanesBlade } from "./Sword/ExaiphanesBlade";
+import { SpikedStake } from "./Sword/SpikedStake";
+import { Fajian } from "./Sword/Fajian";
+import { Samosvist } from "./Sword/Samosvist";
 
 export const Swords = new DbObjectListSerializeStats({
     AlleyFlash: AlleyFlash,
@@ -93,4 +104,15 @@ export const Swords = new DbObjectListSerializeStats({
     SturdyBone: SturdyBone, // 186
     CalamityOfEshu: CalamityOfEshu, // 191
     Azurelight: Azurelight, // 201
+    AthameArtis: AthameArtis, // 224
+    SerenitysCall: SerenitysCall, // 225
+    MoonweaversDawn: MoonweaversDawn, // 226
+    LightbearingMoonshard: LightbearingMoonshard, // 240
+    HereticsMoltenBlade: HereticsMoltenBlade, // 246
+    Emberwell: Emberwell, // 247
+    WhitelakeFrostfeather: WhitelakeFrostfeather, // 248
+    ExaiphanesBlade: ExaiphanesBlade, // 249
+    SpikedStake: SpikedStake, // 258
+    Fajian: Fajian, // 259
+    Samosvist: Samosvist, // 260
 });

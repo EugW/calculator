@@ -1,7 +1,14 @@
 import { Condition } from "../../classes/Condition";
+import { ConditionAnd } from "../../classes/Condition/And";
 import { ConditionAscensionChar } from "../../classes/Condition/Ascension/Char";
 import { ConditionBoolean } from "../../classes/Condition/Boolean";
 import { ConditionEnemyStatus } from "../../classes/Condition/Boolean/EnemyStatus";
+import { ConditionConstellation } from "../../classes/Condition/Constellation";
+import { ConditionNumber } from "../../classes/Condition/Number";
+import { ConditionNot } from "../../classes/Condition/Not";
+import { ConditionOr } from "../../classes/Condition/Or";
+import { ConditionRadianceStellarGlimmer, RADIANCE_STELLARCONDUCT, RADIANCE_STELLARSWIRL } from "../../classes/Condition/RadianceStellarGlimmer";
+import { ConditionStacks } from "../../classes/Condition/Stacks";
 import { ConditionStatic } from "../../classes/Condition/Static";
 import { DbObjectChar } from "../../classes/DbObject/Char";
 import { DbObjectConstellation } from "../../classes/DbObject/Constellation";
@@ -13,10 +20,13 @@ import { FeatureDamageNormal } from "../../classes/Feature2/Damage/Normal";
 import { FeatureDamagePlungeCollision } from "../../classes/Feature2/Damage/Plunge/Collision";
 import { FeatureDamagePlungeShockWave } from "../../classes/Feature2/Damage/Plunge/ShockWave";
 import { FeatureDamageSkill } from "../../classes/Feature2/Damage/Skill";
+import { FeatureDamageStellarConduct } from "../../classes/Feature2/Damage/StellarConduct";
 import { FeatureHeal } from "../../classes/Feature2/Heal";
 import { FeatureMultiplier } from "../../classes/Feature2/Multiplier";
 import { FeatureMultiplierList } from "../../classes/Feature2/Multiplier/List";
+import { FeatureMultiplierTarget } from "../../classes/Feature2/Multiplier/Target";
 import { StatTable } from "../../classes/StatTable";
+import { ValueTable } from "../../classes/ValueTable";
 import { charTables } from "../generated/CharTables";
 import { charTalentTables } from "../generated/CharTalentTables";
 
@@ -96,12 +106,23 @@ const Talents = new DbObjectTalents({
                 table: new StatTable('qiqi_herald_of_frost', charTalentTables.Qiqi.s2.p5),
             },
             {
+                table: new StatTable('qiqi_herald_of_frost_coordinated_attack', charTalentTables.Qiqi.s2.p9),
+            },
+            {
+                unit: 'sec',
+                table: new StatTable('qiqi_herald_of_frost_coordinated_attack_cd', charTalentTables.Qiqi.s2.p10),
+            },
+            {
                 unit: 'sec',
                 table: new StatTable('duration', charTalentTables.Qiqi.s2.p6),
             },
             {
                 unit: 'sec',
                 table: new StatTable('cd', charTalentTables.Qiqi.s2.p7),
+            },
+            {
+                unit: 'sec',
+                table: new StatTable('qiqi_seven_sacred_treasures_cd', charTalentTables.Qiqi.s2.p11),
             },
         ],
     },
@@ -133,12 +154,39 @@ const Talents = new DbObjectTalents({
                 unit: '',
                 table: new StatTable('energy_cost', charTalentTables.Qiqi.s3.p6),
             },
+            {
+                table: new StatTable('qiqi_preserver_of_fortune_stellarconduct', charTalentTables.Qiqi.s3.p7),
+            },
         ],
     },
 });
 
 const A1HealingRecv = 20;
 const C2NormalDmg = 15;
+const RadianceReactionDmg = 50;
+const C2RadianceAtk = 50;
+const C4ExtraHeal = 180;
+const C6StellarGlimmerFlat = 600;
+
+const radianceConductName = 'qiqi_radiance_stellarconduct';
+const radianceSwirlName = 'qiqi_radiance_stellarswirl';
+const partyRadianceConductName = 'party.qiqi_herald_of_frost_radiance_stellarconduct';
+const partyRadianceSwirlName = 'party.qiqi_herald_of_frost_radiance_stellarswirl';
+
+function radianceCondition(mode) {
+    return new ConditionRadianceStellarGlimmer({
+        conductName: radianceConductName,
+        swirlName: radianceSwirlName,
+        mode,
+    });
+}
+
+function anyRadianceCondition() {
+    return new ConditionOr([
+        radianceCondition(RADIANCE_STELLARCONDUCT),
+        radianceCondition(RADIANCE_STELLARSWIRL),
+    ]);
+}
 
 export const Qiqi = new DbObjectChar({
     name: 'qiqi',
@@ -310,6 +358,17 @@ export const Qiqi = new DbObjectChar({
                 }),
             ],
         }),
+        new FeatureDamageSkill({
+            name: 'qiqi_herald_of_frost_coordinated_attack',
+            element: 'cryo',
+            multipliers: [
+                new FeatureMultiplier({
+                    leveling: 'char_skill_elemental',
+                    values: Talents.get('skill.qiqi_herald_of_frost_coordinated_attack'),
+                }),
+            ],
+            condition: new ConditionBoolean({name: 'qiqi_herald_of_frost_radiance'}),
+        }),
         new FeatureHeal({
             name: 'party_heal_on_hit',
             category: 'skill',
@@ -341,6 +400,18 @@ export const Qiqi = new DbObjectChar({
                 }),
             ],
         }),
+        new FeatureDamageStellarConduct({
+            category: 'burst',
+            name: 'qiqi_preserver_of_fortune_stellarconduct',
+            element: 'cryo',
+            multipliers: [
+                new FeatureMultiplier({
+                    leveling: 'char_skill_burst',
+                    values: Talents.get('burst.qiqi_preserver_of_fortune_stellarconduct'),
+                }),
+            ],
+            condition: radianceCondition(RADIANCE_STELLARCONDUCT),
+        }),
         new FeatureHeal({
             name: 'heal',
             category: 'burst',
@@ -350,6 +421,18 @@ export const Qiqi = new DbObjectChar({
                     values: Talents.getList('burst.heal'),
                 }),
             ],
+        }),
+        new FeatureHeal({
+            name: 'qiqi_divine_suppression_extra_heal',
+            category: 'other',
+            multipliers: [
+                new FeatureMultiplier({
+                    scaling: 'atk*',
+                    source: 'constellation4',
+                    values: new ValueTable([C4ExtraHeal]),
+                }),
+            ],
+            condition: new ConditionConstellation({constellation: 4}),
         }),
     ],
     conditions: [
@@ -368,11 +451,56 @@ export const Qiqi = new DbObjectChar({
         }),
         new ConditionStatic({
             title: 'talent_name.qiqi_a_glimpse_into_arcanum',
-            description: 'talent_descr.qiqi_a_glimpse_into_arcanum',
+            description: 'talent_descr.qiqi_a_glimpse_into_arcanum_buffed',
             info: {ascension: 4},
             subConditions: [
                 new ConditionAscensionChar({ascension: 4}),
             ],
+        }),
+        new ConditionBoolean({
+            name: radianceConductName,
+            serializeId: 3,
+            title: 'talent_name.qiqi_seven_sacred_treasures',
+            description: 'talent_descr.qiqi_seven_sacred_treasures',
+            condition: new ConditionBoolean({name: 'polestar_field'}),
+        }),
+        new ConditionBoolean({
+            name: 'qiqi_herald_of_frost_radiance',
+            serializeId: 4,
+            title: 'talent_name.qiqi_seven_sacred_treasures',
+            description: 'talent_descr.qiqi_seven_sacred_treasures',
+            subConditions: [
+                anyRadianceCondition(),
+            ],
+        }),
+        new Condition({
+            stats: {
+                dmg_reaction_superconduct: RadianceReactionDmg,
+                dmg_stellarconduct: RadianceReactionDmg,
+            },
+            condition: new ConditionAnd([
+                new ConditionBoolean({name: 'qiqi_herald_of_frost_radiance'}),
+                radianceCondition(RADIANCE_STELLARCONDUCT),
+            ]),
+        }),
+        new Condition({
+            stats: {
+                dmg_reaction_swirl_cryo: RadianceReactionDmg,
+                dmg_stellarswirl: RadianceReactionDmg,
+            },
+            condition: new ConditionAnd([
+                new ConditionBoolean({name: 'qiqi_herald_of_frost_radiance'}),
+                radianceCondition(RADIANCE_STELLARSWIRL),
+            ]),
+        }),
+        new ConditionBoolean({
+            name: radianceSwirlName,
+            serializeId: 5,
+            title: 'talent_name.qiqi_seven_sacred_treasures',
+            description: 'talent_descr.qiqi_seven_sacred_treasures',
+            condition: new ConditionNot([
+                new ConditionBoolean({name: radianceConductName}),
+            ]),
         }),
     ],
     constellation: new DbObjectConstellation([
@@ -380,7 +508,7 @@ export const Qiqi = new DbObjectChar({
             conditions: [
                 new ConditionStatic({
                     title: 'talent_name.qiqi_ascetics_of_frost',
-                    description: 'talent_descr.qiqi_ascetics_of_frost',
+                    description: 'talent_descr.qiqi_ascetics_of_frost_buffed',
                 }),
             ],
         },
@@ -390,7 +518,7 @@ export const Qiqi = new DbObjectChar({
                     name: 'qiqi_frozen_to_the_bone',
                     serializeId: 2,
                     title: 'talent_name.qiqi_frozen_to_the_bone',
-                    description: 'talent_descr.qiqi_frozen_to_the_bone',
+                    description: 'talent_descr.qiqi_frozen_to_the_bone_buffed',
                     stats: {
                         dmg_normal: C2NormalDmg,
                         dmg_charged: C2NormalDmg,
@@ -398,6 +526,12 @@ export const Qiqi = new DbObjectChar({
                     subConditions: [
                         new ConditionEnemyStatus({status: ['cryo']}),
                     ],
+                }),
+                new Condition({
+                    stats: {
+                        atk_percent: C2RadianceAtk,
+                    },
+                    condition: anyRadianceCondition(),
                 }),
             ]
         },
@@ -414,7 +548,10 @@ export const Qiqi = new DbObjectChar({
             conditions: [
                 new ConditionStatic({
                     title: 'talent_name.qiqi_divine_suppression',
-                    description: 'talent_descr.qiqi_divine_suppression',
+                    description: 'talent_descr.qiqi_divine_suppression_buffed',
+                    stats: {
+                        text_percent: C4ExtraHeal,
+                    },
                 }),
             ],
         },
@@ -431,13 +568,24 @@ export const Qiqi = new DbObjectChar({
             conditions: [
                 new ConditionStatic({
                     title: 'talent_name.qiqi_rite_of_resurrection',
-                    description: 'talent_descr.qiqi_rite_of_resurrection',
+                    description: 'talent_descr.qiqi_rite_of_resurrection_buffed',
                 }),
             ],
         },
     ]),
     partyData: {
+        loadStats: {
+            stats: ['atk_total'],
+        },
         conditions: [
+            new ConditionNumber({
+                name: 'qiqi_atk_total',
+                title: 'talent_name.stats_total_atk',
+                partyStat: 'atk_total',
+                serializeId: 2,
+                rotation: 'party',
+                max: 10000,
+            }),
             new ConditionBoolean({
                 name: 'party.qiqi_life_prolonging_methods',
                 serializeId: 1,
@@ -448,6 +596,57 @@ export const Qiqi = new DbObjectChar({
                 stats: {
                     healing_recv: 20,
                 },
+            }),
+            new ConditionBoolean({
+                name: partyRadianceConductName,
+                serializeId: 3,
+                rotation: 'party',
+                title: 'talent_name.qiqi_seven_sacred_treasures',
+                description: 'talent_descr.qiqi_seven_sacred_treasures',
+                info: {special: true},
+                stats: {
+                    dmg_reaction_superconduct: RadianceReactionDmg,
+                    dmg_stellarconduct: RadianceReactionDmg,
+                },
+            }),
+            new ConditionStacks({
+                name: 'party.qiqi_glimpse_of_mystery',
+                serializeId: 4,
+                rotation: 'party',
+                title: 'talent_name.qiqi_rite_of_resurrection',
+                description: 'talent_descr.qiqi_rite_of_resurrection_buffed',
+                info: {constellation: 6},
+                maxStacks: 4,
+            }),
+            new ConditionBoolean({
+                name: partyRadianceSwirlName,
+                serializeId: 5,
+                rotation: 'party',
+                title: 'talent_name.qiqi_seven_sacred_treasures',
+                description: 'talent_descr.qiqi_seven_sacred_treasures',
+                info: {special: true},
+                stats: {
+                    dmg_reaction_swirl_cryo: RadianceReactionDmg,
+                    dmg_stellarswirl: RadianceReactionDmg,
+                },
+                condition: new ConditionNot([
+                    new ConditionBoolean({name: partyRadianceConductName}),
+                ]),
+            }),
+        ],
+        multipliers: [
+            new FeatureMultiplier({
+                scaling: 'qiqi_atk_total',
+                source: 'constellation6',
+                values: new ValueTable([C6StellarGlimmerFlat]),
+                condition: new ConditionStacks({
+                    name: 'party.qiqi_glimpse_of_mystery',
+                    maxStacks: 4,
+                }),
+                target: new FeatureMultiplierTarget({
+                    tags: ['stellarglimmer_direct'],
+                    options: ['stellarglimmer_flat'],
+                }),
             }),
         ],
     },

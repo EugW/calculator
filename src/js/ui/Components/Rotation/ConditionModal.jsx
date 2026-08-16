@@ -72,7 +72,7 @@ export class RotationConditionModal extends React.PureComponent {
             isVisible: true,
             showDropdown: showDropdown,
             value: value,
-        }
+        };
 
         if (data.conditionId) {
             Object.assign(newState, {
@@ -124,6 +124,11 @@ export class RotationConditionModal extends React.PureComponent {
     }
 
     handleSettingChange(name, value) {
+        let cond = this.state.conditions[0];
+        if (cond && name != cond.getName()) {
+            return;
+        }
+
         this.setState({value: value});
     }
 
@@ -172,7 +177,7 @@ export class RotationConditionModal extends React.PureComponent {
                     />
                 </ControlsBar>
             </DialogContainer>
-        )
+        );
     }
 
     buildConditionsList() {

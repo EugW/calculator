@@ -89,17 +89,24 @@ export class ArtifactListItem extends React.Component {
             classes.push('hidden');
         }
 
-        for (let item of art.getSubStats()) {
+        for (let item of art.getDisplaySubStats()) {
             let stat = item.stat.replace('_percent', '');
             substats.push(
-                <div key={item.stat} className={'substat'+ (item.stat == this.props.highlightStat ? ' highlight' : '')}>
+                <div
+                    key={item.stat + '-' + substats.length}
+                    className={
+                        'substat'
+                        + (item.stat == this.props.highlightStat ? ' highlight' : '')
+                        + (item.inactive ? ' inactive' : '')
+                    }
+                >
                     <span className="stat">{lang.get('stat_mini.'+ stat)}</span>
                     <span className="value">{Stats.format(item.stat, item.value, {signed: false})}</span>
                 </div>
             );
         }
 
-        let statOriginal = art.getMainStat()
+        let statOriginal = art.getMainStat();
         let stat = statOriginal.replace('_percent', '');
 
         return (
@@ -111,8 +118,8 @@ export class ArtifactListItem extends React.Component {
                         UI.TooltipArtifact.updatePosition(e);
                     }
                 }}
-                onMouseEnter={() => this.props.onOver(art)}
-                onMouseLeave={() => UI.TooltipArtifact.hide()}
+                onMouseEnter={this.props.onOver ? () => this.props.onOver(art) : undefined}
+                onMouseLeave={this.props.onOver ? () => UI.TooltipArtifact.hide() : undefined}
             >
                 <div className="line">
                     <ArtifactSetIcon size={60} set={art.getSetName()} slot={art.getSlot()} />
@@ -181,7 +188,7 @@ function ArtifactListItemButtons(props) {
 
     return (
         <div className="buttons" onClick={(e) => {
-            e.preventDefault()
+            e.preventDefault();
             e.stopPropagation();
         }}>
             {props.onEdit ? <div

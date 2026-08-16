@@ -31,6 +31,7 @@ export const CashflowSupervision = new DbObjectWeapon({
             stats: [
                 new StatTable('dmg_normal', [16, 20, 24, 28, 32]),
                 new StatTable('dmg_charged', [14, 17.5, 21, 24.5, 28]),
+                new StatTable('dmg_stellarconduct', [14, 17.5, 21, 24.5, 28]),
             ],
         }),
         new ConditionBooleanValue({

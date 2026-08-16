@@ -36,6 +36,7 @@ export const KagurasVerity = new DbObjectWeapon({
             levelSetting: 'weapon_refine',
             stats: [
                 new StatTable('dmg_skill', [12, 15, 18, 21, 24]),
+                new StatTable('dmg_stellarconduct', [12, 15, 18, 21, 24]),
             ],
         }),
         new ConditionBooleanValue({

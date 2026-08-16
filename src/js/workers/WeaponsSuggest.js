@@ -25,7 +25,7 @@ self.onmessage = function(input) {
     }
 
     for (let item of items) {
-        let weapon = DB.Weapons.getById(item.weaponId)
+        let weapon = DB.Weapons.getById(item.weaponId);
         let build = buildBase.clone();
         let artifacts = [];
 
@@ -62,7 +62,7 @@ self.onmessage = function(input) {
 
             let result = generator.generate();
             for (let art of result[0].artifacts) {
-                artifacts.push(art.serialize())
+                artifacts.push(art.serialize());
             }
             build.replaceArtifacts(result[0].artifacts);
 
@@ -80,8 +80,13 @@ self.onmessage = function(input) {
 
         if (featureResult) {
             let resultItem = {
+                scenarioId: item.scenarioId,
                 weaponId: item.weaponId,
                 suggestName: item.suggestName,
+                isCustom: item.isCustom,
+                customName: item.customName,
+                isCustomized: item.isCustomized,
+                settings: item.settings,
                 level: item.level,
                 ascension: item.ascension,
                 refine: item.refine,
@@ -102,4 +107,4 @@ self.onmessage = function(input) {
     self.postMessage({
         result: results,
     });
-}
+};

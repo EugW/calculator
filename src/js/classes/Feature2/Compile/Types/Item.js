@@ -1,8 +1,13 @@
 import { CItem } from "../Types";
+import { wgslNumber, wgslStatAccess } from "../WGSL";
 import { CMulti, CSum, CSumPlusOne } from "./Block";
 
 export class CConst extends CItem {
-    getType() {return 'item_const'}
+    getType() {return 'item_const';}
+
+    compileWGSL(opts) {
+        return wgslNumber(this.value, opts);
+    }
 
     getSignature() {
         return '(const:' + this.value + ')';
@@ -10,10 +15,14 @@ export class CConst extends CItem {
 }
 
 export class CStat extends CItem {
-    getType() {return 'item_stat'}
+    getType() {return 'item_stat';}
 
     compile(opts) {
         return 'stats.' + this.stat;
+    }
+
+    compileWGSL(opts) {
+        return wgslStatAccess(this.stat, opts);
     }
 
     process(opts) {
@@ -34,7 +43,7 @@ export class CStat extends CItem {
 }
 
 export class CStatTotal extends CStat {
-    getType() {return 'item_stat_total'}
+    getType() {return 'item_stat_total';}
 
     getUsedStats() {
         return [this.stat, this.stat + '_base', this.stat + '_percent'];
@@ -76,6 +85,13 @@ export class CStatTotal extends CStat {
     compile(opts) {
         return `(stats.${this.statBaseName()} * (1 + stats.${this.statPercentName()}) + stats.${this.statFlatName()})`;
     }
+
+    compileWGSL(opts) {
+        const base = wgslStatAccess(this.statBaseName(), opts);
+        const percent = wgslStatAccess(this.statPercentName(), opts);
+        const flat = wgslStatAccess(this.statFlatName(), opts);
+        return `(${base} * (1.0 + ${percent}) + ${flat})`;
+    }
 }
 
 export class CVarValue extends CItem {
@@ -85,10 +101,14 @@ export class CVarValue extends CItem {
         super(params);
     }
 
-    getType() {return 'variable_get'}
-    isVariableGet() {return true}
+    getType() {return 'variable_get';}
+    isVariableGet() {return true;}
 
     compile(opts) {
+        return this.name;
+    }
+
+    compileWGSL(opts) {
         return this.name;
     }
 

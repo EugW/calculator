@@ -1,0 +1,16 @@
+category;name;rus;eng
+artifact_upgrade;start;Рассчитать;Calculate
+artifact_upgrade;recompute;Пересчитать;Recompute
+artifact_upgrade;current_feature;Показатель;Feature
+artifact_upgrade;candidates;Кандидатов;Candidates
+artifact_upgrade;instructions_button;Инструкция;Instructions
+artifact_upgrade;instructions_title;Как пользоваться;How to use
+artifact_upgrade;instructions_text;<ol class="artifact-upgrade-instructions"><li>Сканируйте артефакты через <a href="https://github.com/konkers/irminsul" target="_blank" rel="noreferrer">Irminsul</a><div class="artifact-upgrade-instructions-note">InventoryKamera не различает 3-лайнеры и 4-лайнеры. Им всё ещё можно пользоваться, но тогда нужно вручную добавить +4 уровня всем 3-лайнерам.</div></li><li>Вставьте экспортированный текст GOOD кнопкой импорта GOOD на вкладке Settings.</li><li>Сначала используйте оптимизатор артефактов, чтобы сгенерировать лучшую сборку и экипировать её.</li><li>Используйте эту вкладку, чтобы получить список недокачанных артефактов, которые могут улучшить текущую сборку.</li></ol>;<ol class="artifact-upgrade-instructions"><li>Scan artifacts using <a href="https://github.com/konkers/irminsul" target="_blank" rel="noreferrer">Irminsul</a><div class="artifact-upgrade-instructions-note">InventoryKamera fails to distinguish 3-liners from 4-liners. You may still use it, but you will have to add +4 levels to all 3-liners manually.</div></li><li>Paste the exported GOOD text using the GOOD import button in the Settings tab.</li><li>Use the artifact optimizer first to generate the best build and equip it.</li><li>Use this tab to generate a list of potential underleveled artifacts that may improve the current build.</li></ol>
+artifact_upgrade;improve_chance;Шанс улучшения;Improve chance
+artifact_upgrade;expected_gain;Средний прирост;Expected gain
+artifact_upgrade;variants;Вариантов;Variants
+artifact_upgrade;outdated;Результаты устарели, пересчитайте после изменений сборки или хранилища.;Results are outdated. Recompute after changing the build or storage.
+artifact_upgrade;no_items;Нет недокачанных артефактов для оценки.;There are no underleveled artifacts to score.
+artifact_upgrade;ready;Нажмите «Рассчитать», чтобы ранжировать недокачанные артефакты относительно текущей сборки.;Press Calculate to rank underleveled artifacts against the current build.
+artifact_upgrade;equipped;Надет;Equipped
+artifact_upgrade;loading;Идет оценка вариантов прокачки...;Evaluating upgrade variants...

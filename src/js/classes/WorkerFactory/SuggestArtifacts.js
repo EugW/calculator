@@ -1,9 +1,13 @@
 import { Artifact } from "../Artifact";
 import { ArtifactsSuggestSort } from "../ArtifactsSuggestSort";
+import {
+    DEFAULT_OPTIMIZER_RESULT_LIMIT,
+    finalizeOptimizerResults,
+} from "../OptimizerResult";
 import { WorkerFactory } from "../WorkerFactory";
 
 const MAX_WORKERS_CNT = 16;
-const MAX_RESULTS = 20;
+const MAX_RESULTS = DEFAULT_OPTIMIZER_RESULT_LIMIT;
 const MIN_COMBINATIONS_PER_THREAD = 2_000_000;
 
 export class WorkerFactorySuggestArtifacts extends WorkerFactory {
@@ -12,9 +16,15 @@ export class WorkerFactorySuggestArtifacts extends WorkerFactory {
     }
 
     getResult() {
+        const failedWorker = this.workers.find((item) => item.isError);
+        if (failedWorker) {
+            throw new Error(failedWorker.errorMessage || 'Artifact optimization failed');
+        }
+
         let result = [];
 
         for (const item of this.workers) {
+            if (!item.result) continue;
             result = result.concat(item.result);
         }
 
@@ -29,26 +39,52 @@ export class WorkerFactorySuggestArtifacts extends WorkerFactory {
         }
 
 
-        result = result.sort(function(a,b) {
-            return b.value - a.value;
-        });
-        result = result.splice(0, MAX_RESULTS);
+        result = finalizeOptimizerResults(result, this.resultLimit || MAX_RESULTS);
 
         return result;
     }
 
-    onMessage(index, data) {
-        if (data.result) {
-            super.onMessage(index, data.result);
-        } else {
-            this.workers[index].count = data.count;
-            this.workers[index].total = data.total;
-            this.workers[index].skipped = data.skipped;
-            this.updateProgress();
+    onMessage(index, data, generation = this.runGeneration) {
+        if (!this.isRunActive(generation) || !this.workers[index]) {
+            return;
         }
+
+        if (!data || typeof data !== 'object') {
+            throw new Error('Artifact worker returned an invalid message');
+        }
+
+        // Handle error messages from worker
+        if (Object.prototype.hasOwnProperty.call(data, 'error')) {
+            this.onError(index, data.error, generation);
+            return;
+        }
+        
+        if (Object.prototype.hasOwnProperty.call(data, 'result')) {
+            if (!Array.isArray(data.result)) {
+                throw new Error('Artifact worker returned an invalid result');
+            }
+            super.onMessage(index, data.result, generation);
+            return;
+        }
+
+        const isProgress = ['count', 'total', 'skipped'].some((key) => {
+            return Object.prototype.hasOwnProperty.call(data, key);
+        });
+        if (!isProgress) {
+            throw new Error('Artifact worker returned an invalid message');
+        }
+
+        this.workers[index].count = data.count;
+        this.workers[index].total = data.total;
+        this.workers[index].skipped = data.skipped;
+        this.updateProgress(generation);
     }
 
-    updateProgress() {
+    updateProgress(generation = this.runGeneration) {
+        if (!this.isRunActive(generation)) {
+            return;
+        }
+
         let progress = [];
 
         for (let item of this.workers) {
@@ -56,7 +92,7 @@ export class WorkerFactorySuggestArtifacts extends WorkerFactory {
                 count: item.count || 0,
                 total: item.total || 0,
                 skipped: item.skipped || 0,
-            })
+            });
         }
 
         if (this.progressCallback) {
@@ -65,6 +101,13 @@ export class WorkerFactorySuggestArtifacts extends WorkerFactory {
     }
 
     getWorkersPayload(data) {
+        const requestedLimit = data.limit === undefined ? MAX_RESULTS : Number(data.limit);
+        if (data.useGPU && requestedLimit !== MAX_RESULTS) {
+            throw new RangeError(
+                `GPU optimizer result limit is fixed at ${MAX_RESULTS}; got ${data.limit}`
+            );
+        }
+
         let arts = {
             flower: [],
             plume: [],
@@ -96,12 +139,18 @@ export class WorkerFactorySuggestArtifacts extends WorkerFactory {
             }
         }
 
+        const maxThreads = data.useGPU ? 1 : this.maxThreads;
+        const globalCounts = {};
+        for (const slot of Object.keys(arts)) {
+            globalCounts[slot] = Math.max(1, arts[slot].length);
+        }
         let numParts = Math.min(
-            this.maxThreads,
+            maxThreads,
             MAX_WORKERS_CNT,
             Math.ceil(arts[maxSlot].length / 2),
             Math.ceil(calcCombinations(arts) / MIN_COMBINATIONS_PER_THREAD)
         );
+        numParts = Math.max(1, numParts);
 
         let partSize = arts[maxSlot].length / numParts;
         let parts = [];
@@ -109,6 +158,7 @@ export class WorkerFactorySuggestArtifacts extends WorkerFactory {
 
         for (let i = 0; i < numParts; ++i) {
             let size = Math.floor((i + 1 ) * partSize) - used;
+            const splitOffset = used;
             let part = arts[maxSlot].splice(0, size);
             used += part.length;
 
@@ -118,7 +168,7 @@ export class WorkerFactorySuggestArtifacts extends WorkerFactory {
                 part = part.concat(arts[slot]);
             }
 
-            parts.push(part);
+            parts.push({artifacts: part, splitOffset});
         }
 
 
@@ -143,7 +193,15 @@ export class WorkerFactorySuggestArtifacts extends WorkerFactory {
         let result = [];
         for (let part of parts) {
             result.push(
-                Object.assign({}, data, {artifacts: part, limt: MAX_RESULTS})
+                Object.assign({}, data, {
+                    artifacts: part.artifacts,
+                    limit: this.resultLimit,
+                    combinationIndexContext: {
+                        splitSlot: maxSlot,
+                        splitOffset: part.splitOffset,
+                        globalCounts,
+                    },
+                })
             );
         }
 
@@ -151,10 +209,16 @@ export class WorkerFactorySuggestArtifacts extends WorkerFactory {
     }
 
     run(data) {
-        this.maxThreads = data.maxThreads;
+        this.resultLimit = normalizeResultLimit(data.limit);
+        this.maxThreads = data.useGPU ? 1 : data.maxThreads;
 
         super.run(data);
     }
+}
+
+function normalizeResultLimit(limit) {
+    limit = Number(limit);
+    return Number.isInteger(limit) && limit > 0 ? limit : MAX_RESULTS;
 }
 
 function calcCombinations(items) {

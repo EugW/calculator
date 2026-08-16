@@ -1,0 +1,6 @@
+category;name;rus;eng
+settings_view;artifact_suggest;Подбор артефактов;Artifact suggest
+settings_view;enable_worker_value_output;Показывать значения из worker;Enable worker value output
+settings_view;gpu_batch_size;Размер GPU-пакета;GPU batch size
+settings_view;gpu_batch_size_note;Auto использует проверенное значение по умолчанию (1M). Большие пакеты могут снизить накладные расходы, но крупные тестовые значения используют больше памяти GPU/браузера.;Auto uses the tested default (1M). Larger batches can reduce dispatch overhead, but large test values use more GPU/browser memory.
+suggester;worker_value;Значение worker;Worker value

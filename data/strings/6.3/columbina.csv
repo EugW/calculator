@@ -1,0 +1,22 @@
+category;name;rus;eng
+char_name;columbina;Коломбина;Columbina
+
+feature_attack;columbina_moondew_cleanse_dmg;Урон Очищения лунной росой;Moondew Cleanse DMG
+feature_skill;columbina_skill_dmg;Урон навыка;Skill DMG
+feature_skill;columbina_gravity_ripple_dmg;Зыбь тяготения: периодический урон;Gravity Ripple: Continuous DMG
+feature_skill;columbina_lunar_charged_dmg;Вмешательство тяготения: урон Лунного заряда;Gravity Interference: Lunar-Charged DMG
+feature_skill;columbina_lunar_bloom_dmg;Вмешательство тяготения: урон Лунной бутонизации;Gravity Interference: Lunar-Bloom DMG
+feature_skill;columbina_lunar_crystallize_dmg;Вмешательство тяготения: урон Лунного кристалла;Gravity Interference: Lunar-Crystallize DMG
+feature_skill;columbina_gravity_limit;Максимум Силы тяготения;Gravity Limit
+feature_skill;columbina_gravity_ripple_duration;Длительность Зыби тяготения;Gravity Ripple Duration
+feature_burst;columbina_burst_dmg;Урон навыка;Skill DMG
+feature_burst;columbina_lunar_reaction_bonus;Повышение урона Лунных реакций;Lunar Reaction DMG Bonus
+feature_burst;columbina_lunar_domain_duration;Длительность Владений луны;Lunar Domain Duration
+feature_other;columbina_lunar_hp_bonus;Бонус Лунных реакций от HP;Lunar Reaction HP Bonus
+
+talent_name;columbina_moonsign_benediction;Дар лунного знамения: Одолженный тебе лунный свет;Moonsign Benediction: Moonlight, Lent Unto You
+talent_name;columbina_ascendant_gleam;Возвышенное сияние;Moonsign: Ascendant Gleam
+
+talent_descr;columbina_moonsign_benediction;При активации Электро-заряженной/Бутонизации/Гидро-кристаллизации она преобразуется в Лунную реакцию. Урон Лунных реакций увеличивается на %{text_percent} за каждые 1000 ед. макс. HP, до %{text_percent_max}.;When triggering Electro-Charged/Bloom/Hydro-Crystallize, it will be converted into a Lunar reaction. Lunar Reaction DMG gains +%{text_percent} per 1,000 Max HP, up to %{text_percent_max}.
+talent_descr;columbina_constellation_party;Возвышение урона Лунных реакций от созвездий (C1: 1.5%, C2: 7%, C3: 1.5%, C4: 1.5%, C5: 1.5%, C6: 7%).;Lunar Reaction DMG elevation from constellations (C1: 1.5%, C2: 7%, C3: 1.5%, C4: 1.5%, C5: 1.5%, C6: 7%).
+talent_descr;columbina_ascendant_gleam;Выберите доминирующий тип Лунной реакции (при активном Лунном сиянии): Лунная заряженность → ATK +1% HP, Лунная бутонизация → EM +0.35% HP, Лунная кристаллизация → DEF +1% HP.;Select dominant Lunar reaction type (when Lunar Brilliance active): Lunar-Charged → ATK +1% HP, Lunar-Bloom → EM +0.35% HP, Lunar-Crystallize → DEF +1% HP.

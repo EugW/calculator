@@ -6,6 +6,7 @@ talent_name;stats_total_hp;Макс HP;Max HP
 talent_name;stats_total_mastery;Мастерство стихий;Elemental Mastery
 talent_name;stats_level_skill;Уровень элементального навыка;Elemental Skill level
 talent_name;stats_level_burst;Уровень взрыва стихий;Elemental Burst level
+talent_name;char_constellation;Созвездие;Constellation
 talent_name;nightsoul_points;Очки Ночного духа;Nightsoul Points
 
 talent_descr;bonus_crit_rate;Увеличивает name{шанс крит. попадания} на  %{crit_rate}.;name{CRIT Rate} increased by %{crit_rate}.

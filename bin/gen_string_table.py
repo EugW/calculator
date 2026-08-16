@@ -2,12 +2,23 @@ import csv
 import glob
 import json
 import os
+import re
 import sys
 
 dirname = os.path.dirname(__file__)
 input_files = os.path.join(dirname, '../data/strings/**/*.csv')
 out_dir = os.path.join(dirname, '../src/js/lang/')
 langs = ['eng', 'rus']
+
+
+def is_strict_release_file(filename):
+    """Reject new release-localized conflicts while preserving legacy debt."""
+
+    for part in os.path.normpath(filename).split(os.sep):
+        match = re.fullmatch(r'(\d+)\.(\d+)', part)
+        if match and (int(match.group(1)), int(match.group(2))) >= (7, 0):
+            return True
+    return False
 
 packs = [
     {
@@ -30,8 +41,14 @@ packs = [
 for pack in packs:
     if pack['name'] not in sys.argv:
         continue
-    files = glob.glob(pack['input'])
+    # glob ordering is filesystem-dependent. Compilation order must be stable
+    # even while old version directories still contain intentional overrides.
+    files = sorted(
+        glob.glob(pack['input']),
+        key=lambda filename: os.path.normcase(os.path.normpath(filename)),
+    )
     items = []
+    origins = {}
 
     for filename in files:
         print(filename)
@@ -43,6 +60,28 @@ for pack in packs:
                 delimiter=';',
             )
             for row in csv_file:
+                key = (row['category'], row['name'])
+                values = tuple(row[lang] for lang in langs)
+                previous = origins.get(key)
+                if (
+                    previous
+                    and previous['values'] != values
+                    and (
+                        is_strict_release_file(filename)
+                        or is_strict_release_file(previous['filename'])
+                    )
+                ):
+                    raise ValueError(
+                        'Conflicting 7.x string definition for '
+                        f'{row["category"]}.{row["name"]}: '
+                        f'{previous["filename"]}:{previous["line"]} != '
+                        f'{filename}:{csv_file.line_num}'
+                    )
+                origins[key] = {
+                    'filename': filename,
+                    'line': csv_file.line_num,
+                    'values': values,
+                }
                 items.append(row)
 
     result = {}

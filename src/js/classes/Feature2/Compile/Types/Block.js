@@ -1,11 +1,12 @@
 import { variableName } from "../Helpers";
 import { CBlock } from "../Types";
+import { wgslNumber, wgslStatAccess } from "../WGSL";
 import { CConst, CStat } from "./Item";
 
 
 export class CSum extends CBlock {
-    getType() {return 'block_sum'}
-    dontShrink() {return 0}
+    getType() {return 'block_sum';}
+    dontShrink() {return 0;}
 
     /**
      * @param {Object} opts Compilation options
@@ -22,14 +23,25 @@ export class CSum extends CBlock {
         return result || '0';
     }
 
+    compileWGSL(opts) {
+        let parts = this.compileChildrensWGSL(opts);
+        let result = parts.join(' + ');
+
+        if (parts.length > 1) {
+            result = '(' + result + ')';
+        }
+
+        return result || '0.0';
+    }
+
     /**
      * @param {Object} opts
      * @returns {CBlock}
      */
     process(opts) {
-        this.items = this.items.map((i) => {return i.process(opts)});
-        let staticItems = this.items.filter((i) => {return i instanceof CConst && i.value != 0});
-        let nonStaticItems = this.items.filter((i) => {return !(i instanceof CConst)});
+        this.items = this.items.map((i) => {return i.process(opts);});
+        let staticItems = this.items.filter((i) => {return i instanceof CConst && i.value != 0;});
+        let nonStaticItems = this.items.filter((i) => {return !(i instanceof CConst);});
 
         if (staticItems.length > 1 && !opts.dontProcessStaticValues) {
             let newItems = [];
@@ -70,7 +82,7 @@ export class CSum extends CBlock {
 }
 
 export class CSumPlusOne extends CSum {
-    getType() {return 'block_sum_plus'}
+    getType() {return 'block_sum_plus';}
 
     /**
      * @param {Object} opts Compilation options
@@ -84,6 +96,14 @@ export class CSumPlusOne extends CSum {
         return '(' + parts.join(' + ') + ')';
     }
 
+    compileWGSL(opts) {
+        let parts = this.compileChildrensWGSL(opts);
+        if (parts.length == 0) return '1.0';
+
+        parts.unshift('1.0');
+        return '(' + parts.join(' + ') + ')';
+    }
+
     /**
      * @param {Object} opts
      * @returns {CBlock}
@@ -91,7 +111,7 @@ export class CSumPlusOne extends CSum {
     process(opts) {
         let result = new CSum([
             new CConst({value: 1}),
-            ...this.items.map((i) => {return i.process(opts)}),
+            ...this.items.map((i) => {return i.process(opts);}),
         ], this.getInfoProperties(opts));
 
         return result.process(opts);
@@ -99,7 +119,7 @@ export class CSumPlusOne extends CSum {
 }
 
 export class CSubtract extends CBlock {
-    getType() {return 'block_subtract'}
+    getType() {return 'block_subtract';}
 
     /**
      * @param {Object} opts Compilation options
@@ -115,10 +135,21 @@ export class CSubtract extends CBlock {
 
         return result || '0';
     }
+
+    compileWGSL(opts) {
+        let parts = this.compileChildrensWGSL(opts);
+        let result = parts.join(' - ');
+
+        if (parts.length > 1) {
+            result = '(' + result + ')';
+        }
+
+        return result || '0.0';
+    }
 }
 
 export class CMulti extends CBlock {
-    getType() {return 'block_multi'}
+    getType() {return 'block_multi';}
 
     /**
      * @param {Object} opts Compilation options
@@ -135,14 +166,25 @@ export class CMulti extends CBlock {
         return result || 0;
     }
 
+    compileWGSL(opts) {
+        let parts = this.compileChildrensWGSL(opts);
+
+        let result = parts.join(' * ');
+        if (parts.length > 1) {
+            result = '(' + result + ')';
+        }
+
+        return result || '1.0';
+    }
+
     /**
      * @param {Object} opts
      * @returns {CBlock}
      */
     process(opts) {
-        this.items = this.items.map((i) => {return i.process(opts)});
-        let staticItems = this.items.filter((i) => {return i instanceof CConst && i.value != 1});
-        let nonStaticItems = this.items.filter((i) => {return !(i instanceof CConst)});
+        this.items = this.items.map((i) => {return i.process(opts);});
+        let staticItems = this.items.filter((i) => {return i instanceof CConst && i.value != 1;});
+        let nonStaticItems = this.items.filter((i) => {return !(i instanceof CConst);});
 
         if (staticItems.length > 1 && !opts.dontProcessStaticValues) {
             let newItems = [];
@@ -180,7 +222,7 @@ export class CMulti extends CBlock {
 }
 
 export class CDivide extends CBlock {
-    getType() {return 'block_divide'}
+    getType() {return 'block_divide';}
 
     compile(opts) {
         let parts = this.compileChildrens(opts);
@@ -193,14 +235,25 @@ export class CDivide extends CBlock {
         return result || 0;
     }
 
+    compileWGSL(opts) {
+        let parts = this.compileChildrensWGSL(opts);
+
+        let result = parts.join(' / ');
+        if (parts.length > 1) {
+            result = '(' + result + ')';
+        }
+
+        return result || '1.0';
+    }
+
     /**
      * @param {Object} opts
      * @returns {CBlock}
      */
     process(opts) {
-        this.items = this.items.map((i) => {return i.process(opts)});
-        let staticItems = this.items.filter((i) => {return i instanceof CConst});
-        let nonStaticItems = this.items.filter((i) => {return !(i instanceof CConst)});
+        this.items = this.items.map((i) => {return i.process(opts);});
+        let staticItems = this.items.filter((i) => {return i instanceof CConst;});
+        let nonStaticItems = this.items.filter((i) => {return !(i instanceof CConst);});
 
         if (staticItems.length > 1 && !opts.dontProcessStaticValues) {
             let newItems = [];
@@ -234,25 +287,33 @@ export class CDivide extends CBlock {
 }
 
 export class CNumberFloor extends CSum {
-    getType() {return 'number_floor'}
-    isCollapsable() {return false}
+    getType() {return 'number_floor';}
+    isCollapsable() {return false;}
 
     compile(opts) {
         return 'Math.floor('+ super.compile(opts) +')';
     }
+
+    compileWGSL(opts) {
+        return 'floor('+ super.compileWGSL(opts) +')';
+    }
 }
 
 export class CNumberCeil extends CSum {
-    getType() {return 'number_ceil'}
-    isCollapsable() {return false}
+    getType() {return 'number_ceil';}
+    isCollapsable() {return false;}
 
     compile(opts) {
         return 'Math.ceil('+ super.compile(opts) +')';
     }
+
+    compileWGSL(opts) {
+        return 'ceil('+ super.compileWGSL(opts) +')';
+    }
 }
 
 export class CMax extends CBlock {
-    getType() {return 'block_max'}
+    getType() {return 'block_max';}
 
     compile(opts) {
         let parts = this.compileChildrens(opts);
@@ -263,10 +324,20 @@ export class CMax extends CBlock {
 
         return parts[0];
     }
+
+    compileWGSL(opts) {
+        let parts = this.compileChildrensWGSL(opts);
+
+        if (parts.length > 1) {
+            return 'max(' + parts.join(', ') + ')';
+        }
+
+        return parts[0];
+    }
 }
 
 export class CMin extends CBlock {
-    getType() {return 'block_min'}
+    getType() {return 'block_min';}
 
     compile(opts) {
         let parts = this.compileChildrens(opts);
@@ -277,22 +348,38 @@ export class CMin extends CBlock {
 
         return parts[0];
     }
+
+    compileWGSL(opts) {
+        let parts = this.compileChildrensWGSL(opts);
+
+        if (parts.length > 1) {
+            return 'min(' + parts.join(', ') + ')';
+        }
+
+        return parts[0];
+    }
 }
 
 export class CIfGreater extends CBlock {
-    getType() {return 'if_greater'}
-    isCollapsable() {return false}
+    getType() {return 'if_greater';}
+    isCollapsable() {return false;}
 
     compile(opts) {
         let parts = this.compileChildrens(opts);
         return `(${parts[0]} > ${parts[1]} ? ${parts[2]} : ${parts[3]})`;
     }
+
+    compileWGSL(opts) {
+        let parts = this.compileChildrensWGSL(opts);
+        // WGSL uses select(false_val, true_val, condition)
+        return `select(${parts[3]}, ${parts[2]}, ${parts[0]} > ${parts[1]})`;
+    }
 }
 
 export class CVar extends CSum {
-    getType() {return 'variable_set'}
-    isCollapsable() {return false}
-    isVariableSet() {return true}
+    getType() {return 'variable_set';}
+    isCollapsable() {return false;}
+    isVariableSet() {return true;}
 
     constructor(items, params) {
         params = Object.assign({}, params);
@@ -302,6 +389,11 @@ export class CVar extends CSum {
 
     compile(opts) {
         return 'let '+ this.name +' = '+ super.compile(opts);
+    }
+
+    compileWGSL(opts) {
+        // Use 'var' instead of 'let' because variables may be modified later with CVarIncrease
+        return 'var '+ this.name +' = '+ super.compileWGSL(opts);
     }
 
     // compile(opts) {
@@ -318,38 +410,42 @@ export class CVarIncrease extends CSum {
         super(items, params);
     }
 
-    getType() {return 'variable_inc'}
-    isCollapsable() {return false}
-    isVariableSet() {return true}
-    isVariableGet() {return true}
+    getType() {return 'variable_inc';}
+    isCollapsable() {return false;}
+    isVariableSet() {return true;}
+    isVariableGet() {return true;}
 
     compile(opts) {
         return this.name +' += '+ super.compile(opts);
     }
+
+    compileWGSL(opts) {
+        return this.name +' += '+ super.compileWGSL(opts);
+    }
 }
 
 export class CBaseDamage extends CSum {
-    getType() {return 'base_damage'}
+    getType() {return 'base_damage';}
 }
 
 export class CFlatDamage extends CBaseDamage {
-    getType() {return 'flat_damage'}
+    getType() {return 'flat_damage';}
 }
 
 export class CFlatReduction extends CBaseDamage {
-    getType() {return 'flat_reduce'}
+    getType() {return 'flat_reduce';}
 }
 
 export class CReactionBase extends CMulti {
-    getType() {return 'reaction_base'}
+    getType() {return 'reaction_base';}
 }
 
 export class CReactionBaseBonus extends CSum {
-    getType() {return 'reaction_base_bonus'}
+    getType() {return 'reaction_base_bonus';}
 }
 
 export class CMultiplierBonus extends CSumPlusOne {
-    getType() {return 'multiplier_bonus'}
+    getType() {return 'multiplier_bonus';}
 
     getInfoProperties(opts) {
         let result = super.getInfoProperties(opts);
@@ -359,7 +455,7 @@ export class CMultiplierBonus extends CSumPlusOne {
 }
 
 export class CMultiplierReaction extends CSumPlusOne {
-    getType() {return 'multiplier_reaction'}
+    getType() {return 'multiplier_reaction';}
 
     getInfoProperties(opts) {
         let result = super.getInfoProperties(opts);
@@ -369,27 +465,27 @@ export class CMultiplierReaction extends CSumPlusOne {
 }
 
 export class CMultiplierAmplifying extends CSum {
-    getType() {return 'multiplier_amplifying'}
+    getType() {return 'multiplier_amplifying';}
 }
 
 export class CMultiplierResistance extends CSum {
-    getType() {return 'multiplier_resistance'}
+    getType() {return 'multiplier_resistance';}
 }
 
 export class CMultiplierDefence extends CSum {
-    getType() {return 'multiplier_defence'}
+    getType() {return 'multiplier_defence';}
 }
 
 export class CMultiplierCustom extends CSum {
-    getType() {return 'multiplier_custom'}
+    getType() {return 'multiplier_custom';}
 }
 
 export class CBlockPost extends CBlock {
-    getType() {return 'post'}
+    getType() {return 'post';}
 }
 
 export class CIsolatedBlock extends CBlock {
-    getType() {return 'isolated'}
+    getType() {return 'isolated';}
 
     // compile(opts) {
     //     let result = super.compile(opts);
@@ -398,7 +494,7 @@ export class CIsolatedBlock extends CBlock {
 }
 
 export class CPostEffect extends CMulti {
-    getType() {return 'post_effect'}
+    getType() {return 'post_effect';}
 
     getAssignedStats() {
         if (this.stat) {
@@ -410,10 +506,17 @@ export class CPostEffect extends CMulti {
 }
 
 export class CStatIncrease extends CSum {
-    getType() {return 'stat_increase'}
-    isCollapsable() {return false}
+    getType() {return 'stat_increase';}
+    isCollapsable() {return false;}
 
     getAssignedStats() {
+        return [this.newName || this.stat];
+    }
+
+    getUsedStats() {
+        // `target += value` reads target, while the renamed form writes a new
+        // lane from the original source (`newName = stat + value`). Children
+        // report the dependencies of `value` separately during the AST walk.
         return [this.stat];
     }
 
@@ -425,13 +528,28 @@ export class CStatIncrease extends CSum {
             return 'stats.' + this.stat + ' += ' + code;
         }
     }
+
+    compileWGSL(opts) {
+        let code = super.compileWGSL(opts);
+        let statAccess = wgslStatAccess(this.stat, opts);
+        if (this.newName) {
+            let newStatAccess = wgslStatAccess(this.newName, opts);
+            return `${newStatAccess} = ${statAccess} + ${code}`;
+        } else {
+            return `(*stats)[${opts.statIndex[this.stat]}u] += ${code}`;
+        }
+    }
 }
 
 export class CStatDecrease extends CSum {
-    getType() {return 'stat_decrease'}
-    isCollapsable() {return false}
+    getType() {return 'stat_decrease';}
+    isCollapsable() {return false;}
 
     getAssignedStats() {
+        return [this.stat];
+    }
+
+    getUsedStats() {
         return [this.stat];
     }
 
@@ -443,11 +561,16 @@ export class CStatDecrease extends CSum {
         let code = super.compile(opts);
         return 'stats.' + this.stat + ' -= ' + code;
     }
+
+    compileWGSL(opts) {
+        let code = super.compileWGSL(opts);
+        return `(*stats)[${opts.statIndex[this.stat]}u] -= ${code}`;
+    }
 }
 
 export class CStatSet extends CSum {
-    getType() {return 'stat_set'}
-    isCollapsable() {return false}
+    getType() {return 'stat_set';}
+    isCollapsable() {return false;}
 
     getAssignedStats() {
         return [this.stat];
@@ -461,10 +584,15 @@ export class CStatSet extends CSum {
         let code = super.compile(opts);
         return 'stats.' + this.stat + ' = ' + code;
     }
+
+    compileWGSL(opts) {
+        let code = super.compileWGSL(opts);
+        return `(*stats)[${opts.statIndex[this.stat]}u] = ${code}`;
+    }
 }
 
 export class CValueCap extends CSum {
-    getType() {return 'value_cap'}
+    getType() {return 'value_cap';}
 
     /**
      * @param {Object} opts Compilation options
@@ -475,10 +603,16 @@ export class CValueCap extends CSum {
         let code2 = this.value.compile(opts);
         return 'Math.min('+ code +', ' + code2 + ')';
     }
+
+    compileWGSL(opts) {
+        let code = super.compileWGSL(opts);
+        let code2 = this.value.compileWGSL(opts);
+        return 'min('+ code +', ' + code2 + ')';
+    }
 }
 
 export class CValueAboveZero extends CSum {
-    getType() {return 'value_above_zero'}
+    getType() {return 'value_above_zero';}
 
     /**
      * @param {Object} opts Compilation options
@@ -488,11 +622,16 @@ export class CValueAboveZero extends CSum {
         let code = super.compile(opts);
         return 'Math.max(0, ' + code + ')';
     }
+
+    compileWGSL(opts) {
+        let code = super.compileWGSL(opts);
+        return 'max(0.0, ' + code + ')';
+    }
 }
 
 export class CResistanceValue extends CSum {
-    getType() {return 'resistance_value'}
-    dontShrink() {return 1}
+    getType() {return 'resistance_value';}
+    dontShrink() {return 1;}
 
     process(opts) {
         let result = super.process(opts);
@@ -534,5 +673,14 @@ export class CResistanceValue extends CSum {
     compile(opts) {
         let code = super.compile(opts);
         return `(${code} < 0 ? (1 - ${code} / 2) : (${code} > 0.75 ? (1 / (4 * ${code} + 1)) : 1 - ${code}))`;
+    }
+
+    compileWGSL(opts) {
+        let code = super.compileWGSL(opts);
+        // Piecewise resistance formula:
+        // res < 0: 1 - res/2 (negative resistance = bonus damage)
+        // 0 <= res <= 0.75: 1 - res (normal range)
+        // res > 0.75: 1 / (4*res + 1) (diminishing returns)
+        return `select(select(1.0 - ${code}, 1.0 / (4.0 * ${code} + 1.0), ${code} > 0.75), 1.0 - ${code} * 0.5, ${code} < 0.0)`;
     }
 }

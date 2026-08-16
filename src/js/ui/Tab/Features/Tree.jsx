@@ -6,7 +6,7 @@ import { Lang } from "../../Lang";
 import { Stats, isPercent } from "../../../classes/Stats";
 import { FeatureCompiler } from "../../../classes/Feature2/Compiler";
 import { CConst } from "../../../classes/Feature2/Compile/Types/Item";
-import { CSum } from "../../../classes/Feature2/Compile/Types/Block";
+import { CMulti, CSum } from "../../../classes/Feature2/Compile/Types/Block";
 
 const ROOT_TYPES = {
     'base_damage': LeafRoot,
@@ -24,6 +24,8 @@ const ROOT_TYPES = {
     'reaction_base': LeafRoot,
     'block_multi': LeafRootMulti,
     'block_subtract': LeafRootSubtract,
+    'block_sum_plus': LeafRootSum,
+    'block_crit_dmg': LeafRootSum,
 };
 
 const INLINE_TYPES = {
@@ -31,6 +33,7 @@ const INLINE_TYPES = {
     'item_stat': LeafInlineConst,
     'block_multi': LeafMulti,
     'block_sum': LeafSum,
+    'block_sum_plus': LeafSumPlus,
     'block_subtract': LeafSubtract,
     'block_divide': LeafDivide,
     'resistance_value': LeafSum,
@@ -47,9 +50,22 @@ const INLINE_TYPES = {
     'reaction_base_bonus': LeafSum,
     'value_cap': LeafValueCap,
     'number_floor': LeftFloor,
+    'block_min': LeafMin,
+    'block_max': LeafMax,
 };
 
 let lang = new Lang();
+
+function blockTitle(tree, title) {
+    if (tree.comment) {
+        return lang.any(
+            'features_view.block_'+ tree.comment,
+            'features_view.block_'+ title,
+        );
+    }
+
+    return lang.get('features_view.block_'+ title);
+}
 
 export class FeatureViewTree extends React.Component {
     render() {
@@ -70,10 +86,10 @@ export class FeatureViewTree extends React.Component {
         let staticStats = [];
         for (let stat of compiler.usedStats) {
             if (['enemy_def_reduce', 'enemy_def_ignore'].includes(stat)) {
-                continue
+                continue;
             }
             if (!buildData.stats.get(stat) && !buildData.stats.get(stat +'_base')) {
-                staticStats.push(stat)
+                staticStats.push(stat);
             }
         }
 
@@ -107,14 +123,36 @@ export class FeatureViewTree extends React.Component {
         let type = tree.getType();
         let leaf = ROOT_TYPES[type];
         if (leaf) {
+            let resultTree = tree;
+            if (this.props.isCrit && tree.critDmg) {
+                resultTree = new CMulti([
+                    ...tree.items,
+                    tree.critDmg,
+                ]);
+            }
+
             items.unshift(React.createElement(leaf, {
                 key: 'base',
-                tree: tree,
+                tree: resultTree,
                 data: buildData,
                 title: type,
             }));
         } else {
             console.log('unknown root type '+ type);
+        }
+
+        if (this.props.isCrit && tree.critDmg) {
+            compiler.processBlock(tree.critDmg, processOpts);
+            let critType = tree.critDmg.getType();
+            let critLeaf = ROOT_TYPES[critType];
+            if (critLeaf) {
+                items.push(React.createElement(critLeaf, {
+                    key: 'crit_dmg',
+                    tree: tree.critDmg,
+                    data: buildData,
+                    title: 'crit_dmg',
+                }));
+            }
         }
 
         return (
@@ -136,7 +174,7 @@ function LeafRoot(props) {
     return (
         <div className="block">
             <div className="line">
-                <span className="block-name">{lang.get('features_view.block_'+ props.title)}</span>
+                <span className="block-name">{blockTitle(props.tree, props.title)}</span>
                 <span className="block-value"><TreeValue tree={props.tree} data={props.data} percent={isPercent} /></span>
             </div>
             <LeafRootItems {...props} base={true} />
@@ -148,7 +186,7 @@ function LeafRootMulti(props) {
     return (
         <div className="block">
             <div className="line">
-                <span className="block-name">{lang.get('features_view.block_'+ props.title)}</span>
+                <span className="block-name">{blockTitle(props.tree, props.title)}</span>
                 <span className="block-value"><TreeValue tree={props.tree} data={props.data} percent={isPercent} /></span>
             </div>
             <div className="line">
@@ -162,7 +200,7 @@ function LeafRootSum(props) {
     let tree;
     let type = props.tree.getType();
 
-    if (type == 'multiplier_bonus' || type == 'multiplier_reaction') {
+    if (type == 'multiplier_bonus' || type == 'multiplier_reaction' || type == 'block_sum_plus') {
         tree = new CSum([
             new CConst({value: 1, comment: 'base_bonus', percent: true}),
             ...props.tree.items
@@ -174,7 +212,7 @@ function LeafRootSum(props) {
     return (
         <div className="block">
             <div className="line">
-                <span className="block-name">{lang.get('features_view.block_'+ props.title)}</span>
+                <span className="block-name">{blockTitle(props.tree, props.title)}</span>
                 <span className="block-value"><TreeValue tree={props.tree} data={props.data} percent={isPercent} /></span>
             </div>
             <div className="line">
@@ -188,7 +226,7 @@ function LeafRootSubtract(props) {
     return (
         <div className="block">
             <div className="line">
-                <span className="block-name">{lang.get('features_view.block_'+ props.title)}</span>
+                <span className="block-name">{blockTitle(props.tree, props.title)}</span>
                 <span className="block-value"><TreeValue tree={props.tree} data={props.data} percent={isPercent} /></span>
             </div>
             <div className="line">
@@ -202,7 +240,7 @@ function LeafResult(props) {
     return (
         <div className="block">
             <div className="line">
-                <span className="block-name">{lang.get('features_view.block_'+ props.title)}</span>
+                <span className="block-name">{blockTitle(props.tree, props.title)}</span>
                 {/* <span className="block-value"><TreeValue tree={props.tree} data={props.data} percent={props.percent} /></span> */}
             </div>
             <div className="line">
@@ -331,7 +369,7 @@ class LeafMathOp extends React.Component {
             if (this.state.collapsed) {
                 let comment = this.props.tree.comment ? langStat(this.props.tree.comment, this.props.data) : '';
                 return (
-                    <div className="feature-detail-block multi collapsed" onClick={() => {this.setState({collapsed: false}); return false}}>
+                    <div className="feature-detail-block multi collapsed" onClick={() => {this.setState({collapsed: false}); return false;}}>
                         <div className="feature-detail-block const">
                             <div className="stat-value"><TreeValue tree={this.props.tree} data={this.props.data} /></div>
                             {comment ? <div className="stat-name">{comment}</div> : ''}
@@ -340,10 +378,10 @@ class LeafMathOp extends React.Component {
                 );
             } else {
                 return <>
-                    <div className="l-bracket" onClick={() => {this.setState({collapsed: true}); return false }} />
+                    <div className="l-bracket" onClick={() => {this.setState({collapsed: true}); return false; }} />
                     {this.getItems()}
-                    <div className="r-bracket" onClick={() => {this.setState({collapsed: true}); return false }} />
-                </>
+                    <div className="r-bracket" onClick={() => {this.setState({collapsed: true}); return false; }} />
+                </>;
             }
         }
 
@@ -372,7 +410,7 @@ function LeafSum(props) {
 function LeafSumPlus(props) {
     return <LeafMathOp
         operator="+"
-        tree={new CSum([new CConst({value: 1}, ...props.tree.items)])}
+        tree={new CSum([new CConst({value: 1}), ...props.tree.items])}
         data={props.data}
         collapsable={props.collapsable}
         onlyResult={props.onlyResult}
@@ -392,17 +430,17 @@ function LeafMathFunc(props) {
             collapsable={props.collapsable}
             onlyResult={props.onlyResult}
         />
-    </>
+    </>;
 }
 
 function LeftFloor(props) {
-    return <LeafMathFunc {...props} func="Floor" />
+    return <LeafMathFunc {...props} func="Floor" />;
 }
 
 function LeafValueCap(props) {
     const [collapsed, setCollapsed] = useState(!props.onlyResult);
 
-    let itemType = props.tree.items[0].getType()
+    let itemType = props.tree.items[0].getType();
     let leaf = INLINE_TYPES[itemType];
     if (!leaf) {
         console.log('unknown line type '+ itemType);
@@ -417,18 +455,128 @@ function LeafValueCap(props) {
     });
 
     let item = <>
-        <div className="feature-detail-block cap op" onClick={() => {setCollapsed(true); return false}}>Min</div>
+        <div className="feature-detail-block cap op" onClick={() => {setCollapsed(true); return false;}}>Min</div>
         <div className="l-bracket" />
         {leafItem}
         <span className="op">,</span>
         <LeafSum tree={new CSum([props.tree.value])} data={props.data} />
         <div className="r-bracket" />
-    </>
+    </>;
 
     if (props.collapsable) {
         if (collapsed) {
             return (
-                <div className="feature-detail-block cap collapsed" onClick={() => {setCollapsed(false); return false}}>
+                <div className="feature-detail-block cap collapsed" onClick={() => {setCollapsed(false); return false;}}>
+                    <div className="feature-detail-block const">
+                        <div className="stat-value"><TreeValue tree={props.tree} data={props.data} /></div>
+                    </div>
+                </div>
+            );
+        } else {
+            return item;
+        }
+    } else {
+        return <>
+            {item}
+            <span className="op">=</span>
+            <div className="feature-detail-block const">
+                <div className="stat-value"><TreeValue tree={props.tree} data={props.data} /></div>
+            </div>
+        </>;
+    }
+}
+
+function LeafMin(props) {
+    const [collapsed, setCollapsed] = useState(!props.onlyResult);
+
+    let items = [];
+    for (let i = 0; i < props.tree.items.length; i++) {
+        let item = props.tree.items[i];
+        let leaf = INLINE_TYPES[item.getType()];
+        if (!leaf) {
+            console.log('unknown line type '+ item.getType());
+            continue;
+        }
+
+        let leafItem = React.createElement(leaf, {
+            tree: item,
+            data: props.data,
+            collapsable: true,
+            onlyResult: props.onlyResult,
+        });
+
+        if (items.length > 0) {
+            items.push(<span className="op" key={'comma'+items.length}>,</span>);
+        }
+        items.push(<React.Fragment key={'item'+items.length}>{leafItem}</React.Fragment>);
+    }
+
+    let item = <>
+        <div className="feature-detail-block cap op" onClick={() => {setCollapsed(true); return false;}}>Min</div>
+        <div className="l-bracket" />
+        {items}
+        <div className="r-bracket" />
+    </>;
+
+    if (props.collapsable) {
+        if (collapsed) {
+            return (
+                <div className="feature-detail-block cap collapsed" onClick={() => {setCollapsed(false); return false;}}>
+                    <div className="feature-detail-block const">
+                        <div className="stat-value"><TreeValue tree={props.tree} data={props.data} /></div>
+                    </div>
+                </div>
+            );
+        } else {
+            return item;
+        }
+    } else {
+        return <>
+            {item}
+            <span className="op">=</span>
+            <div className="feature-detail-block const">
+                <div className="stat-value"><TreeValue tree={props.tree} data={props.data} /></div>
+            </div>
+        </>;
+    }
+}
+
+function LeafMax(props) {
+    const [collapsed, setCollapsed] = useState(!props.onlyResult);
+
+    let items = [];
+    for (let i = 0; i < props.tree.items.length; i++) {
+        let item = props.tree.items[i];
+        let leaf = INLINE_TYPES[item.getType()];
+        if (!leaf) {
+            console.log('unknown line type '+ item.getType());
+            continue;
+        }
+
+        let leafItem = React.createElement(leaf, {
+            tree: item,
+            data: props.data,
+            collapsable: true,
+            onlyResult: props.onlyResult,
+        });
+
+        if (items.length > 0) {
+            items.push(<span className="op" key={'comma'+items.length}>,</span>);
+        }
+        items.push(<React.Fragment key={'item'+items.length}>{leafItem}</React.Fragment>);
+    }
+
+    let item = <>
+        <div className="feature-detail-block cap op" onClick={() => {setCollapsed(true); return false;}}>Max</div>
+        <div className="l-bracket" />
+        {items}
+        <div className="r-bracket" />
+    </>;
+
+    if (props.collapsable) {
+        if (collapsed) {
+            return (
+                <div className="feature-detail-block cap collapsed" onClick={() => {setCollapsed(false); return false;}}>
                     <div className="feature-detail-block const">
                         <div className="stat-value"><TreeValue tree={props.tree} data={props.data} /></div>
                     </div>
@@ -468,7 +616,7 @@ function LeafDivide(props) {
 
         if (items.length > 0) {
             items.push(
-                <div className="separator" key={'sep'+ items.length} onClick={() => {setCollapsed(true); return false }} />
+                <div className="separator" key={'sep'+ items.length} onClick={() => {setCollapsed(true); return false; }} />
             );
         }
 
@@ -478,14 +626,14 @@ function LeafDivide(props) {
     if (props.collapsable) {
         if (collapsed) {
             return (
-                <div className="feature-detail-block multi collapsed" onClick={() => {setCollapsed(false); return false}}>
+                <div className="feature-detail-block multi collapsed" onClick={() => {setCollapsed(false); return false;}}>
                     <div className="feature-detail-block const">
                         <div className="stat-value"><TreeValue tree={props.tree} data={props.data} /></div>
                     </div>
                 </div>
             );
         } else {
-            return <div className="feature-detail-block divide">{items}</div>
+            return <div className="feature-detail-block divide">{items}</div>;
         }
     }
 
@@ -497,7 +645,7 @@ function LeafDivide(props) {
                 <div className="stat-value"><TreeValue tree={props.tree} data={props.data} /></div>
             </div>
         </>
-    )
+    );
 }
 
 function LeafInlineConst(props) {

@@ -40,11 +40,11 @@ export class ArtifactsGeneratorTab extends Tab {
     createContent() {
         return (
             <ArtifactsGeneratorView
-                ref={element => { this.component = element }}
+                ref={element => { this.component = element; }}
                 app={this.app}
                 title={this.title}
             />
-        )
+        );
     }
 }
 
@@ -60,6 +60,7 @@ export class ArtifactsGeneratorView extends React.Component {
         this.factory = new WorkerFactoryArtifactsGenerator({
             callback: (data) => this.generateCompleteCallback(data),
             progressCallback: (data) => this.generateProgressCallback(data),
+            errorCallback: (data) => this.generateErrorCallback(data),
         });
 
         this.state = {
@@ -79,7 +80,7 @@ export class ArtifactsGeneratorView extends React.Component {
     handleSettingsOpen() {
         this.generatorModal.show(
             this.settings,
-            (data) => {this.handleSettingsChange(data)}
+            (data) => {this.handleSettingsChange(data);}
         );
     }
 
@@ -189,6 +190,14 @@ export class ArtifactsGeneratorView extends React.Component {
         this.setState({
             isLoading: true,
             progress: data,
+        });
+    }
+
+    generateErrorCallback(data) {
+        console.error('Artifact generator worker error:', data.error);
+        this.setState({
+            isLoading: false,
+            progress: {},
         });
     }
 

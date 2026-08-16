@@ -1,7 +1,7 @@
 import re
 from collections import OrderedDict
 
-from lib.genshin.datafiles.char import CharData, CharProudSkillData, CharSkillData, CharSkillDepotData, SKIP_CHARACTERS, CharTalentSkillData
+from lib.genshin.datafiles.char import CharData, CharProudSkillData, CharSkillData, CharSkillDepotData, SKIP_CHARACTERS, CharTalentSkillData, is_combat_inherent_proud_skill_open
 from lib.genshin.datafiles.hyperlinks import HyperLinkData
 from lib.genshin.datafiles.lang import LangData
 from lib.genshin.strings.templates.names import keywords_eng, keywords_rus, names_eng, names_rus, patterns_eng
@@ -9,6 +9,7 @@ from lib.genshin.strings.templates import talents
 from lib.genshin.utils import convert_id
 from lib.genshin.strings.csv import CsvDumper
 from lib.genshin.strings.text import TextDumper  # noqa
+
 
 char_data = CharData()
 depot_data = CharSkillDepotData()
@@ -48,6 +49,7 @@ traveler_depot_ids = {
     502: 'pyro',
     503: 'hydro',
     504: 'anemo',
+    505: 'cryo',
     506: 'geo',
     507: 'electro',
     508: 'dendro',
@@ -55,6 +57,34 @@ traveler_depot_ids = {
 
 def collect_links(txt):
     return re.findall(r'{LINK#N(\d+)}', txt)
+
+
+def trim_param_value(value):
+    value = round(value, 4)
+    if value == int(value):
+        return str(int(value))
+    return f'{value:.4f}'.rstrip('0').rstrip('.')
+
+
+def resolve_param_tokens(txt):
+    def replace(match):
+        proud_id = int(match.group(1))
+        param_index = int(match.group(2)) - 1
+        scale = int(match.group(3))
+        proud = proud_data.get(proud_id)
+        if not proud:
+            raise ValueError(f'Text references missing ProudSkill id {proud_id}')
+        params = proud.get('paramList', [])
+
+        if param_index < 0 or param_index >= len(params):
+            raise ValueError(
+                f'Text references ProudSkill {proud_id} param{param_index + 1}, '
+                f'but the row has {len(params)} params'
+            )
+
+        return trim_param_value(params[param_index] * scale)
+
+    return re.sub(r'{PARAM#P(\d+)\|(\d+)S(\d+)}', replace, txt or '')
 
 for char in char_data.get_list():
     if char['id'] in SKIP_CHARACTERS:
@@ -96,7 +126,7 @@ for char_key in sorted(char_keys):
 
     res_item = OrderedDict(
         category='char_name',
-        name=char_id,
+        name=char_key,
     )
     for lang_name in lang_data:
         lang = lang_data[lang_name]['lang']
@@ -161,6 +191,7 @@ for char_key in sorted(char_keys):
                 tpl_patterns = lang_data[lang_name]['patterns']
 
                 skill_name = re.sub(r'^Normal Attack:\s*', '', skill_name)
+                skill_descr = resolve_param_tokens(skill_descr)
                 skill_descr = tpl_patterns.process(skill_descr)
 
                 res_item1[lang_name] = skill_name
@@ -171,17 +202,9 @@ for char_key in sorted(char_keys):
 
         talent_items = []
         const_num = 0
-        used_passive = 0
 
         for passive in depot.get('inherentProudSkillOpens', []):
-            skip = 1
-            if passive.get('needAvatarPromoteLevel'):
-                skip = 0
-            elif passive.get('proudSkillGroupId') and char_id in ('skirk', 'ineffa'):
-                if not used_passive:
-                    skip = 0
-                    used_passive = 1
-            if skip:
+            if not is_combat_inherent_proud_skill_open(passive):
                 continue
 
             passive_id = passive.get('proudSkillGroupId')
@@ -191,6 +214,29 @@ for char_key in sorted(char_keys):
                     'nameTextMapHash': proud.get('nameTextMapHash'),
                     'descTextMapHash': proud.get('descTextMapHash'),
                 })
+                if proud.get('extraDescTextMapHash'):
+                    talent_items.append({
+                        'nameTextMapHash': proud.get('nameTextMapHash'),
+                        'descTextMapHash': proud.get('extraDescTextMapHash'),
+                        'is_buffed': True,
+                    })
+
+        for special_passive in depot.get('specialProudSkillOpens', []):
+            if special_passive.get('proudSkillGroupId'):
+                passive_id = special_passive.get('proudSkillGroupId')
+                proud = proud_data.get_item_by_field('proudSkillGroupId', passive_id)
+                if proud:
+                    talent_items.append({
+                        'nameTextMapHash': proud.get('nameTextMapHash'),
+                        'descTextMapHash': proud.get('descTextMapHash'),
+                    })
+                    if proud.get('extraDescTextMapHash'):
+                        talent_items.append({
+                            'nameTextMapHash': proud.get('nameTextMapHash'),
+                            'descTextMapHash': proud.get('extraDescTextMapHash'),
+                            'is_buffed': True,
+                        })
+
 
         for const_id in depot.get('talents'):
             const_num += 1
@@ -202,42 +248,65 @@ for char_key in sorted(char_keys):
                 'descTextMapHash': talent.get('descTextMapHash'),
                 'no_descr': const_num == 3 or const_num == 5,
             })
+            if talent.get('extraDescTextMapHash'):
+                talent_items.append({
+                    'nameTextMapHash': talent.get('nameTextMapHash'),
+                    'descTextMapHash': talent.get('extraDescTextMapHash'),
+                    'is_buffed': True,
+                    'no_descr': const_num == 3 or const_num == 5,
+                })
 
         for talent in talent_items:
             talent_name = lang_default.get(talent['nameTextMapHash'])
             if not talent_name:
                 continue
-            talent_short_id = convert_id(talent_name, removeSemicolon=True)
+            
+            # Skip buffed talents that don't actually have an additional description
+            if talent.get('is_buffed') and not lang_default.get(talent['descTextMapHash']):
+                continue
+
+            base_talent_short_id = convert_id(talent_name, removeSemicolon=True)
+            talent_short_id = base_talent_short_id
+            if talent.get('is_buffed'):
+                talent_short_id += '_buffed'
             talent_id = char_id + '_' + talent_short_id
+            base_talent_id = char_id + '_' + base_talent_short_id
 
             if uniq_skills.get(talent_id):
                 continue
             uniq_skills[talent_id] = 1
 
-            res_item1 = OrderedDict(
-                category='talent_name',
-                name=talent_id,
-            )
+            if not talent.get('is_buffed'):
+                res_item1 = OrderedDict(
+                    category='talent_name',
+                    name=talent_id,
+                )
 
             descItems = {}
 
             for lang_name in lang_data:
                 lang = lang_data[lang_name]['lang']
                 skill_name = lang.get(talent['nameTextMapHash'])
-                res_item1[lang_name] = skill_name
+                if not talent.get('is_buffed'):
+                    res_item1[lang_name] = skill_name
 
                 texts[eng_name].append(skill_name)
 
                 if talent['descTextMapHash']:
-                    skill_descr = lang.get(talent['descTextMapHash'])
+                    skill_descr = lang.get(talent['descTextMapHash']) or ''
                     hyperlinks.update(collect_links(skill_descr))
                     texts[eng_name].append(skill_descr)
+
+                    if talent.get('is_buffed') and not skill_descr:
+                        # Skip this buffed string if it doesn't actually exist
+                        continue
 
                     tpl_names = lang_data[lang_name]['names']
                     tpl_keywords = lang_data[lang_name]['keywords']
                     tpl_talents = lang_data[lang_name]['talents']
 
                     # skill_name = re.sub(r'^.*?:\s*', '', skill_name)
+                    skill_descr = resolve_param_tokens(skill_descr)
                     skill_descr = tpl_talents.process(skill_descr)
                     skill_descr = tpl_keywords.process(skill_descr)
                     skill_descr = tpl_names.process(skill_descr)
@@ -249,9 +318,10 @@ for char_key in sorted(char_keys):
 
                     descItems[lang_name] = skill_descr
                 texts[eng_name].append('\n')
-
-            if tpl_char:
-                result_const.append(res_item1)
+            # Always export talents/constellations, even without custom character processor (tpl_char)
+            if True:
+                if not talent.get('is_buffed'):
+                    result_const.append(res_item1)
 
                 if descItems and not talent.get('no_descr'):
                     index = 0
@@ -259,7 +329,10 @@ for char_key in sorted(char_keys):
                         index += 1
                         namei = talent_id
                         if len(descItems['rus']) > 1:
-                            namei = f'{talent_id}_{index}'
+                            if talent.get('is_buffed'):
+                                namei = f'{base_talent_id}_{index}_buffed'
+                            else:
+                                namei = f'{talent_id}_{index}'
                         result_const.append(
                             OrderedDict(
                                 category='talent_descr',
@@ -274,6 +347,19 @@ for char_key in sorted(char_keys):
             skill_id = f'n{hl_id}'
 
             if hl_item:
+                localized = []
+                for lang_name in lang_data:
+                    lang = lang_data[lang_name]['lang']
+                    skill_name = lang.get(hl_item['nameTextMapHash'])
+                    skill_descr = lang.get(hl_item['descTextMapHash'])
+                    if not skill_name or not skill_descr:
+                        localized = []
+                        break
+                    localized.append((lang_name, skill_name, skill_descr))
+
+                if not localized:
+                    continue
+
                 res_item1 = OrderedDict(
                     category='talent_name',
                     name=skill_id,
@@ -284,12 +370,9 @@ for char_key in sorted(char_keys):
                     name=skill_id,
                 )
 
-                for lang_name in lang_data:
-                    lang = lang_data[lang_name]['lang']
-                    skill_name = lang.get(hl_item['nameTextMapHash'])
-                    skill_descr = lang.get(hl_item['descTextMapHash'])
-
+                for lang_name, skill_name, skill_descr in localized:
                     tpl_patterns = lang_data[lang_name]['patterns']
+                    skill_descr = resolve_param_tokens(skill_descr)
                     skill_descr = tpl_patterns.process(skill_descr)
 
                     res_item1[lang_name] = skill_name
@@ -303,4 +386,4 @@ CsvDumper().dump(result_const, 'char_talents.csv')
 CsvDumper().dump(result_names, 'char_names.csv')
 CsvDumper().dump(result_names, '../../strings_casino/char_names.csv')
 CsvDumper().dump(result_names, '../../strings_draft/char_names.csv')
-TextDumper().dump(texts, 'chat_texts.txt')
+TextDumper().dump(texts, 'char_texts.txt')

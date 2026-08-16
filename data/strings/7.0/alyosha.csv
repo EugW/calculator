@@ -1,0 +1,14 @@
+category;name;rus;eng
+feature_skill;alyosha_thunderbolt_strike_press;Урон быстрого нажатия;Tap DMG
+feature_skill;alyosha_thunderbolt_strike_hold;Урон долгого нажатия;Hold DMG
+feature_skill;alyosha_hunters_mark_duration;Длительность Метки охотника;Hunter's Mark Duration
+feature_skill;alyosha_hunters_precision_atk_bonus;Бонус силы атаки Меткости охотника;Hunter's Precision ATK Bonus
+feature_skill;alyosha_hunters_precision_duration;Длительность Меткости охотника;Hunter's Precision Duration
+feature_burst;alyosha_fulgurite_hunting_field;Урон Охотничьих угодий молний;Fulgurite Hunting Field DMG
+feature_burst;alyosha_tugarin;Урон Тугарина;Tugarin DMG
+feature_other;alyosha_tugarin_active_heal;Лечение активного персонажа атакой Тугарина;Tugarin Active Character Healing
+feature_other;alyosha_tugarin_lowest_hp_heal;Лечение персонажа с наименьшим процентом HP атакой Тугарина;Tugarin Lowest-HP Character Healing
+feature_other;alyosha_frostvale_energy;Восстановление энергии Алёши;Alyosha Energy Restored
+feature_other;alyosha_suffer_the_winter_wheat_will_bonus;Бонус урона навыка и взрыва стихии;Skill and Burst DMG Bonus
+talent_name;alyosha_hunters_precision;Меткость охотника;Hunter's Precision
+talent_descr;alyosha_hunters_precision;Активация Метки охотника даёт всем членам отряда поблизости Меткость охотника на 15 сек. Сила атаки персонажа под действием эффекта повышается, когда он находится на поле боя. Шестое созвездие позволяет складывать эффект до 2 раз.;Activating Hunter's Mark grants all nearby party members Hunter's Precision for 15s. An affected character gains the listed ATK bonus while on the field. Constellation 6 allows the effect to stack up to 2 times.

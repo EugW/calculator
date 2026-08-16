@@ -12,6 +12,14 @@ features_view;block_heal_result;Итоговое лечение;Final Heal
 features_view;block_shield_result;Итоговое поглощение;Final Shield absorption
 features_view;block_flat_damage;Добавочное значение;Flat increase
 features_view;block_flat_reduce;Уменьшения значения;Flat reduce
+features_view;block_block_sum_plus;Множитель возвышения;Elevation Multiplier
+features_view;block_stellarconduct_base_bonus;Бонус базового урона Звёздного проводника;Stellar-Conduct Base Bonus
+features_view;block_stellarconduct_dmg_bonus;Бонус урона Звёздного проводника;Stellar-Conduct DMG Bonus
+features_view;block_stellarconduct_special;Возвышение Звёздного проводника;Stellar-Conduct Elevate
+features_view;block_stellarglimmer_mastery;Бонус мастерства стихий Звёздного блеска;Stellar Glimmer EM Bonus
+features_view;block_stellarswirl_base_bonus;Бонус базового урона Звёздного рассеивания;Stellar Swirl Base Bonus
+features_view;block_stellarswirl_dmg_bonus;Бонус урона Звёздного рассеивания;Stellar Swirl DMG Bonus
+features_view;block_stellarswirl_special;Возвышение Звёздного рассеивания;Stellar Swirl Elevate
 
 features_view;reaction_remark;Выбор урона реакции влияет только на отображение в текущей вкладке. Для корректной оптимизации показатей с учётом реакций используйте вкладку tab{rotation:Ротация}.;Reaction damage selector is used only for display in this tab. For proper features optimisation use tab{rotation:Rotation} tab.
 
@@ -29,6 +37,7 @@ features_view;comment_reaction_base;Ур.;Lvl
 features_view;comment_reaction_ratio;Реакция;Ratio
 features_view;comment_reaction_bonus;Бонус;Bonus
 features_view;comment_reaction_penalty;Штраф;Penalty
+features_view;comment_reaction_contribution;Вклад;Contribution
 features_view;comment_talent_attack;Об. атака;N. Attack
 features_view;comment_talent_elemental;Элем. навык;El. Skill
 features_view;comment_talent_burst;Взрыв стихий;El. Burst
@@ -48,6 +57,9 @@ features_view;stat_dmg_reaction_spread;Разрастание;Spread
 features_view;stat_dmg_reaction_aggravate;Обострение;Aggravate
 features_view;stat_dmg_reaction_bloom;Бутонизация;Bloom
 features_view;stat_dmg_reaction_lunarcharged;Лунный заряд;Lunar-Charged
+features_view;stat_dmg_reaction_lunarbloom;Лунный расцвет;Lunar-Bloom
+features_view;stat_dmg_reaction_lunarcrystallize;Лунная кристаллизация;Lunar-Crystallize
+features_view;stat_dmg_reaction_lunar;Лунные реакции;Lunar Reactions
 features_view;stat_lunarcharged;Лунный заряд;Lunar-Charged
 features_view;stat_reaction_aggravate;Обострение;Aggravate
 features_view;stat_reaction_spread;Разрастание;Spread
@@ -72,3 +84,11 @@ features_view;stat_enemy_def_ignore;Игнор. защ.;DEF ignore
 features_view;stat_stacks;Уровни;Stacks
 features_view;stat_atk_base;Базовая СА;Base ATK
 features_view;stat_base_res;Противник;Enemy
+features_view;stat_lunarcharged_special;Лунный заряд;Lunar-Charged
+features_view;stat_lunarbloom_special;Лунный расцвет;Lunar-Bloom
+features_view;stat_lunarcrystallize_special;Лунная кристаллизация;Lunar-Crystallize
+features_view;stat_dmg_lunar_special;Лунные реакции;Lunar Reactions
+features_view;stat_stellarconduct_base;Базовый множитель Звёздного проводника;Stellar-Conduct Base Multiplier
+features_view;stat_stellarconduct_mastery;М. стихий Звёздного проводника;Stellar-Conduct EM Bonus
+features_view;stat_stellarglimmer_mastery;М. стихий Звёздного блеска;Stellar Glimmer EM Bonus
+features_view;block_crit_dmg;Крит урон;Crit Damage

@@ -32,13 +32,14 @@ export class ArtifactWidgetSimilar extends ArtifactWidget {
 
     getSubstats(art, opts) {
         let html = '';
+        let substats = art.getDisplaySubStats ? art.getDisplaySubStats() : art.subStats;
 
-        for (let i = 0; i < art.subStats.length; ++i) {
-            const substat = art.subStats[i];
+        for (let i = 0; i < substats.length; ++i) {
+            const substat = substats[i];
 
             let selected = false;
 
-            if (opts.sample) {
+            if (opts.sample && !substat.inactive) {
                 let ss = opts.sample.subStats[i];
 
                 if (ss && ss.stat == substat.stat && ss.value > substat.value) {
@@ -50,7 +51,7 @@ export class ArtifactWidgetSimilar extends ArtifactWidget {
 
             const stat = UI.Lang.get('stat_mini.'+ substat.stat.replace('_percent', ''));
 
-            html += '<div class="artifact-list-box-substat"><span class="stat">'+ stat +'</span> ';
+            html += '<div class="artifact-list-box-substat'+ (substat.inactive ? ' inactive' : '') +'"><span class="stat">'+ stat +'</span> ';
             html += '<span class="value '+ (selected ? 'selected' : '') +'">';
             html += Stats.format(substat.stat, substat.value, {signed: false}) +'</span></div>';
         }

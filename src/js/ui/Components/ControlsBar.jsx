@@ -4,7 +4,8 @@ import "../../../css/Components/ControlsBar.css"
 export function ControlsBar(props) {
     return (
         <div className='controls-bar'>
-            {React.Children.map(props.children, child => {
+        {React.Children.map(props.children, child => {
+                if (!child) return null;
                 if (child.type == ControlsBarDivider) {
                     return child;
                 }
@@ -18,9 +19,9 @@ export function ControlsBar(props) {
                 );
             })}
         </div>
-    )
+    );
 }
 
 export function ControlsBarDivider(props) {
-    return <div className='spacer' />
+    return <div className='spacer' />;
 }

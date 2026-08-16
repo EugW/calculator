@@ -1,8 +1,11 @@
+import { ConditionAnd } from "../../classes/Condition/And";
 import { ConditionAscensionChar } from "../../classes/Condition/Ascension/Char";
 import { ConditionBoolean } from "../../classes/Condition/Boolean";
 import { ConditionBooleanLevels } from "../../classes/Condition/Boolean/Levels";
 import { ConditionConstellation } from "../../classes/Condition/Constellation";
+import { ConditionHexereiResonance } from "../../classes/Condition/HexereiResonance";
 import { ConditionNot } from "../../classes/Condition/Not";
+import { ConditionNumber } from "../../classes/Condition/Number";
 import { ConditionStacks } from "../../classes/Condition/Stacks";
 import { ConditionStatic } from "../../classes/Condition/Static";
 import { DbObjectChar } from "../../classes/DbObject/Char";
@@ -131,6 +134,12 @@ const Talents = new DbObjectTalents({
     },
 });
 
+const condWitchHomeworkOn  = new ConditionBoolean({name: 'razor_witch_homework'});
+const condWitchHomeworkOff = new ConditionNot([condWitchHomeworkOn]);
+const condPartyWitchHomeworkOn  = new ConditionBoolean({name: 'party.razor_witch_homework'});
+const condPartyWitchHomeworkOff = new ConditionNot([condPartyWitchHomeworkOn]);
+const condHexereiResonance = new ConditionHexereiResonance({});
+
 export const Razor = new DbObjectChar({
     name: 'razor',
     serializeId: 21,
@@ -189,6 +198,11 @@ export const Razor = new DbObjectChar({
                     values: Talents.get('attack.normal_hit_1'),
                     burstValues: Talents.get('burst.razor_companion_dmg'),
                 }),
+                new FeatureMultiplier({
+                    scaling: 'atk*',
+                    condition: condWitchHomeworkOn,
+                    values: new ValueTable([70]),
+                }),
             ],
             condition: new ConditionBoolean({name: 'razor_wolf_within'}),
         }),
@@ -201,6 +215,11 @@ export const Razor = new DbObjectChar({
                     leveling: 'char_skill_attack',
                     values: Talents.get('attack.normal_hit_2'),
                     burstValues: Talents.get('burst.razor_companion_dmg'),
+                }),
+                new FeatureMultiplier({
+                    scaling: 'atk*',
+                    condition: condWitchHomeworkOn,
+                    values: new ValueTable([70]),
                 }),
             ],
             condition: new ConditionBoolean({name: 'razor_wolf_within'}),
@@ -215,6 +234,11 @@ export const Razor = new DbObjectChar({
                     values: Talents.get('attack.normal_hit_3'),
                     burstValues: Talents.get('burst.razor_companion_dmg'),
                 }),
+                new FeatureMultiplier({
+                    scaling: 'atk*',
+                    condition: condWitchHomeworkOn,
+                    values: new ValueTable([70]),
+                }),
             ],
             condition: new ConditionBoolean({name: 'razor_wolf_within'}),
         }),
@@ -227,6 +251,11 @@ export const Razor = new DbObjectChar({
                     leveling: 'char_skill_attack',
                     values: Talents.get('attack.normal_hit_4'),
                     burstValues: Talents.get('burst.razor_companion_dmg'),
+                }),
+                new FeatureMultiplier({
+                    scaling: 'atk*',
+                    condition: condWitchHomeworkOn,
+                    values: new ValueTable([70]),
                 }),
             ],
             condition: new ConditionBoolean({name: 'razor_wolf_within'}),
@@ -312,6 +341,21 @@ export const Razor = new DbObjectChar({
                 }),
             ],
         }),
+        new FeatureDamageBurst({
+            name: 'razor_secret_rite_lightning',
+            element: 'electro',
+            condition: new ConditionAnd([
+                condWitchHomeworkOn,
+                condHexereiResonance,
+                new ConditionBoolean({name: 'razor_wolf_within'}),
+            ]),
+            multipliers: [
+                new FeatureMultiplier({
+                    scaling: 'atk*',
+                    values: new ValueTable([150]),
+                }),
+            ],
+        }),
         new FeatureDamage({
             name: 'razor_lupus_fulguris',
             category: 'other',
@@ -326,6 +370,13 @@ export const Razor = new DbObjectChar({
         }),
     ],
     conditions: [
+        new ConditionBoolean({
+            name: 'razor_witch_homework',
+            serializeId: 7,
+            title: 'talent_name.razor_surge_of_lightning',
+            description: 'talent_descr.razor_surge_of_lightning',
+            info: {hexerei: true},
+        }),
         new ConditionConstellation({
             constellation: 3,
             settings: {
@@ -433,8 +484,22 @@ export const Razor = new DbObjectChar({
                 new ConditionStatic({
                     title: 'talent_name.razor_lupus_fulguris',
                     description: 'talent_descr.razor_lupus_fulguris',
+                    hideCondition: [condWitchHomeworkOn],
                     stats: {
                         text_percent_dmg: 100,
+                    },
+                }),
+                new ConditionBoolean({
+                    name: 'razor_lupus_fulguris',
+                    serializeId: 8,
+                    title: 'talent_name.razor_lupus_fulguris',
+                    description: 'talent_descr.razor_lupus_fulguris_buffed',
+                    hideCondition: [condWitchHomeworkOff],
+                    condition: condWitchHomeworkOn,
+                    stats: {
+                        text_percent_dmg: 100,
+                        crit_rate: 10,
+                        crit_dmg: 50,
                     },
                 }),
             ],
@@ -442,6 +507,14 @@ export const Razor = new DbObjectChar({
     ]),
     partyData: {
         conditions: [
+            new ConditionBoolean({
+                name: 'party.razor_witch_homework',
+                serializeId: 3,
+                rotation: 'party',
+                title: 'talent_name.razor_surge_of_lightning',
+                description: 'talent_descr.razor_surge_of_lightning',
+                info: {hexerei: true},
+            }),
             new ConditionBoolean({
                 name: 'party.razor_bite',
                 serializeId: 1,

@@ -34,6 +34,12 @@ import { MountainBracingBolt } from "./Polearm/MountainBracingBolt";
 import { BriefPavilionChatter } from "./Polearm/BriefPavilionChatter";
 import { SymphonistofScents } from "./Polearm/SymphonistofScents";
 import { FracturedHalo } from "./Polearm/FracturedHalo";
+import { BloodsoakedRuins } from "./Polearm/BloodsoakedRuins";
+import { ProspectorsShovel } from "./Polearm/ProspectorsShovel";
+import { SacrificersStaff } from "./Polearm/SacrificersStaff";
+import { DisasterAndRemorse } from "./Polearm/DisasterAndRemorse";
+import { Frostbreath } from "./Polearm/Frostbreath";
+import { SongOfTheVigil } from "./Polearm/SongOfTheVigil";
 
 export const Polearm = new DbObjectListSerializeStats({
     BlackcliffPole: BlackcliffPole, // 85
@@ -70,5 +76,11 @@ export const Polearm = new DbObjectListSerializeStats({
     MountainBracingBolt: MountainBracingBolt, // 187
     BriefPavilionChatter: BriefPavilionChatter, // 197
     SymphonistofScents: SymphonistofScents, // 199
-    FracturedHalo: FracturedHalo, // 222 ??
+    FracturedHalo: FracturedHalo, // 222
+    BloodsoakedRuins: BloodsoakedRuins, // 228
+    ProspectorsShovel: ProspectorsShovel, // 229
+    SacrificersStaff: SacrificersStaff, // 230
+    DisasterAndRemorse: DisasterAndRemorse, // 243
+    Frostbreath: Frostbreath, // 252
+    SongOfTheVigil: SongOfTheVigil, // 253
 });

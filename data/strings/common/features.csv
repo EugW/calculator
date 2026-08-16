@@ -86,9 +86,9 @@ feature_reaction;crystalize;Кристаллизация;Crystallize
 feature_reaction;burning;Горение;Burning
 feature_reaction;electrocharged;Заряжен;Electro-Charged
 feature_reaction;lunar;Лунные реакции;Lunar Reactions
-feature_reaction;lunarcharged_contrubution;Вклад в Лунный заряд;Lunar-Charged Contribution
-feature_reaction;lunarcharged_contrubution_2;Вклад в Лунный заряд / 2;Lunar-Charged Contribution / 2
-feature_reaction;lunarcharged_contrubution_12;Вклад в Лунный заряд / 12;Lunar-Charged Contribution / 12
+feature_reaction;lunarcharged_contrubution;Вклад в Лунный заряд 60%;Lunar-Charged Contribution 60%
+feature_reaction;lunarcharged_contrubution_2;Вклад в Лунный заряд 30%;Lunar-Charged Contribution 30%
+feature_reaction;lunarcharged_contrubution_12;Вклад в Лунный заряд 5%;Lunar-Charged Contribution 5%
 feature_reaction;melt;Таяние;Melt
 feature_reaction;none;Без реакции;No reaction
 feature_reaction;overloaded;Перегрузка;Overloaded
@@ -112,6 +112,11 @@ feature_reaction;burgeon;Цветение;Burgeon
 feature_reaction;bloom;Бутонизация;Bloom
 feature_reaction;hyperbloom;Вегетация;Hyperbloom
 feature_reaction;lunarcharged;Лунный заряд;Lunar-Charged
+feature_reaction;lunarbloom;Лунное цветение;Lunar-Bloom
+feature_reaction;lunarcrystallize;Лунная кристаллизация;Lunar-Crystallize
+feature_reaction;lunarcrystallize_contrubution;Вклад в Лунную кристаллизацию 60%;Lunar-Crystallize Contribution 60%
+feature_reaction;lunarcrystallize_contrubution_2;Вклад в Лунную кристаллизацию 30%;Lunar-Crystallize Contribution 30%
+feature_reaction;lunarcrystallize_contrubution_12;Вклад в Лунную кристаллизацию 5%;Lunar-Crystallize Contribution 5%
 feature_rotation;anemo;Анемо урон;Anemo DMG
 feature_rotation;attack;Атака;Attack
 feature_rotation;normal;Обычная атака;Normal attack

@@ -4,3 +4,4 @@ feature_skill;klee_mine;Урон мины;Mine DMG
 feature_skill;klee_mine_duration;Длительность мины;Mine Duration
 feature_burst;klee_chained_reactions;Урон цепной реакции;Chained Reactions DMG
 feature_burst;klee_sparkly_explosion;Урон Взрывоопасно;Sparkly Explosion DMG
+talent_name;klee_hexerei_secret_rite_boom_badges;Бабах-медали;Boom Badges

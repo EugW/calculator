@@ -3,26 +3,29 @@ import os
 import re
 from decimal import Decimal
 import static # type: ignore
+from source_config import get_excel_dir, required_alias
 
 dirname  = os.path.dirname(__file__)
-data_dir = os.path.join(dirname, '../../dimrepo/ExcelBinOutput/')
+data_dir = str(get_excel_dir()) + os.sep
 
 rounded_stats = ['atk', 'hp', 'def', 'mastery']
 
 stats = ['atk', 'atk_percent', 'def', 'def_percent', 'hp', 'hp_percent', 'mastery', 'recharge', 'crit_rate', 'crit_dmg']
 
 def parse_rolls():
-    file   = open(data_dir + 'ReliquaryAffixExcelConfigData.json', 'r')
+    file   = open(data_dir + 'ReliquaryAffixExcelConfigData.json', 'r', encoding='utf-8')
     result = {}
 
-    for item in json.load(file):
-        type = item.get('PropType')
+    for row_index, item in enumerate(json.load(file)):
+        context = f'ReliquaryAffix row {row_index}'
+        type = required_alias(item, 'propType', 'PropType', context=context)
         stat = static.getStatByName(type)
         if not stat:
             continue
-        value = static.getStatValue(type, item.get('PropValue', 0))
+        raw_value = required_alias(item, 'propValue', 'PropValue', context=context)
+        value = static.getStatValue(type, raw_value)
 
-        id = str(item['DepotId'])
+        id = str(required_alias(item, 'depotId', 'DepotId', context=context))
         stat = re.sub(r'_base$', '', stat)
 
         if not id in result:

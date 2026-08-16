@@ -1,4 +1,5 @@
 import { ArtifactSet } from "../../../classes/ArtifactSet";
+import { ConditionBoolean } from "../../../classes/Condition/Boolean";
 import { ConditionBooleanCharElement } from "../../../classes/Condition/Boolean/CharElement";
 import { ConditionDropdownElement } from "../../../classes/Condition/Dropdown/Element";
 import { ConditionStatic } from "../../../classes/Condition/Static";
@@ -29,7 +30,8 @@ export const ViridescentVenerer = new ArtifactSet({
         {},
         {
             suggesterSettings: {
-                "set_bonus.viridescent_venerer_4": 'cryo;electro;hydro;pyro',
+                "set.viridescent_venerer_4": 'cryo;electro;hydro;pyro',
+                "set.viridescent_venerer_4_stellarswirl": true,
             },
             conditions: [
                 new ConditionStatic({
@@ -38,6 +40,7 @@ export const ViridescentVenerer = new ArtifactSet({
                     settings: {},
                     stats: {
                         dmg_reaction_swirl: 60,
+                        dmg_stellarswirl: 20,
                     },
                 }),
                 new ConditionDropdownElement({
@@ -70,7 +73,16 @@ export const ViridescentVenerer = new ArtifactSet({
                         new ConditionBooleanCharElement({element: ['anemo']}),
                     ],
                 }),
+                new ConditionBoolean({
+                    name: 'set.viridescent_venerer_4_stellarswirl',
+                    serializeId: 55,
+                    title: 'set_bonus.viridescent_venerer_4',
+                    description: 'set_descr.viridescent_venerer_4_3',
+                    subConditions: [
+                        new ConditionBooleanCharElement({element: ['anemo']}),
+                    ],
+                }),
             ],
         },
     ],
-})
+});

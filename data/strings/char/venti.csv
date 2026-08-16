@@ -1,1 +1,6 @@
 category;name;rus;eng
+feature_attack;second_charged_aimed_homing;Доп. заряженная прицельная (самонаведение);Add. charged aimed (homing)
+talent_name;venti_hexerei_secret_rite;Ведьмовство: Тайный обряд;Hexerei: Secret Rite
+talent_name;venti_windsunder_arrows;Ураганные стрелы;Windsunder Arrows
+feature_attack;windsunder_arrow;Урон ураганной стрелы;Windsunder Arrow DMG
+stat;windsunder_arrow;Урон ураганной стрелы;Windsunder Arrow DMG

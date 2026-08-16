@@ -1,5 +1,5 @@
 import { BuildData } from "../Build/Data";
-import { CBaseDamage, CDivide, CMulti, CMultiplierBonus, CMultiplierDefence, CMultiplierReaction, CMultiplierResistance, CResistanceValue, CSubtract, CSum } from "./Compile/Types/Block";
+import { CBaseDamage, CDivide, CMin, CMulti, CMultiplierBonus, CMultiplierDefence, CMultiplierReaction, CMultiplierResistance, CResistanceValue, CSubtract, CSum, CSumPlusOne } from "./Compile/Types/Block";
 import { CBlock } from "./Compile/Types";
 import { CConst } from "./Compile/Types/Item";
 import { CCritDmg, CCritRate, CDamage } from "./Compile/Types/Damage";
@@ -24,6 +24,7 @@ export class FeatureDamage extends Feature2 {
         this.items = params.items || [];
         this.category = params.category || 'other';
         this.element = params.element || 'phys';
+        this.elementSetting = params.elementSetting || '';
         this.damageType = params.damageType || 'none';
         this.cannotReact = !!params.cannotReact;
         this.damageBonuses = params.damageBonuses || [];
@@ -174,12 +175,15 @@ export class FeatureDamage extends Feature2 {
                     target,
                     new CSubtract([
                         new CConst({value: 1}),
-                        makeStatItem('enemy_def_reduce', data.stats),
+                        new CMin([
+                            makeStatItem('enemy_def_reduce', data.stats),
+                            new CConst({value: 0.9, comment: 'def_reduce_cap'}),
+                        ]),
                     ]),
                     new CSubtract([
                         new CConst({value: 1}),
                         new CSum([
-                            ...this.getStatsDefIgnore(data).map((stat) => { return makeStatItem(stat, data.stats) })
+                            ...this.getStatsDefIgnore(data).map((stat) => { return makeStatItem(stat, data.stats); })
                         ]),
                     ]),
                 ]),
@@ -220,9 +224,23 @@ export class FeatureDamage extends Feature2 {
 
     /**
      * @param {BuildData} data
+     * @returns {CBlock}
+     */
+    getDmgBonusMultiplier(data) {
+        return new CMultiplierBonus(
+            this.getStatsDmgBonus(data).map((stat) => { return makeStatItem(stat, data.stats); })
+        );
+    }
+
+    /**
+     * @param {BuildData} data
      * @returns {string}
      */
     getElement(data) {
+        if (this.elementSetting && data && data.settings[this.elementSetting]) {
+            return data.settings[this.elementSetting];
+        }
+
         let element = super.getElement(data);
 
         if (this.allowInfusion && element == 'phys') {
@@ -272,11 +290,9 @@ export class FeatureDamage extends Feature2 {
 
         let items = [
             new CBaseDamage(
-                multipliers.map((i) => {return i.getTree(data)})
+                multipliers.map((i) => {return i.getTree(data);})
             ),
-            new CMultiplierBonus(
-                this.getStatsDmgBonus(data).map((stat) => { return makeStatItem(stat, data.stats) })
-            ),
+            this.getDmgBonusMultiplier(data),
             new CMultiplierResistance([this.getResistanceMultiplier(data)]),
             new CMultiplierDefence([this.getDefenceLevelMultiplier(data)], {
                 percent: true,

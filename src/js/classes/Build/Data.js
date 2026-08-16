@@ -31,7 +31,7 @@ export class BuildData {
      * @returns {Array.<PostEffect>}
      */
     getActivePostEffects() {
-        return this.postEffects.filter((i) => {return i.isActive(this.settings)});
+        return this.postEffects.filter((i) => {return i.isActive(this.settings);});
     }
 
     /**
@@ -76,7 +76,7 @@ export class BuildData {
         let byPriority = {};
 
         for (let item of items) {
-            let priority = item.getPriority()
+            let priority = item.getPriority();
             if (opts.maxPriority && priority > opts.maxPriority) {
                 continue;
             }
@@ -89,7 +89,7 @@ export class BuildData {
         }
 
         let result = [];
-        for (let priority of Object.keys(byPriority).sort()) {
+        for (let priority of Object.keys(byPriority).sort((a, b) => {return Number(a) - Number(b);})) {
             result.push(byPriority[priority]);
         }
         return result;
@@ -102,7 +102,7 @@ export class BuildData {
         for (let items of itemsAll) {
             let priorityItems = [];
             for (let post of items) {
-                priorityItems = priorityItems.concat(post.getTree(this))
+                priorityItems = priorityItems.concat(post.getTree(this));
             }
             result.push(priorityItems);
         }
@@ -115,7 +115,7 @@ export class BuildData {
     }
 
     clone() {
-        let data = new BuildData(this.settings, this.stats)
+        let data = new BuildData(this.settings, this.stats);
         data.postEffects = [].concat(this.postEffects);
         data.multipliers = [].concat(this.multipliers);
         return data;
@@ -123,20 +123,53 @@ export class BuildData {
 }
 
 export function filterPostEffectTreeByStats(items, us) {
-    let usedStats = [].concat(us);
-    let result = [];
+    return getPostEffectStatDependencyClosure(items, us).items;
+}
 
-    for (let priorityItems of items) {
-        let priorityStats = [];
+/**
+ * Select the post effects that can influence the requested final stats and
+ * return every stat needed to evaluate those effects.
+ *
+ * Priorities are traversed backwards because a later effect can depend on a
+ * stat changed by an earlier effect. Effects in one priority are evaluated
+ * from the same pre-priority state, so dependencies discovered in a priority
+ * become eligible only for earlier priorities.
+ *
+ * @param {Array.<Array>} items post-effect trees grouped in execution order
+ * @param {Array.<string>} targetStats final stats needed by the caller
+ * @returns {{items: Array, usedStats: Array.<string>}}
+ */
+export function getPostEffectStatDependencyClosure(items, targetStats) {
+    let usedStats = new Set(targetStats || []);
+    let selectedByPriority = new Array((items || []).length);
+
+    for (let i = (items || []).length - 1; i >= 0; --i) {
+        let priorityItems = items[i] || [];
+        let selected = [];
+
         for (let item of priorityItems) {
-            if (usedStats.includes(item.stat)) {
-                result.push(item);
-                priorityStats = priorityStats.concat(getUsedStats(item));
+            let assignedStats = item.getAssignedStats
+                ? item.getAssignedStats()
+                : (item.stat ? [item.stat] : []);
+
+            if (assignedStats.some((stat) => {return usedStats.has(stat);})) {
+                selected.push(item);
             }
         }
 
-        usedStats = usedStats.concat(priorityStats);
+        // postTreeBlocks evaluates all values in a priority before applying
+        // any assignment, so do not let one selected item pull in a sibling.
+        for (let item of selected) {
+            for (let stat of getUsedStats(item)) {
+                usedStats.add(stat);
+            }
+        }
+
+        selectedByPriority[i] = selected;
     }
 
-    return result;
+    return {
+        items: selectedByPriority.flat(),
+        usedStats: [...usedStats],
+    };
 }

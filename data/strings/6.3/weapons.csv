@@ -1,0 +1,10 @@
+category;name;rus;eng
+weapon_name;nocturnes_curtain_call;Вызов ноктюрна;Nocturne's Curtain Call
+talent_name;weapon_nocturnes_curtain_call;Баллада перекрёстков;Ballad of the Crossroads
+talent_descr;weapon_nocturnes_curtain_call_1;name{Макс. HP} +%{hp_percent}.;name{Max HP} +%{hp_percent}.
+talent_descr;weapon_nocturnes_curtain_call_2;skill{Священное вино щедрого моря}: name{макс. HP} +%{hp_percent}, name{крит. урон} Лунных реакций +%{crit_dmg_lunar}.;skill{Bountiful Sea's Sacred Wine}: name{Max HP} +%{hp_percent}, Lunar Reaction name{CRIT DMG} +%{crit_dmg_lunar}.
+
+weapon_name;lightbearing_moonshard;Светоносный осколок луны;Lightbearing Moonshard
+talent_name;weapon_lightbearing_moonshard;Наследие Лан-ганя;Legacy of Lang-Gan
+talent_descr;weapon_lightbearing_moonshard_1;name{Защита} +%{def_percent}.;name{DEF} +%{def_percent}.
+talent_descr;weapon_lightbearing_moonshard_2;После использования skill{элементального навыка} урон geo{Лунной кристаллизации} +%{dmg_reaction_lunarcrystallize} (5 сек).;After using skill{Elemental Skill}, geo{Lunar-Crystallize} DMG +%{dmg_reaction_lunarcrystallize} for 5s.

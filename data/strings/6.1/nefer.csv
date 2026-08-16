@@ -1,0 +1,27 @@
+category;name;rus;eng
+
+feature_attack;nefer_charged_dmg;Урон заряженной атаки;Charged Attack DMG
+feature_skill;nefer_skill_dmg;Урон навыка;Skill DMG
+feature_skill;nefer_skill_dmg_mastery;Урон навыка (МС);Skill DMG (EM)
+feature_skill;nefer_phantasm_hit_1;Урон Игры химер 1;Phantasm Hit 1 DMG
+feature_skill;nefer_phantasm_hit_1_mastery;Урон Игры химер 1 (МС);Phantasm Hit 1 DMG (EM)
+feature_skill;nefer_phantasm_hit_2;Урон Игры химер 2;Phantasm Hit 2 DMG
+feature_skill;nefer_phantasm_hit_2_mastery;Урон Игры химер 2 (МС);Phantasm Hit 2 DMG (EM)
+feature_skill;nefer_phantasm_shade_hit_1;Урон Игры химер 1 (Тени);Phantasm Performance 1-Hit DMG (Shades)
+feature_skill;nefer_phantasm_shade_hit_2;Урон Игры химер 2 (Тени);Phantasm Performance 2-Hit DMG (Shades)
+feature_skill;nefer_phantasm_shade_hit_3;Урон Игры химер 3 (Тени);Phantasm Performance 3-Hit DMG (Shades)
+feature_skill;nefer_shadow_dance_duration;Длительность Танца тени;Shadow Dance Duration
+feature_burst;nefer_burst_hit_1;Урон взрыва стихии 1;1-Hit DMG
+feature_burst;nefer_burst_hit_1_mastery;Урон взрыва стихии 1 (МС);1-Hit DMG (EM)
+feature_burst;nefer_burst_hit_2;Урон взрыва стихии 2;2-Hit DMG
+feature_burst;nefer_burst_hit_2_mastery;Урон взрыва стихии 2 (МС);2-Hit DMG (EM)
+feature_burst;nefer_veil_bonus;Бонус Завесы ложных тайн;Veil of Falsehood Bonus
+feature_other;nefer_lunarbloom_bonus;Базовый бонус Лунной бутонизации;Lunar-Bloom Base Bonus
+feature_skill;nefer_c1_lunarbloom_bonus;Бонус С1 Лунной бутонизации;C1 Lunar-Bloom Bonus
+feature_skill;nefer_c6_phantasm_stage2;Урон С6 Игры химер (стадия 2);C6 Phantasm Stage 2 DMG
+feature_skill;nefer_c6_phantasm_end;Урон С6 Игры химер (финал);C6 Phantasm End DMG
+
+talent_name;nefer_dusklit_eaves;Дар лунного знамения: Коридор сумеречных теней;Moonsign Benediction: Dusklit Eaves
+
+talent_descr;nefer_dusklit_eaves;dendro{Бутонизация} становится dendro{Лунной бутонизацией}. Базовый урон повышается на 0,0175% за каждую ед. name{МС}. Максимум 14%.;dendro{Bloom} converts to dendro{Lunar-Bloom}. Base DMG increased by 0.0175% per name{EM}. Max 14%.
+

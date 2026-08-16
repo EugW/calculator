@@ -10,12 +10,12 @@ let lang = new Lang();
 
 export function WeaponSuggestResult(props) {
     let items = [];
-    let counter = 0
+    let counter = 0;
 
     for (let item of props.items) {
         items.push(
             <WeaponSuggestItem
-                key={item.weaponId +'_'+ item.refine +'_'+ item.suggestName}
+                key={item.weaponId +'_'+ item.refine +'_'+ (item.scenarioId || item.suggestName)}
                 odd={++counter % 2 == 1}
                 baseFeature={props.baseFeature}
                 displayMode={props.displayMode}
@@ -47,6 +47,13 @@ export class WeaponSuggestItem extends React.Component {
 
     render() {
         let weapon = DB.Weapons.getById(this.props.weaponId);
+        let scenarioName = '';
+
+        if (this.props.isCustom) {
+            scenarioName = this.props.customName || lang.get('weapon_suggest.custom');
+        } else if (this.props.suggestName) {
+            scenarioName = lang.get('weapon_settings.'+ this.props.suggestName) + (this.props.isCustomized ? '*' : '');
+        }
 
         return (
             <>
@@ -55,7 +62,7 @@ export class WeaponSuggestItem extends React.Component {
                         {lang.get(weapon.getName())}<br/>
                         <span className="remark">{lang.get('object_view.weapon_refine')}: </span>
                         <span className="value">{this.props.refine}</span>
-                        {this.props.suggestName ? <span className="remark">, {lang.get('weapon_settings.'+ this.props.suggestName)}</span> : ''}
+                        {scenarioName ? <span className="remark">, {scenarioName}</span> : ''}
                         {this.props.artifacts && this.props.artifacts.length > 0 ?
                             <div className="show-arts" onClick={() => this.handleToggleVisibility()}>
                                 {this.state.showArtifacts ? lang.get('pool_view.hide_artifacts') : lang.get('pool_view.show_artifacts')}
@@ -69,11 +76,15 @@ export class WeaponSuggestItem extends React.Component {
                             onClick={() => {this.props.onApply({
                                 weaponId: this.props.weaponId,
                                 suggestName: this.props.suggestName,
+                                scenarioId: this.props.scenarioId,
+                                isCustom: this.props.isCustom,
+                                customName: this.props.customName,
+                                settings: this.props.settings,
                                 level: this.props.level,
                                 ascension: this.props.ascension,
                                 refine: this.props.refine,
                                 artifacts: this.props.artifacts,
-                            })}}
+                            });}}
                         />
                     </div>
                     {/* <div className="button">

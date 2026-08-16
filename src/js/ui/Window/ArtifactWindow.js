@@ -17,10 +17,10 @@ export class ArtifactWindow extends Window{
         this.mainStat = '';
         this.setName = '';
         this.substats = [
-            {stat: '', value: 0},
-            {stat: '', value: 0},
-            {stat: '', value: 0},
-            {stat: '', value: 0},
+            {stat: '', value: 0, inactive: false, canToggle: false},
+            {stat: '', value: 0, inactive: false, canToggle: false},
+            {stat: '', value: 0, inactive: false, canToggle: false},
+            {stat: '', value: 0, inactive: false, canToggle: false},
         ];
         this.groups = [];
         this.groupsList = [];
@@ -61,7 +61,7 @@ export class ArtifactWindow extends Window{
 
         html += '<div class="gi-artifact-window-group-wrapper"><div class="gi-artifact-window-group"></div>';
         html += '<div class="gi-artifact-window-group-add">';
-        html += `<div class="gi-artifact-window-group-add-button" data-tooltip="${UI.Lang.get('artifact_group.add')}"></div>`
+        html += `<div class="gi-artifact-window-group-add-button" data-tooltip="${UI.Lang.get('artifact_group.add')}"></div>`;
         html += '</div></div>';
 
         html += '</div>';
@@ -100,10 +100,11 @@ export class ArtifactWindow extends Window{
             }
             html += '</div>';
 
-            html += '<div class="gi-modal-substat-value-wrapper">'
+            html += '<div class="gi-modal-substat-value-wrapper">';
             html += '<div class="gi-modal-substat-value"><input type="text" value="" class="gi-inputs-number-input">';
             html += '<div class="gi-modal-substat-value-slider"><input class="gi-artifact-substat-slider" type="range"></div></div>';
-            html += '<div class="gi-modal-substat-value-rolls"></div>'
+            html += '<button type="button" class="gi-modal-substat-toggle"></button>';
+            html += '<div class="gi-modal-substat-value-rolls"></div>';
 
             html += '</div></div>';
         }
@@ -240,14 +241,57 @@ export class ArtifactWindow extends Window{
         if (slot >= 1 && slot <= 4) {
             this.substats[slot-1].stat = stat;
 
+            if (!stat) {
+                this.substats[slot-1].inactive = false;
+            }
+
             this.root.find('.gi-modal-substat-line.slot-'+ slot +' .gi-modal-substat-item').removeClass('active');
             this.root.find('.gi-modal-substat-line.slot-'+ slot +' .gi-modal-substat-item[data-stat="'+ stat +'"]').addClass('active');
             this.root.find('.gi-modal-substat-line.slot-'+ slot +' .gi-inputs-number-input').data('stat', stat);
 
-            this.refreshSubstats(slot)
+            this.refreshSubstats(slot);
+            this.refreshSubstatToggle(slot);
         }
 
         this.refreshError();
+    }
+
+    setSubstatInactive(slot, inactive) {
+        if (slot < 1 || slot > 4) {
+            return;
+        }
+
+        let substat = this.substats[slot - 1];
+        substat.inactive = !!inactive && !!substat.stat;
+        this.root.find('.gi-modal-substat-line.slot-' + slot).toggleClass('inactive', substat.inactive);
+        this.refreshSubstatToggle(slot);
+    }
+
+    setSubstatToggleEnabled(slot, enabled) {
+        if (slot < 1 || slot > 4) {
+            return;
+        }
+
+        this.substats[slot - 1].canToggle = !!enabled;
+        this.refreshSubstatToggle(slot);
+    }
+
+    refreshSubstatToggle(slot) {
+        if (slot < 1 || slot > 4) {
+            return;
+        }
+
+        let substat = this.substats[slot - 1];
+        let hasStat = !!substat.stat;
+        let isInactive = !!substat.inactive && hasStat;
+        let canToggle = !!substat.canToggle && hasStat;
+        let line = this.root.find('.gi-modal-substat-line.slot-' + slot);
+        let toggle = this.root.find('.gi-modal-substat-line.slot-' + slot + ' .gi-modal-substat-toggle');
+
+        line.toggleClass('inactive', isInactive);
+        toggle.toggle(canToggle);
+        toggle.toggleClass('inactive', isInactive);
+        toggle.text(UI.Lang.get(isInactive ? 'artifact_view.substat_inactive' : 'artifact_view.substat_active'));
     }
 
     refreshSubstats(filter) {
@@ -264,8 +308,8 @@ export class ArtifactWindow extends Window{
                 const rarityInfo = DB.Artifacts.Rarity[this.rarity-1];
 
                 let step = db.type == 'percent' ? 0.1 : 1;
-                let rolls = db.rolls[this.rarity-1]
-                let min = Stats.roundStatValue(stat, rolls[0])
+                let rolls = db.rolls[this.rarity-1];
+                let min = Stats.roundStatValue(stat, rolls[0]);
                 let max = Stats.roundStatValue(stat, rolls[rolls.length - 1] * rarityInfo.maxUpgrades);
 
                 this.root.find('.gi-modal-substat-line.slot-'+ slot +' .gi-artifact-substat-slider').giSlider('range', min, max, step);
@@ -376,7 +420,7 @@ export class ArtifactWindow extends Window{
         let errors = [];
 
         for (const name of art.getErrors()) {
-            errors.push( UI.Lang.get('artifact_error.'+ name) )
+            errors.push( UI.Lang.get('artifact_error.'+ name) );
         }
 
         let html = errors.join('; ');
@@ -393,8 +437,15 @@ export class ArtifactWindow extends Window{
         let maxSubstats = DB.Artifacts.Rarity[this.rarity-1].maxSubstats;
 
         for (let i = 0; i < maxSubstats; ++i) {
-            if (this.substats[i].stat && this.substats[i].value) {
-                result.addStat(this.substats[i].stat, this.substats[i].value - 0);
+            let item = this.substats[i];
+            if (!item.stat || !item.value) {
+                continue;
+            }
+
+            if (item.inactive) {
+                result.addUnactivatedStat(item.stat, item.value - 0);
+            } else {
+                result.addStat(item.stat, item.value - 0);
             }
         }
 
@@ -441,6 +492,11 @@ export class ArtifactWindow extends Window{
             let slot = $(this).closest('.gi-modal-substat-line').data('slot');
 
             that.setSubstatStat(slot, stat);
+        });
+
+        this.root.find('.gi-modal-substat-toggle').on('click', function() {
+            let slot = $(this).closest('.gi-modal-substat-line').data('slot');
+            that.setSubstatInactive(slot, !that.substats[slot - 1].inactive);
         });
 
         this.root.find('.gi-modal-set-icon').on('click', function() {
@@ -579,7 +635,7 @@ export class ArtifactWindow extends Window{
     }
 
     show(callback, artifact, slot, opts) {
-        opts = Object.assign({}, opts)
+        opts = Object.assign({}, opts);
         this.init();
         this.callback = callback;
 
@@ -602,14 +658,26 @@ export class ArtifactWindow extends Window{
 
             let slot = 1;
             for (let stats of artifact.subStats) {
+                this.setSubstatToggleEnabled(slot, false);
                 this.setSubstatStat(slot, stats.stat);
                 this.setSubstatValue(slot, stats.value);
+                this.setSubstatInactive(slot, false);
+                ++slot;
+            }
+
+            for (let stats of (artifact.getUnactivatedSubStats ? artifact.getUnactivatedSubStats() : [])) {
+                this.setSubstatToggleEnabled(slot, true);
+                this.setSubstatStat(slot, stats.stat);
+                this.setSubstatValue(slot, stats.value);
+                this.setSubstatInactive(slot, true);
                 ++slot;
             }
 
             for (let i = slot; i <= 4; ++i) {
+                this.setSubstatToggleEnabled(i, false);
                 this.setSubstatStat(i, '');
                 this.setSubstatValue(i, 0);
+                this.setSubstatInactive(i, false);
             }
 
             this.root.find('.gi-artifact-slider-level').giSlider('set value', this.level);
@@ -622,8 +690,10 @@ export class ArtifactWindow extends Window{
             for (let i = 1; i <= 4; ++i) {
                 let data = this.substats[i-1];
 
+                this.setSubstatToggleEnabled(i, false);
                 this.setSubstatStat(i, data && data.stat ? data.stat : '');
                 this.setSubstatValue(i, data && data.value ? data.value : 0);
+                this.setSubstatInactive(i, data && data.inactive ? data.inactive : false);
             }
 
             this.setSet(this.setName);
@@ -632,7 +702,7 @@ export class ArtifactWindow extends Window{
         if (Array.isArray(opts.groups)) {
             this.groupsList = opts.groups;
             this.root.find('.gi-artifact-window-group-wrapper').show();
-            this.refreshGroups()
+            this.refreshGroups();
         } else {
             this.groupsList = [];
             this.root.find('.gi-artifact-window-group-wrapper').hide();

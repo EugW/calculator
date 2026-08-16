@@ -1,0 +1,77 @@
+category;name;rus;eng
+weapon_name;athame_artis;Атаме Артис;Athame Artis
+talent_name;weapon_athame_artis;Великолепие дневного короля;Day King's Splendor Solis
+talent_descr;weapon_athame_artis_1;name{Крит. урон} от name{взрыва стихии} +%{crit_dmg_burst}.;name{Elemental Burst} name{CRIT DMG} +%{crit_dmg_burst}.
+talent_descr;weapon_athame_artis_2;Попадание взрыва стихии увеличивает name{силу атаки} экипированного персонажа на %{atk_percent} на 3 сек.;When Elemental Burst hits opponents, the equipping character's name{ATK} is increased by %{atk_percent} for 3s.
+talent_descr;weapon_athame_artis_2_full;Попадание взрыва стихии увеличивает name{силу атаки} экипированного персонажа на %{text_percent} на 3 сек.<br>skill{Hexerei}: бонус усиливается на name{75%} (добавляет +%{text_percent_2}).;When Elemental Burst hits opponents, the equipping character's name{ATK} is increased by %{text_percent} for 3s.<br>skill{Hexerei}: bonus is amplified by name{75%} (adds +%{text_percent_2}).
+talent_name;weapon_athame_artis_hexerei;Усиление Hexerei;Hexerei Amplification
+talent_descr;weapon_athame_artis_hexerei;При наличии эффекта Hexerei бонусы АТК усиливаются на name{75%} (добавляет +%{text_percent}).;When Hexerei effects are active, ATK bonuses are amplified by name{75%} (adds +%{text_percent}).
+talent_name;weapon_athame_artis_party;Бонус АТК для отряда;Party ATK Buff
+talent_descr;weapon_athame_artis_party;Ближайшие члены отряда получают +%{text_percent} АТК на 3 сек.;Nearby party members gain +%{text_percent} ATK for 3s.
+talent_descr;weapon_athame_artis_party_full;Ближайшие члены отряда получают +%{text_percent|16} АТК на 3 сек.<br>skill{Hexerei}: бонус усиливается на name{75%} (добавляет +%{text_percent_2|12}).;Nearby party members gain +%{text_percent|16} ATK for 3s.<br>skill{Hexerei}: bonus is amplified by name{75%} (adds +%{text_percent_2|12}).
+
+weapon_name;serenitys_call;Зов безмятежности;Serenity's Call
+talent_name;weapon_serenitys_call;Тихое спокойствие;Solemn Silence
+talent_descr;weapon_serenitys_call;При активации элементальной реакции name{макс. HP} увеличивается на %{hp_percent} на 12 сек.;Upon triggering an Elemental Reaction, name{Max HP} is increased by %{hp_percent} for 12s.
+
+weapon_name;moonweavers_dawn;Рассвет ткачихи луны;Moonweaver's Dawn
+talent_name;weapon_moonweavers_dawn;Завет тайного серебра;Secret Silver's Testament
+talent_descr;weapon_moonweavers_dawn;Урон от name{взрыва стихии} +%{dmg_burst}.;name{Elemental Burst DMG} +%{dmg_burst}.
+
+weapon_name;the_daybreak_chronicles;Хроники рассвета;The Daybreak Chronicles
+talent_name;weapon_the_daybreak_chronicles;Ода вне времени;Ode Beyond Time
+talent_descr;weapon_the_daybreak_chronicles;Урон от name{обычных атак}, name{элементального навыка} и name{взрыва стихии} +%{dmg_normal}.;name{Normal Attack}, name{Elemental Skill}, and name{Elemental Burst} DMG +%{dmg_normal}.
+talent_name;weapon_the_daybreak_chronicles_hexerei;Бонус Hexerei;Hexerei Bonus
+talent_descr;weapon_the_daybreak_chronicles_hexerei;Когда в отряде действует эффект Ведьмовство: Тайный обряд, попадания обычными атаками, элементальными навыками или взрывами стихии экипированного персонажа повышают бонус урона всех этих типов на %{dmg_normal}.;When the party possesses Hexerei: Secret Rite effects, when the equipping character's Normal Attacks, Elemental Skills, or Elemental Bursts hit an opponent, the DMG Bonus for all these DMG types is increased by %{dmg_normal} instead.
+
+weapon_name;snare_hook;Капкан-крюк;Snare Hook
+talent_name;weapon_snare_hook;Фантомная вспышка;Phantom Flash
+talent_descr;weapon_snare_hook;При активации элементальной реакции name{мастерство стихий} +%{mastery} на 12 сек.;Upon triggering an Elemental Reaction, name{Elemental Mastery} +%{mastery} for 12s.
+
+weapon_name;rainbow_serpents_rain_bow;Лук радужного змея;Rainbow Serpent's Rain Bow
+talent_name;weapon_rainbow_serpents_rain_bow;Шёпот звёзд за священным троном;Astral Whispers Beyond the Sacred Throne
+talent_descr;weapon_rainbow_serpents_rain_bow;Внеполевые атаки персонажа увеличивают name{силу атаки} на %{atk_percent} на 8 сек.;When the wielder's off-field attacks hit opponents, name{ATK} is increased by %{atk_percent} for 8s.
+
+weapon_name;master_key;Мастер-ключ;Master Key
+talent_name;weapon_master_key;Всё по местам;Fall Into Place
+talent_descr;weapon_master_key;При активации элементальной реакции name{мастерство стихий} +%{mastery} на 12 сек.;Upon triggering an Elemental Reaction, name{Elemental Mastery} +%{mastery} for 12s.
+
+weapon_name;nightweavers_looking_glass;Зеркало ночной ткачихи;Nightweaver's Looking Glass
+talent_name;weapon_nightweavers_looking_glass;Тысячелетний гимн;Millennial Hymn
+talent_descr;weapon_nightweavers_looking_glass_1;skill{Молитва дальнего севера}: name{Мастерство стихий} +%{mastery} на 4,5 сек.;skill{Prayer of the Far North}: name{Elemental Mastery} +%{mastery} for 4.5s.
+talent_descr;weapon_nightweavers_looking_glass_2;skill{Строфа новолуния}: name{Мастерство стихий} +%{mastery} на 10 сек.;skill{New Moon Verse}: name{Elemental Mastery} +%{mastery} for 10s.
+talent_descr;weapon_nightweavers_looking_glass_3;При активации обоих эффектов: урон dendro{Бутонизации} +%{dmg_reaction_bloom}, dendro{Вегетации/Цветения} +%{dmg_reaction_hyperbloom}, dendro{Лунного цветения} +%{dmg_reaction_lunarbloom}.;When both effects active: dendro{Bloom} DMG +%{dmg_reaction_bloom}, dendro{Hyperbloom/Burgeon} DMG +%{dmg_reaction_hyperbloom}, dendro{Lunar-Bloom} DMG +%{dmg_reaction_lunarbloom}.
+talent_descr;weapon_nightweavers_looking_glass_party;Ближайшие члены отряда получают: dendro{Бутонизация} +%{dmg_reaction_bloom|120}, dendro{Вегетация/Цветение} +%{dmg_reaction_hyperbloom|80}, dendro{Лунное цветение} +%{dmg_reaction_lunarbloom|40}.;Nearby party members gain: dendro{Bloom} DMG +%{dmg_reaction_bloom|120}, dendro{Hyperbloom/Burgeon} DMG +%{dmg_reaction_hyperbloom|80}, dendro{Lunar-Bloom} DMG +%{dmg_reaction_lunarbloom|40}.
+
+weapon_name;reliquary_of_truth;Реликварий истины;Reliquary of Truth
+talent_name;weapon_reliquary_of_truth;Суть лжи;Essence of Falsity
+talent_descr;weapon_reliquary_of_truth_1;name{Шанс крит. попадания} +%{crit_rate}.;name{CRIT Rate} +%{crit_rate}.
+talent_descr;weapon_reliquary_of_truth_2;При использовании элементального навыка name{мастерство стихий} +%{mastery} на 12 сек.;When Elemental Skill is used, name{Elemental Mastery} +%{mastery} for 12s.
+talent_descr;weapon_reliquary_of_truth_3;При нанесении урона Лунным цветением name{крит. урон} +%{crit_dmg} на 4 сек.;When Lunar-Bloom DMG is dealt, name{CRIT DMG} +%{crit_dmg} for 4s.
+
+weapon_name;etherlight_spindlelute;Эфирная шпиндель-лютня;Etherlight Spindlelute
+talent_name;weapon_etherlight_spindlelute;Последний певец;Last Singer
+talent_descr;weapon_etherlight_spindlelute;При использовании элементального навыка name{мастерство стихий} +%{mastery} на 20 сек.;After using an Elemental Skill, name{Elemental Mastery} +%{mastery} for 20s.
+
+weapon_name;blackmarrow_lantern;Фонарь из чёрного костяка;Blackmarrow Lantern
+talent_name;weapon_blackmarrow_lantern;Знак завета;Token of Covenant
+talent_descr;weapon_blackmarrow_lantern;Урон от реакции dendro{Бутонизация} +%{dmg_reaction_bloom}, от реакции dendro{Лунное цветение} +%{dmg_reaction_lunarbloom}.;dendro{Bloom} DMG +%{dmg_reaction_bloom}, dendro{Lunar-Bloom} DMG +%{dmg_reaction_lunarbloom}.
+
+weapon_name;dawning_frost;Рассветный мороз;Dawning Frost
+talent_name;weapon_dawning_frost;Ночные сны;Nocturnal Dreams
+talent_descr;weapon_dawning_frost_1;При попадании заряженной атаки name{мастерство стихий} +%{mastery} на 10 сек.;When Charged Attack hits, name{Elemental Mastery} +%{mastery} for 10s.
+talent_descr;weapon_dawning_frost_2;При попадании элементального навыка name{мастерство стихий} +%{mastery} на 10 сек.;When Elemental Skill hits, name{Elemental Mastery} +%{mastery} for 10s.
+
+weapon_name;bloodsoaked_ruins;Пропитанные кровью руины;Bloodsoaked Ruins
+talent_name;weapon_bloodsoaked_ruins;Скорбное подношение;Mournful Tribute
+talent_name;weapon_bloodsoaked_ruins_2;Скорбное подношение (реакция);Mournful Tribute (Reaction)
+talent_descr;weapon_bloodsoaked_ruins_1;После применения name{взрыва стихии} урон реакции electro{Лунный заряд} экипированного персонажа, наносимый врагам, повышается на %{dmg_reaction_lunarcharged} на 3,5 сек.;For 3.5s after using an name{Elemental Burst}, the equipping character's electro{Lunar-Charged} DMG dealt to opponents is increased by %{dmg_reaction_lunarcharged}.
+talent_descr;weapon_bloodsoaked_ruins_2;Кроме того, после активации реакции electro{Лунный заряд} экипированный персонаж получает эффект name{Реквием руин}: name{крит. урон} повышается на %{crit_dmg} на 6 сек., а также восстанавливается %{text_energy} ед. энергии. Энергию таким способом можно восстанавливать раз в 14 сек.;Additionally, after triggering an electro{Lunar-Charged} reaction, the equipping character gains name{Requiem of Ruin}: name{CRIT DMG} is increased by %{crit_dmg} for 6s, and they also restore %{text_energy} name{Elemental Energy}. Elemental Energy can be restored this way once every 14s.
+
+weapon_name;prospectors_shovel;Лопата старателя;Prospector's Shovel
+talent_name;weapon_prospectors_shovel;Быстро и верно;Swift and Sure
+talent_descr;weapon_prospectors_shovel;Урон от реакции electro{Заряжен} +%{dmg_reaction_electrocharged}, от реакции electro{Лунный заряд} +%{dmg_reaction_lunarcharged}.;electro{Electro-Charged} DMG +%{dmg_reaction_electrocharged}, electro{Lunar-Charged} DMG +%{dmg_reaction_lunarcharged}.
+
+weapon_name;sacrificers_staff;Посох жертвователя;Sacrificer's Staff
+talent_name;weapon_sacrificers_staff;Незапятнанное желание;Untainted Desire
+talent_descr;weapon_sacrificers_staff;При попадании элементального навыка name{сила атаки} +%{atk_percent} и name{восст. энергии} +%{recharge} на 6 сек. Накладывается до 3 раз.;When Elemental Skill hits opponents, name{ATK} +%{atk_percent} and name{Energy Recharge} +%{recharge} for 6s. Max 3 stacks.

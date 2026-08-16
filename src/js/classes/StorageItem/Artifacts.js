@@ -39,7 +39,7 @@ export class StorageItemArtifacts extends StorageItem {
 
     parseString(string) {
         if (string.substring(0,1) == '[') {
-            return super.parseString(string)
+            return super.parseString(string);
         }
 
         let items = string.split(';');
@@ -50,7 +50,7 @@ export class StorageItemArtifacts extends StorageItem {
                 data: item,
                 locked: 0,
                 group: '',
-            })
+            });
         }
 
         return result;
@@ -83,7 +83,7 @@ export class StorageItemArtifacts extends StorageItem {
 
     reload() {
         super.reload();
-        this.resetCache()
+        this.resetCache();
     }
 
     getByHash(hash) {
@@ -125,7 +125,7 @@ export class StorageItemArtifacts extends StorageItem {
             if (replace) {
                 this.items = newArts;
             } else {
-                this.items = this.items.concat(newArts)
+                this.items = this.items.concat(newArts);
             }
             this.save();
         }
@@ -195,15 +195,13 @@ export class StorageItemArtifacts extends StorageItem {
         for (let index in this.items) {
             let item = this.items[index];
 
-            this.indexByHash[item.data] = index;
-
             for (let group of item.group) {
                 if (group) {
-                    let lcname = group.toUpperCase()
+                    let lcname = group.toUpperCase();
                     groups_hash[lcname] = group;
 
                     if (!groups_counter[lcname]) {
-                        groups_counter[lcname] = 0
+                        groups_counter[lcname] = 0;
                     }
                     ++groups_counter[lcname];
                 } else {
@@ -212,6 +210,11 @@ export class StorageItemArtifacts extends StorageItem {
             }
 
             let art = this.decodeItem(item.data);
+            let hash = art.getHash();
+
+            this.indexByHash[item.data] = index;
+            this.indexByHash[hash] = index;
+
             art.setLocked(item.locked);
             art.setGroups(item.group);
             this.artifactsCache.push(art);

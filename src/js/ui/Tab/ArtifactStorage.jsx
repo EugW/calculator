@@ -33,11 +33,11 @@ export class ArtifactsStorageTab extends Tab {
     createContent() {
         return (
             <ArtifactsPoolView
-                ref={element => { this.component = element }}
+                ref={element => { this.component = element; }}
                 app={this.app}
                 title={this.title}
             />
-        )
+        );
     }
 }
 
@@ -55,6 +55,7 @@ export class ArtifactsPoolView extends React.Component {
         this.storage = props.app.storage.artifacts;
         this.factory = new WorkerFactoryArtifactsSort({
             callback: (data) => this.sortCompleteCallback(data),
+            errorCallback: (data) => this.sortErrorCallback(data),
         });
     }
 
@@ -91,7 +92,7 @@ export class ArtifactsPoolView extends React.Component {
 
         if (item) {
             UI.ArtifactWindow.show((result) => {
-                result.setLocked(item.isLocked())
+                result.setLocked(item.isLocked());
                 this.storage.updateByHash(hash, result);
                 this.props.app.refresh({
                     objects: ['storage.artifacts'],
@@ -132,7 +133,7 @@ export class ArtifactsPoolView extends React.Component {
 
     handleCreateArtifact() {
         UI.ArtifactWindow.show((art) => {
-            this.storage.add(art, {group: art.getGroups()})
+            this.storage.add(art, {group: art.getGroups()});
             this.props.app.refresh({
                 objects: ['storage.artifacts'],
             });
@@ -216,6 +217,13 @@ export class ArtifactsPoolView extends React.Component {
         });
     }
 
+    sortErrorCallback(data) {
+        console.error('Artifact sort worker error:', data.error);
+        if (this.pool) {
+            this.pool.setState({ isLoading: false });
+        }
+    }
+
     componentDidUpdate() {
         this.sortItems();
     }
@@ -227,7 +235,7 @@ export class ArtifactsPoolView extends React.Component {
         for (let slot of Object.keys(artifacts)) {
             let art = artifacts[slot];
             if (art) {
-                result.push(art.getHash())
+                result.push(art.getHash());
             }
         }
 

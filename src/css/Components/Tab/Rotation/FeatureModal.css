@@ -2,3 +2,32 @@
     display: flex;
     align-items: center;
 }
+
+/* Mobile: allow dropdown to overflow and scroll properly */
+.narrow .rotation-feature-modal .dialog-content {
+    overflow: visible;
+}
+
+.narrow .rotation-feature-modal .dropdown-options {
+    position: fixed;
+    top: 120px;
+    left: 20px;
+    right: 20px;
+    bottom: 180px;
+    width: auto;
+    max-height: none;
+}
+
+.narrow .rotation-feature-modal .dropdown-options > [data-simplebar] {
+    max-height: 100% !important;
+    height: 100%;
+}
+
+.narrow .rotation-feature-modal .dropdown-options .simplebar-content-wrapper {
+    max-height: none !important;
+}
+
+.narrow .rotation-feature-modal .dropdown-options .simplebar-mask,
+.narrow .rotation-feature-modal .dropdown-options .simplebar-offset {
+    height: 100%;
+}

@@ -37,11 +37,11 @@ export class ArtifactsTab extends Tab {
     createContent() {
         return (
             <ArtifactsView
-                ref={element => { this.component = element }}
+                ref={element => { this.component = element; }}
                 app={this.app}
                 title={this.title}
             />
-        )
+        );
     }
 }
 
@@ -251,15 +251,15 @@ function ArtifactBlock(props) {
                 slot={props.slot}
                 onClick={props.onIconClick}
             />
-        )
+        );
     }
 
     let setData = DB.Artifacts.Sets.get(art.set);
     let substats = [];
 
-    for (let subStat of art.getSubStats()) {
+    for (let subStat of art.getDisplaySubStats()) {
         substats.push(
-            <div key={subStat.stat} className="value">
+            <div key={subStat.stat + '-' + substats.length} className={'value' + (subStat.inactive ? ' inactive' : '')}>
                 <span className="stat-name">{lang.get('stat.'+ subStat.stat)} </span>
                 {Stats.format(subStat.stat, subStat.value, {signed: true})}
             </div>

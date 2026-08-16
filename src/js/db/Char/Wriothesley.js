@@ -1,6 +1,9 @@
 import { Condition } from "../../classes/Condition";
+import { ConditionAnd } from "../../classes/Condition/And";
 import { ConditionAscensionChar } from "../../classes/Condition/Ascension/Char";
 import { ConditionBoolean } from "../../classes/Condition/Boolean";
+import { ConditionBooleanValue } from "../../classes/Condition/Boolean/Value";
+import { ConditionConstellation } from "../../classes/Condition/Constellation";
 import { ConditionNot } from "../../classes/Condition/Not";
 import { ConditionStacks } from "../../classes/Condition/Stacks";
 import { ConditionStatic } from "../../classes/Condition/Static";
@@ -14,6 +17,7 @@ import { FeatureDamageMultihit } from "../../classes/Feature2/Damage/Multihit";
 import { FeatureDamageNormal } from "../../classes/Feature2/Damage/Normal";
 import { FeatureDamagePlungeCollision } from "../../classes/Feature2/Damage/Plunge/Collision";
 import { FeatureDamagePlungeShockWave } from "../../classes/Feature2/Damage/Plunge/ShockWave";
+import { FeatureDamageStellarConduct } from "../../classes/Feature2/Damage/StellarConduct";
 import { FeatureHeal } from "../../classes/Feature2/Heal";
 import { FeatureMultiplier } from "../../classes/Feature2/Multiplier";
 import { FeatureMultiplierWriothesley } from "../../classes/Feature2/Multiplier/Wriothesley";
@@ -21,6 +25,14 @@ import { StatTable } from "../../classes/StatTable";
 import { ValueTable } from "../../classes/ValueTable";
 import { charTables } from "../generated/CharTables";
 import { charTalentTables } from "../generated/CharTalentTables";
+
+const RadianceStellarConductDmg = 30;
+const C1StellarBonus = 50;
+const C1RepellingStellarDmg = 'dmg_stellarconduct_wriothesley_c1_repelling';
+const C1LusterStellarDmg = 'dmg_stellarconduct_wriothesley_c1_luster';
+const C6CritRate = 10;
+const C6CritDmg = 80;
+const C6IcicleRatio = 20;
 
 const Talents = new DbObjectTalents({
     attack: {
@@ -226,6 +238,167 @@ export const Wriothesley = new DbObjectChar({
                 }),
             ],
         }),
+        new FeatureDamageStellarConduct({
+            category: 'skill',
+            name: 'wriothesley_repelling_fist_3_stellarconduct',
+            element: 'cryo',
+            multipliers: [
+                new FeatureMultiplierWriothesley({
+                    leveling: 'char_skill_attack',
+                    values: Talents.get('attack.normal_hit_3'),
+                    scalingValues: Talents.get('skill.wriothesley_enhanced_repelling_fist'),
+                    scalingMultiplier: 0.6,
+                    scalingSource: 'radiance',
+                }),
+                new FeatureMultiplierWriothesley({
+                    leveling: 'char_skill_attack',
+                    values: Talents.get('attack.normal_hit_3'),
+                    scalingValues: Talents.get('skill.wriothesley_enhanced_repelling_fist'),
+                    scalingMultiplier: 0.3,
+                    scalingSource: 'constellation2',
+                    condition: new ConditionAnd([
+                        new ConditionConstellation({constellation: 2}),
+                        new ConditionBooleanValue({
+                            setting: 'wriothesley_reckoning_for_sin',
+                            cond: 'ge',
+                            value: 5,
+                        }),
+                    ]),
+                }),
+            ],
+            condition: new ConditionAnd([
+                new ConditionBoolean({name: 'wriothesley_radiance_stellarconduct'}),
+                new ConditionBoolean({name: 'wriothesley_chilling_penalty'}),
+            ]),
+        }),
+        new FeatureDamageStellarConduct({
+            category: 'skill',
+            name: 'wriothesley_repelling_fist_5_stellarconduct',
+            element: 'cryo',
+            damageBonuses: [C1RepellingStellarDmg],
+            multipliers: [
+                new FeatureMultiplierWriothesley({
+                    leveling: 'char_skill_attack',
+                    values: Talents.get('attack.normal_hit_5'),
+                    scalingValues: Talents.get('skill.wriothesley_enhanced_repelling_fist'),
+                    scalingMultiplier: 0.8,
+                    scalingSource: 'radiance',
+                }),
+                new FeatureMultiplierWriothesley({
+                    leveling: 'char_skill_attack',
+                    values: Talents.get('attack.normal_hit_5'),
+                    scalingValues: Talents.get('skill.wriothesley_enhanced_repelling_fist'),
+                    scalingMultiplier: 0.4,
+                    scalingSource: 'constellation2',
+                    condition: new ConditionAnd([
+                        new ConditionConstellation({constellation: 2}),
+                        new ConditionBooleanValue({
+                            setting: 'wriothesley_reckoning_for_sin',
+                            cond: 'ge',
+                            value: 5,
+                        }),
+                    ]),
+                }),
+            ],
+            condition: new ConditionAnd([
+                new ConditionBoolean({name: 'wriothesley_radiance_stellarconduct'}),
+                new ConditionBoolean({name: 'wriothesley_chilling_penalty'}),
+            ]),
+        }),
+        new FeatureDamageStellarConduct({
+            category: 'attack',
+            name: 'wriothesley_luster_vaulting_fist_stellarconduct',
+            element: 'cryo',
+            damageBonuses: [C1LusterStellarDmg],
+            multipliers: [
+                new FeatureMultiplier({
+                    leveling: 'char_skill_attack',
+                    values: Talents.get('attack.charged_hit'),
+                }),
+                new FeatureMultiplier({
+                    leveling: 'char_skill_attack',
+                    values: Talents.get('attack.charged_hit'),
+                    scalingMultiplier: 0.5,
+                    scalingSource: 'constellation2',
+                    condition: new ConditionAnd([
+                        new ConditionConstellation({constellation: 2}),
+                        new ConditionBooleanValue({
+                            setting: 'wriothesley_reckoning_for_sin',
+                            cond: 'ge',
+                            value: 5,
+                        }),
+                    ]),
+                }),
+            ],
+            condition: new ConditionBoolean({name: 'wriothesley_radiance_stellarconduct'}),
+        }),
+        new FeatureDamageStellarConduct({
+            category: 'skill',
+            name: 'wriothesley_c6_repelling_icicle_stellarconduct',
+            element: 'cryo',
+            damageBonuses: [C1RepellingStellarDmg],
+            multipliers: [
+                new FeatureMultiplierWriothesley({
+                    leveling: 'char_skill_attack',
+                    values: Talents.get('attack.normal_hit_5'),
+                    scalingValues: Talents.get('skill.wriothesley_enhanced_repelling_fist'),
+                    scalingMultiplier: 0.8 * C6IcicleRatio / 100,
+                    scalingSource: 'constellation6',
+                }),
+                new FeatureMultiplierWriothesley({
+                    leveling: 'char_skill_attack',
+                    values: Talents.get('attack.normal_hit_5'),
+                    scalingValues: Talents.get('skill.wriothesley_enhanced_repelling_fist'),
+                    scalingMultiplier: 0.4 * C6IcicleRatio / 100,
+                    scalingSource: 'constellation2',
+                    condition: new ConditionAnd([
+                        new ConditionConstellation({constellation: 2}),
+                        new ConditionBooleanValue({
+                            setting: 'wriothesley_reckoning_for_sin',
+                            cond: 'ge',
+                            value: 5,
+                        }),
+                    ]),
+                }),
+            ],
+            condition: new ConditionAnd([
+                new ConditionConstellation({constellation: 6}),
+                new ConditionBoolean({name: 'wriothesley_radiance_stellarconduct'}),
+                new ConditionBoolean({name: 'wriothesley_chilling_penalty'}),
+            ]),
+        }),
+        new FeatureDamageStellarConduct({
+            category: 'attack',
+            name: 'wriothesley_c6_luster_icicle_stellarconduct',
+            element: 'cryo',
+            damageBonuses: [C1LusterStellarDmg],
+            multipliers: [
+                new FeatureMultiplier({
+                    leveling: 'char_skill_attack',
+                    values: Talents.get('attack.charged_hit'),
+                    scalingMultiplier: C6IcicleRatio / 100,
+                    scalingSource: 'constellation6',
+                }),
+                new FeatureMultiplier({
+                    leveling: 'char_skill_attack',
+                    values: Talents.get('attack.charged_hit'),
+                    scalingMultiplier: 0.5 * C6IcicleRatio / 100,
+                    scalingSource: 'constellation2',
+                    condition: new ConditionAnd([
+                        new ConditionConstellation({constellation: 2}),
+                        new ConditionBooleanValue({
+                            setting: 'wriothesley_reckoning_for_sin',
+                            cond: 'ge',
+                            value: 5,
+                        }),
+                    ]),
+                }),
+            ],
+            condition: new ConditionAnd([
+                new ConditionConstellation({constellation: 6}),
+                new ConditionBoolean({name: 'wriothesley_radiance_stellarconduct'}),
+            ]),
+        }),
         new FeatureHeal({
             name: 'wriothesley_vaulting_fist_heal',
             category: 'attack',
@@ -308,19 +481,51 @@ export const Wriothesley = new DbObjectChar({
                 new ConditionAscensionChar({ascension: 4}),
             ],
         }),
+        new ConditionBoolean({
+            name: 'wriothesley_radiance_stellarconduct',
+            serializeId: 5,
+            title: 'talent_name.wriothesley_there_shall_be_an_unveiling_for_injustice',
+            description: 'talent_descr.wriothesley_there_shall_be_an_unveiling_for_injustice',
+            stats: {
+                dmg_stellarconduct: RadianceStellarConductDmg,
+            },
+            subConditions: [
+                new ConditionBoolean({name: 'polestar_field'}),
+            ],
+        }),
     ],
     constellation: new DbObjectConstellation([
         {
             conditions: [
                 new ConditionStatic({
                     title: 'talent_name.wriothesley_terror_for_the_evildoers',
-                    description: 'talent_descr.wriothesley_terror_for_the_evildoers',
+                    description: 'talent_descr.wriothesley_terror_for_the_evildoers_buffed',
+                    subConditions: [
+                        new ConditionAscensionChar({ascension: 1}),
+                    ],
+                }),
+                new ConditionBoolean({
+                    name: 'wriothesley_c1_next_repelling_stellar_bonus',
+                    serializeId: 6,
+                    title: 'talent_name.wriothesley_c1_luster_vaulting_fist_hits',
                     stats: {
-                        dmg_charged_wriothesley: 150,
-                        text_percent_dmg: 200,
+                        [C1RepellingStellarDmg]: C1StellarBonus,
                     },
                     subConditions: [
                         new ConditionAscensionChar({ascension: 1}),
+                        new ConditionBoolean({name: 'wriothesley_radiance_stellarconduct'}),
+                    ],
+                }),
+                new ConditionBoolean({
+                    name: 'wriothesley_c1_next_luster_bonus',
+                    serializeId: 7,
+                    title: 'talent_name.wriothesley_c1_repelling_fist_5_hits',
+                    stats: {
+                        [C1LusterStellarDmg]: C1StellarBonus,
+                    },
+                    subConditions: [
+                        new ConditionAscensionChar({ascension: 1}),
+                        new ConditionBoolean({name: 'wriothesley_radiance_stellarconduct'}),
                     ],
                 }),
             ],
@@ -329,7 +534,7 @@ export const Wriothesley = new DbObjectChar({
             conditions: [
                 new ConditionStaticLevel({
                     title: 'talent_name.wriothesley_shackles_for_the_arrogant',
-                    description: 'talent_descr.wriothesley_shackles_for_the_arrogant',
+                    description: 'talent_descr.wriothesley_shackles_for_the_arrogant_buffed',
                     levelSetting: 'wriothesley_reckoning_for_sin',
                     fromZero: true,
                     stats: [
@@ -352,7 +557,7 @@ export const Wriothesley = new DbObjectChar({
             conditions: [
                 new ConditionStatic({
                     title: 'talent_name.wriothesley_redemption_for_the_suffering',
-                    description: 'talent_descr.wriothesley_redemption_for_the_suffering_1',
+                    description: 'talent_descr.wriothesley_redemption_for_the_suffering_buffed',
                     settings: {
                         wriothesley_heal_level: 2,
                     },
@@ -364,7 +569,7 @@ export const Wriothesley = new DbObjectChar({
                     name: 'wriothesley_redemption_for_the_suffering',
                     serializeId: 3,
                     title: 'talent_name.wriothesley_redemption_for_the_suffering_2',
-                    description: 'talent_descr.wriothesley_redemption_for_the_suffering_2',
+                    description: 'talent_descr.wriothesley_redemption_for_the_suffering_buffed',
                     stats: {
                         atk_speed_normal: 20,
                     },
@@ -373,7 +578,7 @@ export const Wriothesley = new DbObjectChar({
                     name: 'wriothesley_redemption_for_the_suffering_2',
                     serializeId: 4,
                     title: 'talent_name.wriothesley_redemption_for_the_suffering_3',
-                    description: 'talent_descr.wriothesley_redemption_for_the_suffering_3',
+                    description: 'talent_descr.wriothesley_redemption_for_the_suffering_buffed',
                     stats: {
                         atk_speed_normal: 10,
                     },
@@ -398,10 +603,12 @@ export const Wriothesley = new DbObjectChar({
             conditions: [
                 new ConditionStatic({
                     title: 'talent_name.wriothesley_esteem_for_the_innocent',
-                    description: 'talent_descr.wriothesley_esteem_for_the_innocent',
+                    description: 'talent_descr.wriothesley_esteem_for_the_innocent_buffed',
                     stats: {
                         crit_rate_charged_wriothesley: 10,
                         crit_dmg_charged_wriothesley: 80,
+                        crit_rate_stellarconduct: C6CritRate,
+                        crit_dmg_stellarconduct: C6CritDmg,
                     },
                     subConditions: [
                         new ConditionAscensionChar({ascension: 1}),
@@ -416,7 +623,7 @@ export const Wriothesley = new DbObjectChar({
                 name: 'party.wriothesley_redemption_for_the_suffering_2',
                 serializeId: 1,
                 title: 'talent_name.wriothesley_redemption_for_the_suffering_3',
-                description: 'talent_descr.wriothesley_redemption_for_the_suffering_4',
+                description: 'talent_descr.wriothesley_redemption_for_the_suffering_buffed',
                 info: {constellation: 4},
                 stats: {
                     atk_speed_normal: 10,

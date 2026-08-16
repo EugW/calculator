@@ -159,6 +159,8 @@ const A4SkillBonus = 0.1;
 const A4SkillBonusCap = 80;
 const C2CritRate = 20;
 const C2CritDmg = 100;
+const C2LunarCritRate = 10;
+const C2LunarCritDmg = 20;
 const C2DefReduce = 30;
 
 const masteryBuffPost = new PostEffectStatsNahida({
@@ -455,6 +457,8 @@ export const Nahida = new DbObjectChar({
                         crit_dmg_bloom: C2CritDmg,
                         crit_rate_burning: C2CritRate,
                         crit_dmg_burning: C2CritDmg,
+                        crit_rate_lunarbloom: C2LunarCritRate,
+                        crit_dmg_lunarbloom: C2LunarCritDmg,
                     },
                 }),
                 new ConditionBoolean({
@@ -536,6 +540,8 @@ export const Nahida = new DbObjectChar({
                     crit_dmg_bloom: C2CritDmg,
                     crit_rate_burning: C2CritRate,
                     crit_dmg_burning: C2CritDmg,
+                    crit_rate_lunarbloom: C2LunarCritRate,
+                    crit_dmg_lunarbloom: C2LunarCritDmg,
                 },
             }),
             new ConditionBoolean({

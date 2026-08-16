@@ -1,12 +1,13 @@
 import json
 import os
 import static # type: ignore
+from source_config import get_excel_dir
 
 dirname  = os.path.dirname(__file__)
-data_dir = os.path.join(dirname, '../../dimrepo/ExcelBinOutput/')
+data_dir = str(get_excel_dir()) + os.sep
 out_dir  = os.path.join(dirname, '../../src/js/db/generated/')
 
-MAX_LEVEL = 90
+MAX_LEVEL = 100
 
 def split_list(data):
     result = []
@@ -25,7 +26,7 @@ def split_list(data):
     return result
 
 def parse_curves():
-    file   = open(data_dir + 'ElementCoeffExcelConfigData.json', 'r')
+    file   = open(data_dir + 'ElementCoeffExcelConfigData.json', 'r', encoding='utf-8')
     out    = open(out_dir + 'ElementScale.js', 'w', encoding='utf-8')
     curves = {
         'reaction': {},
@@ -33,12 +34,12 @@ def parse_curves():
     }
 
     for item in json.load(file):
-        level = item.get('Level')
+        level = item.get('level')
         if not level: continue
         if level > MAX_LEVEL: continue
 
-        curves['reaction'][level] = static.trimValue(item['PlayerElementLevelCo'])
-        curves['shield']  [level] = static.trimValue(item['PlayerShieldLevelCo'])
+        curves['reaction'][level] = static.trimValue(item['playerElementLevelCo'])
+        curves['shield']  [level] = static.trimValue(item['playerShieldLevelCo'])
 
     out.write('// This file is auto generated\n')
     out.write('import { StatTable } from "../../classes/StatTable";\n\n')

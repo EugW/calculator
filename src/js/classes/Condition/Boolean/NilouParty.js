@@ -1,6 +1,10 @@
 import { ConditionBoolean } from "../Boolean";
 
 export class ConditionBooleanNilouParty extends ConditionBoolean {
+    isPartyRestriction() {
+        return true;
+    }
+
     isActive(settings) {
         let result = this.checkSubconditions(settings);
         if (!result) {

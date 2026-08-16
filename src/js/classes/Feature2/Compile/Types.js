@@ -1,4 +1,5 @@
 import { getUsedStats } from "./Stats";
+import { wgslNumber } from "./WGSL";
 
 export class CBlock {
     constructor(items, props) {
@@ -6,12 +7,17 @@ export class CBlock {
         if (props) Object.assign(this, props);
     }
 
-    getType() {return 'block'}
-    hasItems() {return true}
+    getType() {return 'block';}
+    hasItems() {return true;}
 
     compileChildrens(opts) {
-        return this.items.filter((i) => {return !i.isBlank()})
-            .map((i) => {return i.compile(opts)});
+        return this.items.filter((i) => {return !i.isBlank();})
+            .map((i) => {return i.compile(opts);});
+    }
+
+    compileChildrensWGSL(opts) {
+        return this.items.filter((i) => {return !i.isBlank();})
+            .map((i) => {return i.compileWGSL(opts);});
     }
 
     isBlank() {
@@ -21,9 +27,9 @@ export class CBlock {
         return true;
     }
 
-    isCollapsable() {return true}
-    isVariableSet() {return false}
-    isVariableGet() {return false}
+    isCollapsable() {return true;}
+    isVariableSet() {return false;}
+    isVariableGet() {return false;}
 
     process(opts) {
         return this;
@@ -34,6 +40,16 @@ export class CBlock {
         return parts.join(';\n');
     }
 
+    /**
+     * Compile to WGSL code
+     * @param {Object} opts - WGSL compilation options
+     * @returns {string}
+     */
+    compileWGSL(opts) {
+        let parts = this.compileChildrensWGSL(opts);
+        return parts.join(';\n');
+    }
+
     execute(data, opts) {
         data.stats.ensure(getUsedStats(this));
         let func = Function('stats', 'return ' + this.compile(opts));
@@ -41,7 +57,7 @@ export class CBlock {
     }
 
     getSignature() {
-        return '('+ (this.isCollapsable() ? '' : '!') + this.getType() +':'+ this.items.map((i) => {return i.getSignature()}).join(',') +')';
+        return '('+ (this.isCollapsable() ? '' : '!') + this.getType() +':'+ this.items.map((i) => {return i.getSignature();}).join(',') +')';
     }
 
     /**
@@ -111,7 +127,7 @@ export class CBlock {
 }
 
 export class CReturn extends CBlock {
-    getType() {return 'block_return'}
+    getType() {return 'block_return';}
 
     appendChildren() {
         let last = this.items.pop();
@@ -125,8 +141,14 @@ export class CReturn extends CBlock {
     }
 
     compile(opts) {
-        let parts = this.items.map((i) => {return i.compile(opts)});
+        let parts = this.items.map((i) => {return i.compile(opts);});
         parts[parts.length - 1] = 'return ' + parts[parts.length - 1];
+        return parts.join(';\n');
+    }
+
+    compileWGSL(opts) {
+        let parts = this.items.map((i) => {return i.compileWGSL(opts);});
+        parts[parts.length - 1] = 'return ' + parts[parts.length - 1] + ';';
         return parts.join(';\n');
     }
 }
@@ -136,13 +158,22 @@ export class CItem {
         Object.assign(this, props);
     }
 
-    getType() {return 'item'}
-    hasItems() {return false}
-    isVariableSet() {return false}
-    isVariableGet() {return false}
+    getType() {return 'item';}
+    hasItems() {return false;}
+    isVariableSet() {return false;}
+    isVariableGet() {return false;}
 
     compile(opts) {
         return this.value || 0;
+    }
+
+    /**
+     * Compile to WGSL code
+     * @param {Object} opts - WGSL compilation options
+     * @returns {string}
+     */
+    compileWGSL(opts) {
+        return wgslNumber(this.value || 0, opts);
     }
 
     isBlank() {

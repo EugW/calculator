@@ -7,7 +7,7 @@ export class ConditionBooleanDropdownValue extends ConditionBoolean {
             return false;
         }
 
-        let values = (settings[this.getName()] || '').split(';');
+        let values = (settings[this.getName()] || this.params.defaultValue || '').split(';');
         return values.includes(this.params.value);
     }
 }

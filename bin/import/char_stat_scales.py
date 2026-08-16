@@ -4,15 +4,16 @@ import re
 
 import static  # noqa
 from char_common import parse_scales, parse_skills
+from source_config import get_excel_dir
 
 dirname = os.path.dirname(__file__)
-data_dir = os.path.join(dirname, '../../dimrepo/ExcelBinOutput/')
+data_dir = str(get_excel_dir()) + os.sep
 out_dir = os.path.join(dirname, '../../src/js/db/generated/')
 
 
 def parse_curves():
-    file = open(data_dir + 'AvatarCurveExcelConfigData.json', 'r')
-    out = open(out_dir + 'CharScale.js', 'w', encoding='utf-8')
+    file = open(data_dir + 'AvatarCurveExcelConfigData.json', 'r', encoding='utf-8')
+    out = open(out_dir + 'CharScale.js', 'w', encoding='utf-8', newline='\n')
     curves = {}
 
     for item in json.load(file):
@@ -30,7 +31,10 @@ def parse_curves():
 
     for curve_name in curves:
         stat_name = static.getCurveName(curve_name)
-        values = list(curves[curve_name].values())
+        values = [
+            curves[curve_name][level]
+            for level in sorted(curves[curve_name])
+        ]
 
         out.write("\t%s: new StatTable('', [" % (stat_name))
         out.write(", ".join(values))
@@ -43,7 +47,7 @@ def parse_curves():
 
 
 def parse_ascension():
-    file = open(data_dir + 'AvatarPromoteExcelConfigData.json', 'r')
+    file = open(data_dir + 'AvatarPromoteExcelConfigData.json', 'r', encoding='utf-8')
     table = {}
     result = {}
 
@@ -77,7 +81,7 @@ def parse_ascension():
 
 
 def parse_cost():
-    file = open(data_dir + '/AvatarSkillExcelConfigData.json', 'r')
+    file = open(data_dir + '/AvatarSkillExcelConfigData.json', 'r', encoding='utf-8')
     result = {}
 
     for item in json.load(file):
@@ -89,7 +93,7 @@ def parse_cost():
 
 
 def parse_burst():
-    file = open(data_dir + 'AvatarSkillDepotExcelConfigData.json', 'r')
+    file = open(data_dir + 'AvatarSkillDepotExcelConfigData.json', 'r', encoding='utf-8')
     result = {}
 
     for item in json.load(file):
@@ -101,8 +105,8 @@ def parse_burst():
 
 
 def parse_chars():
-    file = open(data_dir + 'AvatarExcelConfigData.json', 'r')
-    out = open(out_dir + 'CharTables.js', 'w', encoding='utf-8')
+    file = open(data_dir + 'AvatarExcelConfigData.json', 'r', encoding='utf-8')
+    out = open(out_dir + 'CharTables.js', 'w', encoding='utf-8', newline='\n')
 
     result = []
 

@@ -92,6 +92,10 @@ export class DbObjectChar extends DbObject {
         return this.partyData && this.partyData.postEffects || [];
     }
 
+    getPartyFeatures() {
+        return this.partyData && this.partyData.features || [];
+    }
+
     getPartyMultipliers() {
         return this.partyData && this.partyData.multipliers || [];
     }

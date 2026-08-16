@@ -24,7 +24,11 @@ import { Tab } from "../Tab";
 import { FeatureMultiplierReactionVaporize } from '../../classes/Feature2/Multiplier/Reaction/Amplifying/Vaporize';
 import { FeatureMultiplierReactionMelt } from '../../classes/Feature2/Multiplier/Reaction/Amplifying/Melt';
 import { FeatureReactionLunarCharged } from '../../classes/Feature2/Reaction/Transformative/Lunar/Charged';
+import { FeatureReactionLunarBloom } from '../../classes/Feature2/Reaction/Transformative/Lunar/Bloom';
+import { FeatureReactionLunarCrystallize } from '../../classes/Feature2/Reaction/Transformative/Lunar/Crystallize';
 import { FeatureReactionLunar } from '../../classes/Feature2/Reaction/Transformative/Lunar';
+import { FeatureMultiplierStellarConduct } from '../../classes/Feature2/Multiplier/StellarConduct';
+import { FeatureMultiplierStellarGlimmer } from '../../classes/Feature2/Multiplier/StellarGlimmer';
 
 let lang = new Lang();
 
@@ -34,11 +38,15 @@ const secondaryStatsList = [
     '!crit_rate_skill', '!crit_rate_burst', '!crit_rate_ganyu', '!crit_rate_nahida', '!crit_rate_freminet', '!crit_rate_charged_wriothesley',
     '!crit_rate_navia', '!crit_rate_gaming', '!crit_rate_normal_arlecchino', '!crit_rate_burst_arlecchino', '!crit_rate_sethos',
     '!crit_rate_amber', '!crit_rate_normal_mualani',
-    'crit_dmg', '!crit_dmg_skill', '!crit_dmg_anemo', '!crit_dmg_cryo', '!crit_dmg_electro', '!crit_dmg_geo',
+    'crit_dmg', '!crit_dmg_skill', '!crit_dmg_anemo', '!crit_dmg_cryo', '!crit_dmg_dendro', '!crit_dmg_electro', '!crit_dmg_geo',
     '!crit_dmg_normal', '!crit_dmg_charged', '!crit_dmg_plunge', '!crit_dmg_neuvillette',
     '!crit_dmg_hydro', '!crit_dmg_pyro', '!crit_dmg_phys', '!crit_dmg_charged_wriothesley', '!crit_dmg_burst',
     '!crit_dmg_navia', '!crit_dmg_xianyun', '!crit_dmg_gaming', '!crit_dmg_normal_arlecchino', '!crit_dmg_burst_arlecchino',
     '!crit_dmg_skill_kinich', '!crit_dmg_normal_mualani', '!crit_dmg_chasca',
+    '!crit_rate_lunar', '!crit_rate_lunarbloom', '!crit_rate_lunarcharged', '!crit_rate_lunarcrystallize',
+    '!crit_dmg_lunar', '!crit_dmg_lunarbloom', '!crit_dmg_lunarcharged', '!crit_dmg_lunarcrystallize',
+    '!crit_rate_stellarglimmer', '!crit_rate_stellarconduct', '!crit_rate_stellarswirl',
+    '!crit_dmg_stellarglimmer', '!crit_dmg_stellarconduct', '!crit_dmg_stellarswirl',
     'healing', 'healing_recv', 'recovery', 'shield',
 ];
 
@@ -86,6 +94,8 @@ const reactionStatList = {
     '!dmg_reaction_spread': FeatureMultiplierReactionSpread,
     'dmg_reaction_lunar': FeatureReactionLunar,
     '!dmg_reaction_lunarcharged': FeatureReactionLunarCharged,
+    '!dmg_reaction_lunarbloom': FeatureReactionLunarBloom,
+    '!dmg_reaction_lunarcrystallize': FeatureReactionLunarCrystallize,
 
     'dmg_reaction_crystalize': FeatureReactionCrystallize,
 };
@@ -109,7 +119,7 @@ export class StatsTab extends Tab {
     createContent() {
         return (
             <StatsView
-                ref={element => { this.component = element }}
+                ref={element => { this.component = element; }}
                 app={this.app}
                 title={lang.get('tab_header.stat_view')}
             />
@@ -178,9 +188,9 @@ class StatsView extends React.Component {
             if (optional) {
                 item.total = Stats.format(stat, total, {signed: 1, zero: 1});
             } else {
-                item.base  = Stats.format(stat, base,  {zero: 1})
-                item.bonus = Stats.format(stat, bonus, {signed: 1, zero: 1})
-                item.total = Stats.format(stat, total, {zero: 1})
+                item.base  = Stats.format(stat, base,  {zero: 1});
+                item.bonus = Stats.format(stat, bonus, {signed: 1, zero: 1});
+                item.total = Stats.format(stat, total, {zero: 1});
             }
 
             rows.push(item);
@@ -242,7 +252,7 @@ class StatsView extends React.Component {
             let optional = stat.search('!') >= 0 ? true : false;
             stat = stat.replace(/^\!/, '');
 
-            let value = stats.get(stat)
+            let value = stats.get(stat);
             let title = lang.getStat('stat.'+ stat);
             if (optional) {
                 title = '• '+ title;
@@ -286,7 +296,7 @@ class StatsView extends React.Component {
             } else if (feature.getMasteryMultiplier) {
                 base = calcTreeValue(feature.getMasteryMultiplier(data), data) * 100 || 0;
             } else {
-                console.log(feature)
+                console.log(feature);
             }
 
             if (feature.getReactionBonuses) {
@@ -313,6 +323,178 @@ class StatsView extends React.Component {
                     base: Stats.format(stat, base, {zero: 1}),
                     bonus: Stats.format(stat, bonus, {signed: 1, zero: 1}),
                     total: Stats.format(stat, base + bonus, {zero: 1}),
+                });
+            }
+        }
+
+        return rows;
+    }
+
+    getLunarBaseDmgStats(stats) {
+        let rows = [];
+
+        // Lunar Base DMG stats (from Lauma, Nefer, Columbina party buff)
+        const subtypes = [
+            'lunarbloom_multi',
+            'lunarcharged_multi',
+            'lunarcrystallize_multi',
+        ];
+
+        for (let stat of subtypes) {
+            let value = stats.get(stat) * 100;
+            if (value) {
+                rows.push({
+                    stat: stat,
+                    title: lang.getStat('stat.' + stat),
+                    base: Stats.format(stat, 0, {zero: 1}),
+                    bonus: Stats.format(stat, value, {signed: 1, zero: 1}),
+                    total: Stats.format(stat, value, {zero: 1}),
+                });
+            }
+        }
+
+        return rows;
+    }
+
+    getElevationStats(stats) {
+        let rows = [];
+
+        // Umbrella stat
+        let umbrella = stats.get('dmg_lunar_special') * 100;
+
+        // Only show elevation section if umbrella or any specific stat is non-zero
+        let lunarbloom = stats.get('dmg_lunarbloom_special') * 100;
+        let lunarcharged = stats.get('dmg_lunarcharged_special') * 100;
+        let lunarcrystallize = stats.get('dmg_lunarcrystallize_special') * 100;
+
+        if (!umbrella && !lunarbloom && !lunarcharged && !lunarcrystallize) {
+            return rows;
+        }
+
+        // Main category: Lunar Elevate (umbrella only)
+        rows.push({
+            stat: 'dmg_lunar_special',
+            title: lang.getStat('stat.dmg_lunar_special'),
+            base: Stats.format('dmg_lunar_special', 0, {zero: 1}),
+            bonus: Stats.format('dmg_lunar_special', umbrella, {signed: 1, zero: 1}),
+            total: Stats.format('dmg_lunar_special', umbrella, {zero: 1}),
+        });
+
+        // Subcategories: show specific bonus, total = umbrella + specific
+        const subtypes = [
+            ['dmg_lunarbloom_special', lunarbloom],
+            ['dmg_lunarcharged_special', lunarcharged],
+            ['dmg_lunarcrystallize_special', lunarcrystallize],
+        ];
+
+        for (let [stat, specific] of subtypes) {
+            let total = umbrella + specific;
+            // Only show if there's a specific bonus OR if umbrella is set
+            if (specific || umbrella) {
+                rows.push({
+                    stat: stat,
+                    optional: true,
+                    title: '• ' + lang.getStat('stat.' + stat),
+                    base: '',
+                    bonus: Stats.format(stat, total, {signed: 1, zero: 1}),
+                    total: Stats.format(stat, total, {zero: 1}),
+                });
+            }
+        }
+
+        return rows;
+    }
+
+    getStellarGlimmerStats(data) {
+        let rows = [];
+        let stats = data.stats;
+        let hitCountBase = calcTreeValue(FeatureMultiplierStellarConduct.baseMultiplier(data), data);
+        let masteryBonus = calcTreeValue(FeatureMultiplierStellarGlimmer.masteryMultiplier(data), data) * 100 || 0;
+        let umbrellaDmg = stats.get('dmg_stellarglimmer') * 100;
+        let conductDmg = stats.get('dmg_stellarconduct') * 100;
+        let swirlDmg = stats.get('dmg_stellarswirl') * 100;
+        let umbrellaBase = stats.get('stellarglimmer_multi') * 100;
+        let conductBase = stats.get('stellarconduct_multi') * 100;
+        let swirlBase = stats.get('stellarswirl_multi') * 100;
+        let umbrellaElevation = stats.get('dmg_stellarglimmer_special') * 100;
+        let conductElevation = stats.get('dmg_stellarconduct_special') * 100;
+        let swirlElevation = stats.get('dmg_stellarswirl_special') * 100;
+
+        rows.push({
+            stat: 'stellarconduct_base_multiplier',
+            title: lang.getStat('stat.stellarconduct_base_multiplier'),
+            base: '',
+            bonus: '',
+            total: hitCountBase.toFixed(2),
+        });
+
+        rows.push({
+            stat: 'stellarglimmer_multi',
+            title: lang.getStat('stat.stellarglimmer_multi'),
+            base: Stats.format('stellarglimmer_multi', 0, {zero: 1}),
+            bonus: Stats.format('stellarglimmer_multi', umbrellaBase, {signed: 1, zero: 1}),
+            total: Stats.format('stellarglimmer_multi', umbrellaBase, {zero: 1}),
+        });
+
+        for (let [stat, specific] of [
+            ['stellarconduct_multi', conductBase],
+            ['stellarswirl_multi', swirlBase],
+        ]) {
+            let total = umbrellaBase + specific;
+            rows.push({
+                stat: stat,
+                optional: true,
+                title: '• ' + lang.getStat('stat.' + stat),
+                base: '',
+                bonus: Stats.format(stat, total, {signed: 1, zero: 1}),
+                total: Stats.format(stat, total, {zero: 1}),
+            });
+        }
+
+        rows.push({
+            stat: 'dmg_stellarglimmer',
+            title: lang.getStat('stat.dmg_stellarglimmer'),
+            base: Stats.format('dmg_stellarglimmer', masteryBonus, {zero: 1}),
+            bonus: Stats.format('dmg_stellarglimmer', umbrellaDmg, {signed: 1, zero: 1}),
+            total: Stats.format('dmg_stellarglimmer', masteryBonus + umbrellaDmg, {zero: 1}),
+        });
+
+        for (let [stat, specific] of [
+            ['dmg_stellarconduct', conductDmg],
+            ['dmg_stellarswirl', swirlDmg],
+        ]) {
+            let totalBonus = umbrellaDmg + specific;
+            rows.push({
+                stat: stat,
+                optional: true,
+                title: '• ' + lang.getStat('stat.' + stat),
+                base: '',
+                bonus: Stats.format(stat, totalBonus, {signed: 1, zero: 1}),
+                total: Stats.format(stat, masteryBonus + totalBonus, {zero: 1}),
+            });
+        }
+
+        if (umbrellaElevation || conductElevation || swirlElevation) {
+            rows.push({
+                stat: 'dmg_stellarglimmer_special',
+                title: lang.getStat('stat.dmg_stellarglimmer_special'),
+                base: Stats.format('dmg_stellarglimmer_special', 0, {zero: 1}),
+                bonus: Stats.format('dmg_stellarglimmer_special', umbrellaElevation, {signed: 1, zero: 1}),
+                total: Stats.format('dmg_stellarglimmer_special', umbrellaElevation, {zero: 1}),
+            });
+
+            for (let [stat, specific] of [
+                ['dmg_stellarconduct_special', conductElevation],
+                ['dmg_stellarswirl_special', swirlElevation],
+            ]) {
+                let total = umbrellaElevation + specific;
+                rows.push({
+                    stat: stat,
+                    optional: true,
+                    title: '• ' + lang.getStat('stat.' + stat),
+                    base: '',
+                    bonus: Stats.format(stat, total, {signed: 1, zero: 1}),
+                    total: Stats.format(stat, total, {zero: 1}),
                 });
             }
         }
@@ -401,7 +583,10 @@ class StatsView extends React.Component {
                             <StatsTableBlock items={this.getModifierStats(stats)} />
                         </FloatTitleBlock>
                         <FloatTitleBlock title={lang.get('stat_view.reaction_bonus')}>
-                            <StatsTableBlock items={this.getReactionStats(buildData)} />
+                            <StatsTableBlock items={[...this.getReactionStats(buildData), ...this.getLunarBaseDmgStats(stats), ...this.getElevationStats(stats)]} />
+                        </FloatTitleBlock>
+                        <FloatTitleBlock title={lang.getStat('stat.dmg_stellarglimmer')}>
+                            <StatsTableBlock items={this.getStellarGlimmerStats(buildData)} />
                         </FloatTitleBlock>
                         <FloatTitleBlock title={lang.get('stat_view.other')}>
                             <StatsTableBlock items={this.getOtherStats(stats)} />
@@ -436,7 +621,7 @@ function StatsTableBlock(props) {
         }
 
         if (item.optional) {
-            classes.push('optional')
+            classes.push('optional');
         }
 
         items.push(
@@ -459,7 +644,7 @@ function StatsTableBlock(props) {
 
 
 function calcTreeValue(tree, data) {
-    if (!tree.walk) {return 0}
+    if (!tree.walk) {return 0;}
 
     let compiler = new FeatureCompiler(tree);
     let opts = {dontProcessTree: true, dontProcessStaticValues: true};

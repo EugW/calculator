@@ -24,6 +24,7 @@ export class EnkaApp extends React.Component {
             characters: [],
             artifacts: [],
             player: {},
+            selectedHash: '',
         };
 
         this.api = new EnkaApi();
@@ -31,25 +32,34 @@ export class EnkaApp extends React.Component {
 
     handleChangeUid(value) {
         value = value.replace(/[^a-z0-9_.]/ig, '');
-        this.setState({uid: value});
+        this.setState((state) => ({
+            uid: value,
+            selectedHash: value == state.uid ? state.selectedHash : '',
+        }));
     }
 
     handleLoadUid(uid) {
+        let currentUid = uid || this.state.uid;
+        let currentHash = uid && uid != this.state.uid ? '' : this.state.selectedHash;
         let newState = {
             isLoading: true,
             isError: false,
         };
         if (uid) {
             newState.uid = uid;
+            if (uid != this.state.uid) {
+                newState.selectedHash = '';
+            }
         }
 
         this.setState(newState);
-        this.api.load(uid || this.state.uid, this.state.selectedHash, (data) => this.dataLoaded(data));
+        this.api.load(currentUid, currentHash, (data) => this.dataLoaded(data));
     }
 
     handleChangeHash(hash) {
-        this.state.selectedHash = hash;
-        this.handleLoadUid();
+        this.setState({
+            selectedHash: hash,
+        }, () => this.handleLoadUid());
     }
 
     dataLoaded(data) {
@@ -62,27 +72,38 @@ export class EnkaApp extends React.Component {
             return;
         }
 
-        let hash = '';
-        if (Array.isArray(data.player.hashes)) {
-            for (let item of data.player.hashes) {
+        let hash = this.state.selectedHash || '';
+        let hashes = Array.isArray(data.player.hashes) ? data.player.hashes : this.state.player.hashes;
+
+        if (Array.isArray(hashes)) {
+            let found = false;
+            for (let item of hashes) {
                 if (this.state.selectedHash == item.hash) {
                     hash = item.hash;
+                    found = true;
                     break;
                 }
             }
 
-            if (!hash && data.player.hashes.length) {
-                hash = data.player.hashes[0].hash;
+            if (!found && hashes.length) {
+                hash = hashes[0].hash;
             }
         }
 
+        // Username lookups return the profile list first; follow it with the first profile builds request.
+        let shouldLoadBuilds = Array.isArray(data.player.hashes) && data.characters.length == 0 && !!hash;
+
         this.setState({
-            isLoading: false,
+            isLoading: shouldLoadBuilds,
             isEmpty: data.characters.length == 0,
             characters: data.characters,
             artifacts: data.artifacts,
-            player: data.player,
+            player: { hashes: hashes },
             selectedHash: hash,
+        }, () => {
+            if (shouldLoadBuilds) {
+                this.handleLoadUid();
+            }
         });
     }
 
@@ -131,7 +152,7 @@ export class EnkaApp extends React.Component {
                         <TextInput
                             value={this.state.uid}
                             addClass="enka-uid resizable"
-                            onChange={(value) => {this.handleChangeUid(value)}}
+                            onChange={(value) => {this.handleChangeUid(value);}}
                             onEnter={() => this.handleLoadUid()}
                         />
                         <TitledButton

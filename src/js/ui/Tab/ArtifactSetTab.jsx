@@ -39,12 +39,12 @@ export class ArtifactSetTab extends Tab {
     createContent() {
         return (
             <ArtifactSetView
-                ref={obj => { this.component = obj }}
+                ref={obj => { this.component = obj; }}
                 app={this.app}
                 feature={this.app.getFeature()}
                 displayMode={this.app.getDisplayMode()}
             />
-        )
+        );
     }
 }
 
@@ -65,6 +65,7 @@ class ArtifactSetView extends React.Component {
 
         this.factory = new WorkerFactorySuggestSet({
             callback: (data) => this.completeCallback(data),
+            errorCallback: (data) => this.errorCallback(data),
         });
     }
 
@@ -176,6 +177,11 @@ class ArtifactSetView extends React.Component {
         });
     }
 
+    errorCallback(data) {
+        console.error('Artifact set worker error:', data.error);
+        this.setState({ isLoading: false });
+    }
+
     componentDidUpdate() {
         this.triggerGenerate();
     }
@@ -263,7 +269,7 @@ function ArtifactSetItem(props) {
                 displayMode={props.displayMode}
             />
         </div>
-    )
+    );
 }
 
 function ArtifactSetDetail(props) {

@@ -2,19 +2,19 @@ import json
 import os
 import re
 import static
+from source_config import get_excel_dir, load_text_map
 
 dirname = os.path.dirname(__file__)
-data_dir = os.path.join(dirname, '../../dimrepo/ExcelBinOutput/')
+data_dir = str(get_excel_dir()) + os.sep
 out_dir = os.path.join(dirname, '../../data/raw/')
 
 
 def parse_lang(name):
-    file = open(data_dir + f'../TextMap/TextMap{name}.json', 'r')
-    return json.load(file)
+    return load_text_map(name)
 
 
 def parse_proud():
-    file = open(data_dir + 'ProudSkillExcelConfigData.json', 'r')
+    file = open(data_dir + 'ProudSkillExcelConfigData.json', 'r', encoding='utf-8')
 
     result = {}
 
@@ -25,8 +25,8 @@ def parse_proud():
 
 
 def parse_skills():
-    file = open(data_dir + 'AvatarSkillDepotExcelConfigData.json', 'r')
-    file2 = open(data_dir + 'AvatarSkillExcelConfigData.json', 'r')
+    file = open(data_dir + 'AvatarSkillDepotExcelConfigData.json', 'r', encoding='utf-8')
+    file2 = open(data_dir + 'AvatarSkillExcelConfigData.json', 'r', encoding='utf-8')
 
     result = {}
     skills = {}
@@ -101,7 +101,7 @@ def parse_char_skills(charName, skills, proud, depotId):
 
 
 def parse_chars():
-    file = open(data_dir + 'AvatarExcelConfigData.json', 'r')
+    file = open(data_dir + 'AvatarExcelConfigData.json', 'r', encoding='utf-8')
 
     skills = parse_skills()
     proud = parse_proud()

@@ -8,25 +8,37 @@ export class CCritRate extends CSum {
         let result = super.compile(opts);
         return `Math.max(0, Math.min(1, ${result}))`;
     }
+
+    compileWGSL(opts) {
+        let result = super.compileWGSL(opts);
+        return `clamp(${result}, 0.0, 1.0)`;
+    }
 }
 
-export class CCritDmg extends CSumPlusOne {}
+export class CCritDmg extends CSumPlusOne {
+    // Inherits compileWGSL from CSumPlusOne
+}
 
 export class CDamageResult extends CBlock {
-    getType() {return 'damage_result'}
-    isCollapsable() {return false}
+    getType() {return 'damage_result';}
+    isCollapsable() {return false;}
 
 
     compile(opts) {
         return '[' + this.compileChildrens(opts).join(', ') + ']';
     }
 
-    getSignature() { return null }
+    compileWGSL(opts) {
+        let parts = this.compileChildrensWGSL(opts);
+        return `vec3<f32>(${parts.join(', ')})`;
+    }
+
+    getSignature() { return null; }
 }
 
 export class CHeal extends CMulti {
-    getType() {return 'heal_result'}
-    isCollapsable() {return false}
+    getType() {return 'heal_result';}
+    isCollapsable() {return false;}
 
     /**
      * @returns {CBlock}
@@ -42,12 +54,16 @@ export class CHeal extends CMulti {
                 new CVarValue({ref: varNormal}),
             ]),
         ]);
+    }
+
+    makeResultWGSL(opts) {
+        return this.makeResult(opts);
     }
 }
 
 export class CShield extends CMulti {
-    getType() {return 'shield_result'}
-    isCollapsable() {return false}
+    getType() {return 'shield_result';}
+    isCollapsable() {return false;}
 
     /**
      * @returns {CBlock}
@@ -64,10 +80,14 @@ export class CShield extends CMulti {
             ]),
         ]);
     }
+
+    makeResultWGSL(opts) {
+        return this.makeResult(opts);
+    }
 }
 
 export class CDamage extends CMulti {
-    getType() {return 'damage_result'}
+    getType() {return 'damage_result';}
 
     /**
      * @returns {Array.<CBlock>}
@@ -124,10 +144,15 @@ export class CDamage extends CMulti {
             ]),
         ]);
     }
+
+    makeResultWGSL(opts) {
+        // Reuse the same tree structure - compileWGSL will handle the translation
+        return this.makeResult(opts);
+    }
 }
 
 export class CDamageRotation extends CMulti {
-    getType() {return 'damage_rotation_result'}
+    getType() {return 'damage_rotation_result';}
 
     /**
      * @returns {CBlock}
@@ -140,8 +165,13 @@ export class CDamageRotation extends CMulti {
             new CDamageResult(this.vars),
         ]);
     }
+
+    makeResultWGSL(opts) {
+        return this.makeResult(opts);
+    }
 }
 
 export class CStaticValue extends CHeal {
-    getType() {return 'static_result'}
+    getType() {return 'static_result';}
+    // Inherits makeResultWGSL from CHeal
 }

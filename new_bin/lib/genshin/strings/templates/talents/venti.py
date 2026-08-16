@@ -58,6 +58,24 @@ char_venti = TemplateList(
             [1],
         ],
     ),
+    breeze_of_reminiscence_buffed=Template(
+        patterns=[
+            (r'<br>', '\\n'),
+        ],
+        sentences=[
+            ['ignore', 'ignore'],
+            [],
+            ['ignore'],
+            [],
+            [],
+            ['ignore'],
+            ['ignore'],
+        ],
+        results=[
+            [0],
+            [1, 2, 4, 5, 6],
+        ],
+    ),
     hurricane_of_freedom=Template(
         sentences=[
             ['dmg_anemo', 'ignore'],
@@ -74,6 +92,20 @@ char_venti = TemplateList(
         results=[
             [0],
             [1],
+        ],
+    ),
+    storm_of_defiance_buffed=Template(
+        patterns=[
+            (r'<br>', '\\n'),
+        ],
+        sentences=[
+            ['ignore'],
+            ['ignore'],
+            ['ignore'],
+        ],
+        results=[
+            [0],
+            [1, 2],
         ],
     ),
 )

@@ -135,6 +135,8 @@ const Talents = new DbObjectTalents({
 
 const A4BloomBonus = 0.002;
 const A4BloomBonusCap = 100;
+const A4LunarBloomBonus = 0.0007;
+const A4LunarBloomBonusCap = 35;
 const A4QuickenBonus = 0.0008;
 const A4QuickenBonusCap = 40;
 const C2HealValue = 20;
@@ -153,6 +155,14 @@ const buffBloom = new PostEffectStatsHP({
 const buffQuicken = new PostEffectStatsHP({
     percent: new StatTable('dmg_reaction_quicken', [A4QuickenBonus]),
     statCap: new StatTable('', [A4QuickenBonusCap]),
+    conditions: [
+        new ConditionAscensionChar({ascension: 4}),
+        new ConditionBoolean({name: 'baizhu_all_things_are_of_the_earth'}),
+    ],
+});
+const buffLunarBloom = new PostEffectStatsHP({
+    percent: new StatTable('dmg_reaction_lunarbloom', [A4LunarBloomBonus]),
+    statCap: new StatTable('', [A4LunarBloomBonusCap]),
     conditions: [
         new ConditionAscensionChar({ascension: 4}),
         new ConditionBoolean({name: 'baizhu_all_things_are_of_the_earth'}),
@@ -421,6 +431,7 @@ export const Baizhu = new DbObjectChar({
             ],
         }),
         buffBloom,
+        buffLunarBloom,
         buffQuicken,
     ],
     constellation: new DbObjectConstellation([
@@ -529,6 +540,14 @@ export const Baizhu = new DbObjectChar({
                 from: 'baizhu_max_hp',
                 percent: new StatTable('dmg_reaction_bloom', [A4BloomBonus]),
                 statCap: new StatTable('', [A4BloomBonusCap]),
+                conditions: [
+                    new ConditionBoolean({name: 'party.baizhu_all_things_are_of_the_earth'}),
+                ],
+            }),
+            new PostEffectStats({
+                from: 'baizhu_max_hp',
+                percent: new StatTable('dmg_reaction_lunarbloom', [A4LunarBloomBonus]),
+                statCap: new StatTable('', [A4LunarBloomBonusCap]),
                 conditions: [
                     new ConditionBoolean({name: 'party.baizhu_all_things_are_of_the_earth'}),
                 ],

@@ -19,6 +19,7 @@ export class SuggestProgressModal extends React.Component {
             skipped: 0,
             isVisible: false,
             threads: [],
+            error: null,
         };
     }
 
@@ -26,7 +27,7 @@ export class SuggestProgressModal extends React.Component {
         let threads = [];
 
         for (let i = 0; i < data.threads; ++i) {
-            threads.push({count: 0, total: 0, skipped: 0});
+            threads.push({ count: 0, total: 0, skipped: 0 });
         }
 
         this.closeCallback = data.closeCallback;
@@ -38,11 +39,16 @@ export class SuggestProgressModal extends React.Component {
             isVisible: true,
             threads: threads,
             started: performance.now(),
+            error: null,
         });
     }
 
+    showError(errorMessage) {
+        this.setState({ error: errorMessage });
+    }
+
     hide() {
-        this.setState({isVisible: false});
+        this.setState({ isVisible: false });
     }
 
     handleClose() {
@@ -84,12 +90,12 @@ export class SuggestProgressModal extends React.Component {
             let threadId = threads.length;
 
             if (data.total) {
-                content = <ProgressBar addClass="small" count={data.count} total={data.total} />
+                content = <ProgressBar addClass="small" count={data.count} total={data.total} />;
             } else {
-                content = <div className="loading">{lang.get('artifacts_suggest.thread_loading')}</div>
+                content = <div className="loading">{lang.get('artifacts_suggest.thread_loading')}</div>;
             }
 
-            threads.push(<div key={'item'+ threadId} className="thread">{content}</div>);
+            threads.push(<div key={'item' + threadId} className="thread">{content}</div>);
         }
 
         return (
@@ -101,11 +107,16 @@ export class SuggestProgressModal extends React.Component {
             >
                 <ProgressBar count={this.state.count} total={this.state.total} />
                 <ElapsedTime started={this.state.started} />
+                {this.state.error && (
+                    <div className="error-message" style={{ color: '#ff6b6b', padding: '10px', background: 'rgba(255,107,107,0.1)', borderRadius: '4px', margin: '10px 0' }}>
+                        <strong>Error:</strong> {this.state.error}
+                    </div>
+                )}
                 {this.state.threads.length > 1 ?
-                <>
-                    <div className="info-line rem">{lang.get('artifacts_suggest.threads_info')}</div>
-                    {threads}
-                </> : ''}
+                    <>
+                        <div className="info-line rem">{lang.get('artifacts_suggest.threads_info')}</div>
+                        {threads}
+                    </> : ''}
 
                 <ControlsBar>
                     <ControlsBarDivider />
@@ -147,5 +158,5 @@ function formatSeconds(sec) {
         parts.unshift(0);
     }
 
-    return parts.map((i) => {return String(i).padStart(2, '0')}).join(':');
+    return parts.map((i) => { return String(i).padStart(2, '0'); }).join(':');
 }

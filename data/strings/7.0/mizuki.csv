@@ -1,0 +1,8 @@
+category;name;rus;eng
+feature_skill;mizuki_stellarswirl_em_buff;Увеличение урона Звёздного рассеивания согласно мастерству стихий;Elemental Mastery-Based Stellar Swirl DMG Increase
+feature_skill;mizuki_stellarswirl_bonus;Бонус урона Звёздного рассеивания;Stellar Swirl DMG Bonus
+feature_other;mizuki_moonlit_dream_attack;Дополнительный Анемо урон Двадцати трёх ночей ожидания;Twenty-Three Nights' Awaiting Additional Anemo DMG
+feature_other;mizuki_moonlit_dream_stellarswirl;Дополнительный урон Звёздного рассеивания Двадцати трёх ночей ожидания;Twenty-Three Nights' Awaiting Stellar Swirl DMG
+feature_other;mizuki_vast_be_the_dream_dmg;Усиленный периодический Анемо урон;Enhanced Periodic Anemo DMG
+feature_other;mizuki_vast_be_the_dream_stellarswirl;Дополнительный урон Звёздного рассеивания Безграничного сна;Vast Be the Dream Stellar Swirl DMG
+feature_other;mizuki_buds_warm_lucid_springs_heal;Дополнительное лечение Цветов у воды;Buds Warm Lucid Springs Extra Healing

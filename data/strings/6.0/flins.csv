@@ -1,0 +1,22 @@
+category;name;rus;eng
+feature_skill;flins_manifest_hit_1;Урон удара проявления 1;Manifest Hit 1 DMG
+feature_skill;flins_manifest_hit_2;Урон удара проявления 2;Manifest Hit 2 DMG
+feature_skill;flins_manifest_hit_3;Урон удара проявления 3;Manifest Hit 3 DMG
+feature_skill;flins_manifest_hit_4;Урон удара проявления 4;Manifest Hit 4 DMG
+feature_skill;flins_manifest_hit_5;Урон удара проявления 5;Manifest Hit 5 DMG
+feature_skill;flins_manifest_charged;Заряженный удар проявления;Manifest Charged DMG
+feature_skill;flins_northland_spearstorm_dmg;Урон северного копейного шторма;Northland Spearstorm DMG
+feature_skill;flins_spearstorm_cd;КВ копейного шторма;Spearstorm CD
+feature_skill;flins_manifest_duration;Длительность проявления;Manifest Duration
+feature_burst;flins_initial_dmg;Начальный урон;Initial DMG
+feature_burst;flins_middle_phase_dmg;Урон Лунного заряда средней фазы;Middle Phase Lunar-Charged DMG
+feature_burst;flins_final_phase_dmg;Урон Лунного заряда финальной фазы;Final Phase Lunar-Charged DMG
+feature_burst;flins_thunderous_symphony_dmg;Урон Лунного заряда грозовой симфонии;Thunderous Symphony Lunar-Charged DMG
+feature_burst;flins_thunderous_additional_dmg;Дополнительный урон Лунного заряда грозовой симфонии;Thunderous Symphony Additional Lunar-Charged DMG
+feature_skill;flins_c2_lunar_dmg;Лунный урон С2;C2 Lunar DMG
+feature_other;flins_lunar_bonus;Базовый бонус Лунного заряда;Lunar-Charged Base Bonus
+feature_other;flins_em_from_atk;Бонус МС от Силы атаки;EM from ATK Bonus
+
+talent_name;flins_old_world_secrets;Дар лунного знамения: Секреты старого мира;Moonsign Benediction: Old World Secrets
+
+talent_descr;flins_old_world_secrets;Базовый урон electro{Лунного заряда} увеличивается на 0,7% за каждые 100 ед. name{силы атаки} Флинса. Максимум 14%.;electro{Lunar-Charged} Base DMG is increased by 0.7% for every 100 name{ATK} Flins has, max 14%.

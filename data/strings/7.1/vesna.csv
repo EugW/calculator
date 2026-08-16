@@ -1,0 +1,24 @@
+category;name;rus;eng
+talent_name;n11430001;Клинок духа;Spirit Blade
+talent_descr;n11430001;Состояние длится 15 сек., начинается с 2 ед. Могущества, даёт неудаляемую Анемо инфузию и последовательно открывает Выпад, Падение и Танец. Танец можно применить 3 раза, после чего состояние завершается. C1 повышает предел до 4, а первое применение Танца не расходует Могущество.;The state lasts 15s, starts with 2 Spirit Blade Force, grants an unoverrideable Anemo infusion, and advances through Pierce, Plunge, and Dance. Dance can be used 3 times before the state ends. C1 raises this to 4 and makes the first Dance cost no Force.
+talent_name;vesna_spirit_blade_force;Могущество клинка духа;Spirit Blade Force
+talent_descr;vesna_spirit_blade_force;Начальное значение и максимум равны 2. Особые навыки расходуют Могущество. Перо духа и взрыв стихии восстанавливают по 1 ед. Тайминг расходования и восстановления задаётся в ротации вручную.;Starts at and is capped at 2. Special Skills consume Force. Spirit Feather and the Burst each restore 1. Consumption and restoration timing are explicit rotation inputs.
+talent_name;vesna_spirit_blade_sequence;Последовательность Клинка духа;Spirit Blade Sequence
+talent_descr;vesna_spirit_blade_sequence;Особый навык последовательно проходит Выпад, Падение и Танец. Танец можно применить 3 раза, после третьего применения Весна выходит из состояния. C1 позволяет 4 применения и завершает состояние после четвёртого.;The special Skill advances through Pierce, Plunge, and Dance. Dance can be used 3 times and the third use ends the state. C1 allows 4 Dance uses and the fourth ends the state.
+talent_name;vesna_unruffled_clear;Сброс Выдержки;Clear Unruffled
+feature_skill;vesna_spirit_blade_inception;Урон Зарождения;Inception DMG
+feature_skill;vesna_spirit_blade_pierce;Урон Выпада;Spirit Blade Pierce DMG
+feature_skill;vesna_spirit_blade_plunge;Урон Весны при Падении;Vesna Plunge DMG
+feature_skill;vesna_spirit_blade_plunge_blade;Урон Клинка духа при Падении;Spirit Blade Plunge DMG
+feature_skill;vesna_stellar_spirit_blade_plunge;Урон Звёздного клинка при Падении;Stellar Spirit Blade Plunge DMG
+feature_skill;vesna_spirit_blade_dance;Урон Клинка духа при Танце;Spirit Blade Dance DMG
+feature_skill;vesna_stellar_spirit_blade_dance;Урон Звёздного клинка при Танце;Stellar Spirit Blade Dance DMG
+feature_skill;vesna_spirit_blade_dance_final;Финальный урон Клинка духа при Танце;Spirit Blade Dance Final DMG
+feature_skill;vesna_stellar_spirit_blade_dance_final;Финальный урон Звёздного клинка при Танце;Stellar Spirit Blade Dance Final DMG
+feature_skill;vesna_spirit_feather;Урон Пера духа;Spirit Feather DMG
+feature_skill;vesna_spirit_blade_duration;Длительность Клинка духа;Spirit Blade Duration
+feature_burst;vesna_spirit_blade_burst;Урон Клинка духа: Взрыв;Spirit Blade Burst DMG
+feature_burst;vesna_stellar_spirit_blade_burst;Урон Звёздного клинка: Взрыв;Stellar Spirit Blade Burst DMG
+feature_skill;vesna_c6_spirit_blade_tread;Анемо урон Поступи C6;C6 Tread Anemo DMG
+feature_skill;vesna_c6_stellar_spirit_blade_tread;Урон Звёздного клинка Поступи C6;C6 Tread Direct Stellar Swirl DMG
+feature_skill;vesna_c6_tread_spirit_feather;Урон Пера духа от Поступи C6;C6 Tread Spirit Feather DMG

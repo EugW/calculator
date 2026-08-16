@@ -1,31 +1,61 @@
-import { REAL_TOTAL } from "../db/Constants";
 import { Artifact } from "./Artifact";
-import { filterPostEffectTreeByStats } from "./Build/Data";
+import { getPostEffectStatDependencyClosure } from "./Build/Data";
 import { Condition } from "./Condition";
-import { CBlock } from "./Feature2/Compile/Types";
 import { FeatureCompiler } from "./Feature2/Compiler";
-import { isPercent, Stats } from "./Stats";
-
-const FEATURE_TYPE_INDEX = {
-    'normal': 0,
-    'crit': 1,
-    'average': 2,
-};
+import { Stats } from "./Stats";
+import { GPUArtifactOptimizer } from "./GPUArtifactOptimizer";
+import {
+    GPU_TOP_K_CAPACITY,
+    normalizeGPUOptimizerBatchSize,
+} from "./GPUOptimizerContract";
+import {
+    compareOptimizerResults,
+    DEFAULT_OPTIMIZER_RESULT_LIMIT,
+    getArtifactCombinationCounts,
+    remapCombinationIndex,
+} from "./OptimizerResult";
+import {
+    createOptimizationPlan,
+    createOptimizationPlanConstraints,
+} from "./OptimizationPlan";
+import { compileOptimizationPlanCPU } from "./OptimizationPlanCPU";
 
 const DYNAMIC_STATS = ['crit_value'];
 
+// Global GPU optimizer instance (reused across optimizations)
+let gpuOptimizer = null;
+
 export class ArtifactsSuggest {
     constructor(data) {
-        this.build = data.build;
+        this.sourceBuild = data.build;
+        this.build = null;
         this.artifacts = data.artifacts;
         this.featureName = data.featureName;
         this.featureType = data.featureType;
         this.settings = data.settings;
-        this.limit = data.limit || 20;
+        this.requestedLimit = data.limit === undefined
+            ? DEFAULT_OPTIMIZER_RESULT_LIMIT
+            : data.limit;
+        this.limit = data.limit || DEFAULT_OPTIMIZER_RESULT_LIMIT;
+        this.useGPU = data.useGPU === true; // Disabled by default, opt-in
+        this.gpuBatchSize = normalizeGPUOptimizerBatchSize(data.gpuBatchSize);
+        this.combinationIndexContext = data.combinationIndexContext || null;
+        this.showBeta = data.showBeta !== false; // Default to true for backwards compatibility
     }
 
     prepare() {
-        this.currentArts = this.build.getArtifacts();
+        this.optimizationPlanConstraints = createOptimizationPlanConstraints(this.settings);
+        this.settings = Object.assign({}, this.settings, {
+            setMinValues: this.optimizationPlanConstraints.setConstraints.minValues,
+            setMaxValues: this.optimizationPlanConstraints.setConstraints.maxValues,
+        });
+
+        // CalcObjectArtifacts#get returns its live slot map. Keep a snapshot so
+        // clearArtifacts does not also erase the empty-slot fallbacks. Work on
+        // a fresh clone so prepare() is repeatable and never strips the caller's
+        // equipped artifacts or modifies its artifact settings.
+        this.currentArts = Object.assign({}, this.sourceBuild.getArtifacts());
+        this.build = this.sourceBuild.clone();
         this.build.clearArtifacts();
         // this.addArtifactPostSettings();
         this.build.artifacts.modifySettings(this.settings.sets_settings);
@@ -48,16 +78,10 @@ export class ArtifactsSuggest {
         this.featureVariants = {};
         this.usedStats = [];
         let variationData = [];
+        let planVariations = [];
 
-        let statFilterUsedStats = [];
-        for (let name of Object.keys(this.settings.stats || {})) {
-            name = name.replace('_min', '').replace('_max', '');
-            statFilterUsedStats.push(name);
-            statFilterUsedStats.push(name +'_base');
-            if (REAL_TOTAL.includes(name)) {
-                statFilterUsedStats.push(name +'_percent');
-            }
-        }
+        let statBounds = this.optimizationPlanConstraints.statConstraints.bounds;
+        let statFilterUsedStats = this.optimizationPlanConstraints.statConstraints.targetStats;
 
         this.usedStats = this.usedStats.concat(statFilterUsedStats);
 
@@ -96,39 +120,107 @@ export class ArtifactsSuggest {
                 this.addDynamicStatsFromItems(vBuildData, feature.items);
             }
 
+            // Track set info for GPU variation lookup
+            let setInfo = [];
+            for (let vItem of variant) {
+                if (vItem.setId) {
+                    setInfo.push({setName: vItem.setId, pieces: vItem.pieces});
+                }
+            }
+
             variationData.push({
                 variandId: variandId,
                 feature: feature,
                 buildData: vBuildData,
+                setInfo: setInfo,
             });
         }
 
         for (let item of variationData) {
             let activePostTree = item.buildData.postEffectTreeByPriority();
+            let constraintData = makeStatConstraintData(
+                statBounds,
+                activePostTree,
+                statFilterUsedStats
+            );
             let postTrees = this.filterPostEffects(item.feature, item.buildData);
 
             let tree = item.feature.getTree(item.buildData, compilerOpts);
             let compiler = new FeatureCompiler(tree, postTrees);
 
-            let usedStats = compiler.usedStats;
+            let usedStats = [...new Set(compiler.usedStats.concat(constraintData.usedStats))];
             this.usedStats = this.usedStats.concat(usedStats);
-            usedStats = usedStats.concat(statFilterUsedStats);
             item.buildData.stats.ensure(usedStats);
 
             compilerOpts.staticStats = this.makeStaticStats(usedStats);
 
             compiler.prepare(item.buildData, compilerOpts);
             compiler.compile(compilerOpts);
+            const objectiveUsedStats = compiler.usedStats.slice();
 
-            compiler.checkFunc = makeStatCheckFunc(this.settings.stats, activePostTree);
+            // Keep the complete constraint dependency closure available to all
+            // backends, including stats read only by a relevant post effect.
+            for (const stat of constraintData.usedStats) {
+                if (!compiler.usedStats.includes(stat)) {
+                    compiler.usedStats.push(stat);
+                }
+            }
+
+            this.usedStats = this.usedStats.concat(compiler.usedStats);
+            compiler.constraintData = constraintData;
+            compiler.setInfo = item.setInfo;  // For GPU variation lookup
 
             this.featureVariants[item.variandId] = compiler;
+            planVariations.push({
+                id: item.variandId,
+                objectiveAst: compiler.processed,
+                objectiveUsedStats,
+                constraintPostEffects: constraintData.postEffects,
+                constraintUsedStats: constraintData.usedStats,
+                constraintTargetStats: constraintData.targetStats,
+                setInfo: item.setInfo,
+            });
         }
 
+        this.planVariationInputs = planVariations;
+        this.setOptimizationObjective(this.featureType);
+
+        this.usedStats = [...new Set(this.usedStats)];
         this.buildData.stats.truncate(this.usedStats);
         this.buildData.stats.ensure(this.usedStats);
 
         this.prepareArtifacts();
+    }
+
+    /**
+     * Rebind the selected result component by constructing a new immutable
+     * semantic plan over the already prepared shared AST references. This is
+     * explicit so a caller cannot mutate featureType behind a compiled CPU or
+     * GPU program and accidentally evaluate a different objective.
+     */
+    setOptimizationObjective(objective) {
+        if (!this.planVariationInputs) {
+            throw new Error('Artifact suggester must be prepared before rebinding its objective');
+        }
+
+        const plan = createOptimizationPlan({
+            constraints: this.optimizationPlanConstraints,
+            objective,
+            variations: this.planVariationInputs,
+        });
+        const cpuProgram = compileOptimizationPlanCPU(plan);
+
+        this.featureType = objective;
+        this.optimizationPlan = plan;
+        this.cpuOptimizationProgram = cpuProgram;
+
+        // Temporary compatibility surface for diagnostics and callers that
+        // inspect the prepared feature compiler. Production evaluation below
+        // is driven exclusively by the shared plan lowering.
+        for (const variation of plan.variations) {
+            const compiler = this.featureVariants[variation.id];
+            compiler.checkFunc = cpuProgram.variationsById[variation.id].checkStats;
+        }
     }
 
     getVariations() {
@@ -217,7 +309,9 @@ export class ArtifactsSuggest {
             if (this.slots[slot].length == 0) {
                 let curArt = this.currentArts[slot];
                 if (curArt) {
+                    this.setNames[curArt.set] = 1;
                     curArt.calcCache(this.usedStats);
+                    curArt.concatFunc = curArt.calculated.getConcatFunc();
                     this.slots[slot].push(curArt);
                 } else {
                     let emptyArtifact = new Artifact(5, 0, slot, 'none', 'none', []);
@@ -230,11 +324,43 @@ export class ArtifactsSuggest {
 
             this.totalCombinations *= this.slots[slot].length;
         }
+
+        if (!Number.isSafeInteger(this.totalCombinations) || this.totalCombinations < 1) {
+            throw new RangeError(
+                `CPU optimizer requires a positive safe-integer Cartesian product; got ${this.totalCombinations}`
+            );
+        }
+
+        const globalCounts = this.combinationIndexContext?.globalCounts;
+        if (globalCounts) {
+            let globalTotal = 1;
+            for (const slot of this.optimizationPlan.ordering.cartesianSlotOrder) {
+                const count = globalCounts[slot];
+                if (!Number.isInteger(count) || count < 1) {
+                    throw new RangeError(`CPU optimizer global Cartesian count for "${slot}" is invalid`);
+                }
+                globalTotal *= count;
+            }
+            if (!Number.isSafeInteger(globalTotal)) {
+                throw new RangeError(
+                    `CPU optimizer global Cartesian index exceeds Number.MAX_SAFE_INTEGER; got ${globalTotal} combinations`
+                );
+            }
+        }
     }
 
     prepareArtifactSets() {
         let setPieces = {};
-        for (let art of this.artifacts) {
+        let availableArtifacts = [].concat(this.artifacts);
+        let candidateSlots = new Set(this.artifacts.map((art) => {return art.slot;}));
+
+        for (let [slot, art] of Object.entries(this.currentArts)) {
+            if (art && !candidateSlots.has(slot)) {
+                availableArtifacts.push(art);
+            }
+        }
+
+        for (let art of availableArtifacts) {
             if (!setPieces[art.set]) {
                 setPieces[art.set] = {};
             }
@@ -243,7 +369,7 @@ export class ArtifactsSuggest {
 
         let setMaxPieces = {};
         for (let setName of Object.keys(setPieces)) {
-            setMaxPieces[setName] = Object.keys(setPieces[setName]).length
+            setMaxPieces[setName] = Object.keys(setPieces[setName]).length;
         }
 
 
@@ -261,7 +387,7 @@ export class ArtifactsSuggest {
 
         let activePostEffects = this.buildData.getActivePostEffects().length;
 
-        for (let setId of DB.Artifacts.Sets.getKeys()) {
+        for (let setId of DB.Artifacts.Sets.getKeys(this.showBeta)) {
             let set = DB.Artifacts.Sets.get(setId);
             let bonuses = set.getConditionsByPieces();
 
@@ -277,7 +403,7 @@ export class ArtifactsSuggest {
 
             for (let pieces = 1; pieces < bonuses.length; ++pieces) {
                 if (pieces > maxPieces) {
-                    break
+                    break;
                 }
 
                 buildData.addSettings({[Artifact.settingName(setId)]: pieces});
@@ -287,18 +413,20 @@ export class ArtifactsSuggest {
 
                 if (conditions.length) {
                     pieceSettings = Condition.allConditionsOn(conditions, baseSettings);
+                    let calculatedSettings = getCalculatedConditionSettings(conditions, baseSettings);
                     for (let key of Object.keys(pieceSettings)) {
-                        if (baseSettings.hasOwnProperty(key)) {
+                        if (baseSettings.hasOwnProperty(key) && !calculatedSettings.hasOwnProperty(key)) {
                             pieceSettings[key] = baseSettings[key];
                         }
                     }
-                    let localSettings = Object.assign({}, pieceSettings, baseSettings);
+                    let localSettings = Object.assign({}, baseSettings, pieceSettings);
 
                     let stats = new Stats();
 
                     for (let cond of conditions) {
                         let data = cond.getData(localSettings);
                         stats.concat(data.stats);
+                        Object.assign(localSettings, data.settings);
                     }
 
                     // stats.truncate(this.usedStats); // TODO нужно пересчитать после обработки всех variation
@@ -307,9 +435,11 @@ export class ArtifactsSuggest {
                     buildData.addSettings(pieceSettings);
                 }
 
+                setStats = this.calculateSetStats(setId, pieces, setTotalSettings);
+
                 // change variation if new togglable condition or post effect appears
                 let curActivePostEffects = buildData.getActivePostEffects().length;
-                let curSerializableConditions = conditions.filter((i) => {return i.isSerializable()}).length
+                let curSerializableConditions = conditions.filter((i) => {return i.isSerializable();}).length;
                 if (curActivePostEffects > prevActivePostEffects) {
                     prevActivePostEffects = curActivePostEffects;
                     featureVariation = artPiecesName + pieces;
@@ -319,7 +449,6 @@ export class ArtifactsSuggest {
 
                 if (Object.keys(setStats).length || setPostStats || featureVariation) {
                     let s = new Stats(setStats);
-                    s.processPercent();
 
                     if (!this.setData[setId]) {
                         this.setData[setId] = {};
@@ -333,6 +462,25 @@ export class ArtifactsSuggest {
                 }
             }
         }
+    }
+
+    calculateSetStats(setId, pieces, setSettings) {
+        let build = this.build.clone();
+        let slots = DB.Artifacts.Slots.getKeys();
+        let fakeArtifacts = [];
+
+        for (let i = 0; i < pieces && i < slots.length; ++i) {
+            fakeArtifacts.push(new Artifact(5, 20, slots[i], setId, '', []));
+        }
+
+        build.artifacts.replace(fakeArtifacts);
+        build.artifacts.modifySettings(Object.assign({}, this.settings.sets_settings, setSettings));
+
+        let buildData = build.getBuildData();
+        let stats = new Stats(buildData.stats);
+        stats.concat(this.buildData.stats.revert());
+
+        return normalizeSetStats(stats);
     }
 
     prepareDynamicStats() {
@@ -402,27 +550,32 @@ export class ArtifactsSuggest {
     getResult(callback) {
         let combination;
         let results = [];
-        let minimalValue = 0;
+        let minimalValue = Number.NEGATIVE_INFINITY;
         this.currentCombinations = 0;
         this.skippedCombinations = 0;
 
         let artifacts;
         let artSets;
         let artStats;
-        let featureData;
         let value;
-        let featureIndex = FEATURE_TYPE_INDEX[this.featureType];
+        const localCombinationCounts = getArtifactCombinationCounts(this.slots);
 
-        let initialStatFunc = this.buildData.stats.getSetFunc();
-        let generator = artifactCombinations(this.settings, this.setNames, this.slots, (val) => {
+        // Every run starts from and leaves behind the prepared build state.
+        // Candidate stats are passed directly to the compiled feature instead
+        // of replacing buildData.stats with the last visited combination.
+        let initialStats = new Stats(this.buildData.stats);
+        let initialStatFunc = initialStats.getSetFunc();
+        let generator = artifactCombinations(this.cpuOptimizationProgram, this.setNames, this.slots, (val) => {
             this.currentCombinations += val;
             this.skippedCombinations += val;
-            if (callback && this.currentCombinations % 50000 == 0 || val > 50000) {
+            if (callback && (this.currentCombinations % 50000 == 0 || val > 50000)) {
                 callback(this.currentCombinations, this.totalCombinations, this.skippedCombinations);
             }
         });
 
-        callback(this.currentCombinations, this.totalCombinations, this.skippedCombinations);
+        if (callback) {
+            callback(this.currentCombinations, this.totalCombinations, this.skippedCombinations);
+        }
 
         while (combination = generator.next()) {
             if (combination.done) {
@@ -442,69 +595,121 @@ export class ArtifactsSuggest {
                 }
             }
 
-            let variation = [];
             for (let id in artSets) {
                 let sdata = this.setData[ id ] && this.setData[ id ][ artSets[id] ];
                 if (!sdata) continue;
-
-                if (sdata.variation) {
-                    variation.push(sdata.variation)
-                }
 
                 if (sdata.concatFunc) {
                     sdata.concatFunc(artStats);
                 }
             }
 
-            variation = variation.sort().join('-') || 'default';
-            let compiler = this.featureVariants[variation];
+            const variationId = this.cpuOptimizationProgram.resolveVariationIdTrusted(artSets);
+            value = this.cpuOptimizationProgram.evaluate(variationId, artStats);
 
-            // check for stat requirements
-            if (!compiler.checkFunc || compiler.checkFunc(artStats)) {
-                this.buildData.stats = artStats;
-                featureData = compiler.execute(this.buildData);
-                value = featureData[featureIndex] || 0;
-
-                if (value >= minimalValue) {
-                    results.push({
-                        value: value,
-                        artifacts: artifacts,
-                    });
-                }
-            } else {
+            if (value !== undefined && value >= minimalValue) {
+                results.push({
+                    value: value,
+                    artifacts: artifacts,
+                    combinationIndex: remapCombinationIndex(
+                        this.currentCombinations - 1,
+                        localCombinationCounts,
+                        this.combinationIndexContext
+                    ),
+                });
+            } else if (value === undefined) {
                 ++this.skippedCombinations;
             }
 
-            if (callback && this.currentCombinations % 50000 == 0) {
+            if (this.currentCombinations % 50000 == 0) {
                 if (results.length > this.limit * 100) {
                     truncateResults(results, this.limit);
                     minimalValue = results[results.length - 1].value;
                 }
 
-                callback(this.currentCombinations, this.totalCombinations, this.skippedCombinations);
+                if (callback) {
+                    callback(this.currentCombinations, this.totalCombinations, this.skippedCombinations);
+                }
             }
         }
 
-        callback(this.currentCombinations, this.totalCombinations, this.skippedCombinations);
+        if (callback) {
+            callback(this.currentCombinations, this.totalCombinations, this.skippedCombinations);
+        }
         truncateResults(results, this.limit);
         removeEmptyArtifacts(results);
+        if (!this.combinationIndexContext) {
+            removeCombinationIndices(results);
+        }
 
         return results;
     }
 
+    /**
+     * Get results using GPU compute
+     * @param {Function} callback - Progress callback
+     * @returns {Promise<Array>}
+     */
+    async getResultGPU(callback) {
+        if (this.requestedLimit !== GPU_TOP_K_CAPACITY) {
+            throw new RangeError(
+                `GPU optimizer result limit is fixed at ${GPU_TOP_K_CAPACITY}; got ${this.requestedLimit}`
+            );
+        }
 
+        // A worker can be reused after adapter/device loss. Recreate the
+        // optimizer whenever its device is absent instead of caching an
+        // unusable instance for every later run.
+        if (!gpuOptimizer || !gpuOptimizer.device) {
+            gpuOptimizer = new GPUArtifactOptimizer();
+            const initialized = await gpuOptimizer.initialize();
+            if (!initialized) {
+                gpuOptimizer = null;
+                throw new Error('WebGPU is unavailable on this device');
+            }
+        }
+
+        // The pipeline is bound to the same semantic plan as the CPU lowerer.
+        await gpuOptimizer.preparePipeline(this.optimizationPlan, this.buildData);
+
+        // Run GPU optimization
+        const results = await gpuOptimizer.optimize({
+            slots: this.slots,
+            buildData: this.buildData,
+            setData: this.setData,
+            limit: this.limit,
+            batchSize: this.gpuBatchSize,
+            callback: callback,
+        });
+        this.gpuProfile = {
+            prepare: gpuOptimizer.lastPrepareProfile,
+            optimize: gpuOptimizer.lastOptimizeProfile,
+        };
+
+        // Remove empty artifacts from results
+        removeEmptyArtifacts(results);
+        if (!this.combinationIndexContext) {
+            removeCombinationIndices(results);
+        }
+
+        return results;
+    }
 }
 
-function* artifactCombinations(settings, setNames, slots, skipCallback) {
+function* artifactCombinations(cpuProgram, setNames, slots, skipCallback) {
     let s1, s2, s3, s4, s5;
 
     let sets = {};
     for (let name of Object.keys(setNames)) {
         sets[name] = 0;
     }
-
-    let checkFunc = generateCheckFunc(settings);
-    let requireFunc = generateRequireFunc(settings);
+    for (const artifacts of Object.values(slots)) {
+        for (const artifact of artifacts) {
+            if (!Object.prototype.hasOwnProperty.call(sets, artifact.set)) {
+                sets[artifact.set] = 0;
+            }
+        }
+    }
 
     let skip5 = slots.circlet.length;
     let skip4 = skip5 * slots.goblet.length;
@@ -518,7 +723,7 @@ function* artifactCombinations(settings, setNames, slots, skipCallback) {
             s2 = slots.plume[i2];
             ++sets[s2.set];
 
-            if (checkFunc(sets)) {
+            if (cpuProgram.rejectsSetPrefixTrusted(sets)) {
                 skipCallback(skip3);
                 continue;
             }
@@ -527,7 +732,7 @@ function* artifactCombinations(settings, setNames, slots, skipCallback) {
                 s3 = slots.sands[i3];
                 ++sets[s3.set];
 
-                if (checkFunc(sets)) {
+                if (cpuProgram.rejectsSetPrefixTrusted(sets)) {
                     skipCallback(skip4);
                     continue;
                 }
@@ -536,7 +741,7 @@ function* artifactCombinations(settings, setNames, slots, skipCallback) {
                     s4 = slots.goblet[i4];
                     ++sets[s4.set];
 
-                    if (checkFunc(sets)) {
+                    if (cpuProgram.rejectsSetPrefixTrusted(sets)) {
                         skipCallback(skip5);
                         continue;
                     }
@@ -545,7 +750,7 @@ function* artifactCombinations(settings, setNames, slots, skipCallback) {
                         s5 = slots.circlet[i5];
                         ++sets[s5.set];
 
-                        if (checkFunc(sets) || requireFunc(sets)) {
+                        if (cpuProgram.rejectsCompleteSetsTrusted(sets)) {
                             skipCallback(1);
                             continue;
                         }
@@ -560,9 +765,7 @@ function* artifactCombinations(settings, setNames, slots, skipCallback) {
 
 
 function truncateResults(results, limit) {
-    results = results.sort(function(a,b) {
-        return b.value - a.value;
-    });
+    results = results.sort(compareOptimizerResults);
     results.splice(limit);
 }
 
@@ -577,85 +780,43 @@ function removeEmptyArtifacts(results) {
     }
 }
 
-function generateCheckFunc(settings) {
-    let parts = [];
-    for (let [setName, pieces] of Object.entries(settings.setMaxValues)) {
-        parts.push('if (sets.'+ setName +' >= '+ pieces +') {return true}');
-    }
+function getCalculatedConditionSettings(conditions, baseSettings) {
+    let result = {};
 
-    parts.push('return false');
-    return Function('sets', parts.join(';'));
-}
-
-function generateRequireFunc(settings) {
-    let parts = [];
-    for (let [setName, pieces] of Object.entries(settings.setMinValues)) {
-        parts.push('if (sets.'+ setName +' < '+ pieces +') {return true}');
-    }
-
-    parts.push('return false');
-    return Function('sets', parts.join(';'));
-}
-
-function makeStatCheckFunc(settings, post) {
-    let [parts, usedStats] = makeStatCheckParts(settings);
-    if (parts.length == 0) return;
-
-    let code = parts.join(';\n');
-
-    let filtered = filterPostEffectTreeByStats(post, usedStats);
-    if (filtered) {
-        let [assign, revert] = FeatureCompiler.postTreeBlocks(filtered);
-        let before = getBlockCode(assign);
-        let after = getBlockCode(revert);
-
-        code = before +';\n' + code + ';\n'+ after;
-    }
-
-    // console.log(code)
-    return Function('stats', code + ';\nreturn true');
-}
-
-function makeStatCheckParts(settings) {
-    let parts = [];
-    let usedStats = [];
-
-    for (let name of Object.keys(settings)) {
-        let [str, stat, op] = /^(.*)_(min|max)$/.exec(name);
-        let value = settings[name];
-        if (!value) continue;
-
-        if (isPercent(stat)) {
-            value /= 100;
-        }
-
-        let statStr;
-        if (REAL_TOTAL.includes(stat)) {
-            statStr = 'stats.'+ stat +'_base * (1 + stats.'+ stat + '_percent) + stats.'+ stat;
-        } else {
-            statStr = 'stats.'+ stat +'_base + stats.'+ stat;
-        }
-
-        if (!usedStats.includes(stat)) {
-            usedStats.push(stat);
-            usedStats.push(stat + '_base');
-
-            if (REAL_TOTAL.includes(stat)) {
-                usedStats.push(stat + '_percent');
-            }
-        }
-
-        if (op == 'max') {
-            parts.push('if ('+ statStr +' > '+ value +') {return false}')
-        } else if (op == 'min') {
-            parts.push('if ('+ statStr +' < '+ value +') {return false}')
+    for (let cond of conditions) {
+        if (cond.getAllConditionsOn) {
+            Object.assign(result, cond.getAllConditionsOn(baseSettings));
         }
     }
-    return [parts, usedStats];
+
+    return result;
 }
 
-function getBlockCode(items) {
-    let compiler = new FeatureCompiler(new CBlock(items, {noReturn: true}), []);
-    compiler.prepare();
-    return compiler.getCode();
+function normalizeSetStats(stats) {
+    for (let stat of Object.keys(stats)) {
+        if (/^text_/.test(stat) || Math.abs(stats[stat]) < 0.0000001) {
+            stats.del(stat);
+        }
+    }
+
+    return stats;
+}
+
+function makeStatConstraintData(bounds, postTree, targetStats) {
+    let closure = getPostEffectStatDependencyClosure(postTree, targetStats);
+
+    return {
+        bounds: bounds.map((bound) => {return Object.assign({}, bound, {
+            components: Object.assign({}, bound.components),
+        });}),
+        targetStats: targetStats,
+        usedStats: closure.usedStats,
+        postEffects: closure.items,
+    };
+}
+
+function removeCombinationIndices(results) {
+    for (const item of results) {
+        delete item.combinationIndex;
+    }
 }

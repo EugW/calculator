@@ -54,6 +54,14 @@ import { ObsidianCodex } from "./Set/ObsidianCodex.js"
 import { ScrollOfTheEmberedCitysHero } from "./Set/ScrollOfTheEmberedCitysHero.js"
 import { LongNightsOath } from "./Set/LongNightsOath.js"
 import { FinaleOfTheDeepGalleries } from "./Set/FinaleOfTheDeepGalleries.js"
+import { NightOfTheSkysUnveiling } from "./Set/NightOfTheSkysUnveiling.js"
+import { SilkenMoonsSerenade } from "./Set/SilkenMoonsSerenade.js"
+import { AubadeOfMorningstarAndMoon } from "./Set/AubadeOfMorningstarAndMoon.js"
+import { ADayCarvedFromRisingWinds } from "./Set/ADayCarvedFromRisingWinds.js"
+import { CelestialGift } from "./Set/CelestialGift.js"
+import { DisenchantmentInDeepShadow } from "./Set/DisenchantmentInDeepShadow.js"
+import { ScarletProof } from "./Set/ScarletProof.js"
+import { HeartOfTheFurnace } from "./Set/HeartOfTheFurnace.js"
 
 export const Sets = new DbObjectListArtifactSets({
     Adventurer: Adventurer, // 1
@@ -111,4 +119,12 @@ export const Sets = new DbObjectListArtifactSets({
     ObsidianCodex: ObsidianCodex, // 53
     LongNightsOath: LongNightsOath, // 54
     FinaleOfTheDeepGalleries: FinaleOfTheDeepGalleries, // 55
+    NightOfTheSkysUnveiling: NightOfTheSkysUnveiling, // 56
+    SilkenMoonsSerenade: SilkenMoonsSerenade, // 57
+    AubadeOfMorningstarAndMoon: AubadeOfMorningstarAndMoon, // 58
+    ADayCarvedFromRisingWinds: ADayCarvedFromRisingWinds, // 59
+    CelestialGift: CelestialGift, // 60
+    DisenchantmentInDeepShadow: DisenchantmentInDeepShadow, // 61
+    ScarletProof: ScarletProof, // 62
+    HeartOfTheFurnace: HeartOfTheFurnace, // 63
 });

@@ -39,7 +39,16 @@ import { Heizou } from "./Char/Heizou"
 import { Hutao } from "./Char/Hutao"
 import { Iansan } from "./Char/Iansan"
 import { Ifa } from "./Char/Ifa"
+import { Illuga } from "./Char/Illuga"
 import { Ineffa } from "./Char/Ineffa"
+import { Aino } from "./Char/Aino"
+import { Lauma } from "./Char/Lauma"
+import { Flins } from "./Char/Flins"
+import { Nefer } from "./Char/Nefer"
+import { Durin } from "./Char/Durin"
+import { Jahoda } from "./Char/Jahoda"
+import { Columbina } from "./Char/Columbina"
+import { Zibai } from "./Char/Zibai"
 import { Itto } from "./Char/Itto"
 import { Jean } from "./Char/Jean"
 import { Kachina } from "./Char/Kachina"
@@ -89,6 +98,7 @@ import { TravelerElectro } from "./Char/TravelerElectro"
 import { TravelerGeo } from "./Char/TravelerGeo"
 import { TravelerHydro } from "./Char/TravelerHydro"
 import { TravelerPyro } from "./Char/TravelerPyro"
+import { TravelerCryo } from "./Char/TravelerCryo"
 import { Varesa } from "./Char/Varesa"
 import { Venti } from "./Char/Venti"
 import { Wanderer } from "./Char/Wanderer"
@@ -106,6 +116,16 @@ import { Yelan } from "./Char/Yelan"
 import { Yoimiya } from "./Char/Yoimiya"
 import { YunJin } from "./Char/YunJin"
 import { Zhongli } from "./Char/Zhongli"
+import { Varka } from "./Char/Varka"
+import { Linnea } from "./Char/Linnea"
+import { Lohen } from "./Char/Lohen"
+import { Nicole } from "./Char/Nicole"
+import { Prune } from "./Char/Prune"
+import { Sandrone } from "./Char/Sandrone"
+import { Alyosha } from "./Char/Alyosha"
+import { Odette } from "./Char/Odette"
+import { Vodyanitsa } from "./Char/Vodyanitsa"
+import { Vesna } from "./Char/Vesna"
 
 export const Chars = new DbObjectListSerializeChars({
     Albedo: Albedo, // 1
@@ -215,4 +235,24 @@ export const Chars = new DbObjectListSerializeChars({
     Skirk: Skirk, // 106
     Dahlia: Dahlia, // 107
     Ineffa: Ineffa, // 108
+    Aino: Aino, // 109
+    Lauma: Lauma, // 110
+    Flins: Flins, // 111
+    Nefer: Nefer, // 112
+    Durin: Durin, // 113
+    Jahoda: Jahoda, // 114
+    Columbina: Columbina, // 115
+    Zibai: Zibai, // 116
+    Illuga: Illuga, // 117
+    Varka: Varka, // 118
+    Linnea: Linnea, // 119
+    Lohen: Lohen, // 120
+    Nicole: Nicole, // 121
+    Prune: Prune, // 122
+    Sandrone: Sandrone, // 123
+    TravelerCryo: TravelerCryo, // 124
+    Alyosha: Alyosha, // 125
+    Odette: Odette, // 126
+    Vodyanitsa: Vodyanitsa, // 127
+    Vesna: Vesna, // 128
 });

@@ -8,7 +8,7 @@ export class CustomEnemy extends React.Component {
         super(props);
 
         this.lang = new Lang();
-        this.elements = DB.Objects.Elements.getList().map((v) => {return v.name});
+        this.elements = DB.Objects.Elements.getList().map((v) => {return v.name;});
     }
 
     render() {
@@ -20,9 +20,9 @@ export class CustomEnemy extends React.Component {
                     key={element}
                     title={this.lang.get('stat.res_'+ element)}
                     value={this.props.resistances[element]}
-                    minValue={-100}
+                    minValue={-300}
                     maxValue={400}
-                    onChange={(value) => {this.props.onResistanceChange(element, value)}}
+                    onChange={(value) => {this.props.onResistanceChange(element, value);}}
                 />
             );
         }

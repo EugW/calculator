@@ -37,6 +37,11 @@ import { Earthshaker } from "./Claymore/Earthshaker";
 import { FruitfulHook } from "./Claymore/FruitfulHook";
 import { AThousandBlazingSuns } from "./Claymore/AThousandBlazingSuns";
 import { FlameForgedInsight } from "./Claymore/FlameForgedInsight";
+import { MasterKey } from "./Claymore/MasterKey";
+import { GestOfTheMightyWolf } from "./Claymore/GestOfTheMightyWolf";
+import { ATeaspoonOfTranscendence } from "./Claymore/ATeaspoonOfTranscendence";
+import { ForgedByTheGoldenMelody } from "./Claymore/ForgedByTheGoldenMelody";
+import { BladeOfAtonement } from "./Claymore/BladeOfAtonement";
 
 export const Claymore = new DbObjectListSerializeStats({
     Bell: Bell, // 71
@@ -76,5 +81,10 @@ export const Claymore = new DbObjectListSerializeStats({
     Earthshaker: Earthshaker, // 182
     FruitfulHook: FruitfulHook, // 188
     AThousandBlazingSuns: AThousandBlazingSuns, // 193
-    FlameForgedInsight: FlameForgedInsight, // 223 ??
+    FlameForgedInsight: FlameForgedInsight, // 223
+    MasterKey: MasterKey, // 227
+    GestOfTheMightyWolf: GestOfTheMightyWolf, // 241
+    ATeaspoonOfTranscendence: ATeaspoonOfTranscendence, // 245
+    ForgedByTheGoldenMelody: ForgedByTheGoldenMelody, // 250
+    BladeOfAtonement: BladeOfAtonement, // 251
 });

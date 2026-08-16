@@ -2,7 +2,13 @@ import { Artifact } from "../Artifact";
 import { CalcSet } from "../CalcSet";
 import { prepareUid } from "./Uid";
 
-const API_URL = '/back/proxy/enka/?uid=<uid>&hash=<hash>';
+// Numeric UID -> current showcase (no trailing slash!)
+const API_UID = '/back/proxy/enka/uid/<uid>';
+// Username -> profile hoyos list
+const API_HOYOS = '/back/proxy/enka/profile/<uid>/hoyos/';
+// Username + hash -> saved builds
+const API_BUILDS = '/back/proxy/enka/profile/<uid>/hoyos/<hash>/builds/';
+const HOYO_TYPE_GENSHIN = 0;
 
 const SLOT_DATA = {
     'EQUIP_RING': 'goblet',
@@ -15,12 +21,28 @@ const SLOT_DATA = {
 export class EnkaApi {
     load(uid, hash, callback) {
         let xhr = new XMLHttpRequest();
-        let url = API_URL.replace('<uid>', prepareUid(uid));
-        url = url.replace('<hash>', hash || '');
+        let url;
+        let mode;
 
-        xhr.open('GET', url)
-        xhr.onload = () => callback(this.processData(xhr.response));
-        xhr.onerror = () => callback()
+        let isNumericUid = /^1?\d{9}$/.test(uid);
+
+        if (isNumericUid) {
+            // Numeric UID - get current showcase directly
+            url = API_UID.replace('<uid>', prepareUid(uid));
+            mode = 'uid';
+        } else if (hash) {
+            // Username with hash - get specific builds
+            url = API_BUILDS.replace('<uid>', prepareUid(uid)).replace('<hash>', hash);
+            mode = 'builds';
+        } else {
+            // Username without hash - get hoyos list
+            url = API_HOYOS.replace('<uid>', prepareUid(uid));
+            mode = 'hoyos';
+        }
+
+        xhr.open('GET', url);
+        xhr.onload = () => callback(this.processData(xhr.response, mode));
+        xhr.onerror = () => callback();
         xhr.send();
     }
 
@@ -34,7 +56,7 @@ export class EnkaApi {
         return uid.length > 0;
     }
 
-    processData(data) {
+    processData(data, mode) {
         let json;
         try {
             json = JSON.parse(data);
@@ -42,23 +64,95 @@ export class EnkaApi {
             return null;
         }
 
-        // let player = getPlayer(json);
-        let characters = getChars(json) || [];
+        if (mode === 'uid') {
+            return this.processUidData(json);
+        } else if (mode === 'builds') {
+            return this.processBuildsData(json);
+        } else {
+            return this.processHoyosData(json);
+        }
+    }
+
+    processUidData(json) {
+        // Process /api/uid/{uid}/ response - current showcase
+        let characters = [];
         let artifacts = [];
 
-        for (let item of characters) {
-            let charArts = item.set.getArtifacts();
-            for (let slot of Object.keys(charArts)) {
-                if (charArts[slot]) {
-                    artifacts.push(charArts[slot].clone());
+        if (Array.isArray(json.avatarInfoList)) {
+            for (let avatarData of json.avatarInfoList) {
+                let calcset = processChar(avatarData);
+                if (calcset) {
+                    characters.push({
+                        title: '',
+                        set: calcset,
+                    });
+
+                    let charArts = calcset.getArtifacts();
+                    for (let slot of Object.keys(charArts)) {
+                        if (charArts[slot]) {
+                            artifacts.push(charArts[slot].clone());
+                        }
+                    }
                 }
             }
         }
 
         return {
-            player: {
-                hashes: getHashes(json),
-            },
+            player: { hashes: null },
+            characters: characters,
+            artifacts: artifacts,
+        };
+    }
+
+    processHoyosData(json) {
+        // Transform {hash: {uid, player_info...}} to hashes array
+        let hashes = [];
+        for (let hash of Object.keys(json)) {
+            let hoyo = json[hash];
+            if (!hoyo.public || hoyo.hoyo_type !== HOYO_TYPE_GENSHIN) continue;
+            hashes.push({
+                hash: hash,
+                name: hoyo.player_info?.nickname || '',
+                uid: hoyo.uid,
+                ar: hoyo.player_info?.level,
+                region: hoyo.region,
+            });
+        }
+
+        return {
+            player: { hashes: hashes },
+            characters: [],
+            artifacts: [],
+        };
+    }
+
+    processBuildsData(json) {
+        // Transform {avatarId: [{name, avatar_data...}]} to builds array
+        let characters = [];
+        let artifacts = [];
+
+        for (let avatarId of Object.keys(json)) {
+            let builds = json[avatarId];
+            for (let build of builds) {
+                let calcset = processChar(build.avatar_data);
+                if (calcset) {
+                    characters.push({
+                        title: build.name,
+                        set: calcset,
+                    });
+
+                    let charArts = calcset.getArtifacts();
+                    for (let slot of Object.keys(charArts)) {
+                        if (charArts[slot]) {
+                            artifacts.push(charArts[slot].clone());
+                        }
+                    }
+                }
+            }
+        }
+
+        return {
+            player: { hashes: null },
             characters: characters,
             artifacts: artifacts,
         };
@@ -93,10 +187,8 @@ function getPlayer(data) {
             ar: player.level,
             avatar: DB.Chars.getByGameId(avatarId),
             chars: chars,
-        }
+        };
     } catch(e) {}
-
-    return;
 }
 
 function getChars(data) {
@@ -135,12 +227,12 @@ function processChar(data) {
 
         set.setChar(char);
         set.setCharLevels({
-            level: Math.min(90, Math.max(1, parseInt(data.propMap['4001'].ival))),
+            level: Math.min(100, Math.max(1, parseInt(data.propMap['4001'].ival))),
             ascension: Math.min(6, Math.max(0, parseInt(data.propMap['1002'].ival))),
             constellation: Math.min(6, Math.max(0, data.talentIdList ? data.talentIdList.length : 0)),
         });
 
-        let skillLevels = {}
+        let skillLevels = {};
         for (let skill of ['attack', 'skill', 'burst']) {
             let id = char.talents.getCategory(skill).gameId;
             skillLevels[skill] = data.skillLevelMap[id] || 1;
@@ -151,7 +243,7 @@ function processChar(data) {
         let weaponData;
         for (let item of data.equipList) {
             if (item.weapon) {
-                weaponData = item
+                weaponData = item;
             }
         }
 
@@ -180,9 +272,8 @@ function processChar(data) {
 
         return set;
     } catch(e) {
-        console.log(e)
+        console.log(e);
     }
-    return;
 }
 
 function listArtifacts(data) {
@@ -227,5 +318,5 @@ function shuffleArray(array) {
         array[i] = array[j];
         array[j] = temp;
     }
-    return array
+    return array;
 }

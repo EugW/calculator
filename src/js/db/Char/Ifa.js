@@ -110,6 +110,7 @@ const Talents = new DbObjectTalents({
 const A1Stacks = 150;
 const A1ReactionDmg = 1.5;
 const A1MoonReactionDmg = 0.2;
+const A1StellarSwirlDmg = 0.24;
 const A4Mastery = 80;
 const C2Stacks = 50;
 const C4Mastery = 100;
@@ -132,6 +133,18 @@ const reactionDmgPost2 = new PostEffectStats({
     from: 'ifa_field_medics_vision',
     percent: [
         new StatTable('dmg_reaction_lunarcharged', [A1MoonReactionDmg]),
+    ],
+    condition: new ConditionAnd([
+        new ConditionBoolean({name: 'common.nightsoul_blessing_state'}),
+        new ConditionBoolean({name: 'ifa_field_medics_vision'}),
+        new ConditionAscensionChar({ascension: 1}),
+    ]),
+});
+
+const reactionDmgPost3 = new PostEffectStats({
+    from: 'ifa_field_medics_vision',
+    percent: [
+        new StatTable('dmg_stellarswirl', [A1StellarSwirlDmg]),
     ],
     condition: new ConditionAnd([
         new ConditionBoolean({name: 'common.nightsoul_blessing_state'}),
@@ -281,6 +294,12 @@ export const Ifa = new DbObjectChar({
             postEffect: reactionDmgPost2,
             format: 'percent',
         }),
+        new FeaturePostEffectValue({
+            category: 'other',
+            name: 'ifa_reaction_bonus_3',
+            postEffect: reactionDmgPost3,
+            format: 'percent',
+        }),
     ],
     conditions: [
         new ConditionBoolean({
@@ -313,6 +332,7 @@ export const Ifa = new DbObjectChar({
     postEffects: [
         reactionDmgPost,
         reactionDmgPost2,
+        reactionDmgPost3,
     ],
     constellation: new DbObjectConstellation([
         {
@@ -393,6 +413,7 @@ export const Ifa = new DbObjectChar({
                     new StatTable('dmg_reaction_swirl', [A1ReactionDmg]),
                     new StatTable('dmg_reaction_electrocharged', [A1ReactionDmg]),
                     new StatTable('dmg_reaction_lunarcharged', [A1MoonReactionDmg]),
+                    new StatTable('dmg_stellarswirl', [A1StellarSwirlDmg]),
                 ],
                 condition: new ConditionBoolean({name: 'party_ifa_field_medics_vision'}),
             }),

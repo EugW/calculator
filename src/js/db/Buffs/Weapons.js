@@ -1,12 +1,58 @@
+import { ConditionAnd } from "../../classes/Condition/And";
 import { ConditionBoolean } from "../../classes/Condition/Boolean";
+import { ConditionBooleanDropdownValue } from "../../classes/Condition/Boolean/DropdownValue";
+import { ConditionBooleanValue } from "../../classes/Condition/Boolean/Value";
+import { ConditionHexereiResonance } from "../../classes/Condition/HexereiResonance";
 import { ConditionLevelSelect } from "../../classes/Condition/LevelSelect";
 import { ConditionNot } from "../../classes/Condition/Not";
 import { ConditionPartyWeapon } from "../../classes/Condition/PartyWeapon";
+import { ConditionStaticLevel } from "../../classes/Condition/Static/Level";
+import { ConditionWitchHomework } from "../../classes/Condition/WitchHomework";
 import { DbObjectBuff } from "../../classes/DbObject/Buff";
 import { PostEffectStats } from "../../classes/PostEffect/Stats";
 import { PostEffectStatsDef } from "../../classes/PostEffect/Stats/Def";
 import { StatTable } from "../../classes/StatTable";
 import { CHARACTER_MAX_POSSIBLE_HP } from "../Constants";
+
+const bludnyeAtkPerThousand = new StatTable('', [0.25, 0.325, 0.4, 0.475, 0.55]);
+const bludnyeAtkCap = new StatTable('', [5, 6.5, 8, 9.5, 11]);
+
+class ConditionPartyWeaponBludnye extends ConditionPartyWeapon {
+    getStats(settings) {
+        const stats = super.getStats(settings);
+
+        for (let i = 1; i <= this.getMaxNum(); ++i) {
+            const level = Math.min(5, this.getLevel(settings, i));
+            if (!level) continue;
+
+            const mode = settings[this.getModeParamName(i)] || '-';
+            const match = /^(hymn|triumph)_([123])$/.exec(mode);
+            if (!match) continue;
+
+            const hp = this.createStatCond(i).getValue(settings);
+            const thousandsAboveThreshold = Math.floor(Math.max(0, hp - 40000) / 1000);
+            const stacks = parseInt(match[2]);
+            const modeMultiplier = match[1] === 'triumph' ? 1.75 : 1;
+            const atkPerStack = Math.min(
+                bludnyeAtkCap.getValue(level),
+                thousandsAboveThreshold * bludnyeAtkPerThousand.getValue(level),
+            );
+            stats.add('atk_percent', atkPerStack * stacks * modeMultiplier);
+        }
+
+        return stats;
+    }
+}
+
+const bludnyePartyModes = [
+    {title: '-', value: '-', serializeId: 7, conditions: []},
+    {title_str: 'talent_name.weapon_bludnye_hymn_1', value: 'hymn_1', serializeId: 1, conditions: []},
+    {title_str: 'talent_name.weapon_bludnye_hymn_2', value: 'hymn_2', serializeId: 2, conditions: []},
+    {title_str: 'talent_name.weapon_bludnye_hymn_3', value: 'hymn_3', serializeId: 3, conditions: []},
+    {title_str: 'talent_name.weapon_bludnye_triumph_1', value: 'triumph_1', serializeId: 4, conditions: []},
+    {title_str: 'talent_name.weapon_bludnye_triumph_2', value: 'triumph_2', serializeId: 5, conditions: []},
+    {title_str: 'talent_name.weapon_bludnye_triumph_3', value: 'triumph_3', serializeId: 6, conditions: []},
+];
 
 export const Weapons = new DbObjectBuff({
     name: 'weapons',
@@ -287,6 +333,56 @@ export const Weapons = new DbObjectBuff({
             ],
         }),
         new ConditionPartyWeapon({
+            name: 'weapon_other.weapon_angelos_heptades',
+            serializeIds: [65],
+            statName: 'angelos_heptades_atk',
+            statSerializeIds: [66],
+            statClass: 'inputs-6digit',
+            modeName: 'weapon_other.weapon_angelos_heptades_mode',
+            modeSerializeIds: [67],
+            modeClass: 'medium-text',
+            modeHideEmpty: true,
+            modeDefaultValue: '-',
+            modeValues: [
+                {
+                    title: '-',
+                    value: '-',
+                    serializeId: 3,
+                    conditions: [],
+                },
+                {
+                    title_str: 'talent_name.weapon_angelos_heptades_active',
+                    value: 'active',
+                    serializeId: 1,
+                    conditions: [],
+                },
+                {
+                    title_str: 'talent_name.weapon_angelos_heptades_off_field_hexerei',
+                    value: 'off_field_hexerei',
+                    serializeId: 2,
+                    conditions: [],
+                },
+            ],
+            partyStat: 'atk',
+            statMax: 20000,
+            title: 'weapon_name.angelos_heptades',
+            statTitle: 'talent_name.angelos_heptades_atk',
+            description: 'talent_descr.weapon_angelos_heptades_party',
+            icon: {
+                rarity: 5,
+                name: 'sprite-weapon-catalyst weapon-icon-catalyst-angelos-heptades',
+            },
+            stats: [
+                new StatTable('text_percent', [10, 13, 16, 19, 22]),
+                new StatTable('text_percent_max', [26, 34, 42, 50, 58]),
+                new StatTable('text_percent_hexerei', [5, 6.5, 8, 9.5, 11]),
+                new StatTable('text_percent_max_hexerei', [13, 17, 21, 25, 29]),
+            ],
+            condition: new ConditionNot([
+                new ConditionBoolean({name: 'weapon_angelos_heptades'}),
+            ]),
+        }),
+        new ConditionPartyWeapon({
             name: 'weapon_other.weapon_symphonist_of_scents',
             serializeIds: [58],
             title: 'talent_name.weapon_symphonist_of_scents',
@@ -305,7 +401,6 @@ export const Weapons = new DbObjectBuff({
         new ConditionPartyWeapon({
             name: 'weapon_other.weapon_fractured_halo',
             serializeIds: [59],
-            beta: true,
             title: 'talent_name.weapon_fractured_halo',
             description: 'talent_descr.weapon_fractured_halo_2',
             icon: {
@@ -317,6 +412,133 @@ export const Weapons = new DbObjectBuff({
             ],
             condition: new ConditionNot([
                 new ConditionBoolean({name: 'weapon_fractured_halo_2'}),
+            ]),
+        }),
+        new ConditionPartyWeapon({
+            name: 'weapon_other.weapon_nightweavers_looking_glass',
+            serializeIds: [61],
+            title: 'weapon_name.nightweavers_looking_glass',
+            description: 'talent_descr.weapon_nightweavers_looking_glass_party',
+            icon: {
+                rarity: 5,
+                name: 'sprite-weapon-catalyst weapon-icon-catalyst-nightweavers-looking-glass',
+            },
+            stats: [
+                new StatTable('dmg_reaction_bloom', [120, 150, 180, 210, 240]),
+                new StatTable('dmg_reaction_hyperbloom', [80, 100, 120, 140, 160]),
+                new StatTable('dmg_reaction_burgeon', [80, 100, 120, 140, 160]),
+                new StatTable('dmg_reaction_lunarbloom', [40, 50, 60, 70, 80]),
+            ],
+            condition: new ConditionNot([
+                new ConditionBoolean({name: 'weapon_nightweavers_looking_glass_3'}),
+            ]),
+        }),
+        new ConditionPartyWeapon({
+            name: 'weapon_other.weapon_golden_frostbound_oath',
+            serializeIds: [63],
+            title: 'weapon_name.golden_frostbound_oath',
+            description: 'talent_descr.weapon_golden_frostbound_oath_party',
+            icon: {
+                rarity: 5,
+                name: 'sprite-weapon-bow weapon-icon-bow-golden-frostbound-oath',
+            },
+            stats: [
+                new StatTable('dmg_geo', [20, 25, 30, 35, 40]),
+                new StatTable('dmg_reaction_lunarcrystallize', [20, 25, 30, 35, 40]),
+            ],
+            condition: new ConditionNot([
+                new ConditionBoolean({name: 'weapon_golden_frostbound_oath'}),
+            ]),
+        }),
+        new ConditionPartyWeaponBludnye({
+            name: 'weapon_other.weapon_bludnye',
+            serializeIds: [74],
+            statName: 'weapon_bludnye_holder_hp',
+            statSerializeIds: [75],
+            statClass: 'inputs-6digit',
+            partyStat: 'hp',
+            statMax: CHARACTER_MAX_POSSIBLE_HP,
+            modeName: 'weapon_other.weapon_bludnye_mode',
+            modeSerializeIds: [76],
+            modeTitle: 'talent_name.weapon_bludnye_mode',
+            modeClass: 'medium-text',
+            modeHideEmpty: true,
+            modeDefaultValue: '-',
+            modeValues: bludnyePartyModes,
+            title: 'weapon_name.bludnye',
+            statTitle: 'talent_name.weapon_bludnye_holder_hp',
+            description: 'talent_descr.weapon_bludnye_party',
+            icon: {
+                rarity: 5,
+                name: 'sprite-weapon-catalyst weapon-icon-catalyst-bludnye',
+            },
+            stats: [
+                new StatTable('text_atk_per_thousand', [0.25, 0.325, 0.4, 0.475, 0.55]),
+                new StatTable('text_atk_cap', [5, 6.5, 8, 9.5, 11]),
+            ],
+            condition: new ConditionNot([
+                new ConditionBooleanValue({
+                    cond: 'ge',
+                    value: 1,
+                    setting: 'weapon_bludnye_stacks',
+                }),
+            ]),
+        }),
+        new ConditionPartyWeapon({
+            name: 'weapon_other.weapon_windtalker',
+            serializeIds: [77],
+            maxDisplay: 1,
+            title: 'weapon_name.windtalker',
+            description: 'talent_descr.weapon_windtalker_party',
+            icon: {
+                rarity: 4,
+                name: 'sprite-weapon-bow weapon-icon-bow-windtalker',
+            },
+            stats: [
+                new StatTable('dmg_stellarconduct', [24, 30, 36, 42, 48]),
+                new StatTable('dmg_stellarswirl', [24, 30, 36, 42, 48]),
+            ],
+            condition: new ConditionNot([
+                new ConditionBooleanValue({
+                    cond: 'ge',
+                    value: 3,
+                    setting: 'weapon_windtalker_points',
+                }),
+            ]),
+        }),
+        // Athame Artis - Party ATK buff (Day King's Splendor Solis)
+        new ConditionLevelSelect({
+            name: 'weapon_other.weapon_athame_artis',
+            serializeId: 62,
+            rotation: 'buffs',
+            title: 'weapon_name.athame_artis',
+            description: 'talent_descr.weapon_athame_artis_party_full',
+            maxStacks: 5,
+            icon: {
+                rarity: 5,
+                name: 'sprite-weapon-sword weapon-icon-sword-athame-artis',
+            },
+            stats: [
+                new StatTable('atk_percent', [16, 20, 24, 28, 32]),
+                new StatTable('text_percent', [16, 20, 24, 28, 32]),
+                new StatTable('text_percent_2', [12, 15, 18, 21, 24]),
+            ],
+            subConditions: [
+                new ConditionNot([
+                    new ConditionBoolean({name: 'weapon_athame_artis_party'}),
+                ]),
+            ],
+        }),
+        // Athame Artis - Hexerei amplification (hidden, auto-applies with Hexerei resonance)
+        new ConditionStaticLevel({
+            isHidden: true,
+            levelSetting: 'weapon_other.weapon_athame_artis',
+            stats: [
+                new StatTable('atk_percent', [12, 15, 18, 21, 24]), // 75% of party ATK buff
+            ],
+            condition: new ConditionAnd([
+                new ConditionBoolean({name: 'weapon_other.weapon_athame_artis'}),
+                new ConditionHexereiResonance({}),
             ]),
         }),
     ],
@@ -387,6 +609,41 @@ export const Weapons = new DbObjectBuff({
                 new ConditionNot([
                     new ConditionBoolean({name: 'weapon_peak_patrol_song_2'}),
                 ]),
+            ],
+        }),
+        new PostEffectStats({
+            from: 'angelos_heptades_atk',
+            levelSetting: 'weapon_other.weapon_angelos_heptades',
+            percent: new StatTable('dmg_all', [0.01, 0.013, 0.016, 0.019, 0.022]),
+            statCap: new StatTable('', [26, 34, 42, 50, 58]),
+            conditions: [
+                new ConditionBoolean({name: 'weapon_other.weapon_angelos_heptades'}),
+                new ConditionBooleanDropdownValue({
+                    name: 'weapon_other.weapon_angelos_heptades_mode',
+                    value: 'active',
+                    defaultValue: '-',
+                }),
+                new ConditionNot([
+                    new ConditionBoolean({name: 'weapon_angelos_heptades'}),
+                ]),
+            ],
+        }),
+        new PostEffectStats({
+            from: 'angelos_heptades_atk',
+            levelSetting: 'weapon_other.weapon_angelos_heptades',
+            percent: new StatTable('dmg_all', [0.005, 0.0065, 0.008, 0.0095, 0.011]),
+            statCap: new StatTable('', [13, 17, 21, 25, 29]),
+            conditions: [
+                new ConditionBoolean({name: 'weapon_other.weapon_angelos_heptades'}),
+                new ConditionBooleanDropdownValue({
+                    name: 'weapon_other.weapon_angelos_heptades_mode',
+                    value: 'off_field_hexerei',
+                }),
+                new ConditionNot([
+                    new ConditionBoolean({name: 'weapon_angelos_heptades'}),
+                ]),
+                new ConditionWitchHomework({}),
+                new ConditionHexereiResonance({}),
             ],
         }),
     ]

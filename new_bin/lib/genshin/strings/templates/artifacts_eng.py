@@ -240,12 +240,15 @@ viridescent_venerer_2 = Template(
 viridescent_venerer_4 = Template(
     names=['сопротивление'],
     sentences=[
-        ['dmg_reaction_swirl'],
-        ['text_percent|40', 'ignore']
+        ['dmg_reaction_swirl', 'dmg_stellarswirl'],
+        ['text_percent|40', 'ignore'],
+        ['text_percent|40'],
+        [],
     ],
     results=[
         [0],
         [1],
+        [2, 3],
     ]
 )
 
@@ -272,7 +275,7 @@ thundering_fury_4 = Template(
         ['dmg_reaction_overloaded', 'dmg_reaction_aggravate', 'dmg_reaction_lunarcharged'],
         ['ignore'],
         ['ignore'],
-    ]
+    ],
 )
 
 crimson_witch_of_flames_2 = Template(
@@ -553,7 +556,7 @@ flower_of_paradise_lost_2 = Template(
 
 flower_of_paradise_lost_4 = Template(
     sentences=[
-        ['dmg_reaction_bloom'],
+        ['dmg_reaction_bloom', 'dmg_reaction_lunarbloom'],
         ['ignore'],
         ['ignore'],
         ['ignore'],
@@ -606,11 +609,12 @@ nighttime_whispers_in_the_echoing_woods_2 = Template(
 nighttime_whispers_in_the_echoing_woods_4 = Template(
     sentences=[
         ['20:dmg_geo', '10:ignore'],
-        ['150:ignore', '1:ignore'],
+        ['150:ignore'],
+        ['1:ignore'],
     ],
     results=[
         [0],
-        [1],
+        [1, 2],
     ],
 )
 
@@ -750,6 +754,151 @@ long_nights_oath_4 = Template(
         ['1:ignore', '2:ignore', '2:ignore', '1:ignore'],
         ['15:dmg_plunge', '6:ignore'],
         ['5:ignore'],
+        [],
+    ],
+)
+
+night_of_the_skys_unveiling_2 = Template(
+    sentences=[
+        ['mastery'],
+    ],
+)
+
+night_of_the_skys_unveiling_4 = Template(
+    sentences=[
+        ['ignore', 'ignore', 'ignore'],
+        ['ignore'],
+        [],
+    ],
+    results=[
+        [0, 2],
+        [1, 2],
+    ]
+)
+
+silken_moons_serenade_2 = Template(
+    sentences=[
+        ['recharge'],
+    ],
+)
+
+silken_moons_serenade_4 = Template(
+    sentences=[
+        ['ignore', 'ignore', 'ignore'],
+        [],
+        ['ignore'],
+        [],
+    ],
+    results=[
+        [0, 1, 3],
+        [2, 3],
+    ]
+)
+
+aubade_of_morningstar_and_moon_2 = Template(
+    sentences=[
+        ['mastery'],
+    ],
+)
+
+aubade_of_morningstar_and_moon_4 = Template(
+    sentences=[
+        ['dmg_reaction_lunar'],
+        ['dmg_reaction_lunar'],
+        ['ignore'],
+    ],
+    results=[
+        [0, 2],
+        [1, 2],
+    ],
+)
+
+a_day_carved_from_rising_winds_2 = Template(
+    sentences=[
+        ['18:atk_percent'],
+    ],
+)
+
+a_day_carved_from_rising_winds_4 = Template(
+    sentences=[
+        ['6:ignore', '25:atk_percent'],
+        ['20:crit_rate'],
+        [],
+    ],
+    results=[
+        [0, 2],
+        [1],
+    ],
+)
+
+celestial_gift_2 = Template(
+    sentences=[
+        ['recharge'],
+    ],
+)
+
+celestial_gift_4 = Template(
+    replace={
+        '\\n· ': ' ',
+    },
+    sentences=[
+        ['20:ignore', '20:text_percent'],
+        [],
+        [],
+        ['40:text_percent'],
+        [],
+    ],
+    results=[
+        [0, 1, 2],
+        [3, 4],
+    ],
+)
+
+disenchantment_in_deep_shadow_2 = Template(
+    sentences=[
+        ['18:atk_percent'],
+    ],
+)
+
+disenchantment_in_deep_shadow_4 = Template(
+    sentences=[
+        ['dmg_reaction_superconduct', 'dmg_stellarconduct'],
+        ['crit_rate_enemy'],
+    ],
+    results=[
+        [0],
+        [1],
+    ],
+)
+
+scarlet_proof_2 = Template(
+    sentences=[
+        ['18:atk_percent'],
+    ],
+)
+
+scarlet_proof_4 = Template(
+    replace={
+        'their Stellar Swirl reaction dealt': 'their Stellar Swirl reaction DMG dealt',
+    },
+    sentences=[
+        ['16:crit_rate', '40:dmg_stellarswirl', '10:ignore'],
+    ],
+)
+
+heart_of_the_furnace_2 = Template(
+    sentences=[
+        ['18:atk_percent'],
+    ],
+)
+
+heart_of_the_furnace_4 = Template(
+    replace={
+        'and he DMG bonus': 'and the DMG bonus',
+    },
+    sentences=[
+        ['12:atk_percent', '12:ignore'],
+        ['50:dmg_stellarglimmer'],
         [],
     ],
 )

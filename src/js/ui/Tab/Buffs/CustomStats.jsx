@@ -13,6 +13,12 @@ const DAMAGE_BONUS_STATS = [
     'dmg_all', 'dmg_anemo', 'dmg_cryo', 'dmg_dendro', 'dmg_electro', 'dmg_geo', 'dmg_hydro', 'dmg_pyro', 'dmg_phys',
     'dmg_normal', 'dmg_charged', 'dmg_plunge', 'dmg_skill', 'dmg_burst',
     'enemy_def_reduce', 'enemy_def_ignore',
+    'dmg_reaction_lunar', 'dmg_reaction_lunarbloom', 'dmg_reaction_lunarcharged', 'dmg_reaction_lunarcrystallize',
+    'lunarcharged_multi', 'lunarbloom_multi', 'lunarcrystallize_multi',
+    'dmg_lunar_special', 'dmg_lunarcharged_special', 'dmg_lunarbloom_special', 'dmg_lunarcrystallize_special',
+    'dmg_stellarglimmer', 'stellarglimmer_multi', 'dmg_stellarglimmer_special',
+    'dmg_stellarconduct', 'stellarconduct_multi', 'dmg_stellarconduct_special',
+    'dmg_stellarswirl', 'stellarswirl_multi', 'dmg_stellarswirl_special',
 ];
 
 export class CustomStats extends React.Component {
@@ -34,22 +40,22 @@ export class CustomStats extends React.Component {
         for (let stat of PRIMARY_STATS) {
             items.push(
                 <div key={stat} className="line">
-                    <div className="name">{this.lang.get('stat.'+ stat)}</div>
+                    <div className="name">{this.lang.get('stat.' + stat)}</div>
                     <div className="value">
                         <NumberInput
-                            maxValue={9999}
+                            maxValue={99999}
                             addClass="stat-input"
                             value={this.props.settings['custom_buffs.' + stat] || ''}
                             onChange={(value) => this.props.onChange('custom_buffs.' + stat, value)}
                         />
                         <div className="separator"></div>
                         <NumberInput
-                            maxValue={999}
+                            maxValue={9999}
                             addClass="stat-input"
-                            value={this.props.settings['custom_buffs.' + stat +'_percent'] || ''}
+                            value={this.props.settings['custom_buffs.' + stat + '_percent'] || ''}
                             isDecimal={true}
                             decimalDigits={1}
-                            onChange={(value) => this.props.onChange('custom_buffs.' + stat +'_percent', value)}
+                            onChange={(value) => this.props.onChange('custom_buffs.' + stat + '_percent', value)}
                         />
                         %
                     </div>
@@ -64,9 +70,9 @@ export class CustomStats extends React.Component {
                     key={stat}
                     stat={stat}
                     value={this.props.settings['custom_buffs.' + stat]}
-                    title={this.lang.get('stat.'+ stat)}
+                    title={this.lang.get('stat.' + stat)}
                     isDecimal={isPercent}
-                    maxValue={isPercent ? 999 : 9999}
+                    maxValue={isPercent ? 9999 : 99999}
                     onChange={this.props.onChange}
                 />
             );
@@ -78,9 +84,9 @@ export class CustomStats extends React.Component {
                     key={stat}
                     stat={stat}
                     value={this.props.settings['custom_buffs.' + stat]}
-                    title={this.lang.get('stat.'+ stat)}
+                    title={this.lang.get('stat.' + stat)}
                     isDecimal={true}
-                    maxValue={999}
+                    maxValue={9999}
                     onChange={this.props.onChange}
                 />
             );

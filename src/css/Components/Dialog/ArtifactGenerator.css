@@ -5,3 +5,26 @@
 .artifact-generator-modal.dialog-back {
     z-index: 1500;
 }
+
+.narrow .artifact-generator-modal.dialog.max-height .dialog-content {
+    flex: 1 1 auto;
+    overflow: hidden;
+    min-height: 0;
+}
+
+.narrow .artifact-generator-modal.dialog.max-height .artifact-generator {
+    flex: 1 1 auto;
+    overflow-x: hidden;
+    overflow-y: auto;
+    min-height: 0;
+    padding-right: 6px;
+}
+
+.narrow .artifact-generator-modal.dialog.max-height .dialog-content > .controls-bar {
+    flex-shrink: 0;
+}
+
+.narrow .artifact-generator-modal .roll-mode-dropdown .dropdown-options {
+    top: auto;
+    bottom: 30px;
+}

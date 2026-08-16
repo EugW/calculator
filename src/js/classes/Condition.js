@@ -96,8 +96,21 @@ export class Condition {
         return this.params.maxStacks || 0;
     }
 
+    isPartyRestriction() {
+        return false;
+    }
+
     checkSubconditions(settings) {
+        // Check if this condition belongs to an extra party member
+        const isExtraParty = this.entityId && settings['party_extra_override_' + this.entityId];
+
         if (this.params.condition) {
+            // Skip party restrictions for extra party members
+            if (isExtraParty &&
+                this.params.condition.isPartyRestriction &&
+                this.params.condition.isPartyRestriction()) {
+                return true;
+            }
             return this.params.condition.isActive(settings);
         } else {
             // deprecated
@@ -105,6 +118,12 @@ export class Condition {
             if (subcond) {
                 for (let i = 0; i < subcond.length; ++i) {
                     const cond = subcond[i];
+                    // Skip party restrictions for extra party members
+                    if (isExtraParty &&
+                        cond.isPartyRestriction &&
+                        cond.isPartyRestriction()) {
+                        continue;
+                    }
                     if (!cond.isActive(settings)) {
                         return false;
                     }
@@ -140,6 +159,7 @@ export class Condition {
 
     static allConditionsOn(conditions, buildSettings) {
         let settings = {};
+        let localSettings = buildSettings || {};
 
         for (let i = 0; i < conditions.length; ++i) {
             const cond = conditions[i];
@@ -150,9 +170,19 @@ export class Condition {
             } else if (type == 'checkbox') {
                 settings[cond.getName()] = true;
             } else if (type == 'dropdown') {
-                settings[cond.getName()] = cond.params.suggesterValue || 0;
+                let value = cond.params.suggesterValue;
+                if (value === undefined) {
+                    value = cond.params.defaultValue;
+                }
+                settings[cond.getName()] = value === undefined ? '' : value;
+            } else if (type == 'number') {
+                let value = cond.getMaxValue(localSettings);
+                if (value === undefined) {
+                    value = cond.getMinValue(localSettings);
+                }
+                settings[cond.getName()] = value === undefined ? 0 : value;
             } else if (cond.getAllConditionsOn) {
-                Object.assign(settings, cond.getAllConditionsOn(buildSettings));
+                Object.assign(settings, cond.getAllConditionsOn(localSettings));
             }
         }
 
@@ -170,6 +200,8 @@ export class Condition {
                 settings[cond.getName()] = 0;
             } else if (type == 'checkbox') {
                 settings[cond.getName()] = false;
+            } else if (type == 'number') {
+                settings[cond.getName()] = 0;
             }
         }
 

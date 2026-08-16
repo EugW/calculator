@@ -5,3 +5,25 @@
     background-color: #ECE5D8;
     background-image: url("../../../images/icons/tab_settings_dark.png");
 }
+
+.settings-gpu-row {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+    margin: 10px 0 4px;
+}
+
+.settings-gpu-row-title {
+    min-width: 140px;
+}
+
+.settings-gpu-batch-size {
+    width: 120px;
+}
+
+.settings-gpu-note {
+    color: #7f7465;
+    font-size: 12px;
+    line-height: 1.4;
+    margin-bottom: 8px;
+}

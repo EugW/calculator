@@ -34,6 +34,7 @@ export const FlowerOfParadiseLost = new ArtifactSet({
                     stacks: 4,
                     stats: {
                         'dmg_reaction_bloom': 40,
+                        'dmg_reaction_lunarbloom': 10,
                     },
                 }),
                 new ConditionStacks({
@@ -44,9 +45,10 @@ export const FlowerOfParadiseLost = new ArtifactSet({
                     maxStacks: 4,
                     stats: [
                         new StatTable('dmg_reaction_bloom', [10]),
+                        new StatTable('dmg_reaction_lunarbloom', [2.5]),
                     ],
                 }),
             ],
         },
     ],
-})
+});

@@ -42,12 +42,12 @@
 .features-table-block .icon > div {
     width: 20px;
     height: 20px;
-    background-size: 120px 40px;
-    background-image: url("../../../images/icons/element_40_v2.png");
+    background-size: 120px 60px;
+    background-image: url("../../../images/icons/element_40_v3.png");
 }
 
 .features-table-block .stat-anemo {
-    background-position: -60px 0px;
+    background-position: -60px 0;
 }
 .features-table-block .stat-cryo {
     background-position: -40px -20px;
@@ -56,32 +56,41 @@
     background-position: -60px -20px;
 }
 .features-table-block .stat-electro {
-    background-position: -40px 0px;
+    background-position: -40px 0;
 }
 .features-table-block .stat-geo {
-    background-position: 0px -20px;
+    background-position: 0 -20px;
 }
 .features-table-block .stat-hydro {
     background-position: -20px -20px;
 }
 .features-table-block .stat-pyro {
-    background-position: -20px 0px;
+    background-position: -20px 0;
 }
 .features-table-block .stat-phys {
-    background-position: 0px 0px;
+    background-position: 0 0;
 }
 .features-table-block .stat-heal {
-    background-position: -80px 0px;
+    background-position: -80px 0;
 }
 .features-table-block .stat-multi {
-    background-position: -100px 0px;
+    background-position: -100px 0;
 }
 .features-table-block .stat-buff {
     background-position: -100px -20px;
 }
 .features-table-block .stat-hp {
-    background-position: -80px 0px;
+    background-position: -80px 0;
 }
 .stat-shield {
     background-position: -80px -20px;
+}
+.features-table-block .stat-lunarcharged {
+    background-position: 0 -40px;
+}
+.features-table-block .stat-lunarbloom {
+    background-position: -20px -40px;
+}
+.features-table-block .stat-lunarcrystallize {
+    background-position: -40px -40px;
 }

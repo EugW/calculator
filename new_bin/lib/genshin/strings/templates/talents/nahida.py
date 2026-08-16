@@ -42,31 +42,38 @@ char_nahida = TemplateList(
     ),
     the_root_of_all_fullness_rus=Template(
         patterns=[
-            (r'\s*· Полученный урон', '\\nПолученный урон'),
-            (r'\s*· В течени', '\\nВ течени'),
+            (r'(?:<br>|\s)*·\s*Урон', '\\nУрон'),
+            (r'(?:<br>|\s)*·\s*На', '\\nНа'),
+            (r'(?:<br>|\s)*·\s*name\{Шанс', '\\nname{Шанс'),
+            (r'(?:<br>|\s)*·\s*Шанс', '\\nШанс'),
         ],
         sentences=[
             [],
+            [],
             ['crit_rate_bloom', 'crit_dmg_bloom'],
             ['ignore', 'enemy_def_reduce'],
+            ['crit_rate_lunarbloom', 'crit_dmg_lunarbloom'],
         ],
         results=[
-            [1],
-            [2],
+            [1, 2, 4],
+            [3],
         ],
     ),
     the_root_of_all_fullness_eng=Template(
         patterns=[
-            (r'\s*·pyro{Burning}', '\\n·pyro{Burning}'),
-            (r'\s*·Within', '\\nWithin'),
+            (r'(?:<br>|\s)*·\s*pyro\{Burning\}', '\\npyro{Burning}'),
+            (r'(?:<br>|\s)*·\s*Burning', '\\nBurning'),
+            (r'(?:<br>|\s)*·\s*Within', '\\nWithin'),
+            (r'(?:<br>|\s)*·\s*The', '\\nThe'),
         ],
         sentences=[
             [],
             ['crit_rate_bloom', 'crit_dmg_bloom'],
             ['ignore', 'enemy_def_reduce'],
+            ['crit_rate_lunarbloom', 'crit_dmg_lunarbloom'],
         ],
         results=[
-            [1],
+            [1, 3],
             [2],
         ],
     ),

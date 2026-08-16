@@ -1,9 +1,13 @@
 import json
 import re
+import sys
 
 
-from lib.genshin.datafiles.char import CharData, CharProudSkillData, CharSkillData, CharSkillDepotData, SKIP_CHARACTERS, CharTalentSkillData
+from lib.genshin.datafiles.char import CharData, CharProudSkillData, CharSkillData, CharSkillDepotData, SKIP_CHARACTERS, CharTalentSkillData, is_combat_inherent_proud_skill_open
 from lib.genshin.datafiles.lang import LangData
+
+if hasattr(sys.stdout, 'reconfigure'):
+    sys.stdout.reconfigure(encoding='utf-8')
 
 char_data = CharData()
 depot_data = CharSkillDepotData()
@@ -99,7 +103,7 @@ for char in char_data.get_list():
             })
 
         for passive in depot.get('inherentProudSkillOpens', []):
-            if not passive.get('needAvatarPromoteLevel'):
+            if not is_combat_inherent_proud_skill_open(passive):
                 continue
 
             passive_id = passive.get('proudSkillGroupId')

@@ -1,0 +1,14 @@
+category;name;rus;eng
+feature_reaction;stellarswirl_anemo_contribution;Звёздное рассеивание: Анемо вклад 60%;Stellar Swirl: Anemo Contribution 60%
+feature_reaction;stellarswirl_anemo_contribution_2;Звёздное рассеивание: Анемо вклад 30%;Stellar Swirl: Anemo Contribution 30%
+feature_reaction;stellarswirl_anemo_contribution_12;Звёздное рассеивание: Анемо вклад 5%;Stellar Swirl: Anemo Contribution 5%
+feature_reaction;stellarswirl_vortex_1_contribution;Звёздный вихрь ур. 1: вклад 60%;Stellar Vortex Lv. 1: Contribution 60%
+feature_reaction;stellarswirl_vortex_1_contribution_2;Звёздный вихрь ур. 1: вклад 30%;Stellar Vortex Lv. 1: Contribution 30%
+feature_reaction;stellarswirl_vortex_1_contribution_12;Звёздный вихрь ур. 1: вклад 5%;Stellar Vortex Lv. 1: Contribution 5%
+feature_reaction;stellarswirl_vortex_2_contribution;Звёздный вихрь ур. 2: вклад 60%;Stellar Vortex Lv. 2: Contribution 60%
+feature_reaction;stellarswirl_vortex_2_contribution_2;Звёздный вихрь ур. 2: вклад 30%;Stellar Vortex Lv. 2: Contribution 30%
+feature_reaction;stellarswirl_vortex_2_contribution_12;Звёздный вихрь ур. 2: вклад 5%;Stellar Vortex Lv. 2: Contribution 5%
+talent_name;radiance_stellarconduct;Сияние - Звёздный проводник;Radiance: Stellar-Conduct
+talent_name;radiance_stellarswirl;Сияние - Звёздное рассеивание;Radiance: Stellar Swirl
+talent_name;stellarswirl_vortex_triggers;Активации Звёздного вихря;Stellar Vortex Triggers
+talent_descr;stellarswirl_vortex_triggers;Количество активаций Звёздного рассеивания, накопленных текущим Звёздным вихрем. На 3 активациях вихрь достигает 2 уровня, а на 6 взрывается досрочно.;Number of Stellar Swirl triggers accumulated by the current Stellar Vortex. It reaches Level 2 at 3 triggers and bursts early at 6.

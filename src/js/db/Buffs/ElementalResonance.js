@@ -2,12 +2,18 @@ import { ConditionBoolean } from "../../classes/Condition/Boolean";
 import { ConditionEnemyStatus } from "../../classes/Condition/Boolean/EnemyStatus";
 import { ConditionBooleanResonanceEnabled } from "../../classes/Condition/Boolean/ResonanceEnabled";
 import { ConditionBooleanValue } from "../../classes/Condition/Boolean/Value";
+import { ConditionCalcMoonsign } from "../../classes/Condition/CalcMoonsign";
 import { ConditionChars } from "../../classes/Condition/Chars";
 import { ConditionCustomBuffs } from "../../classes/Condition/CustomBuffs";
 import { ConditionDropdownElement } from "../../classes/Condition/Dropdown/Element";
+import { ConditionHexereiResonance } from "../../classes/Condition/HexereiResonance";
+import { ConditionNumber } from "../../classes/Condition/Number";
+import { ConditionNumberLunarBuff } from "../../classes/Condition/Number/LunarBuff";
 import { ConditionResonance } from "../../classes/Condition/Resonance";
 import { ConditionStatic } from "../../classes/Condition/Static";
+import { ConditionStaticLevel } from "../../classes/Condition/Static/Level";
 import { DbObjectBuff } from "../../classes/DbObject/Buff";
+import { StatTable } from "../../classes/StatTable";
 
 const elementValues = [
     {
@@ -72,6 +78,8 @@ export const ElementalResonance = new DbObjectBuff({
             serializeId: 24,
             isHidden: true,
         }),
+        // Calculate moonsign level from party composition
+        new ConditionCalcMoonsign({}),
         new ConditionStatic({
             title: 'buffs_name.resonance_cryo',
             description: 'buffs_descr.resonance_cryo',
@@ -363,6 +371,94 @@ export const ElementalResonance = new DbObjectBuff({
                     element: '',
                 }),
                 new ConditionBooleanResonanceEnabled(),
+            ],
+        }),
+        // Ascendant Gleam: Non-Moonsign character buff (0-36% Lunar Reaction DMG)
+        new ConditionNumberLunarBuff({
+            name: 'buffs.ascendant_gleam_buff',
+            serializeId: 25,
+            title: 'buffs_name.ascendant_gleam_buff',
+            description: 'buffs_descr.ascendant_gleam_buff',
+            max: 36,
+            hideCondition: [
+                new ConditionBooleanValue({
+                    setting: 'party_moonsign',
+                    cond: 'lt',
+                    value: 2,
+                }),
+            ],
+            subConditions: [
+                new ConditionBooleanValue({
+                    setting: 'party_moonsign',
+                    cond: 'ge',
+                    value: 2,
+                }),
+            ],
+        }),
+        new ConditionBoolean({
+            name: 'polestar_field',
+            serializeId: 70,
+            rotation: 'buffs',
+            title: 'talent_name.n11330003',
+            description: 'talent_descr.n11330003',
+            stats: {
+                enemy_res_phys: -40,
+            },
+        }),
+        new ConditionNumber({
+            name: 'polestar_included_hits',
+            serializeId: 71,
+            rotation: 'buffs',
+            title: 'talent_name.polestar_included_hits',
+            description: 'talent_descr.polestar_included_hits',
+            max: 12,
+            allowMinZero: true,
+            noStat: true,
+            hideInactive: true,
+            subConditions: [
+                new ConditionBoolean({name: 'polestar_field'}),
+            ],
+        }),
+        new ConditionStaticLevel({
+            isHidden: true,
+            levelSetting: 'polestar_included_hits',
+            fromZero: true,
+            stats: [
+                new StatTable('dmg_cryo', [20, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40]),
+                new StatTable('dmg_electro', [20, 29, 30, 31, 32, 33, 34, 35, 36, 37, 38, 39, 40]),
+            ],
+            subConditions: [
+                new ConditionBoolean({name: 'polestar_field'}),
+            ],
+        }),
+        new ConditionNumber({
+            name: 'stellarswirl_vortex_triggers',
+            serializeId: 78,
+            rotation: 'buffs',
+            title: 'talent_name.stellarswirl_vortex_triggers',
+            description: 'talent_descr.stellarswirl_vortex_triggers',
+            min: 0,
+            max: 6,
+            allowMinZero: true,
+            noStat: true,
+            forceSettings: true,
+            hideInactive: true,
+            subConditions: [
+                new ConditionBoolean({name: 'allowed_stellarswirl'}),
+            ],
+        }),
+        // Hexerei Resonance: Active when 2+ Hexerei-capable characters are in party
+        new ConditionStatic({
+            title: 'buffs_name.resonance_hexerei',
+            description: 'buffs_descr.resonance_hexerei',
+            info: {hexerei: true},
+            hideCondition: [
+                new ConditionHexereiResonance({
+                    invert: true,
+                }),
+            ],
+            subConditions: [
+                new ConditionHexereiResonance({}),
             ],
         }),
         new ConditionBoolean({

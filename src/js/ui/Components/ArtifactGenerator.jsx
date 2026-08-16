@@ -18,7 +18,7 @@ export const DEFAULT_SETTINGS = {
     rollMode: 'avg',
     minRecharge: 100,
     kqms: true,
-}
+};
 
 export class ArtifactGeneratorSettings extends React.Component {
     constructor(props) {
@@ -149,6 +149,7 @@ export class ArtifactGeneratorSettings extends React.Component {
                         {settings.kqms ? <div className="value">-</div> : <>
                             <div className="control dropdown">
                                 <Dropdown
+                                    addClass="roll-mode-dropdown"
                                     items={this.rollModes}
                                     selected={settings.rollMode}
                                     onChange={(item) => this.handleRollMode(item.value)}

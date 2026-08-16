@@ -2,12 +2,15 @@ import { Condition } from "../../classes/Condition";
 import { ConditionAnd } from "../../classes/Condition/And";
 import { ConditionAscensionChar } from "../../classes/Condition/Ascension/Char";
 import { ConditionBoolean } from "../../classes/Condition/Boolean";
+import { ConditionConstellation } from "../../classes/Condition/Constellation";
 import { ConditionNot } from "../../classes/Condition/Not";
+import { ConditionOr } from "../../classes/Condition/Or";
 import { ConditionStacks } from "../../classes/Condition/Stacks";
 import { ConditionStatic } from "../../classes/Condition/Static";
 import { DbObjectChar } from "../../classes/DbObject/Char";
 import { DbObjectConstellation } from "../../classes/DbObject/Constellation";
 import { DbObjectTalents } from "../../classes/DbObject/Talents";
+import { FeatureDamageStellarConduct } from "../../classes/Feature2/Damage/StellarConduct";
 import { FeatureDamageCharged } from "../../classes/Feature2/Damage/Charged";
 import { FeatureDamageMultihit } from "../../classes/Feature2/Damage/Multihit";
 import { FeatureDamageNormal } from "../../classes/Feature2/Damage/Normal";
@@ -146,10 +149,14 @@ const TalentValues = {
     BurstMastery: 100,
     A1SkillDmgBonus: 35,
     A1DustStalkerDmg: 100,
+    A1StarsameDmg: 200,
     A4NormalMasteryDmg: 150,
     A4DustStalkerMasteryDmg: 250,
+    A4StarsameMasteryDmg: 600,
     C1AtkSpeed: 20,
+    C1Mastery: 200,
     C2ElectroDmg: 10,
+    C2StellarConductDmg: 16,
 };
 
 export const Cyno = new DbObjectChar({
@@ -444,6 +451,30 @@ export const Cyno = new DbObjectChar({
                 new ConditionAscensionChar({ascension: 1}),
             ]),
         }),
+        new FeatureDamageStellarConduct({
+            category: 'skill',
+            name: 'cyno_duststalker_bolt_starsame',
+            element: 'electro',
+            hits: 3,
+            tags: ['cyno_duststalker_bolt_starsame'],
+            multipliers: [
+                new FeatureMultiplier({
+                    source: 'ascension1',
+                    values: new ValueTable([TalentValues.A1StarsameDmg]),
+                }),
+            ],
+            condition: new ConditionAnd([
+                new ConditionBoolean({name: 'cyno_wolfs_swiftness'}),
+                new ConditionAscensionChar({ascension: 1}),
+                new ConditionOr([
+                    new ConditionBoolean({name: 'cyno_radiance_stellarconduct'}),
+                    new ConditionAnd([
+                        new ConditionConstellation({constellation: 6}),
+                        new ConditionBoolean({name: 'cyno_together_we_rise'}),
+                    ]),
+                ]),
+            ]),
+        }),
     ],
     multipliers: [
         new FeatureMultiplier({
@@ -457,6 +488,19 @@ export const Cyno = new DbObjectChar({
             target: new FeatureMultiplierTarget({
                 damageElements: ['electro'],
                 damageTypes: ['normal'],
+            }),
+        }),
+        new FeatureMultiplier({
+            scaling: 'mastery*',
+            source: 'ascension4',
+            values: new ValueTable([TalentValues.A4StarsameMasteryDmg]),
+            condition: new ConditionAnd([
+                new ConditionBoolean({name: 'cyno_wolfs_swiftness'}),
+                new ConditionAscensionChar({ascension: 4}),
+            ]),
+            target: new FeatureMultiplierTarget({
+                tags: ['cyno_duststalker_bolt_starsame'],
+                options: ['stellarconduct_flat'],
             }),
         }),
     ],
@@ -474,11 +518,12 @@ export const Cyno = new DbObjectChar({
             name: 'cyno_featherfall_judgment',
             serializeId: 2,
             title: 'talent_name.cyno_featherfall_judgment',
-            description: 'talent_descr.cyno_featherfall_judgment',
+            description: 'talent_descr.cyno_featherfall_judgment_buffed',
             info: {ascension: 1},
             stats: {
                 dmg_skill_cyno: TalentValues.A1SkillDmgBonus,
                 text_percent_dmg: TalentValues.A1DustStalkerDmg,
+                text_percent_dmg2: TalentValues.A1StarsameDmg,
             },
             subConditions: [
                 new ConditionAscensionChar({ascension: 1}),
@@ -487,15 +532,25 @@ export const Cyno = new DbObjectChar({
         }),
         new ConditionStatic({
             title: 'talent_name.cyno_authority_over_the_nine_bows',
-            description: 'talent_descr.cyno_authority_over_the_nine_bows',
+            description: 'talent_descr.cyno_authority_over_the_nine_bows_buffed',
             info: {ascension: 4},
             stats: {
                 text_percent_dmg: TalentValues.A4NormalMasteryDmg,
                 text_percent_dmg2: TalentValues.A4DustStalkerMasteryDmg,
+                text_percent_dmg3: TalentValues.A4StarsameMasteryDmg,
             },
             subConditions: [
                 new ConditionAscensionChar({ascension: 4}),
                 new ConditionBoolean({name: 'cyno_wolfs_swiftness'}),
+            ],
+        }),
+        new ConditionBoolean({
+            name: 'cyno_radiance_stellarconduct',
+            serializeId: 4,
+            title: 'talent_name.cyno_a_star_with_which_to_start_the_journey',
+            description: 'talent_descr.cyno_a_star_with_which_to_start_the_journey',
+            subConditions: [
+                new ConditionBoolean({name: 'polestar_field'}),
             ],
         }),
     ],
@@ -504,7 +559,7 @@ export const Cyno = new DbObjectChar({
             conditions: [
                 new ConditionStatic({
                     title: 'talent_name.cyno_unceasing_vigil',
-                    description: 'talent_descr.cyno_unceasing_vigil',
+                    description: 'talent_descr.cyno_unceasing_vigil_buffed',
                     stats: {
                         atk_speed_normal: TalentValues.C1AtkSpeed,
                     },
@@ -512,6 +567,18 @@ export const Cyno = new DbObjectChar({
                         new ConditionBoolean({name: 'cyno_wolfs_swiftness'}),
                         new ConditionBoolean({name: 'cyno_featherfall_judgment'}),
                         new ConditionAscensionChar({ascension: 1}),
+                    ],
+                }),
+                new ConditionBoolean({
+                    name: 'cyno_together_we_rise',
+                    serializeId: 5,
+                    title: 'talent_name.cyno_unceasing_vigil',
+                    description: 'talent_descr.cyno_unceasing_vigil_buffed',
+                    stats: {
+                        mastery: TalentValues.C1Mastery,
+                    },
+                    subConditions: [
+                        new ConditionBoolean({name: 'cyno_radiance_stellarconduct'}),
                     ],
                 }),
             ],
@@ -522,10 +589,23 @@ export const Cyno = new DbObjectChar({
                     name: 'cyno_homecoming_of_spirits',
                     serializeId: 3,
                     title: 'talent_name.cyno_homecoming_of_spirits',
-                    description: 'talent_descr.cyno_homecoming_of_spirits',
+                    description: 'talent_descr.cyno_homecoming_of_spirits_buffed',
                     maxStacks: 5,
                     stats: [
                         new StatTable('dmg_electro', [TalentValues.C2ElectroDmg]),
+                    ],
+                }),
+                new ConditionStacks({
+                    name: 'cyno_homecoming_of_spirits_stellarconduct',
+                    serializeId: 6,
+                    title: 'talent_name.cyno_homecoming_of_spirits',
+                    description: 'talent_descr.cyno_homecoming_of_spirits_buffed',
+                    maxStacks: 5,
+                    stats: [
+                        new StatTable('dmg_stellarconduct', [TalentValues.C2StellarConductDmg]),
+                    ],
+                    subConditions: [
+                        new ConditionBoolean({name: 'cyno_together_we_rise'}),
                     ],
                 }),
             ],
@@ -543,7 +623,7 @@ export const Cyno = new DbObjectChar({
             conditions: [
                 new ConditionStatic({
                     title: 'talent_name.cyno_forbidding_guard',
-                    description: 'talent_descr.cyno_forbidding_guard',
+                    description: 'talent_descr.cyno_forbidding_guard_buffed',
                 }),
             ],
         },
@@ -560,9 +640,39 @@ export const Cyno = new DbObjectChar({
             conditions: [
                 new ConditionStatic({
                     title: 'talent_name.cyno_just_scales',
-                    description: 'talent_descr.cyno_just_scales',
+                    description: 'talent_descr.cyno_just_scales_buffed',
                 }),
             ],
         },
     ]),
+    partyData: {
+        conditions: [
+            new ConditionBoolean({
+                name: 'party.cyno_together_we_rise',
+                serializeId: 1,
+                rotation: 'party',
+                title: 'talent_name.cyno_unceasing_vigil',
+                description: 'talent_descr.cyno_unceasing_vigil_buffed',
+                info: {constellation: 1},
+                stats: {
+                    mastery: TalentValues.C1Mastery,
+                },
+            }),
+            new ConditionStacks({
+                name: 'party.cyno_homecoming_of_spirits_stellarconduct',
+                serializeId: 2,
+                rotation: 'party',
+                title: 'talent_name.cyno_homecoming_of_spirits',
+                description: 'talent_descr.cyno_homecoming_of_spirits_buffed',
+                info: {constellation: 2},
+                maxStacks: 5,
+                stats: [
+                    new StatTable('dmg_stellarconduct', [TalentValues.C2StellarConductDmg]),
+                ],
+                subConditions: [
+                    new ConditionBoolean({name: 'party.cyno_together_we_rise'}),
+                ],
+            }),
+        ],
+    },
 });

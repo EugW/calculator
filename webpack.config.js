@@ -48,6 +48,8 @@ module.exports = (env, argv) => {
                     {from: path.resolve(__dirname, 'src/images/help/'), to: "images/help/"},
                     {from: path.resolve(__dirname, 'src/help/'), to: "help/"},
                     {from: path.resolve(__dirname, 'src/js/lang/'), to: "js/lang/"},
+                    {from: path.resolve(__dirname, 'src/robots.txt'), to: "robots.txt"},
+                    {from: path.resolve(__dirname, 'src/sitemap.xml'), to: "sitemap.xml"},
                 ],
             }),
         ],
@@ -63,32 +65,20 @@ module.exports = (env, argv) => {
                 {
                     test: /\.(ttf|woff2?)$/,
                     include: /fonts/,
-                    use: [
-                        {
-                            loader: 'file-loader',
-                            options: {
-                                name: '[name].[ext]',
-                                outputPath: 'fonts/',
-                                publicPath: '../fonts/'
-                            }
-                        }
-                    ]
+                    type: 'asset/resource',
+                    generator: {
+                        filename: 'fonts/[name][ext]'
+                    }
                 },
                 {
                     test: /\.(png|svg|jpe?g|gif|webp)$/,
                     include: /images/,
-                    use: [
-                        {
-                            loader: 'file-loader',
-                            options: {
-                                name(resourcePath) {
-                                    return resourcePath.replace(/^.*?\/src\/images\//, '');
-                                },
-                                outputPath: 'images/',
-                                publicPath: '../images/'
-                            }
+                    type: 'asset/resource',
+                    generator: {
+                        filename: (pathData) => {
+                            return pathData.filename.replace(/^src\/images\//, 'images/').replace(/\\/g, '/');
                         }
-                    ]
+                    }
                 },
                 {
                     test: /\.m?jsx?$/,

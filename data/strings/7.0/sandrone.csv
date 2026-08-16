@@ -1,0 +1,8 @@
+category;name;rus;eng
+feature_attack;sandrone_condensed_beam_stellarswirl;Урон конденсационного луча Звёздного рассеивания;Condensed Beam Stellar Swirl DMG
+feature_skill;sandrone_prism_shot_stellarswirl;Урон призматического снаряда Звёздного рассеивания;Prism Shot Stellar Swirl DMG
+feature_skill;sandrone_refined_prism_shot_stellarswirl;Урон усовершенствованного призматического снаряда Звёздного рассеивания;Refined Prism Shot Stellar Swirl DMG
+feature_burst;sandrone_convective_inhibition_ray_stellarswirl;Урон кумулятивного криолуча Звёздного рассеивания;Convective Inhibition Ray Stellar Swirl DMG
+feature_other;sandrone_prismatic_resonance_cannon_stellarswirl;Урон призморезонансной пушки Звёздного рассеивания;Prismatic Resonance Cannon Stellar Swirl DMG
+feature_attack;sandrone_condensed_cluster_beam_stellarswirl;Урон пучка конденсационных лучей Звёздного рассеивания;Condensed Cluster Beam Stellar Swirl DMG
+feature_other;sandrone_light_of_rationalisme;Базовый урон Звёздного блеска от силы атаки;Base Stellar Glimmer DMG from ATK

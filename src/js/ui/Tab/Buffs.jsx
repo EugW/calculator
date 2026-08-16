@@ -36,11 +36,11 @@ export class BuffsTab extends Tab {
     createContent() {
         return (
             <Buffs
-                ref={element => { this.component = element }}
+                ref={element => { this.component = element; }}
                 app={this.app}
                 title={this.title}
             />
-        )
+        );
     }
 }
 
@@ -49,11 +49,14 @@ export class Buffs extends React.Component {
         super(props);
 
         this.lang = new Lang();
-        this.state = {};
+        this.state = {
+            expandedExtraChars: {},  // Track which extra characters are expanded
+        };
 
         this.strings = {
             title: this.lang.get('tab_header.buff_view'),
             party: this.lang.get('buff_group.elemental_resonance'),
+            additionalSupports: this.lang.get('buff_group.additional_supports'),
             artifacts: this.lang.get('buff_group.artifacts'),
             weapons: this.lang.get('buff_group.weapons'),
             custom: this.lang.get('buff_group.custom'),
@@ -90,6 +93,15 @@ export class Buffs extends React.Component {
                 },
             });
         }
+    }
+
+    toggleExtraChar(charId) {
+        this.setState(prevState => ({
+            expandedExtraChars: {
+                ...prevState.expandedExtraChars,
+                [charId]: !prevState.expandedExtraChars[charId],
+            },
+        }));
     }
 
     render() {
@@ -146,6 +158,59 @@ export class Buffs extends React.Component {
             );
         }
 
+        // Extra party members (beyond core 4)
+        let extraCharItems = [];
+        let extraIndex = 1;
+        while (settings['party_char_extra_' + extraIndex]) {
+            let char = DB.Chars.getById(settings['party_char_extra_' + extraIndex]);
+            if (char) {
+                let conditions = char.getPartyConditions();
+                if (countConditions(conditions) >= 1) {
+                    let charId = char.getId();
+                    let isExpanded = this.state.expandedExtraChars[charId];
+                    let partyButton = null;
+                    let loadData = char.isLoadParty();
+                    if (loadData) {
+                        partyButton = (
+                            <ControlsBar>
+                                <ControlsBarDivider/>
+                                <TitledButton
+                                    icon="icon-ok"
+                                    title={this.strings.load_char}
+                                    onClick={() => this.handleCharLoad(charId, loadData)}
+                                />
+                            </ControlsBar>
+                        );
+                    }
+
+                    extraCharItems.push(
+                        <div key={'char_extra_'+ charId} className="buffs-char-extended">
+                            <div
+                                className="buffs-char-extended-header"
+                                onClick={() => this.toggleExtraChar(charId)}
+                            >
+                                <span>{makeTitleWithCount(this.lang.get(char.getName()), conditions, settings)}</span>
+                                <span className={'buffs-char-extended-toggle' + (isExpanded ? ' open' : '')}></span>
+                            </div>
+                            {isExpanded && (
+                                <div className="buffs-char-extended-content">
+                                    {partyButton}
+                                    <ConditionList
+                                        charId={charId}
+                                        items={conditions}
+                                        settings={settings}
+                                        hideInactive={true}
+                                        onChange={(name, value) => this.handleSettingChange(name, value)}
+                                    />
+                                </div>
+                            )}
+                        </div>
+                    );
+                }
+            }
+            extraIndex++;
+        }
+
         let buffCount = countCustomStats(settings);
 
         return (
@@ -182,6 +247,11 @@ export class Buffs extends React.Component {
                         {charItems[0] ? charItems[0] : null}
                         {charItems[1] ? charItems[1] : null}
                         {charItems[2] ? charItems[2] : null}
+                        {extraCharItems.length > 0 && (
+                            <AccordionItem id="additional_supports" title={this.strings.additionalSupports + ` (${extraCharItems.length})`}>
+                                {extraCharItems}
+                            </AccordionItem>
+                        )}
                         <AccordionItem id="custom" title={this.strings.custom + (buffCount ? ` (${buffCount})` : '')}>
                             <CustomStats
                                 settings={settings}

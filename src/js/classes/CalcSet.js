@@ -12,6 +12,7 @@ import { Condition } from "./Condition";
 import { PRIORITIES } from "./PostEffect";
 import { RotationCompiler } from "./RotationCompiler";
 import { Serializer } from "./Serializer";
+import { normalizeRadianceStellarGlimmer } from "./Build/Settings";
 
 export const objectsNames = ['char', 'weapon', 'artifacts', 'enemy', 'buffs', 'rotation', 'food', 'reaction', 'static'];
 const serializeObjectsNames = ['char', 'weapon', 'artifacts', 'enemy', 'buffs', 'rotation', 'food'];
@@ -44,11 +45,11 @@ export class CalcSet {
         }
 
         if (weapon != data.weapon) {
-            this.setWeapon(DB.Weapons.get(data.weapon).getFirst())
+            this.setWeapon(DB.Weapons.get(data.weapon).getFirst());
         }
 
         let chars = this.buffs.getPartyChars();
-        this.buffs.setPartyChars(chars.filter((id) => {return id != data.getId()}));
+        this.buffs.setPartyChars(chars.filter((id) => {return id != data.getId();}));
         this.setCharSettings(commonSettings);
     }
 
@@ -63,6 +64,7 @@ export class CalcSet {
     setCharSettings(data) {
         this.char.setSettings(data);
         this.setCommonSettings(data);
+        this.normalizeRadianceStellarGlimmerSettings();
     }
 
     getWeapon() {
@@ -155,11 +157,13 @@ export class CalcSet {
     setBuffsSettings(data) {
         this.buffs.setSettings(data);
         this.setCommonSettings(data);
+        this.normalizeRadianceStellarGlimmerSettings();
     }
 
     modifyBuffsSettings(data) {
         let settings = this.buffs.modifySettings(data);
         this.setCommonSettings(settings);
+        this.normalizeRadianceStellarGlimmerSettings();
     }
 
     setPartyChars(ids) {
@@ -216,6 +220,32 @@ export class CalcSet {
             let conditions = this.getActiveConditions(allSettings, {objects: [i]});
             Condition.setCommonValues(settings, conditions);
             this[i].setSettings(settings);
+        }
+
+        this.normalizeRadianceStellarGlimmerSettings();
+    }
+
+    normalizeRadianceStellarGlimmerSettings() {
+        const normalized = normalizeRadianceStellarGlimmer(this.getSettings());
+
+        for (const objectName of objectsNames) {
+            const object = this[objectName];
+            if (!object) continue;
+
+            const settings = object.getSettings();
+            let changed = false;
+
+            for (const name of Object.keys(settings)) {
+                if (Object.prototype.hasOwnProperty.call(normalized, name) &&
+                    settings[name] !== normalized[name]) {
+                    settings[name] = normalized[name];
+                    changed = true;
+                }
+            }
+
+            if (changed) {
+                object.setSettings(settings);
+            }
         }
     }
 
@@ -442,7 +472,7 @@ export class CalcSet {
 
     getFeaturesList(opts) {
         let result = [];
-        opts = Object.assign({}, opts)
+        opts = Object.assign({}, opts);
 
         for (let name of objectsNames) {
             if (!this[name]) {
@@ -533,12 +563,12 @@ export class CalcSet {
     }
 
     getFeatureByName(name, buildData) {
-        if (!name) { return null }
+        if (!name) { return null; }
 
         buildData ||= this.getBuildData();
 
         for (let feat of this.getFeaturesList()) {
-            if (!feat.isActive(buildData)) { continue }
+            if (!feat.isActive(buildData)) { continue; }
 
             if (name == feat.getName()) {
                 return feat;
@@ -549,7 +579,7 @@ export class CalcSet {
     }
 
     getAllFeaturesByName(name, opts) {
-        if (!name) { return [] }
+        if (!name) { return []; }
 
         let result = [];
         for (let feat of this.getFeaturesList(opts)) {
@@ -634,6 +664,8 @@ export class CalcSet {
 
             result.food = CalcObjectFood.deserialize(input);
             if (!result.food) return null;
+
+            result.normalizeRadianceStellarGlimmerSettings();
         }
 
         return result;

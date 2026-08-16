@@ -19,7 +19,13 @@ export class ConditionNumber extends Condition {
     }
 
     getMaxValue(settings) {
-        return this.params.max;
+        let max = this.params.max;
+
+        if (typeof max === 'function') {
+            return max(settings || {});
+        }
+
+        return max;
     }
 
     getValue(settings) {
@@ -30,7 +36,7 @@ export class ConditionNumber extends Condition {
         if (this.params.format == 'decimal') {
             value = parseFloat(value).toFixed(1);
         } else {
-            value = parseInt(value)
+            value = parseInt(value);
         }
 
         value = Math.max(min, value);

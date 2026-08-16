@@ -1,11 +1,15 @@
 import { Condition } from "../../classes/Condition";
+import { ConditionAnd } from "../../classes/Condition/And";
 import { ConditionAscensionChar } from "../../classes/Condition/Ascension/Char";
 import { ConditionBoolean } from "../../classes/Condition/Boolean";
 import { ConditionBooleanLevels } from "../../classes/Condition/Boolean/Levels";
 import { ConditionConstellation } from "../../classes/Condition/Constellation";
+import { ConditionHexereiResonance } from "../../classes/Condition/HexereiResonance";
+import { ConditionNot } from "../../classes/Condition/Not";
 import { ConditionNumberTalent } from "../../classes/Condition/Number/Talent";
 import { ConditionStacks } from "../../classes/Condition/Stacks";
 import { ConditionStatic } from "../../classes/Condition/Static";
+import { ConditionWitchHomework } from "../../classes/Condition/WitchHomework";
 import { DbObjectChar } from "../../classes/DbObject/Char";
 import { DbObjectConstellation } from "../../classes/DbObject/Constellation";
 import { DbObjectTalents } from "../../classes/DbObject/Talents";
@@ -19,6 +23,7 @@ import { FeatureMultiplier } from "../../classes/Feature2/Multiplier";
 import { FeaturePostEffectValue } from "../../classes/Feature2/PostEffectValue";
 import { PostEffectStatsRecharge } from "../../classes/PostEffect/Stats/Recharge";
 import { StatTable } from "../../classes/StatTable";
+import { ValueTable } from "../../classes/ValueTable";
 import { charTables } from "../generated/CharTables";
 import { charTalentTables } from "../generated/CharTalentTables";
 
@@ -136,6 +141,11 @@ const hydroDmgPost = new PostEffectStatsRecharge({
     ],
 });
 
+const condWitchHomeworkOn = new ConditionBoolean({name: 'mona_witch_homework'});
+const condWitchHomeworkOff = new ConditionNot([condWitchHomeworkOn]);
+const condPartyWitchHomeworkOn = new ConditionBoolean({name: 'party.mona_witch_homework'});
+const condPartyWitchHomeworkOff = new ConditionNot([condPartyWitchHomeworkOn]);
+
 export const Mona = new DbObjectChar({
     name: 'mona',
     serializeId: 17,
@@ -196,6 +206,15 @@ export const Mona = new DbObjectChar({
                     leveling: 'char_skill_attack',
                     values: Talents.get('attack.charged_hit'),
                 }),
+                new FeatureMultiplier({
+                    leveling: 'char_skill_attack',
+                    condition: new ConditionAnd([
+                        condWitchHomeworkOn,
+                        new ConditionConstellation({constellation: 6}),
+                        new ConditionBoolean({name: 'mona_omen'}),
+                    ]),
+                    values: Talents.get('attack.charged_hit'),
+                }),
             ],
         }),
         new FeatureDamageCharged({
@@ -206,6 +225,15 @@ export const Mona = new DbObjectChar({
             multipliers: [
                 new FeatureMultiplier({
                     leveling: 'char_skill_attack',
+                    values: Talents.get('attack.charged_hit'),
+                }),
+                new FeatureMultiplier({
+                    leveling: 'char_skill_attack',
+                    condition: new ConditionAnd([
+                        condWitchHomeworkOn,
+                        new ConditionConstellation({constellation: 6}),
+                        new ConditionBoolean({name: 'mona_omen'}),
+                    ]),
                     values: Talents.get('attack.charged_hit'),
                 }),
             ],
@@ -293,6 +321,13 @@ export const Mona = new DbObjectChar({
         }),
     ],
     conditions: [
+        new ConditionBoolean({
+            name: 'mona_witch_homework',
+            serializeId: 9,
+            title: 'talent_name.mona_genesis_of_starsigns',
+            description: 'talent_descr.mona_genesis_of_starsigns',
+            info: {hexerei: true},
+        }),
         new ConditionConstellation({
             constellation: 3,
             settings: {
@@ -343,12 +378,49 @@ export const Mona = new DbObjectChar({
                     serializeId: 4,
                     title: 'talent_name.mona_prophecy_of_submersion',
                     description: 'talent_descr.mona_prophecy_of_submersion',
+                    hideCondition: [condWitchHomeworkOn],
+                    condition: condWitchHomeworkOff,
                     stats: {
                         dmg_reaction_electrocharged: C1ReactionBonus,
                         dmg_reaction_vaporize: C1ReactionBonus,
                         dmg_reaction_swirl_hydro: C1ReactionBonus,
                         duration_frozen: C1ReactionBonus,
                         dmg_reaction_lunarcharged: C1ReactionBonus,
+                        dmg_reaction_lunarcrystallize: C1ReactionBonus,
+                    },
+                }),
+                new ConditionBoolean({
+                    name: 'mona_prophecy_of_submersion',
+                    serializeId: 4,
+                    title: 'talent_name.mona_prophecy_of_submersion',
+                    description: 'talent_descr.mona_prophecy_of_submersion_buffed',
+                    hideCondition: [condWitchHomeworkOff],
+                    condition: condWitchHomeworkOn,
+                    stats: {
+                        dmg_reaction_electrocharged: C1ReactionBonus,
+                        dmg_reaction_vaporize: C1ReactionBonus,
+                        dmg_reaction_swirl_hydro: C1ReactionBonus,
+                        duration_frozen: C1ReactionBonus,
+                        dmg_reaction_lunarcharged: C1ReactionBonus,
+                        dmg_reaction_lunarcrystallize: C1ReactionBonus,
+                    },
+                }),
+                new ConditionBoolean({
+                    name: 'mona_prophecy_of_submersion_off_field',
+                    serializeId: 5,
+                    title: 'talent_name.mona_prophecy_of_submersion',
+                    hideCondition: [condWitchHomeworkOff],
+                    condition: new ConditionAnd([
+                        condWitchHomeworkOn,
+                        new ConditionBoolean({name: 'mona_prophecy_of_submersion'}),
+                    ]),
+                    stats: {
+                        dmg_reaction_electrocharged: C1ReactionBonus * 0.6,
+                        dmg_reaction_vaporize: C1ReactionBonus * 0.6,
+                        dmg_reaction_swirl_hydro: C1ReactionBonus * 0.6,
+                        duration_frozen: C1ReactionBonus * 0.6,
+                        dmg_reaction_lunarcharged: C1ReactionBonus * 0.6,
+                        dmg_reaction_lunarcrystallize: C1ReactionBonus * 0.6,
                     },
                 }),
             ],
@@ -358,8 +430,21 @@ export const Mona = new DbObjectChar({
                 new ConditionStatic({
                     title: 'talent_name.mona_lunar_chain',
                     description: 'talent_descr.mona_lunar_chain',
+                    hideCondition: [condWitchHomeworkOn],
                     stats: {
                         text_percent_chance: C2ChargedProb,
+                    },
+                }),
+                new ConditionBoolean({
+                    name: 'mona_lunar_chain_buff',
+                    serializeId: 6,
+                    title: 'talent_name.mona_lunar_chain',
+                    description: 'talent_descr.mona_lunar_chain_buffed',
+                    hideCondition: [condWitchHomeworkOff],
+                    condition: condWitchHomeworkOn,
+                    stats: {
+                        text_percent_chance: C2ChargedProb,
+                        mastery: 80,
                     },
                 }),
             ],
@@ -372,9 +457,29 @@ export const Mona = new DbObjectChar({
                     serializeId: 2,
                     title: 'talent_name.mona_prophecy_of_oblivion',
                     description: 'talent_descr.mona_prophecy_of_oblivion',
+                    hideCondition: [condWitchHomeworkOn],
+                    condition: condWitchHomeworkOff,
                     stats: {
                         crit_rate: C4CritRate,
                     },
+                }),
+                new ConditionBoolean({
+                    name: 'mona_prophecy_of_oblivion',
+                    serializeId: 2,
+                    title: 'talent_name.mona_prophecy_of_oblivion',
+                    description: 'talent_descr.mona_prophecy_of_oblivion_buffed',
+                    hideCondition: [condWitchHomeworkOff],
+                    condition: condWitchHomeworkOn,
+                    stats: {
+                        crit_rate: C4CritRate,
+                    },
+                }),
+                new Condition({
+                    condition: new ConditionAnd([
+                        new ConditionBoolean({name: 'mona_prophecy_of_oblivion'}),
+                        condWitchHomeworkOn,
+                    ]),
+                    stats: {crit_dmg: 15},
                 }),
             ]
         },
@@ -394,11 +499,25 @@ export const Mona = new DbObjectChar({
                     serializeId: 3,
                     title: 'talent_name.mona_rhetorics_of_calamitas',
                     description: 'talent_descr.mona_rhetorics_of_calamitas',
+                    hideCondition: [condWitchHomeworkOn],
+                    condition: condWitchHomeworkOff,
                     maxStacks: 3,
                     stats: [
                         new StatTable('dmg_charged', [C6ChargedDmg]),
                     ],
-                })
+                }),
+                new ConditionStacks({
+                    name: 'mona_rhetorics_of_calamitas',
+                    serializeId: 3,
+                    title: 'talent_name.mona_rhetorics_of_calamitas',
+                    description: 'talent_descr.mona_rhetorics_of_calamitas_buffed',
+                    hideCondition: [condWitchHomeworkOff],
+                    condition: condWitchHomeworkOn,
+                    maxStacks: 3,
+                    stats: [
+                        new StatTable('dmg_charged', [C6ChargedDmg]),
+                    ],
+                }),
             ],
         },
     ]),
@@ -407,6 +526,28 @@ export const Mona = new DbObjectChar({
             settings: ['char_skill_burst'],
         },
         conditions: [
+            new ConditionBoolean({
+                name: 'party.mona_witch_homework',
+                serializeId: 10,
+                rotation: 'party',
+                title: 'talent_name.mona_genesis_of_starsigns',
+                description: 'talent_descr.mona_genesis_of_starsigns',
+                info: {hexerei: true},
+            }),
+            new ConditionStacks({
+                name: 'party.mona_astral_glow',
+                serializeId: 9,
+                rotation: 'party',
+                title: 'talent_name.mona_genesis_of_starsigns',
+                description: 'talent_descr.mona_genesis_of_starsigns',
+                maxStacks: 3,
+                hideCondition: [new ConditionNot([new ConditionHexereiResonance({})])],
+                condition: new ConditionHexereiResonance({}),
+                stats: [
+                    new StatTable('dmg_reaction_vaporize', [5]),
+                ],
+                info: {hexerei: true},
+            }),
             new ConditionNumberTalent({
                 name: 'mona_char_skill_burst',
                 serializeId: 1,
@@ -438,21 +579,80 @@ export const Mona = new DbObjectChar({
             new ConditionBoolean({
                 name: 'party.mona_prophecy_of_submersion',
                 serializeId: 4,
+                rotation: 'party',
                 title: 'talent_name.mona_prophecy_of_submersion',
                 description: 'talent_descr.mona_prophecy_of_submersion',
-                info: {constellation: 1},
+                hideCondition: [condPartyWitchHomeworkOn],
+                condition: condPartyWitchHomeworkOff,
                 stats: {
                     dmg_reaction_electrocharged: C1ReactionBonus,
                     dmg_reaction_vaporize: C1ReactionBonus,
                     dmg_reaction_swirl_hydro: C1ReactionBonus,
                     duration_frozen: C1ReactionBonus,
+                    dmg_reaction_lunarcharged: C1ReactionBonus,
+                    dmg_reaction_lunarcrystallize: C1ReactionBonus,
                 },
+                info: {constellation: 1},
+            }),
+            new ConditionBoolean({
+                name: 'party.mona_prophecy_of_submersion',
+                serializeId: 4,
+                rotation: 'party',
+                title: 'talent_name.mona_prophecy_of_submersion',
+                description: 'talent_descr.mona_prophecy_of_submersion_buffed',
+                hideCondition: [condPartyWitchHomeworkOff],
+                condition: condPartyWitchHomeworkOn,
+                stats: {
+                    dmg_reaction_electrocharged: C1ReactionBonus,
+                    dmg_reaction_vaporize: C1ReactionBonus,
+                    dmg_reaction_swirl_hydro: C1ReactionBonus,
+                    duration_frozen: C1ReactionBonus,
+                    dmg_reaction_lunarcharged: C1ReactionBonus,
+                    dmg_reaction_lunarcrystallize: C1ReactionBonus,
+                },
+                info: {constellation: 1},
+            }),
+            new ConditionBoolean({
+                name: 'party.mona_prophecy_of_submersion_off_field',
+                serializeId: 6,
+                rotation: 'party',
+                title: 'talent_name.mona_prophecy_of_submersion',
+                hideCondition: [condPartyWitchHomeworkOff],
+                condition: new ConditionAnd([
+                    condPartyWitchHomeworkOn,
+                    new ConditionBoolean({name: 'party.mona_prophecy_of_submersion'}),
+                ]),
+                stats: {
+                    dmg_reaction_electrocharged: C1ReactionBonus * 0.6,
+                    dmg_reaction_vaporize: C1ReactionBonus * 0.6,
+                    dmg_reaction_swirl_hydro: C1ReactionBonus * 0.6,
+                    duration_frozen: C1ReactionBonus * 0.6,
+                    dmg_reaction_lunarcharged: C1ReactionBonus * 0.6,
+                    dmg_reaction_lunarcrystallize: C1ReactionBonus * 0.6,
+                },
+                info: {constellation: 1},
+            }),
+            new ConditionBoolean({
+                name: 'party.mona_lunar_chain_buff',
+                serializeId: 7,
+                rotation: 'party',
+                title: 'talent_name.mona_lunar_chain',
+                description: 'talent_descr.mona_lunar_chain_buffed',
+                hideCondition: [condPartyWitchHomeworkOff],
+                condition: condPartyWitchHomeworkOn,
+                stats: {
+                    mastery: 80,
+                },
+                info: {constellation: 2},
             }),
             new ConditionBoolean({
                 name: 'party.mona_prophecy_of_oblivion',
                 serializeId: 5,
+                rotation: 'party',
                 title: 'talent_name.mona_prophecy_of_oblivion',
                 description: 'talent_descr.mona_prophecy_of_oblivion',
+                hideCondition: [condPartyWitchHomeworkOn],
+                condition: condPartyWitchHomeworkOff,
                 stats: {
                     crit_rate: C4CritRate,
                 },
@@ -460,6 +660,30 @@ export const Mona = new DbObjectChar({
                 subConditions: [
                     new ConditionBoolean({name: 'party.mona_omen'}),
                 ],
+            }),
+            new ConditionBoolean({
+                name: 'party.mona_prophecy_of_oblivion',
+                serializeId: 5,
+                rotation: 'party',
+                title: 'talent_name.mona_prophecy_of_oblivion',
+                description: 'talent_descr.mona_prophecy_of_oblivion_buffed',
+                hideCondition: [condPartyWitchHomeworkOff],
+                condition: condPartyWitchHomeworkOn,
+                stats: {
+                    crit_rate: C4CritRate,
+                },
+                info: {constellation: 4},
+                subConditions: [
+                    new ConditionBoolean({name: 'party.mona_omen'}),
+                ],
+            }),
+            new Condition({
+                condition: new ConditionAnd([
+                    new ConditionWitchHomework({}),
+                    new ConditionBoolean({name: 'party.mona_prophecy_of_oblivion'}),
+                    condPartyWitchHomeworkOn,
+                ]),
+                stats: {crit_dmg: 15},
             }),
         ],
     },

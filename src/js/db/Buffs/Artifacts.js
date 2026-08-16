@@ -7,13 +7,51 @@ import { ConditionBooleanDropdownValue } from "../../classes/Condition/Boolean/D
 import { ConditionBooleanNightSoul } from "../../classes/Condition/Boolean/NightSoul";
 import { ConditionBooleanPiecesCount } from "../../classes/Condition/Boolean/PiecesCount";
 import { ConditionDropdownElement } from "../../classes/Condition/Dropdown/Element";
+import { ConditionHexereiResonance } from "../../classes/Condition/HexereiResonance";
 import { ConditionNot } from "../../classes/Condition/Not";
 import { ConditionNumber } from "../../classes/Condition/Number";
 import { ConditionOr } from "../../classes/Condition/Or";
+import { ConditionStaticLevel } from "../../classes/Condition/Static/Level";
+import { ConditionWitchHomework } from "../../classes/Condition/WitchHomework";
 import { DbObjectBuff } from "../../classes/DbObject/Buff";
 import { FeatureMultiplier } from "../../classes/Feature2/Multiplier";
 import { FeatureMultiplierTarget } from "../../classes/Feature2/Multiplier/Target";
+import { StatTable } from "../../classes/StatTable";
 import { ValueTable } from "../../classes/ValueTable";
+
+const CELESTIAL_GIFT_ELEMENTS = [
+    {value: 'cryo', serializeId: 1},
+    {value: 'electro', serializeId: 2},
+    {value: 'hydro', serializeId: 3},
+    {value: 'pyro', serializeId: 4},
+    {value: 'geo', serializeId: 5},
+    {value: 'anemo', serializeId: 6},
+    {value: 'dendro', serializeId: 7},
+];
+
+const celestialGiftSelfElementActive = (element) => new ConditionAnd([
+    new ConditionBoolean({name: 'set.celestial_gift_4'}),
+    new ConditionBooleanPiecesCount({
+        setName: 'CelestialGift',
+        count: 4,
+    }),
+    new ConditionWitchHomework({}),
+    new ConditionBooleanCharElement({element: [element]}),
+]);
+
+const celestialGiftElementValues = (bonus) => CELESTIAL_GIFT_ELEMENTS.map((item) => ({
+    ...item,
+    conditions: [
+        new Condition({
+            stats: {
+                ['dmg_' + item.value]: bonus,
+            },
+            condition: new ConditionNot([
+                celestialGiftSelfElementActive(item.value),
+            ]),
+        }),
+    ],
+}));
 
 export const Artifacts = new DbObjectBuff({
     name: 'artifacts',
@@ -79,6 +117,17 @@ export const Artifacts = new DbObjectBuff({
                 },
             ],
         }),
+        new ConditionBoolean({
+            name: 'set_other.viridescent_venerer_4_stellarswirl',
+            serializeId: 72,
+            rotation: 'buffs',
+            title: 'set_bonus.viridescent_venerer_4',
+            description: 'set_descr.viridescent_venerer_4_3',
+            icon: {
+                rarity: 5,
+                name: 'sprite-artifact artifact-icon-viridescent-venerer flower',
+            },
+        }),
         ...['pyro', 'hydro', 'electro', 'cryo'].map((elem) => {
             return new Condition({
                 stats: {
@@ -94,8 +143,19 @@ export const Artifacts = new DbObjectBuff({
                         }),
                     ]),
                     new ConditionBooleanDropdownValue({name: 'set_other.viridescent_venerer_4', value: elem}),
+                    ...(elem == 'cryo' ? [
+                        new ConditionAnd([
+                            new ConditionBoolean({name: 'set.viridescent_venerer_4_stellarswirl'}),
+                            new ConditionBooleanCharElement({element: ['anemo']}),
+                            new ConditionBooleanPiecesCount({
+                                setName: 'ViridescentVenerer',
+                                count: 4,
+                            }),
+                        ]),
+                        new ConditionBoolean({name: 'set_other.viridescent_venerer_4_stellarswirl'}),
+                    ] : []),
                 ]),
-            })
+            });
         }),
 
         new ConditionDropdownElement({
@@ -356,6 +416,163 @@ export const Artifacts = new DbObjectBuff({
                 ]),
                 new ConditionBoolean({name: 'set_other.scroll_of_the_hero_of_cinder_city_4_2'}),
             ]),
+        }),
+        // Silken Moon's Serenade 4-piece: Gleaming Moon: Devotion (party EM buff + Lunar Reaction DMG)
+        // EM scales with Moonsign level (60/120), Lunar DMG is always 10%
+        new ConditionBoolean({
+            name: 'set_other.silken_moons_serenade_4',
+            serializeId: 60,
+            rotation: 'buffs',
+            title: 'set_bonus.silken_moons_serenade_4',
+            description: 'set_descr.silken_moons_serenade_4_combined',
+            stats: {
+                text_em_nascent: 60,
+                text_em_ascendant: 120,
+                text_percent_lunar: 10,
+            },
+            icon: {
+                rarity: 5,
+                name: 'sprite-artifact artifact-icon-silken-moons-serenade flower',
+            },
+        }),
+        // EM bonus based on Moonsign level (hidden from UI)
+        new ConditionStaticLevel({
+            isHidden: true,
+            levelSetting: 'party_moonsign',
+            fromZero: true,
+            stats: [
+                new StatTable('mastery', [0, 60, 120]),
+            ],
+            subConditions: [
+                new ConditionOr([
+                    new ConditionAnd([
+                        new ConditionBoolean({name: 'set.silken_moons_serenade_4'}),
+                        new ConditionBooleanPiecesCount({
+                            setName: 'SilkenMoonsSerenade',
+                            count: 4,
+                        }),
+                    ]),
+                    new ConditionBoolean({name: 'set_other.silken_moons_serenade_4'}),
+                ]),
+            ],
+        }),
+        // Fixed 10% Lunar Reaction DMG bonus
+        new Condition({
+            stats: {
+                dmg_reaction_lunar: 10,
+            },
+            condition: new ConditionOr([
+                new ConditionAnd([
+                    new ConditionBoolean({name: 'set.silken_moons_serenade_4'}),
+                    new ConditionBooleanPiecesCount({
+                        setName: 'SilkenMoonsSerenade',
+                        count: 4,
+                    }),
+                ]),
+                new ConditionBoolean({name: 'set_other.silken_moons_serenade_4'}),
+            ]),
+        }),
+        // Night of the Sky's Unveiling 4-piece: Gleaming Moon: Intent (party Lunar Reaction DMG)
+        new ConditionBoolean({
+            name: 'set_other.night_of_the_skys_unveiling_4',
+            serializeId: 64,
+            rotation: 'buffs',
+            title: 'set_bonus.night_of_the_skys_unveiling_4',
+            description: 'set_descr.night_of_the_skys_unveiling_4_party',
+            stats: {
+                text_percent_lunar: 10,
+            },
+            icon: {
+                rarity: 5,
+                name: 'sprite-artifact artifact-icon-night-of-the-skys-unveiling flower',
+            },
+        }),
+        new Condition({
+            stats: {
+                dmg_reaction_lunar: 10,
+            },
+            condition: new ConditionOr([
+                new ConditionAnd([
+                    new ConditionBoolean({name: 'set.night_of_the_skys_unveiling_4'}),
+                    new ConditionBooleanPiecesCount({
+                        setName: 'NightOfTheSkysUnveiling',
+                        count: 4,
+                    }),
+                ]),
+                new ConditionBoolean({name: 'set_other.night_of_the_skys_unveiling_4'}),
+            ]),
+        }),
+        new ConditionDropdownElement({
+            name: 'set_other.celestial_gift_4',
+            serializeId: 68,
+            rotation: 'buffs',
+            title: 'set_bonus.celestial_gift_4',
+            description: 'set_descr.celestial_gift_4_1',
+            dropdownClass: 'select-element',
+            icon: {
+                rarity: 5,
+                name: 'sprite-artifact artifact-icon-celestial-gift flower',
+            },
+            values: celestialGiftElementValues(20),
+            valueAliases: ['set_other.celestial_gift_4_hexerei'],
+            linkedSettings: [
+                {name: 'set_other.celestial_gift_4_hexerei'},
+            ],
+            condition: new ConditionNot([
+                new ConditionHexereiResonance({}),
+            ]),
+            hideCondition: [
+                new ConditionHexereiResonance({}),
+            ],
+        }),
+        new ConditionDropdownElement({
+            name: 'set_other.celestial_gift_4_hexerei',
+            serializeId: 69,
+            rotation: 'buffs',
+            multiple: true,
+            limit: 2,
+            hideEmpty: true,
+            dropdownClass: 'select-element-multiple',
+            title: 'set_bonus.celestial_gift_4',
+            description: 'set_descr.celestial_gift_4_2',
+            icon: {
+                rarity: 5,
+                name: 'sprite-artifact artifact-icon-celestial-gift flower',
+            },
+            values: celestialGiftElementValues(40),
+            valueAliases: ['set_other.celestial_gift_4'],
+            linkedSettings: [
+                {name: 'set_other.celestial_gift_4', limit: 1},
+            ],
+            condition: new ConditionHexereiResonance({}),
+            hideCondition: [
+                new ConditionNot([
+                    new ConditionHexereiResonance({}),
+                ]),
+            ],
+        }),
+        new ConditionBoolean({
+            name: 'set_other.heart_of_the_furnace_4',
+            serializeId: 73,
+            rotation: 'buffs',
+            title: 'set_bonus.heart_of_the_furnace_4',
+            description: 'set_descr.heart_of_the_furnace_4',
+            icon: {
+                rarity: 5,
+                name: 'sprite-artifact artifact-icon-heart-of-the-furnace flower',
+            },
+            stats: {
+                dmg_stellarglimmer: 50,
+            },
+            subConditions: [
+                new ConditionNot([
+                    new ConditionBoolean({name: 'set.heart_of_the_furnace_4'}),
+                    new ConditionBooleanPiecesCount({
+                        setName: 'HeartOfTheFurnace',
+                        count: 4,
+                    }),
+                ]),
+            ],
         }),
     ],
     postEffects: [],

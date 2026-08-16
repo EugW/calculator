@@ -1,0 +1,38 @@
+category;name;rus;eng
+talent_name;polestar_included_hits;Учтённые попадания Предела путеводной звезды;Polestar Field Included Hits
+talent_descr;polestar_included_hits;Количество cryo{Крио} и electro{Электро} попаданий, учтённых Пределом путеводной звезды. Используется для бонусов поля и базового множителя урона Звёздного проводника, если у источника нет отдельного счётчика.;Number of cryo{Cryo} and electro{Electro} hits included by the Polestar Field. Used for field bonuses and the Stellar-Conduct base multiplier when a source has no separate hit counter.
+feature_skill;cyno_duststalker_bolt_starsame;Урон Громовых звёзд;Starsame Bolt DMG
+feature_skill;diona_choice_treasures_icy_paws;Урон Морозных коготочков Сокровища на выбор;Choice Treasures Icy Paws DMG
+feature_skill;wriothesley_repelling_fist_3_stellarconduct;Урон 3-го Кулака изгнания Звёздного проводника;3rd Repelling Fist Stellar-Conduct DMG
+feature_skill;wriothesley_repelling_fist_5_stellarconduct;Урон 5-го Кулака изгнания Звёздного проводника;5th Repelling Fist Stellar-Conduct DMG
+feature_attack;wriothesley_luster_vaulting_fist_stellarconduct;Урон Сияния: Морозного кулака в прыжке Звёздного проводника;Luster: Vaulting Fist Stellar-Conduct DMG
+feature_skill;wriothesley_c6_repelling_icicle_stellarconduct;Урон ледяного шипа Кулака изгнания Звёздного проводника;Repelling Fist Stellar-Conduct Icicle DMG
+feature_attack;wriothesley_c6_luster_icicle_stellarconduct;Урон ледяного шипа Морозного кулака в прыжке Звёздного проводника;Luster: Vaulting Fist Stellar-Conduct Icicle DMG
+feature_skill;yae_miko_enhanced_sesshou_sakura_1;Урон усиленной Сакуры сэссё ур. 1;Enhanced Sesshou Sakura DMG: Level 1
+feature_skill;yae_miko_enhanced_sesshou_sakura_2;Урон усиленной Сакуры сэссё ур. 2;Enhanced Sesshou Sakura DMG: Level 2
+feature_skill;yae_miko_enhanced_sesshou_sakura_3;Урон усиленной Сакуры сэссё ур. 3;Enhanced Sesshou Sakura DMG: Level 3
+feature_skill;yae_miko_enhanced_sesshou_sakura_4;Урон усиленной Сакуры сэссё ур. 4;Enhanced Sesshou Sakura DMG: Level 4
+feature_skill;yae_miko_radiance_sesshou_sakura_stellarconduct;Урон Сакуры сэссё Звёздного проводника;Sesshou Sakura Stellar-Conduct DMG
+feature_skill;yae_miko_radiance_shrine_shade_stellarconduct;Урон Священной тени Звёздного проводника;Sacred Shade Stellar-Conduct DMG
+feature_skill;qiqi_herald_of_frost_coordinated_attack;Урон совместной атаки Вестника стужи;Herald of Frost Coordinated Attack DMG
+feature_skill;qiqi_herald_of_frost_coordinated_attack_cd;Время отката совместной атаки Вестника стужи;Herald of Frost Coordinated Attack CD
+feature_skill;qiqi_seven_sacred_treasures_cd;Время отката навыка Семи истинных сокровищ;Seven Sacred Treasures Skill CD
+feature_burst;qiqi_preserver_of_fortune_stellarconduct;Урон Хранителя Фортуны Звёздного проводника;Preserver of Fortune Stellar-Conduct DMG
+feature_other;qiqi_divine_suppression_extra_heal;Дополнительное лечение Божественного подавления;Divine Suppression Extra Healing
+talent_name;sandrone_power_overdrive;Перегрузка мощности;Power Overdrive
+feature_attack;sandrone_sweeping_fire;Урон ураганного огня;Sweeping Fire DMG
+feature_attack;sandrone_condensed_beam;Урон конденсационного луча;Condensed Beam DMG
+feature_attack;sandrone_condensed_beam_stellarconduct;Урон конденсационного луча Звёздного проводника;Condensed Beam Stellar-Conduct DMG
+feature_attack;sandrone_power_overdrive;Урон в режиме перегрузки мощности;Power Overdrive DMG
+feature_attack;sandrone_condensed_cluster_beam;Урон пучка конденсационных лучей;Condensed Cluster Beam DMG
+feature_attack;sandrone_condensed_cluster_beam_stellarconduct;Урон пучка конденсационных лучей Звёздного проводника;Condensed Cluster Beam Stellar-Conduct DMG
+feature_skill;sandrone_prism_shot;Урон призматического снаряда;Prism Shot DMG
+feature_skill;sandrone_prism_shot_1;Урон 1-го призматического снаряда;1st Prism Shot DMG
+feature_skill;sandrone_prism_shot_2;Урон 2-го призматического снаряда;2nd Prism Shot DMG
+feature_skill;sandrone_prism_shot_stellarconduct;Урон призматического снаряда Звёздного проводника;Prism Shot Stellar-Conduct DMG
+feature_skill;sandrone_refined_prism_shot_stellarconduct;Урон усовершенствованного призматического снаряда Звёздного проводника;Refined Prism Shot Stellar-Conduct DMG
+feature_burst;sandrone_bombardment;Урон бомбардировки;Bombardment DMG
+feature_burst;sandrone_convective_inhibition_ray;Урон кумулятивного криолуча;Convective Inhibition Ray DMG
+feature_burst;sandrone_convective_inhibition_ray_stellarconduct;Урон кумулятивного криолуча Звёздного проводника;Convective Inhibition Ray Stellar-Conduct DMG
+feature_other;sandrone_a_ladys_code_of_conduct;Мастерство стихий от силы атаки;Elemental Mastery from ATK
+feature_other;sandrone_prismatic_resonance_cannon_stellarconduct;Урон призморезонансной пушки Звёздного проводника;Prismatic Resonance Cannon Stellar-Conduct DMG

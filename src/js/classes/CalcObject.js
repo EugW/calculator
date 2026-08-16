@@ -1,5 +1,6 @@
 import { Stats } from "./Stats";
 import { Condition } from "./Condition";
+import { normalizeRadianceStellarGlimmer } from "./Build/Settings";
 
 export class CalcObject {
     constructor() {
@@ -53,7 +54,7 @@ export class CalcObject {
     }
 
     getStats() {
-        var result = new Stats();
+        const result = new Stats();
 
         if (this.object && this.object.statTable) {
             for (let i = 0; i < this.object.statTable.length; ++i) {
@@ -67,20 +68,22 @@ export class CalcObject {
         return {
             stats: result,
             settings: {},
-        }
+        };
     }
 
     setSettings(data) {
-        this.settings = data;
+        this.settings = normalizeRadianceStellarGlimmer(Object.assign({}, data));
     }
 
     modifySettings(data) {
         Object.assign(this.settings, data);
+        normalizeRadianceStellarGlimmer(this.settings);
         return this.getSettings();
     }
 
     addSettings(data) {
-        this.settings = Object.assign(this.settings, data);
+        Object.assign(this.settings, data);
+        normalizeRadianceStellarGlimmer(this.settings);
     }
 
     isBeta() {
@@ -182,7 +185,7 @@ export class CalcObject {
     }
 
     serializeCustomBuffs(settings) {
-        return []
+        return [];
     }
 
     deserializeChars(input) {

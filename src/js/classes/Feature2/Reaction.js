@@ -1,7 +1,7 @@
 import { BuildData } from "../Build/Data";
 import { makeStatItem } from "./Compile/Helpers";
 import { CBlock, CItem } from "./Compile/Types";
-import { CBaseDamage, CFlatDamage, CMultiplierReaction, CMultiplierResistance, CReactionBase, CReactionBaseBonus, CSum } from "./Compile/Types/Block";
+import { CBaseDamage, CFlatDamage, CMulti, CMultiplierReaction, CMultiplierResistance, CReactionBase, CReactionBaseBonus, CSum } from "./Compile/Types/Block";
 import { CDamage } from "./Compile/Types/Damage";
 import { FeatureDamage } from "./Damage";
 
@@ -10,22 +10,25 @@ export class FeatureReaction extends FeatureDamage {
         params.category ||= 'reaction';
         params.damageType ||= 'reaction';
         super(params);
+        this.reactionBonuses = params.reactionBonuses || [];
     }
 
     /**
      * @returns {Array.<string>}
      */
-    getStatsReactionBonus() {return [] }
+    getStatsReactionBonus() {
+        return [...this.reactionBonuses];
+    }
 
     /**
      * @returns {Array.<string>}
      */
-    getStatsCritRate() {return [] }
+    getStatsCritRate() {return []; }
 
     /**
      * @returns {Array.<string>}
      */
-    getStatsCritDamage() {return [] }
+    getStatsCritDamage() {return []; }
 
     getReactionMasteryBonus() {
         throw `Define getReactionMasteryBonus method for reaction feature!`;
@@ -54,7 +57,7 @@ export class FeatureReaction extends FeatureDamage {
      */
     getReactionBonuses(data) {
         return new CSum([
-            ...this.getStatsReactionBonus().map((stat) => { return makeStatItem(stat, data.stats) })
+            ...this.getStatsReactionBonus().map((stat) => { return makeStatItem(stat, data.stats); })
         ]);
     }
 
@@ -79,6 +82,10 @@ export class FeatureReaction extends FeatureDamage {
         return [this.getBaseMultiplier(data)];
     }
 
+    getFinalReactionBaseMultipliers(data) {
+        return [];
+    }
+
     /**
      * @param {BuildData} data
      * @returns {CItem}
@@ -95,7 +102,7 @@ export class FeatureReaction extends FeatureDamage {
 
         let base = new CReactionBase([
             new CBaseDamage(
-                multipliers.map((i) => {return i.getTree(data)})
+                multipliers.map((i) => {return i.getTree(data);})
             ),
             ...this.getMultiplierReaction(data),
         ], {group: true});
@@ -105,8 +112,16 @@ export class FeatureReaction extends FeatureDamage {
             base = new CReactionBaseBonus([
                 base,
                 new CFlatDamage(
-                    bonusMulti.map((i) => {return i.getTree(data)})
+                    bonusMulti.map((i) => {return i.getTree(data);})
                 ),
+            ], {group: true});
+        }
+
+        let finalBaseMultipliers = this.getFinalReactionBaseMultipliers(data);
+        if (finalBaseMultipliers.length) {
+            base = new CMulti([
+                base,
+                ...finalBaseMultipliers,
             ], {group: true});
         }
 

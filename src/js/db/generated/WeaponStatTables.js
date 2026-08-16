@@ -149,106 +149,106 @@ const enumStatTables = {
 		scale: weaponStatScales.crt_2_1,
 	}),
 	n27: new StatTableAscensionScale({
+		stat: 'crit_dmg_base',
+		base: 12,
+		scale: weaponStatScales.crt_2_1,
+	}),
+	n28: new StatTableAscensionScale({
 		stat: 'atk_base',
 		base: 47.537,
 		ascension: enumAscensionTables.n3,
 		scale: weaponStatScales.atk_3_2,
 	}),
-	n28: new StatTableAscensionScale({
+	n29: new StatTableAscensionScale({
 		stat: 'dmg_phys_base',
 		base: 9,
 		scale: weaponStatScales.crt_3_1,
 	}),
-	n29: new StatTableAscensionScale({
+	n30: new StatTableAscensionScale({
 		stat: 'atk_base',
 		base: 45.9364,
 		ascension: enumAscensionTables.n3,
 		scale: weaponStatScales.atk_3_1,
 	}),
-	n30: new StatTableAscensionScale({
+	n31: new StatTableAscensionScale({
 		stat: 'recharge_base',
 		base: 12,
 		scale: weaponStatScales.crt_3_1,
 	}),
-	n31: new StatTableAscensionScale({
+	n32: new StatTableAscensionScale({
 		stat: 'mastery_base',
 		base: 43.2,
 		scale: weaponStatScales.crt_3_1,
 	}),
-	n32: new StatTableAscensionScale({
+	n33: new StatTableAscensionScale({
 		stat: 'atk_percent',
 		base: 10.8,
 		scale: weaponStatScales.crt_3_1,
 	}),
-	n33: new StatTableAscensionScale({
+	n34: new StatTableAscensionScale({
 		stat: 'atk_base',
 		base: 44.3358,
 		ascension: enumAscensionTables.n3,
 		scale: weaponStatScales.atk_3_4,
 	}),
-	n34: new StatTableAscensionScale({
-		stat: 'crit_rate_base',
-		base: 9.6,
-		scale: weaponStatScales.crt_3_1,
-	}),
 	n35: new StatTableAscensionScale({
-		stat: 'crit_dmg_base',
+		stat: 'crit_rate_base',
 		base: 9.6,
 		scale: weaponStatScales.crt_3_1,
 	}),
 	n36: new StatTableAscensionScale({
+		stat: 'crit_dmg_base',
+		base: 9.6,
+		scale: weaponStatScales.crt_3_1,
+	}),
+	n37: new StatTableAscensionScale({
 		stat: 'crit_rate_base',
 		base: 7.2,
 		scale: weaponStatScales.crt_3_1,
 	}),
-	n37: new StatTableAscensionScale({
+	n38: new StatTableAscensionScale({
 		stat: 'hp_percent',
 		base: 14.4,
 		scale: weaponStatScales.crt_3_1,
 	}),
-	n38: new StatTableAscensionScale({
+	n39: new StatTableAscensionScale({
 		stat: 'crit_dmg_base',
 		base: 19.2,
 		scale: weaponStatScales.crt_3_1,
 	}),
-	n39: new StatTableAscensionScale({
+	n40: new StatTableAscensionScale({
 		stat: 'def_percent',
 		base: 18,
 		scale: weaponStatScales.crt_3_1,
 	}),
-	n40: new StatTableAscensionScale({
+	n41: new StatTableAscensionScale({
 		stat: 'crit_rate_base',
 		base: 4.8,
 		scale: weaponStatScales.crt_3_1,
 	}),
-	n41: new StatTableAscensionScale({
+	n42: new StatTableAscensionScale({
 		stat: 'hp_percent',
 		base: 7.66,
 		scale: weaponStatScales.crt_1_1,
 	}),
-	n42: new StatTableAscensionScale({
+	n43: new StatTableAscensionScale({
 		stat: 'mastery_base',
 		base: 40.8,
 		scale: weaponStatScales.crt_1_1,
 	}),
-	n43: new StatTableAscensionScale({
-		stat: 'def_percent',
-		base: 9.56,
-		scale: weaponStatScales.crt_1_1,
-	}),
 	n44: new StatTableAscensionScale({
-		stat: 'dmg_phys_base',
+		stat: 'def_percent',
 		base: 9.56,
 		scale: weaponStatScales.crt_1_1,
 	}),
 	n45: new StatTableAscensionScale({
-		stat: 'def_percent',
-		base: 11.26,
-		scale: weaponStatScales.crt_2_1,
+		stat: 'dmg_phys_base',
+		base: 9.56,
+		scale: weaponStatScales.crt_1_1,
 	}),
 	n46: new StatTableAscensionScale({
-		stat: 'crit_dmg_base',
-		base: 12,
+		stat: 'def_percent',
+		base: 11.26,
 		scale: weaponStatScales.crt_2_1,
 	}),
 	n47: new StatTableAscensionScale({
@@ -328,56 +328,61 @@ const enumStatTables = {
 		scale: weaponStatScales.crt_2_1,
 	}),
 	n62: new StatTableAscensionScale({
+		stat: 'crit_rate_base',
+		base: 2,
+		scale: weaponStatScales.crt_2_1,
+	}),
+	n63: new StatTableAscensionScale({
 		stat: 'crit_dmg_base',
 		base: 14.4,
 		scale: weaponStatScales.crt_3_1,
 	}),
-	n63: new StatTableAscensionScale({
+	n64: new StatTableAscensionScale({
 		stat: 'atk_percent',
 		base: 3.6,
 		scale: weaponStatScales.crt_3_1,
 	}),
-	n64: new StatTableAscensionScale({
+	n65: new StatTableAscensionScale({
 		stat: 'recharge_base',
 		base: 8.5,
 		scale: weaponStatScales.crt_1_1,
 	}),
-	n65: new StatTableAscensionScale({
+	n66: new StatTableAscensionScale({
 		stat: 'mastery_base',
 		base: 20.4,
 		scale: weaponStatScales.crt_1_1,
 	}),
-	n66: new StatTableAscensionScale({
+	n67: new StatTableAscensionScale({
 		stat: 'crit_rate_base',
 		base: 3.4,
 		scale: weaponStatScales.crt_1_1,
 	}),
-	n67: new StatTableAscensionScale({
+	n68: new StatTableAscensionScale({
 		stat: 'atk_percent',
 		base: 7.2,
 		scale: weaponStatScales.crt_3_1,
 	}),
-	n68: new StatTableAscensionScale({
+	n69: new StatTableAscensionScale({
 		stat: 'hp_percent',
 		base: 10.8,
 		scale: weaponStatScales.crt_3_1,
 	}),
-	n69: new StatTableAscensionScale({
+	n70: new StatTableAscensionScale({
 		stat: 'mastery_base',
 		base: 57.6,
 		scale: weaponStatScales.crt_3_1,
 	}),
-	n70: new StatTableAscensionScale({
+	n71: new StatTableAscensionScale({
 		stat: 'crit_rate_base',
 		base: 6.8,
 		scale: weaponStatScales.crt_1_1,
 	}),
-	n71: new StatTableAscensionScale({
+	n72: new StatTableAscensionScale({
 		stat: 'crit_dmg_base',
 		base: 6.8,
 		scale: weaponStatScales.crt_1_1,
 	}),
-	n72: new StatTableAscensionScale({
+	n73: new StatTableAscensionScale({
 		stat: 'dmg_phys_base',
 		base: 11.26,
 		scale: weaponStatScales.crt_2_1,
@@ -513,73 +518,117 @@ export const weaponStatTables = {
 		enumStatTables.n13,
 		enumStatTables.n25,
 	],
-	AquilaFavonia: [
+	SerenitysCall: [
+		enumStatTables.n9,
+		enumStatTables.n10,
+	],
+	MoonweaversDawn: [
+		enumStatTables.n13,
+		enumStatTables.n25,
+	],
+	HereticsMoltenBlade: [
+		enumStatTables.n11,
+		enumStatTables.n17,
+	],
+	Emberwell: [
+		enumStatTables.n11,
+		enumStatTables.n15,
+	],
+	SpikedStake: [
+		enumStatTables.n11,
 		enumStatTables.n27,
+	],
+	Fajian: [
+		enumStatTables.n11,
+		enumStatTables.n12,
+	],
+	AquilaFavonia: [
 		enumStatTables.n28,
+		enumStatTables.n29,
 	],
 	SkywardBlade: [
-		enumStatTables.n29,
 		enumStatTables.n30,
-	],
-	FreedomSworn: [
-		enumStatTables.n29,
 		enumStatTables.n31,
 	],
-	SummitShaper: [
-		enumStatTables.n29,
+	FreedomSworn: [
+		enumStatTables.n30,
 		enumStatTables.n32,
 	],
-	PrimordialJadeCutter: [
+	SummitShaper: [
+		enumStatTables.n30,
 		enumStatTables.n33,
+	],
+	PrimordialJadeCutter: [
 		enumStatTables.n34,
+		enumStatTables.n35,
 	],
 	MistsplitterReforged: [
-		enumStatTables.n27,
-		enumStatTables.n35,
-	],
-	HaranGeppakuFutsu: [
-		enumStatTables.n29,
+		enumStatTables.n28,
 		enumStatTables.n36,
 	],
-	KeyofKhajNisut: [
-		enumStatTables.n33,
+	HaranGeppakuFutsu: [
+		enumStatTables.n30,
 		enumStatTables.n37,
 	],
+	KeyofKhajNisut: [
+		enumStatTables.n34,
+		enumStatTables.n38,
+	],
 	LightofFoliarIncision: [
-		enumStatTables.n33,
-		enumStatTables.n38,
-	],
-	SplendorOfStillWaters: [
-		enumStatTables.n33,
-		enumStatTables.n38,
-	],
-	UrakuMisugiri: [
-		enumStatTables.n33,
-		enumStatTables.n38,
-	],
-	Absolution: [
-		enumStatTables.n27,
-		enumStatTables.n35,
-	],
-	PeakPatrolSong: [
-		enumStatTables.n33,
+		enumStatTables.n34,
 		enumStatTables.n39,
 	],
-	Azurelight: [
-		enumStatTables.n27,
+	SplendorOfStillWaters: [
+		enumStatTables.n34,
+		enumStatTables.n39,
+	],
+	UrakuMisugiri: [
+		enumStatTables.n34,
+		enumStatTables.n39,
+	],
+	Absolution: [
+		enumStatTables.n28,
+		enumStatTables.n36,
+	],
+	PeakPatrolSong: [
+		enumStatTables.n34,
 		enumStatTables.n40,
+	],
+	Azurelight: [
+		enumStatTables.n28,
+		enumStatTables.n41,
+	],
+	AthameArtis: [
+		enumStatTables.n30,
+		enumStatTables.n37,
+	],
+	LightbearingMoonshard: [
+		enumStatTables.n34,
+		enumStatTables.n39,
+	],
+	WhitelakeFrostfeather: [
+		enumStatTables.n28,
+		enumStatTables.n41,
+	],
+	ExaiphanesBlade: [
+		enumStatTables.n30,
+		enumStatTables.n37,
+	],
+	Samosvist: [
+		enumStatTables.n28,
+		enumStatTables.n36,
 	],
 	FerrousShadow: [
 		enumStatTables.n1,
-		enumStatTables.n41,
+		enumStatTables.n42,
 	],
 	BloodtaintedGreatsword: [
 		enumStatTables.n7,
-		enumStatTables.n42,
+		enumStatTables.n43,
 	],
 	WhiteIronGreatsword: [
 		enumStatTables.n1,
-		enumStatTables.n43,
+		enumStatTables.n44,
 	],
 	DebateClub: [
 		enumStatTables.n1,
@@ -587,7 +636,7 @@ export const weaponStatTables = {
 	],
 	SkyriderGreatsword: [
 		enumStatTables.n1,
-		enumStatTables.n44,
+		enumStatTables.n45,
 	],
 	FavoniusGreatsword: [
 		enumStatTables.n9,
@@ -615,11 +664,11 @@ export const weaponStatTables = {
 	],
 	Whiteblind: [
 		enumStatTables.n11,
-		enumStatTables.n45,
+		enumStatTables.n46,
 	],
 	BlackcliffSlasher: [
 		enumStatTables.n11,
-		enumStatTables.n46,
+		enumStatTables.n27,
 	],
 	SerpentSpine: [
 		enumStatTables.n11,
@@ -685,33 +734,45 @@ export const weaponStatTables = {
 		enumStatTables.n11,
 		enumStatTables.n15,
 	],
+	MasterKey: [
+		enumStatTables.n9,
+		enumStatTables.n10,
+	],
+	ForgedByTheGoldenMelody: [
+		enumStatTables.n11,
+		enumStatTables.n17,
+	],
+	BladeOfAtonement: [
+		enumStatTables.n13,
+		enumStatTables.n25,
+	],
 	SkywardPride: [
-		enumStatTables.n27,
+		enumStatTables.n28,
 		enumStatTables.n50,
 	],
 	WolfsGravestone: [
-		enumStatTables.n29,
-		enumStatTables.n32,
+		enumStatTables.n30,
+		enumStatTables.n33,
 	],
 	SongofBrokenPines: [
 		enumStatTables.n51,
 		enumStatTables.n52,
 	],
 	Unforged: [
-		enumStatTables.n29,
-		enumStatTables.n32,
+		enumStatTables.n30,
+		enumStatTables.n33,
 	],
 	RedhornStonethresher: [
-		enumStatTables.n33,
-		enumStatTables.n38,
+		enumStatTables.n34,
+		enumStatTables.n39,
 	],
 	BeaconOfTheReedSea: [
-		enumStatTables.n29,
-		enumStatTables.n36,
+		enumStatTables.n30,
+		enumStatTables.n37,
 	],
 	Verdict: [
-		enumStatTables.n27,
-		enumStatTables.n40,
+		enumStatTables.n28,
+		enumStatTables.n41,
 	],
 	MountainKingsFang: [
 		enumStatTables.n51,
@@ -720,6 +781,14 @@ export const weaponStatTables = {
 	AThousandBlazingSuns: [
 		enumStatTables.n51,
 		enumStatTables.n53,
+	],
+	GestOfTheMightyWolf: [
+		enumStatTables.n30,
+		enumStatTables.n37,
+	],
+	ATeaspoonOfTranscendence: [
+		enumStatTables.n28,
+		enumStatTables.n36,
 	],
 	WhiteTassel: [
 		enumStatTables.n1,
@@ -747,7 +816,7 @@ export const weaponStatTables = {
 	],
 	BlackcliffPole: [
 		enumStatTables.n11,
-		enumStatTables.n46,
+		enumStatTables.n27,
 	],
 	Deathmatch: [
 		enumStatTables.n9,
@@ -811,75 +880,99 @@ export const weaponStatTables = {
 	],
 	RainbowsTrail: [
 		enumStatTables.n11,
-		enumStatTables.n45,
+		enumStatTables.n46,
 	],
 	BriefPavilionChatter: [
 		enumStatTables.n13,
 		enumStatTables.n24,
 	],
-	StaffofHoma: [
-		enumStatTables.n29,
+	ProspectorsShovel: [
+		enumStatTables.n11,
+		enumStatTables.n12,
+	],
+	SacrificersStaff: [
+		enumStatTables.n18,
 		enumStatTables.n62,
 	],
+	Frostbreath: [
+		enumStatTables.n11,
+		enumStatTables.n21,
+	],
+	SongOfTheVigil: [
+		enumStatTables.n13,
+		enumStatTables.n47,
+	],
+	StaffofHoma: [
+		enumStatTables.n30,
+		enumStatTables.n63,
+	],
 	SkywardSpine: [
-		enumStatTables.n27,
+		enumStatTables.n28,
 		enumStatTables.n50,
 	],
 	VortexVanquisher: [
-		enumStatTables.n29,
-		enumStatTables.n32,
+		enumStatTables.n30,
+		enumStatTables.n33,
 	],
 	PrimordialJadeWingedSpear: [
-		enumStatTables.n27,
-		enumStatTables.n40,
+		enumStatTables.n28,
+		enumStatTables.n41,
 	],
 	CalamityQueller: [
 		enumStatTables.n51,
-		enumStatTables.n63,
+		enumStatTables.n64,
 	],
 	GrasscuttersLight: [
-		enumStatTables.n29,
 		enumStatTables.n30,
+		enumStatTables.n31,
 	],
 	StaffOfScarletSands: [
-		enumStatTables.n33,
 		enumStatTables.n34,
+		enumStatTables.n35,
 	],
 	CrimsonMoonsSemblance: [
-		enumStatTables.n27,
-		enumStatTables.n40,
+		enumStatTables.n28,
+		enumStatTables.n41,
 	],
 	LumidouceElegy: [
-		enumStatTables.n29,
-		enumStatTables.n36,
+		enumStatTables.n30,
+		enumStatTables.n37,
 	],
 	SymphonistofScents: [
-		enumStatTables.n29,
-		enumStatTables.n62,
+		enumStatTables.n30,
+		enumStatTables.n63,
 	],
 	FracturedHalo: [
-		enumStatTables.n29,
-		enumStatTables.n62,
+		enumStatTables.n30,
+		enumStatTables.n63,
+	],
+	BloodsoakedRuins: [
+		enumStatTables.n28,
+		enumStatTables.n41,
+	],
+	DisasterAndRemorse: [
+		enumStatTables.n28,
+		enumStatTables.n41,
 	],
 	MagicGuide: [
 		enumStatTables.n7,
-		enumStatTables.n42,
+		enumStatTables.n43,
 	],
 	ThrillingTalesofDragonSlayers: [
 		enumStatTables.n1,
-		enumStatTables.n41,
+		enumStatTables.n42,
 	],
 	OtherworldlyStory: [
 		enumStatTables.n1,
-		enumStatTables.n64,
+		enumStatTables.n65,
 	],
 	EmeraldOrb: [
 		enumStatTables.n4,
-		enumStatTables.n65,
+		enumStatTables.n66,
 	],
 	TwinNephrite: [
 		enumStatTables.n4,
-		enumStatTables.n66,
+		enumStatTables.n67,
 	],
 	FavoniusCodex: [
 		enumStatTables.n11,
@@ -887,7 +980,7 @@ export const weaponStatTables = {
 	],
 	Widsith: [
 		enumStatTables.n11,
-		enumStatTables.n46,
+		enumStatTables.n27,
 	],
 	SacrificialFragments: [
 		enumStatTables.n9,
@@ -911,7 +1004,7 @@ export const weaponStatTables = {
 	],
 	BlackcliffAgate: [
 		enumStatTables.n11,
-		enumStatTables.n46,
+		enumStatTables.n27,
 	],
 	EyeofPerception: [
 		enumStatTables.n9,
@@ -969,69 +1062,113 @@ export const weaponStatTables = {
 		enumStatTables.n11,
 		enumStatTables.n26,
 	],
-	SkywardAtlas: [
+	EtherlightSpindlelute: [
+		enumStatTables.n11,
+		enumStatTables.n21,
+	],
+	BlackmarrowLantern: [
+		enumStatTables.n9,
+		enumStatTables.n57,
+	],
+	DawningFrost: [
+		enumStatTables.n11,
 		enumStatTables.n27,
-		enumStatTables.n67,
+	],
+	ClashOfKings: [
+		enumStatTables.n11,
+		enumStatTables.n17,
+	],
+	EchoesOfTheHeart: [
+		enumStatTables.n13,
+		enumStatTables.n25,
+	],
+	FrostScepter: [
+		enumStatTables.n11,
+		enumStatTables.n27,
+	],
+	SkywardAtlas: [
+		enumStatTables.n28,
+		enumStatTables.n68,
 	],
 	LostPrayer: [
-		enumStatTables.n29,
-		enumStatTables.n36,
+		enumStatTables.n30,
+		enumStatTables.n37,
 	],
 	MemoryofDust: [
-		enumStatTables.n29,
-		enumStatTables.n32,
+		enumStatTables.n30,
+		enumStatTables.n33,
 	],
 	JadefallsSplendor: [
-		enumStatTables.n29,
-		enumStatTables.n68,
-	],
-	EverlastingMoonglow: [
-		enumStatTables.n29,
-		enumStatTables.n68,
-	],
-	KagurasVerity: [
-		enumStatTables.n29,
-		enumStatTables.n62,
-	],
-	ThousandFloatingDreams: [
-		enumStatTables.n33,
+		enumStatTables.n30,
 		enumStatTables.n69,
 	],
+	EverlastingMoonglow: [
+		enumStatTables.n30,
+		enumStatTables.n69,
+	],
+	KagurasVerity: [
+		enumStatTables.n30,
+		enumStatTables.n63,
+	],
+	ThousandFloatingDreams: [
+		enumStatTables.n34,
+		enumStatTables.n70,
+	],
 	TulaytullahsRemembrance: [
-		enumStatTables.n27,
-		enumStatTables.n35,
+		enumStatTables.n28,
+		enumStatTables.n36,
 	],
 	CashflowSupervision: [
-		enumStatTables.n27,
-		enumStatTables.n40,
+		enumStatTables.n28,
+		enumStatTables.n41,
 	],
 	TomeoftheEternalFlow: [
-		enumStatTables.n33,
-		enumStatTables.n38,
+		enumStatTables.n34,
+		enumStatTables.n39,
 	],
 	CranesEchoingCall: [
 		enumStatTables.n51,
-		enumStatTables.n63,
+		enumStatTables.n64,
 	],
 	SurfingTime: [
-		enumStatTables.n33,
-		enumStatTables.n38,
+		enumStatTables.n34,
+		enumStatTables.n39,
 	],
 	StarcallersWatch: [
-		enumStatTables.n33,
-		enumStatTables.n69,
+		enumStatTables.n34,
+		enumStatTables.n70,
 	],
 	MorningHibernation: [
-		enumStatTables.n33,
-		enumStatTables.n69,
+		enumStatTables.n34,
+		enumStatTables.n70,
 	],
 	VividNotions: [
-		enumStatTables.n27,
-		enumStatTables.n35,
+		enumStatTables.n28,
+		enumStatTables.n36,
+	],
+	NightweaversLookingGlass: [
+		enumStatTables.n34,
+		enumStatTables.n70,
+	],
+	ReliquaryOfTruth: [
+		enumStatTables.n34,
+		enumStatTables.n39,
+	],
+	NocturnesCurtainCall: [
+		enumStatTables.n34,
+		enumStatTables.n39,
+	],
+	AngelosHeptades: [
+		enumStatTables.n51,
+		enumStatTables.n64,
+	],
+	Bludnye: [
+		enumStatTables.n34,
+		enumStatTables.n38,
 	],
 	RavenBow: [
 		enumStatTables.n4,
-		enumStatTables.n65,
+		enumStatTables.n66,
 	],
 	SharpshootersOath: [
 		enumStatTables.n1,
@@ -1043,11 +1180,11 @@ export const weaponStatTables = {
 	],
 	Slingshot: [
 		enumStatTables.n7,
-		enumStatTables.n70,
+		enumStatTables.n71,
 	],
 	Messenger: [
 		enumStatTables.n4,
-		enumStatTables.n71,
+		enumStatTables.n72,
 	],
 	FavoniusWarbow: [
 		enumStatTables.n9,
@@ -1095,7 +1232,7 @@ export const weaponStatTables = {
 	],
 	MitternachtsWaltz: [
 		enumStatTables.n11,
-		enumStatTables.n72,
+		enumStatTables.n73,
 	],
 	WindblumeOde: [
 		enumStatTables.n11,
@@ -1153,44 +1290,72 @@ export const weaponStatTables = {
 		enumStatTables.n11,
 		enumStatTables.n26,
 	],
+	SnareHook: [
+		enumStatTables.n9,
+		enumStatTables.n10,
+	],
+	RainbowSerpentsRainBow: [
+		enumStatTables.n11,
+		enumStatTables.n21,
+	],
+	JadeVista: [
+		enumStatTables.n11,
+		enumStatTables.n17,
+	],
+	CovenantOfFrostAndSnow: [
+		enumStatTables.n11,
+		enumStatTables.n46,
+	],
+	Windtalker: [
+		enumStatTables.n11,
+		enumStatTables.n17,
+	],
 	SkywardHarp: [
-		enumStatTables.n27,
-		enumStatTables.n40,
+		enumStatTables.n28,
+		enumStatTables.n41,
 	],
 	AmosBow: [
-		enumStatTables.n29,
-		enumStatTables.n32,
+		enumStatTables.n30,
+		enumStatTables.n33,
 	],
 	ElegyfortheEnd: [
-		enumStatTables.n29,
 		enumStatTables.n30,
+		enumStatTables.n31,
 	],
 	PolarStar: [
-		enumStatTables.n29,
-		enumStatTables.n36,
-	],
-	AquaSimulacra: [
-		enumStatTables.n33,
-		enumStatTables.n38,
-	],
-	ThunderingPulse: [
-		enumStatTables.n29,
-		enumStatTables.n62,
-	],
-	HuntersPath: [
-		enumStatTables.n33,
-		enumStatTables.n34,
-	],
-	TheFirstGreatMagic: [
-		enumStatTables.n29,
-		enumStatTables.n62,
-	],
-	SilvershowerHeartstrings: [
-		enumStatTables.n33,
+		enumStatTables.n30,
 		enumStatTables.n37,
 	],
+	AquaSimulacra: [
+		enumStatTables.n34,
+		enumStatTables.n39,
+	],
+	ThunderingPulse: [
+		enumStatTables.n30,
+		enumStatTables.n63,
+	],
+	HuntersPath: [
+		enumStatTables.n34,
+		enumStatTables.n35,
+	],
+	TheFirstGreatMagic: [
+		enumStatTables.n30,
+		enumStatTables.n63,
+	],
+	SilvershowerHeartstrings: [
+		enumStatTables.n34,
+		enumStatTables.n38,
+	],
 	AstralVulturesCrimsonPlumage: [
-		enumStatTables.n29,
-		enumStatTables.n62,
+		enumStatTables.n30,
+		enumStatTables.n63,
+	],
+	TheDaybreakChronicles: [
+		enumStatTables.n28,
+		enumStatTables.n36,
+	],
+	GoldenFrostboundOath: [
+		enumStatTables.n34,
+		enumStatTables.n39,
 	],
 };

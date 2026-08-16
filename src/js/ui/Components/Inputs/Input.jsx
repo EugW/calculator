@@ -103,24 +103,35 @@ export class NumberInput extends React.PureComponent {
         };
     }
 
+    componentDidUpdate(prevProps) {
+        if (prevProps.value !== this.props.value && (this.state.emptyValue || this.state.decimalValue !== '')) {
+            this.setState({emptyValue: false, decimalValue: ''});
+        }
+    }
+
     handleChange(value) {
         if (value === '') {
             if (this.props.nonEmpty) {
-                this.setState({emptyValue: true});
+                this.setState({emptyValue: true, decimalValue: ''});
             } else {
                 this.props.onChange(value);
             }
             return;
         }
 
-        this.state.emptyValue = false;
+        this.setState({emptyValue: false});
+
+        if (this.props.minValue < 0 && value == '-') {
+            this.setState({decimalValue: value});
+            return;
+        }
 
         if (this.props.isDecimal && value.match(/[\,\.]$/)) {
             value = value.replace(',', '.');
             this.setState({decimalValue: value});
             return;
         } else {
-            this.state.decimalValue = '';
+            this.setState({decimalValue: ''});
         }
 
         if (this.props.isDecimal) {
@@ -141,8 +152,12 @@ export class NumberInput extends React.PureComponent {
                 // allow zero value with minValue
             } else {
                 if (value < this.props.minValue) {
-                    this.setState({decimalValue: value});
-                    return;
+                    if (this.props.clampValue) {
+                        value = this.props.minValue;
+                    } else {
+                        this.setState({emptyValue: false, decimalValue: value});
+                        return;
+                    }
                 }
                 value = Math.max(value, this.props.minValue);
             }
@@ -152,23 +167,27 @@ export class NumberInput extends React.PureComponent {
             value = Math.min(value, this.props.maxValue);
         }
 
-        this.state.emptyValue = false;
+        this.setState({emptyValue: false, decimalValue: ''});
         this.props.onChange(value);
     }
 
     restoreValue() {
-        if (this.state.decimalValue) {
+        if (this.state.decimalValue !== '') {
             let value;
-            if (this.props.minValue && parseFloat(this.state.decimalValue) < this.props.minValue) {
+            let parsedValue = parseFloat(this.state.decimalValue);
+
+            if (isNaN(parsedValue)) {
+                value = this.props.value;
+            } else if (this.props.minValue && parsedValue < this.props.minValue) {
                 value = this.props.minValue;
             } else {
-                value = parseFloat(this.state.decimalValue);
+                value = parsedValue;
             }
-            this.state.emptyValue = false;
-            this.state.decimalValue = '';
+
+            this.setState({emptyValue: false, decimalValue: ''});
             this.props.onChange(value);
         } else if (this.state.emptyValue) {
-            this.state.emptyValue = false;
+            this.setState({emptyValue: false});
             this.props.onChange(this.props.value);
         }
     }
@@ -182,7 +201,7 @@ export class NumberInput extends React.PureComponent {
         let displayValue = this.props.value;
         if (this.state.emptyValue) {
             displayValue = '';
-        } else if (this.state.decimalValue) {
+        } else if (this.state.decimalValue !== '') {
             displayValue = this.state.decimalValue;
         }
 
@@ -238,7 +257,7 @@ export function Checkbox(props) {
             <div className="checkbox-switcher"></div>
             <div className="checkbox-label">{props.title}</div>
         </div>
-    )
+    );
 }
 
 export function CheckboxList(props) {

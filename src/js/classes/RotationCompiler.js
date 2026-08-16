@@ -78,12 +78,13 @@ export class RotationCompiler {
                 settingsDiff = Object.assign(settingsDiff, settings);
                 build[object].addSettings(settings);
                 build.setCommonSettings(settings);
+                build.normalizeRadianceStellarGlimmerSettings();
             }
         }
 
         this.conditions = [];
 
-        if (!matched) { return }
+        if (!matched) { return; }
 
         let base2 = build.getBuildData();
         let post = base2.getActivePostEffects();
@@ -105,12 +106,12 @@ export class RotationCompiler {
         let compiledItems = [];
         let itemsList = [];
 
-        let enabled = items.filter((i) => {return !i.disabled});
+        let enabled = items.filter((i) => {return !i.disabled;});
         if (enabled.length && enabled[0].type != 'condition') {
             itemsList.push({
                 type: 'condition',
                 static: 1,
-                getSettings: () => {return {}},
+                getSettings: () => {return {};},
             });
         }
 
@@ -130,9 +131,9 @@ export class RotationCompiler {
         }
 
         for (const item of itemsList) {
-            if (item.disabled) { continue }
+            if (item.disabled) { continue; }
 
-            if (item.type != 'condition') {
+            if (item.type != 'condition' && item.type != 'action') {
                 let condItem = this.processConditions(build);
                 if (condItem) {
                     compiledItems.push(condItem);
@@ -159,6 +160,22 @@ export class RotationCompiler {
                 }
             } else if (item.type == 'condition') {
                 this.conditions.push(item);
+            } else if (item.type == 'action') {
+                if (item.action == 'disable_artifacts') {
+                    let settings = {};
+                    for (let set of DB.Artifacts.Sets.getList(1)) {
+                        for (let cond of set.getConditions(5)) {
+                            settings[cond.getName()] = 0;
+                        }
+                    }
+                    this.conditions.push({
+                        type: 'condition',
+                        static: 1,
+                        getSettings: () => settings,
+                        object: 'artifacts'
+                    });
+                }
+                compiledItems.push(item);
             } else if (item.type == 'repeat') {
                 let subItems = this.processBlock(build, item.items, 1);
                 if (subItems) {
@@ -224,7 +241,7 @@ export class RotationCompiler {
         items.unshift({
             type: 'condition',
             static: 1,
-            getSettings: () => {return {}},
+            getSettings: () => {return {};},
         });
 
         let compiledItems = this.processBlock(this.build.cloneWithArtifactSettings(), items);

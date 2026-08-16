@@ -13,6 +13,7 @@ const ITEM_TYPE_FEATURE = 1;
 const ITEM_TYPE_CONDITION = 2;
 const ITEM_TYPE_REPEAT = 3;
 const ITEM_TYPE_UPTIME = 4;
+const ITEM_TYPE_ACTION = 5;
 
 export class Rotation {
     constructor(data) {
@@ -209,7 +210,7 @@ export class Rotation {
 
             if (selected) {
                 result.typeId = 6;
-                result.object = 'buffs',
+                result.object = 'buffs';
                 result.icon   = selected.getIcon();
                 conditions    = [selected];
                 validConditions = conditions;
@@ -314,6 +315,10 @@ function serializeItems(items) {
             let subItems = [].concat(item.conditions, item.features);
             let subResult = serializeItems(subItems);
             result = result.concat(subResult);
+        } else if (item.type == 'action') {
+            ++count;
+            result.push(ITEM_TYPE_ACTION);
+            result.push(item.action === 'disable_artifacts' ? 1 : 0);
         }
     }
 
@@ -342,7 +347,7 @@ function deserializeItems(input, counter, version) {
         if (type == ITEM_TYPE_FEATURE) {
             item.type = 'feature';
 
-            let featId = input.shift()
+            let featId = input.shift();
             item.feature = DB.Features.Rotation.getById(featId);
 
             if (!item.feature) return null;
@@ -400,6 +405,11 @@ function deserializeItems(input, counter, version) {
                     item.features.push(subItem);
                 }
             }
+        } else if (type == ITEM_TYPE_ACTION) {
+            item.type = 'action';
+            let actionType = input.shift();
+            if (actionType === 1) item.action = 'disable_artifacts';
+            else item.action = 'unknown';
         } else {
             return null;
         }

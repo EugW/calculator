@@ -1,4 +1,5 @@
 import { Condition } from "../../classes/Condition";
+import { ConditionAnd } from "../../classes/Condition/And";
 import { ConditionAscensionChar } from "../../classes/Condition/Ascension/Char";
 import { ConditionBoolean } from "../../classes/Condition/Boolean";
 import { ConditionConstellation } from "../../classes/Condition/Constellation";
@@ -131,6 +132,8 @@ const TalentValues = {
     C1Shield: 16,
     C4Damage: 20,
     C6ElectroRes: -15,
+    C6CryoRes: -15,
+    C6Mastery: 200,
 };
 
 export const Beidou = new DbObjectChar({
@@ -370,6 +373,15 @@ export const Beidou = new DbObjectChar({
                 new ConditionAscensionChar({ascension: 4}),
             ],
         }),
+        new ConditionBoolean({
+            name: 'beidou_radiance_stellarconduct',
+            serializeId: 4,
+            title: 'talent_name.beidou_polaris',
+            description: 'talent_descr.beidou_polaris',
+            subConditions: [
+                new ConditionBoolean({name: 'polestar_field'}),
+            ],
+        }),
     ],
     constellation: new DbObjectConstellation([
         {
@@ -427,10 +439,20 @@ export const Beidou = new DbObjectChar({
                     name: 'beidou_bane_of_the_evil',
                     serializeId: 3,
                     title: 'talent_name.beidou_bane_of_evil',
-                    description: 'talent_descr.beidou_bane_of_evil',
+                    description: 'talent_descr.beidou_bane_of_evil_buffed',
                     stats: {
                         enemy_res_electro: TalentValues.C6ElectroRes,
                     },
+                }),
+                new Condition({
+                    stats: {
+                        enemy_res_cryo: TalentValues.C6CryoRes,
+                        mastery: TalentValues.C6Mastery,
+                    },
+                    condition: new ConditionAnd([
+                        new ConditionBoolean({name: 'beidou_bane_of_the_evil'}),
+                        new ConditionBoolean({name: 'beidou_radiance_stellarconduct'}),
+                    ]),
                 }),
             ],
         },
@@ -438,15 +460,36 @@ export const Beidou = new DbObjectChar({
     partyData: {
         conditions: [
             new ConditionBoolean({
+                name: 'party.beidou_radiance_stellarconduct',
+                serializeId: 2,
+                rotation: 'party',
+                title: 'talent_name.beidou_polaris',
+                description: 'talent_descr.beidou_polaris',
+                info: {special: true},
+                subConditions: [
+                    new ConditionBoolean({name: 'polestar_field'}),
+                ],
+            }),
+            new ConditionBoolean({
                 name: 'party.beidou_bane_of_the_evil',
                 serializeId: 1,
                 rotation: 'party',
                 title: 'talent_name.beidou_bane_of_evil',
-                description: 'talent_descr.beidou_bane_of_evil',
+                description: 'talent_descr.beidou_bane_of_evil_buffed',
                 info: {constellation: 6},
                 stats: {
                     enemy_res_electro: TalentValues.C6ElectroRes,
                 },
+            }),
+            new Condition({
+                stats: {
+                    enemy_res_cryo: TalentValues.C6CryoRes,
+                    mastery: TalentValues.C6Mastery,
+                },
+                condition: new ConditionAnd([
+                    new ConditionBoolean({name: 'party.beidou_bane_of_the_evil'}),
+                    new ConditionBoolean({name: 'party.beidou_radiance_stellarconduct'}),
+                ]),
             }),
         ],
     },

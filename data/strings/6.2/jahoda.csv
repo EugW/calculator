@@ -1,0 +1,16 @@
+category;name;rus;eng
+
+feature_attack;jahoda_aimed_shot;Прицельный выстрел;Aimed Shot DMG
+feature_attack;jahoda_fully_charged;Полностью заряженный выстрел;Fully-Charged Aimed Shot DMG
+feature_skill;jahoda_smoke_bomb_dmg;Урон дымовой бомбы;Smoke Bomb DMG
+feature_skill;jahoda_unfilled_flask_dmg;Урон пустой фляжки;Unfilled Flask DMG
+feature_skill;jahoda_filled_flask_dmg;Урон полной фляжки;Filled Flask DMG
+feature_skill;jahoda_meowball_dmg;Урон Пушистого котошарика;Fluffy Meowball DMG
+feature_burst;jahoda_burst_dmg;Урон взрыва стихии;Burst DMG
+feature_burst;jahoda_robot_dmg;Урон Котординатора;Purrsonal Robot DMG
+
+talent_name;jahoda_rooftop_dash;Дар лунного знамения: Бегом по карнизам;Moonsign Benediction: Rooftop Dash
+talent_name;jahoda_backstreet_guile;Находчивость переулков;Backstreet Guile
+
+talent_descr;jahoda_rooftop_dash;Когда Ягода в отряде, уровень skill{Лунного знамения} повышается на 1.;When Jahoda is in party, skill{Moonsign} level increased by 1.
+talent_descr;jahoda_backstreet_guile;Уменьшает длительность экспедиций в Нод-Крае на 25%.;Reduces Nod-Krai expedition time by 25%.

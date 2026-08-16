@@ -1,6 +1,7 @@
 import { Condition } from "../Condition";
 import { Stats } from "../Stats";
 import { StatTableConditions } from "../StatTable/Condition";
+import { ConditionDropdown } from "./Dropdown";
 import { ConditionLevelSelect } from "./LevelSelect";
 import { ConditionNumber } from "./Number";
 
@@ -22,6 +23,10 @@ export class ConditionPartyWeapon extends Condition {
             let statName = this.getStatParamName(i);
             if (statName) {
                 items.push(statName);
+            }
+            let modeName = this.getModeParamName(i);
+            if (modeName) {
+                items.push(modeName);
             }
         }
         return items;
@@ -55,6 +60,18 @@ export class ConditionPartyWeapon extends Condition {
         return name;
     }
 
+    getModeParamName(number) {
+        if (!this.params.modeName) {
+            return;
+        }
+
+        let name = this.params.modeName;
+        if (number > 1) {
+            name += '_' + number;
+        }
+        return name;
+    }
+
     isActive(settings) {
         let result = this.checkSubconditions(settings);
         if (!result) {
@@ -66,7 +83,7 @@ export class ConditionPartyWeapon extends Condition {
                 return true;
             }
         }
-        return false
+        return false;
     }
 
     getLevel(settings, number) {
@@ -105,6 +122,11 @@ export class ConditionPartyWeapon extends Condition {
             if (statCond) {
                 stats.concat(statCond.getStats(settings));
             }
+
+            let modeCond = this.createModeCond(i);
+            if (modeCond) {
+                stats.concat(modeCond.getStats(settings));
+            }
         }
 
         return stats;
@@ -120,6 +142,9 @@ export class ConditionPartyWeapon extends Condition {
             result.push(this.createLevelCond(i));
             if (this.params.statName) {
                 result.push(this.createStatCond(i));
+            }
+            if (this.params.modeName) {
+                result.push(this.createModeCond(i));
             }
         }
 
@@ -140,6 +165,26 @@ export class ConditionPartyWeapon extends Condition {
             maxStacks: 5,
             icon: this.params.icon,
             stats: this.params.stats,
+            beta: this.params.beta,
+        });
+    }
+
+    createModeCond(number) {
+        if (!this.params.modeName) {
+            return;
+        }
+
+        return new ConditionDropdown({
+            isHidden: number > this.params.maxDisplay,
+            name: this.getModeParamName(number),
+            serializeId: this.params.modeSerializeIds[number-1],
+            title: this.params.modeTitle || this.params.title,
+            rotation: 'buffs',
+            rotationNumber: number > 1 ? number : '',
+            dropdownClass: this.params.modeClass,
+            hideEmpty: this.params.modeHideEmpty,
+            defaultValue: this.params.modeDefaultValue,
+            values: this.params.modeValues,
             beta: this.params.beta,
         });
     }

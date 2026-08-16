@@ -9,12 +9,29 @@ import { Tab } from "../Tab";
 import { Accordion, AccordionItem } from '../Components/Accordion';
 import { GroupBox } from '../Components/Inputs/GroupBox';
 import { TitledButton } from '../Components/Inputs/Buttons';
+import { Dropdown } from '../Components/Inputs/Dropdown';
 import { Checkbox, CheckboxList, FileInput } from '../Components/Inputs/Input';
 import { Backup } from '../../classes/Backup';
+import {
+    GPU_TOP_K_MAX_BATCH_COMBINATIONS,
+    normalizeGPUOptimizerBatchSize,
+} from '../../classes/GPUOptimizerContract';
 import { ImporterGood } from '../../classes/Importer/Good';
 
 let FileSaver = require('file-saver');
 let lang = new Lang();
+
+const GPU_BATCH_SIZE_SETTING = 'artifact_suggest_gpu_batch_size';
+const GPU_BATCH_SIZE_OPTIONS = [
+    { value: 'auto', text: 'Auto' },
+    { value: '262144', text: '256K' },
+    { value: '524288', text: '512K' },
+    { value: '1048576', text: '1M' },
+    { value: '2097152', text: '2M' },
+    { value: '4194304', text: '4M' },
+    { value: '8388608', text: '8M' },
+    { value: String(GPU_TOP_K_MAX_BATCH_COMBINATIONS), text: '16M' },
+];
 
 export class SettingsTab extends Tab {
     constructor(params) {
@@ -37,7 +54,7 @@ export class SettingsTab extends Tab {
     createContent() {
         return (
             <SettingsView
-                ref={element => { this.component = element }}
+                ref={element => { this.component = element; }}
                 app={this.app}
                 title={this.title}
             />
@@ -110,7 +127,7 @@ export class SettingsView extends React.Component {
             }
         };
 
-        reader.onerror = () => {this.backupError()};
+        reader.onerror = () => {this.backupError();};
     }
 
     backupError() {
@@ -145,12 +162,31 @@ export class SettingsView extends React.Component {
     }
 
     handleToggleBetaContent(value) {
-        this.props.app.setSetting('show_beta_content', value ? 1 : 0)
+        this.props.app.setSetting('show_beta_content', value ? 1 : 0);
         this.refresh();
+    }
+
+    handleToggleWorkerValueOutput(value) {
+        this.props.app.setSetting('artifact_suggest_worker_value_output', value ? 1 : 0);
+        this.refresh();
+    }
+
+    handleGpuBatchSize(value) {
+        this.props.app.setSetting(GPU_BATCH_SIZE_SETTING, value);
+        this.refresh();
+    }
+
+    getGpuBatchSize() {
+        const value = normalizeGPUOptimizerBatchSize(
+            this.props.app.getSetting(GPU_BATCH_SIZE_SETTING)
+        );
+        return GPU_BATCH_SIZE_OPTIONS.some((item) => item.value === value) ? value : 'auto';
     }
 
     render() {
         this.beta_content = this.props.app.showBetaContent();
+        this.worker_value_output = !!parseInt(this.props.app.getSetting('artifact_suggest_worker_value_output') || 0);
+        this.gpu_batch_size = this.getGpuBatchSize();
 
         return (
             <ReactTab title={lang.get('tab_header.settings_view')}>
@@ -239,6 +275,23 @@ export class SettingsView extends React.Component {
                                     title={lang.get('good_import.export')}
                                     onClick={() => this.handleGoodExport(true)}
                                 />
+                            </AccordionItem>
+                            <AccordionItem id="artifact_suggest" title={lang.get('settings_view.artifact_suggest')}>
+                                <Checkbox
+                                    title={lang.get('settings_view.enable_worker_value_output')}
+                                    checked={this.worker_value_output}
+                                    onChange={(value) => this.handleToggleWorkerValueOutput(value)}
+                                />
+                                <div className="settings-gpu-row">
+                                    <div className="settings-gpu-row-title">{lang.get('settings_view.gpu_batch_size')}</div>
+                                    <Dropdown
+                                        addClass="settings-gpu-batch-size"
+                                        items={GPU_BATCH_SIZE_OPTIONS}
+                                        selected={this.gpu_batch_size}
+                                        onChange={(item) => this.handleGpuBatchSize(item.value)}
+                                    />
+                                </div>
+                                <div className="settings-gpu-note">{lang.get('settings_view.gpu_batch_size_note')}</div>
                             </AccordionItem>
                             <AccordionItem id="beta" title={lang.get('settings_view.beta')}>
                                 <Checkbox

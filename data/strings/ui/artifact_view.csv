@@ -6,3 +6,5 @@ artifact_view;random_artifacts;Случайн.;Random
 artifact_view;clear_confirm;Снять все надетые артефакты?;Unequip all equipped artifacts?
 artifact_view;total_stats;Характеристики артефактов;Artifact details
 artifact_view;useful_rolls;Полезные роллы доп. характеристик;Useful substat rolls
+artifact_view;substat_active;Активен;Active
+artifact_view;substat_inactive;Неактивен;Inactive

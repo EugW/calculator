@@ -1,0 +1,13 @@
+category;name;rus;eng
+feature_skill;vodyanitsa_overture_initial_dmg;Начальный урон Увертюры;Overture Initial DMG
+feature_skill;vodyanitsa_microphone_duration;Длительность Микрофона;Microphone Duration
+feature_skill;vodyanitsa_microphone_attack_interval;Интервал атак Микрофона;Microphone Attack Interval
+feature_skill;vodyanitsa_microphone_dmg;Урон Микрофона;Microphone DMG
+feature_skill;vodyanitsa_microphone_heal;Лечение Микрофона;Microphone Healing
+feature_skill;vodyanitsa_microphone_heal_interval;Интервал лечения Микрофона;Microphone Healing Interval
+feature_skill;vodyanitsa_hydro_cryo_res_reduction;Снижение сопротивления Гидро и Крио;Hydro/Cryo RES Reduction
+feature_skill;vodyanitsa_res_reduction_duration;Длительность снижения сопротивления;RES Reduction Duration
+feature_burst;vodyanitsa_aria_dmg;Урон Арии;Aria DMG
+feature_burst;vodyanitsa_microphone_resonance_dmg;Дополнительный урон резонанса Микрофона;Additional Microphone Resonance DMG
+talent_name;vodyanitsa_microphone_summons;Призванный Микрофон;Microphone Summons
+talent_descr;vodyanitsa_microphone_summons;Микрофон существует 16 сек. и повышает сопротивление прерыванию активного персонажа. Его попадания на 6 сек. снижают сопротивление Гидро и Крио на значение текущего уровня навыка. Взрыв стихии получает дополнительный множитель 48% макс. HP на уровне 1, пока Микрофон призван.;The Microphone lasts 16s and increases the active character's interruption resistance. Its hits reduce Hydro and Cryo RES for 6s by the current Skill-level value. While it is summoned, the Burst gains an additional 48% Max HP multiplier at level 1.

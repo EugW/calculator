@@ -9,6 +9,18 @@
     padding-left: 15px;
 }
 
+.weapon-suggester-list-item .title-line {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+}
+
+.weapon-suggester-list-item .title-line .round-button {
+    width: 26px;
+    height: 26px;
+    background-size: 22px 22px;
+}
+
 .weapon-suggester-list-item .icon {
     flex-shrink: 0;
 }
@@ -38,10 +50,28 @@
     text-align: center;
 }
 
+.weapon-suggester-list-item .setting .actions {
+    min-width: 32px;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+}
+
+.weapon-suggester-list-item .setting .actions .round-button {
+    width: 26px;
+    height: 26px;
+    background-size: 24px 24px;
+}
+
+.weapon-suggester-list-item .setting .name .custom-name {
+    width: 100%;
+}
+
 .weapon-suggester-list-item .checkbox-wrapper {
     height: auto;
 }
 
 .weapon-suggester-list-item .checkbox-switcher {
-    margin-top: 0px;
+    margin-top: 0;
 }

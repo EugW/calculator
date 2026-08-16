@@ -1,0 +1,22 @@
+category;name;rus;eng
+char_name;durin;Дурин;Durin
+
+feature_attack;durin_charged_dmg;Урон заряженной атаки;Charged Attack DMG
+feature_skill;durin_confirmation_dmg;Урон Утверждения чистоты;Confirmation of Purity DMG
+feature_skill;durin_denial_dmg_1;Урон Отрицания тьмы (1);Denial of Darkness DMG (1)
+feature_skill;durin_denial_dmg_2;Урон Отрицания тьмы (2);Denial of Darkness DMG (2)
+feature_skill;durin_denial_dmg_3;Урон Отрицания тьмы (3);Denial of Darkness DMG (3)
+feature_skill;energy_regen;Восстановление энергии;Energy Regeneration
+feature_burst;durin_purity_dmg_1;Урон Принципа чистоты (1);Principle of Purity DMG (1)
+feature_burst;durin_purity_dmg_2;Урон Принципа чистоты (2);Principle of Purity DMG (2)
+feature_burst;durin_purity_dmg_3;Урон Принципа чистоты (3);Principle of Purity DMG (3)
+feature_burst;durin_darkness_dmg_1;Урон Принципа тьмы (1);Principle of Darkness DMG (1)
+feature_burst;durin_darkness_dmg_2;Урон Принципа тьмы (2);Principle of Darkness DMG (2)
+feature_burst;durin_darkness_dmg_3;Урон Принципа тьмы (3);Principle of Darkness DMG (3)
+feature_burst;durin_white_flame_dmg;Урон Дракона белого пламени;Dragon of White Flame DMG
+feature_burst;durin_dark_decay_dmg;Урон Дракона чёрного разложения;Dragon of Dark Decay DMG
+feature_burst;durin_dragon_duration;Длительность дракона;Dragon Duration
+feature_other;durin_c1_cycle_dmg;Урон Цикла просветления C1;C1 Cycle of Enlightenment DMG
+
+talent_name;durin_darkness_mode;Принцип тьмы;Principle of Darkness
+

@@ -3,6 +3,7 @@ buff_group;elemental_resonance;Отряд;Party setup
 buff_group;artifacts;Артефакты членов отряда;Party members' artifacts
 buff_group;weapons;Оружие членов отряда;Party members' weapons
 buff_group;custom;Произвольные бонусы;Custom bonuses
+buff_group;additional_supports;Дополнительная поддержка;Additional Supports
 buffs;party_elements;Персонажи в отряде;Current party characters
 buffs_name;resonance_none;Нити защиты;Protective Canopy
 buffs_descr;resonance_none;Элементальное и физ. сопротивление повышается на %{res_phys}.;All Elemental RES +15%, Physical RES +15%.
@@ -31,3 +32,9 @@ buffs_name;resonance_dendro;Ползучая зелень;Sprawling Greenery
 buffs_descr;resonance_dendro_1;Увеличивает name{мастерство стихий} на %{mastery} ед.;name{Elemental Mastery} increased by %{mastery}.
 buffs_descr;resonance_dendro_2;Статусы pyro{Горение}, dendro{Стимуляция} и dendro{Бутонизация} увеличивают name{мастерство стихий} всех членов отряда поблизости на %{mastery} ед. на 6 сек.<br>Длительность каждого из этих эффектов рассчитывается отдельно.;After triggering pyro{Burning}, dendro{Quicken}, or dendro{Bloom} reactions, all nearby party members gain %{mastery} name{Elemental Mastery} for 6s.<br>The durations of the aforementioned effects will be counted independently.
 buffs_descr;resonance_dendro_3;Статусы electro{Обострение}, dendro{Разрастание}, dendro{Вегетация} и dendro{Цветение} увеличивают name{мастерство стихий} всех членов отряда поблизости на %{mastery} ед. на 6 сек.<br>Длительность каждого из этих эффектов рассчитывается отдельно.;After triggering electro{Aggravate}, dendro{Spread}, dendro{Hyperbloom}, or dendrp{Burgeon} reactions, all nearby party members gain %{mastery} Elemental Mastery for 6s.<br>The durations of the aforementioned effects will be counted independently.
+
+buffs_name;ascendant_gleam_buff;Высшее сияние: Бонус не-Лунных;Ascendant Gleam: Non-Moonsign Buff
+buffs_descr;ascendant_gleam_buff;skill{Высшее сияние}: персонажи без лунного знамения могут повысить урон name{Лунных реакций} на основе своих характеристик (не более 36%).;skill{Ascendant Gleam}: Non-Moonsign characters can increase name{Lunar Reaction DMG} based on their stats (up to 36%).
+
+buffs_name;resonance_hexerei;Ведьмин резонанс;Hexerei Resonance
+buffs_descr;resonance_hexerei;skill{Резонанс Hexerei} активен: 2+ персонажа skill{Hexerei} в отряде (Дурин, Венти, Альбедо, Мона, Кли, Сахароза, Рэйзор, Фишль, Варка, Лоэн, Николь, Прюн). Активирует специальные способности Hexerei.;skill{Hexerei Resonance} active: 2+ skill{Hexerei} characters in party (Durin, Venti, Albedo, Mona, Klee, Sucrose, Razor, Fischl, Varka, Lohen, Nicole, Prune). Activates special Hexerei abilities.

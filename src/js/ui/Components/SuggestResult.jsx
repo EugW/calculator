@@ -40,10 +40,11 @@ export function SuggestResult(props) {
                 onApply={props.onApply}
                 onCompare={props.onCompare}
                 displayMode={props.displayMode}
+                showWorkerValues={props.showWorkerValues}
                 savedHashes={props.savedHashes}
                 onLock={props.onLock}
             />
-        )
+        );
     }
 
     return (
@@ -127,6 +128,7 @@ export class SuggestResultItem extends React.Component {
                         mainFeature={this.props.mainFeature}
                         otherFeatures={this.props.otherFeatures}
                         displayMode={this.props.displayMode}
+                        showWorkerValues={this.props.showWorkerValues}
                     />
                 </div>
                 <div className={'line' + (this.props.even ? ' even' : '')} style={this.state.showArtifacts ? {} : {display: 'none'}}>
@@ -149,12 +151,20 @@ function SuggestSetIcon(props) {
             <ArtifactSetIcon set={props.name} size={60}/>
             <div className="number">x{props.count}</div>
         </div>
-    )
+    );
 }
 
 function SuggesterFeatures(props) {
     let lang = new Lang();
     let features = props.item.calcFeatures(1);
+    let workerValues = {};
+
+    if (props.showWorkerValues &&
+        props.item.suggesterWorkerFeature == props.mainFeature &&
+        props.item.suggesterWorkerValue !== undefined
+    ) {
+        workerValues[props.item.suggesterWorkerFeatureType] = props.item.suggesterWorkerValue;
+    }
 
     let items = [];
     for (let feat of props.otherFeatures) {
@@ -180,6 +190,7 @@ function SuggesterFeatures(props) {
                     item={features[props.mainFeature]}
                     base={props.maxFeatures[props.mainFeature]}
                     displayMode={props.displayMode}
+                    workerValues={workerValues}
                 />
             </div>
             {items}
@@ -191,34 +202,54 @@ function SuggesterFeaturesValues(props) {
     let format = props.item.format;
     let values = {};
     let percents = {};
+    let workerValues = {};
 
     for (const field of ['normal', 'crit', 'average']) {
         let value   = props.item[field];
         let percent = 0;
+        let workerValue = props.workerValues ? props.workerValues[field] : undefined;
 
         if (props.base && props.base[field]) {
             percent = formatFeatureDiff(value, props.base[field], {displayMode: props.displayMode});
         }
 
-        if (format == 'percent') {
-            value = formatNumber(value, {percent: true, digits: props.item.digits});
-        } else if (format == 'decimal') {
-            value = formatNumber(value, {digits: props.item.digits});
-        } else {
-            value = formatNumber(Math.round(value));
-        }
-
-        values[field] = value;
+        values[field] = formatFeatureValue(value, props.item);
         percents[field] = percent;
+
+        if (workerValue !== undefined) {
+            workerValues[field] = formatFeatureValue(workerValue, props.item);
+        }
     }
 
     return (
         <>
-            <div className="value">{values.normal}{props.base ? <div>{percents.normal}</div> : ''}</div>
-            <div className="value">{values.crit}{props.base ? <div>{percents.crit}</div> : ''}</div>
-            <div className="value">{values.average}{props.base ? <div>{percents.average}</div> : ''}</div>
+            <SuggesterFeatureValue value={values.normal} percent={props.base ? percents.normal : undefined} workerValue={workerValues.normal} />
+            <SuggesterFeatureValue value={values.crit} percent={props.base ? percents.crit : undefined} workerValue={workerValues.crit} />
+            <SuggesterFeatureValue value={values.average} percent={props.base ? percents.average : undefined} workerValue={workerValues.average} />
         </>
     );
+}
+
+function SuggesterFeatureValue(props) {
+    let lang = new Lang();
+
+    return (
+        <div className="value">
+            {props.value}
+            {props.percent !== undefined ? <div>{props.percent}</div> : ''}
+            {props.workerValue !== undefined ? <div className="worker-value" title={lang.get('suggester.worker_value')}>{props.workerValue}</div> : ''}
+        </div>
+    );
+}
+
+function formatFeatureValue(value, item) {
+    if (item.format == 'percent') {
+        return formatNumber(value, {percent: true, digits: item.digits});
+    } else if (item.format == 'decimal') {
+        return formatNumber(value, {digits: item.digits});
+    }
+
+    return formatNumber(Math.round(value));
 }
 
 function getArtifactsIcons(set) {
@@ -283,7 +314,7 @@ function formatFeatureDiff(current, max, opts) {
         result = <span className={'remark '+ diffClass}>{diff}</span>;
     } else {
         let percent = Stats.format('text_percent', current / max * 100, {decimal_digits: 1, no_decimal_zero: 1});
-        result = <span className="remark">{percent}</span>
+        result = <span className="remark">{percent}</span>;
     }
 
     return result;

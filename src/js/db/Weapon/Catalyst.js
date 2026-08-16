@@ -41,6 +41,17 @@ import { WaveridingWhirl } from "./Catalyst/WaveridingWhirl";
 import { StarcallersWatch } from "./Catalyst/StarcallersWatch";
 import { MorningHibernation } from "./Catalyst/MorningHibernation";
 import { VividNotions } from "./Catalyst/VividNotions";
+import { NightweaversLookingGlass } from "./Catalyst/NightweaversLookingGlass";
+import { ReliquaryOfTruth } from "./Catalyst/ReliquaryOfTruth";
+import { EtherlightSpindlelute } from "./Catalyst/EtherlightSpindlelute";
+import { BlackmarrowLantern } from "./Catalyst/BlackmarrowLantern";
+import { DawningFrost } from "./Catalyst/DawningFrost";
+import { NocturnesCurtainCall } from "./Catalyst/NocturnesCurtainCall";
+import { AngelosHeptades } from "./Catalyst/AngelosHeptades";
+import { ClashOfKings } from "./Catalyst/ClashOfKings";
+import { EchoesOfTheHeart } from "./Catalyst/EchoesOfTheHeart";
+import { FrostScepter } from "./Catalyst/FrostScepter";
+import { Bludnye } from "./Catalyst/Bludnye";
 
 export const Catalyst = new DbObjectListSerializeStats({
     SolarPearl: SolarPearl, // 43
@@ -85,4 +96,15 @@ export const Catalyst = new DbObjectListSerializeStats({
     StarcallersWatch: StarcallersWatch, // 195
     MorningHibernation: MorningHibernation, // 196
     VividNotions: VividNotions, // 198
+    NightweaversLookingGlass: NightweaversLookingGlass, // 231
+    ReliquaryOfTruth: ReliquaryOfTruth, // 232
+    EtherlightSpindlelute: EtherlightSpindlelute, // 233
+    BlackmarrowLantern: BlackmarrowLantern, // 234
+    DawningFrost: DawningFrost, // 235
+    NocturnesCurtainCall: NocturnesCurtainCall, // 239
+    AngelosHeptades: AngelosHeptades, // 244
+    ClashOfKings: ClashOfKings, // 254
+    EchoesOfTheHeart: EchoesOfTheHeart, // 255
+    FrostScepter: FrostScepter, // 261
+    Bludnye: Bludnye, // 262
 });

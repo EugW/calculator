@@ -1,4 +1,5 @@
 from .base import DictParser
+from ..config import DATA_SOURCE, load_text_map
 
 
 class LangData(DictParser):
@@ -11,3 +12,6 @@ class LangData(DictParser):
     @property
     def filename(self):
         return f'TextMap{self.lang}.json'
+
+    def parse(self):
+        self.data = load_text_map(self.lang, source=DATA_SOURCE)

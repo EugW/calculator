@@ -15,3 +15,5 @@ talent_descr;razor_claw_and_thunder_talent;name{Удар когтями} гро�
 
 talent_name;razor_wolf_within;Внутренний волк;The Wolf Within
 talent_descr;razor_wolf_within;• Атакует вместе с name{обычными атаками} name{Рэйзора}, нанося electro{Электро урон}.<br>• Увеличивает name{скорость атаки} и electro{Электро сопротивление} nam{Рэйзора}.<br>• name{Заряженные атаки} name{Рэйзора} становятся недоступны;• Strikes alongside name{Razor}'s name{normal attacks}, dealing electro{Electro DMG}.<br>• Raises Razor's name{ATK SPD} and electro{Electro RES}.<br>• Disables name{Razor}'s name{Charged Attacks}.
+
+feature_burst;razor_secret_rite_lightning;Вспышка молнии;Surge of Lightning

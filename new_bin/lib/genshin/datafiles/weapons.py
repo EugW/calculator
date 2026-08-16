@@ -11,6 +11,14 @@ IGNORED_WEAPONS = [
 class WeaponData(ListParser):
     filename = 'WeaponExcelConfigData.json'
 
+    def parse(self):
+        super().parse()
+        for item in self.get_list():
+            # Some current dumps mark event weapons as rankLevel 1; the id still carries their rarity.
+            rarity = (item['id'] // 100) % 10
+            if rarity >= 3 and item.get('rankLevel', 0) < rarity:
+                item['rankLevel'] = rarity
+
 
 class WeaponSkillData(ListParser):
     filename = 'EquipAffixExcelConfigData.json'

@@ -30,6 +30,11 @@
 .weapon-icon-bow-flower-wreathed-feathers {background-image: url("../../images/weapons/bow/bow_umpakati.png")}
 .weapon-icon-bow-chain-breaker {background-image: url("../../images/weapons/bow/bow_isikhulu.png")}
 .weapon-icon-bow-sequence-of-solitude {background-image: url("../../images/weapons/bow/bow_stinger.png")}
+.weapon-icon-bow-snare-hook {background-image: url("../../images/weapons/bow/bow_ilmarinen.png")}
+.weapon-icon-bow-rainbow-serpents-rain-bow {background-image: url("../../images/weapons/bow/bow_elegguabow.png")}
+.weapon-icon-bow-jade-vista {background-image: url("../../images/weapons/bow/bow_shatteredmirror.png")}
+.weapon-icon-bow-covenant-of-frost-and-snow {background-image: url("../../images/weapons/bow/bow_glintstonebow.png")}
+.weapon-icon-bow-windtalker {background-image: url("../../images/weapons/bow/bow_windtalker.png")}
 .weapon-icon-bow-skyward-harp {background-image: url("../../images/weapons/bow/bow_dvalin.png")}
 .weapon-icon-bow-amos-bow {background-image: url("../../images/weapons/bow/bow_amos.png")}
 .weapon-icon-bow-elegy-for-the-end {background-image: url("../../images/weapons/bow/bow_widsith.png")}
@@ -40,60 +45,69 @@
 .weapon-icon-bow-the-first-great-magic {background-image: url("../../images/weapons/bow/bow_pledge.png")}
 .weapon-icon-bow-silvershower-heartstrings {background-image: url("../../images/weapons/bow/bow_arcdange.png")}
 .weapon-icon-bow-astral-vultures-crimson-plumage {background-image: url("../../images/weapons/bow/bow_qoyllorsnova.png")}
+.weapon-icon-bow-the-daybreak-chronicles {background-image: url("../../images/weapons/bow/bow_arianna.png")}
+.weapon-icon-bow-golden-frostbound-oath {background-image: url("../../images/weapons/bow/bow_alkonost.png")}
 .sprite-weapon-bow.sprite-24 {
-	background-image: url("../../images/sprites/weapon_bow_a321f9bfbbe83ecc55ab8e9610c68062.png");
+	background-image: url("../../images/sprites/weapon_bow_85413e1f4c1f6574b1acd200eb55c0ff.png");
 	background-size: 120px 264px;
 }
 .sprite-weapon-bow.sprite-40 {
-	background-image: url("../../images/sprites/weapon_bow_068fd56dd0cb80864b58446cbbb3e1ec.png");
+	background-image: url("../../images/sprites/weapon_bow_151c5fd0f040b1e7b9573879721ad63d.png");
 	background-size: 200px 440px;
 }
 .sprite-weapon-bow.sprite-60 {
-	background-image: url("../../images/sprites/weapon_bow_bdc8ac626aafcc36c607e4c80b8c51ff.png");
+	background-image: url("../../images/sprites/weapon_bow_3420c30d662b08ed4995815b0d235b32.png");
 	background-size: 300px 660px;
 }
-.sprite.weapon-icon-bow-unknown {background-position: 0% 0%}
-.sprite.weapon-icon-bow-raven-bow {background-position: 25% 0%}
-.sprite.weapon-icon-bow-sharpshooters-oath {background-position: 50% 0%}
-.sprite.weapon-icon-bow-recurve-bow {background-position: 75% 0%}
-.sprite.weapon-icon-bow-slingshot {background-position: 100% 0%}
-.sprite.weapon-icon-bow-messenger {background-position: 0% 10%}
+.sprite.weapon-icon-bow-unknown {background-position: 0 0}
+.sprite.weapon-icon-bow-raven-bow {background-position: 25% 0}
+.sprite.weapon-icon-bow-sharpshooters-oath {background-position: 50% 0}
+.sprite.weapon-icon-bow-recurve-bow {background-position: 75% 0}
+.sprite.weapon-icon-bow-slingshot {background-position: 100% 0}
+.sprite.weapon-icon-bow-messenger {background-position: 0 10%}
 .sprite.weapon-icon-bow-favonius-warbow {background-position: 25% 10%}
 .sprite.weapon-icon-bow-the-stringless {background-position: 50% 10%}
 .sprite.weapon-icon-bow-sacrificial-bow {background-position: 75% 10%}
 .sprite.weapon-icon-bow-royal-bow {background-position: 100% 10%}
-.sprite.weapon-icon-bow-rust {background-position: 0% 20%}
+.sprite.weapon-icon-bow-rust {background-position: 0 20%}
 .sprite.weapon-icon-bow-prototype-crescent {background-position: 25% 20%}
 .sprite.weapon-icon-bow-compound-bow {background-position: 50% 20%}
 .sprite.weapon-icon-bow-blackcliff-warbow {background-position: 75% 20%}
 .sprite.weapon-icon-bow-the-viridescent-hunt {background-position: 100% 20%}
-.sprite.weapon-icon-bow-alley-hunter {background-position: 0% 30%}
+.sprite.weapon-icon-bow-alley-hunter {background-position: 0 30%}
 .sprite.weapon-icon-bow-fading-twilight {background-position: 25% 30%}
 .sprite.weapon-icon-bow-mitternachts-waltz {background-position: 50% 30%}
 .sprite.weapon-icon-bow-windblume-ode {background-position: 75% 30%}
 .sprite.weapon-icon-bow-hamayumi {background-position: 100% 30%}
-.sprite.weapon-icon-bow-predator {background-position: 0% 40%}
+.sprite.weapon-icon-bow-predator {background-position: 0 40%}
 .sprite.weapon-icon-bow-mouuns-moon {background-position: 25% 40%}
 .sprite.weapon-icon-bow-kings-squire {background-position: 50% 40%}
 .sprite.weapon-icon-bow-end-of-the-line {background-position: 75% 40%}
 .sprite.weapon-icon-bow-ibis-piercer {background-position: 100% 40%}
-.sprite.weapon-icon-bow-scion-of-the-blazing-sun {background-position: 0% 50%}
+.sprite.weapon-icon-bow-scion-of-the-blazing-sun {background-position: 0 50%}
 .sprite.weapon-icon-bow-song-of-stillness {background-position: 25% 50%}
 .sprite.weapon-icon-bow-cloudforged {background-position: 50% 50%}
 .sprite.weapon-icon-bow-range-gauge {background-position: 75% 50%}
 .sprite.weapon-icon-bow-flower-wreathed-feathers {background-position: 100% 50%}
-.sprite.weapon-icon-bow-chain-breaker {background-position: 0% 60%}
+.sprite.weapon-icon-bow-chain-breaker {background-position: 0 60%}
 .sprite.weapon-icon-bow-sequence-of-solitude {background-position: 25% 60%}
-.sprite.weapon-icon-bow-skyward-harp {background-position: 50% 60%}
-.sprite.weapon-icon-bow-amos-bow {background-position: 75% 60%}
-.sprite.weapon-icon-bow-elegy-for-the-end {background-position: 100% 60%}
-.sprite.weapon-icon-bow-polar-star {background-position: 0% 70%}
-.sprite.weapon-icon-bow-aqua-simulacra {background-position: 25% 70%}
-.sprite.weapon-icon-bow-thundering-pulse {background-position: 50% 70%}
-.sprite.weapon-icon-bow-hunters-path {background-position: 75% 70%}
-.sprite.weapon-icon-bow-the-first-great-magic {background-position: 100% 70%}
-.sprite.weapon-icon-bow-silvershower-heartstrings {background-position: 0% 80%}
-.sprite.weapon-icon-bow-astral-vultures-crimson-plumage {background-position: 25% 80%}
+.sprite.weapon-icon-bow-snare-hook {background-position: 50% 60%}
+.sprite.weapon-icon-bow-rainbow-serpents-rain-bow {background-position: 75% 60%}
+.sprite.weapon-icon-bow-jade-vista {background-position: 100% 60%}
+.sprite.weapon-icon-bow-covenant-of-frost-and-snow {background-position: 0 70%}
+.sprite.weapon-icon-bow-windtalker {background-position: 25% 70%}
+.sprite.weapon-icon-bow-skyward-harp {background-position: 50% 70%}
+.sprite.weapon-icon-bow-amos-bow {background-position: 75% 70%}
+.sprite.weapon-icon-bow-elegy-for-the-end {background-position: 100% 70%}
+.sprite.weapon-icon-bow-polar-star {background-position: 0 80%}
+.sprite.weapon-icon-bow-aqua-simulacra {background-position: 25% 80%}
+.sprite.weapon-icon-bow-thundering-pulse {background-position: 50% 80%}
+.sprite.weapon-icon-bow-hunters-path {background-position: 75% 80%}
+.sprite.weapon-icon-bow-the-first-great-magic {background-position: 100% 80%}
+.sprite.weapon-icon-bow-silvershower-heartstrings {background-position: 0 90%}
+.sprite.weapon-icon-bow-astral-vultures-crimson-plumage {background-position: 25% 90%}
+.sprite.weapon-icon-bow-the-daybreak-chronicles {background-position: 50% 90%}
+.sprite.weapon-icon-bow-golden-frostbound-oath {background-position: 75% 90%}
 
 @media
 only screen and (-webkit-min-device-pixel-ratio: 2),
@@ -134,6 +148,11 @@ only screen and (                min-resolution: 2dppx) {
 	.weapon-icon-bow-flower-wreathed-feathers {background-image: url("../../images/weapons/bow/bow_umpakati_2x.png")}
 	.weapon-icon-bow-chain-breaker {background-image: url("../../images/weapons/bow/bow_isikhulu_2x.png")}
 	.weapon-icon-bow-sequence-of-solitude {background-image: url("../../images/weapons/bow/bow_stinger_2x.png")}
+	.weapon-icon-bow-snare-hook {background-image: url("../../images/weapons/bow/bow_ilmarinen_2x.png")}
+	.weapon-icon-bow-rainbow-serpents-rain-bow {background-image: url("../../images/weapons/bow/bow_elegguabow_2x.png")}
+	.weapon-icon-bow-jade-vista {background-image: url("../../images/weapons/bow/bow_shatteredmirror_2x.png")}
+	.weapon-icon-bow-covenant-of-frost-and-snow {background-image: url("../../images/weapons/bow/bow_glintstonebow_2x.png")}
+	.weapon-icon-bow-windtalker {background-image: url("../../images/weapons/bow/bow_windtalker_2x.png")}
 	.weapon-icon-bow-skyward-harp {background-image: url("../../images/weapons/bow/bow_dvalin_2x.png")}
 	.weapon-icon-bow-amos-bow {background-image: url("../../images/weapons/bow/bow_amos_2x.png")}
 	.weapon-icon-bow-elegy-for-the-end {background-image: url("../../images/weapons/bow/bow_widsith_2x.png")}
@@ -144,7 +163,9 @@ only screen and (                min-resolution: 2dppx) {
 	.weapon-icon-bow-the-first-great-magic {background-image: url("../../images/weapons/bow/bow_pledge_2x.png")}
 	.weapon-icon-bow-silvershower-heartstrings {background-image: url("../../images/weapons/bow/bow_arcdange_2x.png")}
 	.weapon-icon-bow-astral-vultures-crimson-plumage {background-image: url("../../images/weapons/bow/bow_qoyllorsnova_2x.png")}
-	.sprite-weapon-bow.sprite-24 {background-image: url("../../images/sprites/weapon_bow_5b91b5818050861b773f7f46a793472b.png")}
-	.sprite-weapon-bow.sprite-40 {background-image: url("../../images/sprites/weapon_bow_631dc3b4887657311f771b0dea1b28cd.png")}
-	.sprite-weapon-bow.sprite-60 {background-image: url("../../images/sprites/weapon_bow_f8cff43cdf6c620a3e0b8f62c4d2b018.png")}
+	.weapon-icon-bow-the-daybreak-chronicles {background-image: url("../../images/weapons/bow/bow_arianna_2x.png")}
+	.weapon-icon-bow-golden-frostbound-oath {background-image: url("../../images/weapons/bow/bow_alkonost_2x.png")}
+	.sprite-weapon-bow.sprite-24 {background-image: url("../../images/sprites/weapon_bow_76d8c40be2d4de9b9ccfb5b80e54408d.png")}
+	.sprite-weapon-bow.sprite-40 {background-image: url("../../images/sprites/weapon_bow_bc0eae02d1f647076c90d26dc26aa76c.png")}
+	.sprite-weapon-bow.sprite-60 {background-image: url("../../images/sprites/weapon_bow_cc3dc2346fbfb3442a964c3f397b263e.png")}
 }

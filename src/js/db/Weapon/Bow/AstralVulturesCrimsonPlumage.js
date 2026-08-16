@@ -24,15 +24,15 @@ export const AstralVulturesCrimsonPlumage = new DbObjectWeapon({
         new ConditionBooleanRefine({
             name: 'astral_vultures_crimson_plumage',
             serializeId: 1,
-            title: 'talent_name.astral_vultures_crimson_plumage',
-            description: 'talent_descr.astral_vultures_crimson_plumage_1',
+            title: 'talent_name.weapon_astral_vultures_crimson_plumage',
+            description: 'talent_descr.weapon_astral_vultures_crimson_plumage_1',
             stats: [
                 new StatTable('atk_percent', [24, 30, 36, 42, 48]),
             ],
         }),
         new ConditionStaticRefineCrimsonPlumage({
-            title: 'talent_name.astral_vultures_crimson_plumage',
-            description: 'talent_descr.astral_vultures_crimson_plumage_2',
+            title: 'talent_name.weapon_astral_vultures_crimson_plumage',
+            description: 'talent_descr.weapon_astral_vultures_crimson_plumage_2',
             levelSetting: 'weapon_refine',
             effectLevelSetting: 'party_elements_different',
             stats: [

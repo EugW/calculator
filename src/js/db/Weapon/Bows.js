@@ -40,6 +40,13 @@ import { ShatteredChains } from "./Bow/ShatteredChains";
 import { FlowerWreathedFeathers } from "./Bow/FlowerWreathedFeathers";
 import { AstralVulturesCrimsonPlumage } from "./Bow/AstralVulturesCrimsonPlumage";
 import { SequenceofSolitude } from "./Bow/SequenceofSolitude";
+import { TheDaybreakChronicles } from "./Bow/TheDaybreakChronicles";
+import { SnareHook } from "./Bow/SnareHook";
+import { RainbowSerpentsRainBow } from "./Bow/RainbowSerpentsRainBow";
+import { GoldenFrostboundOath } from "./Bow/GoldenFrostboundOath";
+import { JadeVista } from "./Bow/JadeVista";
+import { CovenantOfFrostAndSnow } from "./Bow/CovenantOfFrostAndSnow";
+import { Windtalker } from "./Bow/Windtalker";
 
 export const Bows = new DbObjectListSerializeStats({
     AlleyHunter: AlleyHunter,
@@ -83,4 +90,11 @@ export const Bows = new DbObjectListSerializeStats({
     FlowerWreathedFeathers: FlowerWreathedFeathers, // 189
     AstralVulturesCrimsonPlumage: AstralVulturesCrimsonPlumage, // 190
     SequenceofSolitude: SequenceofSolitude, // 200
+    TheDaybreakChronicles: TheDaybreakChronicles, // 236
+    SnareHook: SnareHook, // 237
+    RainbowSerpentsRainBow: RainbowSerpentsRainBow, // 238
+    GoldenFrostboundOath: GoldenFrostboundOath, // 242
+    JadeVista: JadeVista, // 256
+    CovenantOfFrostAndSnow: CovenantOfFrostAndSnow, // 257
+    Windtalker: Windtalker, // 263
 });

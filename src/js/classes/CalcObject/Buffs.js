@@ -1,7 +1,7 @@
 import { CalcObject } from '../CalcObject';
 import { Stats } from '../Stats';
 
-const CUSTOM_STATS = {
+export const CUSTOM_STATS = {
     atk: {
         serializeId: 1,
         flat: true,
@@ -111,6 +111,66 @@ const CUSTOM_STATS = {
     enemy_def_ignore: {
         serializeId: 35,
     },
+    dmg_reaction_lunar: {
+        serializeId: 36,
+    },
+    dmg_reaction_lunarbloom: {
+        serializeId: 37,
+    },
+    dmg_reaction_lunarcharged: {
+        serializeId: 38,
+    },
+    dmg_reaction_lunarcrystallize: {
+        serializeId: 39,
+    },
+    lunarcharged_multi: {
+        serializeId: 40,
+    },
+    lunarbloom_multi: {
+        serializeId: 41,
+    },
+    lunarcrystallize_multi: {
+        serializeId: 42,
+    },
+    dmg_lunar_special: {
+        serializeId: 43,
+    },
+    dmg_lunarcharged_special: {
+        serializeId: 44,
+    },
+    dmg_lunarbloom_special: {
+        serializeId: 45,
+    },
+    dmg_lunarcrystallize_special: {
+        serializeId: 46,
+    },
+    dmg_stellarconduct: {
+        serializeId: 47,
+    },
+    stellarconduct_multi: {
+        serializeId: 48,
+    },
+    dmg_stellarconduct_special: {
+        serializeId: 51,
+    },
+    dmg_stellarglimmer: {
+        serializeId: 52,
+    },
+    stellarglimmer_multi: {
+        serializeId: 53,
+    },
+    dmg_stellarglimmer_special: {
+        serializeId: 54,
+    },
+    dmg_stellarswirl: {
+        serializeId: 55,
+    },
+    stellarswirl_multi: {
+        serializeId: 56,
+    },
+    dmg_stellarswirl_special: {
+        serializeId: 57,
+    },
 };
 
 let STATS_BY_ID = {};
@@ -130,7 +190,18 @@ export class CalcObjectBuffs extends CalcObject {
     }
 
     getFeatures() {
-        return [];
+        let result = [];
+        let charIds = this.getPartyChars();
+
+        for (let charId of charIds) {
+            const char = DB.Chars.getById(charId);
+
+            if (char) {
+                result = result.concat(char.getPartyFeatures());
+            }
+        }
+
+        return result;
     }
 
     isBeta() {
@@ -226,8 +297,9 @@ export class CalcObjectBuffs extends CalcObject {
         let result = super.getSettings();
         let partySize = 1;
 
+        // Core party (affects resonance) - first 3 supports
         for (let i = 1; i <= 3; ++i) {
-            let charId = this.partyCharIds[i-1]
+            let charId = this.partyCharIds[i-1];
             const char = DB.Chars.getById(charId);
 
             if (char) {
@@ -240,7 +312,39 @@ export class CalcObjectBuffs extends CalcObject {
             }
         }
 
+        // Extended party (buffs only, no resonance)
+        let extraCount = 0;
+        let extraCharIds = {};
+        for (let i = 4; i <= this.partyCharIds.length; ++i) {
+            let charId = this.partyCharIds[i-1];
+            const char = DB.Chars.getById(charId);
+
+            if (char) {
+                extraCount++;
+                result['party_char_extra_'+ extraCount] = charId;
+                // Mark for condition override - use serializeId (same as getId())
+                result['party_extra_override_'+ char.getId()] = 1;
+                extraCharIds[char.getId()] = true;
+            }
+        }
+
+        // Clear any previously set extra slots and override flags
+        for (const key of Object.keys(result)) {
+            if (key.startsWith('party_char_extra_')) {
+                let idx = parseInt(key.replace('party_char_extra_', ''), 10);
+                if (idx > extraCount) {
+                    result[key] = 0;
+                }
+            } else if (key.startsWith('party_extra_override_')) {
+                let id = parseInt(key.replace('party_extra_override_', ''), 10);
+                if (!extraCharIds[id]) {
+                    result[key] = 0;
+                }
+            }
+        }
+
         result['party_size'] = partySize;
+        result['party_total_size'] = 1 + this.partyCharIds.length;
 
         return result;
     }
@@ -315,7 +419,13 @@ export class CalcObjectBuffs extends CalcObject {
             if (!char) return null;
 
             let conditions = char.getPartyConditions();
-            result['party_char_'+ (i+1)] = charId;
+
+            // First 3 go to party_char_X, rest go to party_char_extra_X
+            if (i < 3) {
+                result['party_char_'+ (i+1)] = charId;
+            } else {
+                result['party_char_extra_'+ (i-2)] = charId;
+            }
 
             let charSettings = this.deserializeConditions(input, conditions);
             result = Object.assign(result, charSettings);
@@ -354,10 +464,18 @@ export class CalcObjectBuffs extends CalcObject {
         let charUsed = {};
         result.partyCharIds = [];
 
+        // Core party members (1-3)
         for (let i = 1; i <= 3; ++i) {
             if (settings['party_char_'+ i]) {
                 result.partyCharIds.push(settings['party_char_'+ i]);
             }
+        }
+
+        // Extra party members
+        let extraIndex = 1;
+        while (settings['party_char_extra_' + extraIndex]) {
+            result.partyCharIds.push(settings['party_char_extra_' + extraIndex]);
+            extraIndex++;
         }
 
         if (result.partyCharIds.length == 0) {

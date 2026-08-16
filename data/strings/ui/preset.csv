@@ -1,0 +1,38 @@
+category;name;rus;eng
+preset;tab_title;Пресеты;Presets
+preset;btn_save;Сохранить пресет;Save Preset
+preset;btn_login;Войти;Login
+preset;btn_logout;Выйти;Logout
+preset;search_placeholder;Поиск по имени или описанию;Search by name or description
+preset;filter_char;Персонаж;Character
+preset;filter_weapon;Оружие;Weapon
+preset;filter_party;Участник отряда;Party member
+preset;filter_party_add;+ Отряд;+ Party
+preset;filter_liked;❤ Понравилось;❤ Liked
+preset;filter_clear;✕ Очистить;✕ Clear
+preset;save_modal_title;Сохранить пресет;Save Preset
+preset;save_name;Название пресета;Preset Name
+preset;save_desc;Описание;Description
+preset;unnamed;Пресет без названия;Unnamed Preset
+preset;load_loading;Загрузка;Loading
+preset;no_presets;Пресеты не найдены;No presets found
+preset;btn_unlike;Убрать лайк;Unlike
+preset;btn_like;Лайк;Like
+preset;login_to_like;Войдите, чтобы поставить лайк;Log in to like
+preset;desc_title;Описание;Description
+preset;desc_empty;Описание не предоставлено;No description provided
+preset;confirm_delete;Удалить этот пресет?;Delete this preset?
+preset;login_modal_title;Вход / Регистрация;Login / Register
+preset;username;Имя пользователя;Username
+preset;password;Пароль;Password
+preset;btn_register;Регистрация;Register
+preset;err_login;Ошибка авторизации;Login failed
+preset;err_register;Ошибка регистрации;Registration failed
+preset;err_save;Ошибка сохранения пресета;Failed to save preset
+preset;err_fetch;Ошибка сети. Сервер недоступен.;Network error. Server is unreachable.
+preset;err_session_expired;Время сессии истекло. Пожалуйста, войдите снова.;Session expired. Please log in again.
+preset;msg_registered;Успешная регистрация! Теперь вы можете войти.;Registered! You can now log in.
+preset;err_unknown;Неизвестная ошибка;Unknown error
+preset;err_backend_invalid_credentials;Неверное имя пользователя или пароль;Invalid credentials
+preset;err_backend_username_taken;Имя пользователя уже занято;Username taken
+preset;err_backend_missing_fields;Заполните все поля;Missing fields

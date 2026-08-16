@@ -1,0 +1,26 @@
+category;name;rus;eng
+feature_skill;odette_phantom_night_dancers;Урон навыка;Skill DMG
+feature_skill;odette_coda_dot;Периодический урон Рассветной коды;Coda at Dawn's Tolling DoT
+feature_skill;odette_coda_stellarconduct;Урон Звёздного проводника Рассветной коды;Coda at Dawn's Tolling Stellar-Conduct DMG
+feature_skill;odette_coda_stellarswirl;Урон Звёздного рассеивания Рассветной коды;Coda at Dawn's Tolling Stellar Swirl DMG
+feature_skill;odette_plume;Урон танцевального движения «Перо»;Plume Dance Move DMG
+feature_skill;odette_plume_stellarconduct;Дополнительный урон Звёздного проводника движения «Перо»;Plume Additional Stellar-Conduct DMG
+feature_skill;odette_plume_stellarswirl;Дополнительный урон Звёздного рассеивания движения «Перо»;Plume Additional Stellar Swirl DMG
+feature_skill;odette_wing;Урон танцевального движения «Крыло»;Wing Dance Move DMG
+feature_skill;odette_wing_stellarconduct;Дополнительный урон Звёздного проводника движения «Крыло»;Wing Additional Stellar-Conduct DMG
+feature_skill;odette_wing_stellarswirl;Дополнительный урон Звёздного рассеивания движения «Крыло»;Wing Additional Stellar Swirl DMG
+feature_skill;odette_solo_dance_double_duration;Длительность Отражения соло;Solo Dance Double Duration
+feature_skill;odette_coda_cooldown;Время отката Рассветной коды;Coda at Dawn's Tolling CD
+feature_skill;odette_c1_coda_stellarconduct;Дополнительный урон Звёздного проводника Рассветной коды;C1 Coda Additional Stellar-Conduct DMG
+feature_skill;odette_c1_coda_stellarswirl;Дополнительный урон Звёздного рассеивания Рассветной коды;C1 Coda Additional Stellar Swirl DMG
+feature_burst;odette_bluebird_slash;Урон рубящего удара;Slash DMG
+feature_burst;odette_bluebird_final_slash;Урон финального рубящего удара;Final Slash DMG
+feature_burst;odette_snow_swans_dream_bonus;Бонус урона реакций Звёздного блеска Сновидения снежного лебедя;Snow Swan's Dream Stellar Glimmer DMG Bonus
+feature_burst;odette_snow_swans_dream_duration;Длительность Сновидения снежного лебедя;Snow Swan's Dream Duration
+feature_burst;odette_solo_dance_double_duration;Длительность Отражения соло;Solo Dance Double Duration
+feature_other;odette_c4_coordinated_stellarconduct;Совместная атака Звёздного проводника;Coordinated Stellar-Conduct Attack
+feature_other;odette_c4_coordinated_stellarswirl;Совместная атака Звёздного рассеивания;Coordinated Stellar Swirl Attack
+feature_other;odette_pathetique_base_bonus;Бонус исходного урона Звёздного блеска;Original Stellar Glimmer DMG Bonus
+feature_other;odette_radiance_base_bonus;Бонус базового урона Сияния;Radiance Base DMG Bonus
+talent_name;odette_snow_swans_dream;Сновидение снежного лебедя;Snow Swan's Dream
+talent_descr;odette_snow_swans_dream;После применения взрыва стихии урон реакций Звёздного блеска Одетты повышается на указанную величину на 20 сек. Четвёртое созвездие передаёт другим членам отряда 50% этого эффекта.;After Odette uses her Elemental Burst, her Stellar Glimmer reaction DMG is increased by the listed amount for 20s. Constellation 4 grants other party members 50% of this effect.

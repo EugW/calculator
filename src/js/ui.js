@@ -37,6 +37,7 @@ import { ArtifactSetTab } from './ui/Tab/ArtifactSetTab';
 import { ArtifactsGeneratorTab } from './ui/Tab/ArtifactsGenerator';
 import { ArtifactsStorageTab } from './ui/Tab/ArtifactStorage';
 import { ArtifactsTab } from './ui/Tab/Artifacts';
+import { ArtifactUpgradePredictorTab } from './ui/Tab/ArtifactUpgradePredictor';
 import { ArtifactSubstatTab } from './ui/Tab/ArtifactSubstatTab';
 import { ArtifactTooltip } from './ui/Components/ArtifactTooltip.jsx';
 import { ArtifactWindow } from './ui/Window/ArtifactWindow'
@@ -71,18 +72,20 @@ import { Sync } from './ui/Components/Sync.jsx';
 import { WeaponSuggestTab } from './ui/Tab/WeaponSuggest';
 import { WeaponTab } from './ui/Tab/Weapon';
 import { GoodImportModal } from './ui/Modal/GoodImport.jsx';
-
+import { PresetTab } from './ui/Tab/Preset.jsx';
 window.UI = {
     Layout: new Layout(),
     Lang: new Lang(),
 
     // main views
+    PresetTab: new PresetTab(),
     ShareTab: new ShareTab(),
     WeaponSuggestTab: new WeaponSuggestTab(),
     ArtifactSetTab: new ArtifactSetTab(),
     ArtifactsGeneratorTab: new ArtifactsGeneratorTab(),
     SettingsTab: new SettingsTab(),
     ArtifactSubstatTab: new ArtifactSubstatTab(),
+    ArtifactUpgradePredictorTab: new ArtifactUpgradePredictorTab({position: 'right'}),
     BestArtifactTab: new BestArtifactTab({position: 'right'}),
     BuffsTab: new BuffsTab({position: 'right'}),
     CharTab: new CharTab({position: 'right'}),
@@ -123,7 +126,7 @@ window.UI = {
     ArtifactSetSettingsModal: new ArtifactSetSettingsModal(),
     Sync: new Sync(),
 
-    debug: (text) => {if (isDevel()) { console.log(text) }}
+    debug: (text) => {if (isDevel()) { console.log(text); }}
 };
 
 function isDevel() {

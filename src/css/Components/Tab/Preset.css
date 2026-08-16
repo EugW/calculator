@@ -1,0 +1,71 @@
+.gi-preset-tab .gi-tab-item-inner {
+    background-image: url("../../../images/icons/tab_preset_light.png");
+}
+.gi-preset-tab.active .gi-tab-item-inner {
+    background-color: #ECE5D8;
+    background-image: url("../../../images/icons/tab_preset_dark.png");
+}
+
+.preset-card {
+    background-color: rgba(30, 30, 30, 0.5);
+    border: solid 2px #626770;
+    border-radius: 10px;
+    padding: 10px 12px;
+    margin: 4px 0;
+    box-sizing: border-box;
+    width: 100%;
+}
+
+.preset-card .title {
+    text-overflow: clip;
+    white-space: nowrap;
+    overflow: hidden;
+    flex-grow: 1;
+    margin-right: 10px;
+    -webkit-mask-image: linear-gradient(to right, #000 calc(100% - 40px), transparent 100%);
+    mask-image: linear-gradient(to right, #000 calc(100% - 40px), transparent 100%);
+}
+
+/* Action buttons row at the right of a card — like / info / delete */
+.preset-card-actions {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    flex-shrink: 0;
+}
+
+/* Shared style for all three round action buttons */
+.preset-card-actions .line-button {
+    width: 32px;
+    height: 32px;
+    margin-left: 0;
+    flex-shrink: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 15px;
+    color: #4a4a4a;
+    background-color: #ECE5D8;
+    border-radius: 50%;
+    cursor: pointer;
+    float: none;
+    transition: background-color 0.15s;
+}
+
+.preset-card-actions .line-button:hover {
+    background-color: #d9cfc0;
+}
+
+/* Like button: red tint when active */
+.preset-card-actions .line-button.liked {
+    color: #e74c3c;
+}
+
+/* Like count badge */
+.preset-card-like-count {
+    font-size: 12px;
+    color: #D3BC8E;
+    min-width: 16px;
+    text-align: left;
+    flex-shrink: 0;
+}

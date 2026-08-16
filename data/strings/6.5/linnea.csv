@@ -1,0 +1,13 @@
+category;name;rus;eng
+
+feature_skill;lumi_pound_pound_pummeler_dmg;Урон Бух-бах молота Луми;Lumi Pound-Pound Pummeler DMG
+feature_skill;lumi_heavy_overdrive_hammer_dmg;Урон Усиленного молота Луми;Lumi Heavy Overdrive Hammer DMG
+feature_skill;lumi_million_ton_crush_dmg;Урон Мегатонного молота Луми;Lumi Million Ton Crush DMG
+feature_skill;lumi_duration;Длительность Луми;Lumi Duration
+feature_burst;linnea_initial_healing_amount;Начальное лечение;Initial Healing Amount
+feature_burst;linnea_continuous_healing;Периодическое лечение;Continuous Healing
+feature_burst;linnea_healing_duration;Длительность лечения;Healing Duration
+talent_name;linnea_moonsign_benediction;Дар лунного знамения: Исследование среды обитания;Moonsign Benediction: Habitat Survey
+talent_descr;linnea_moonsign_benediction;Когда персонажи отряда активируют реакцию Гидро Кристалл, она превращается в Лунный кристалл, а базовый урон реакции Лунный кристалл персонажей отряда увеличивается на 0,7% за каждые 100 ед. защиты Линнеи. Максимальное увеличение урона, которое можно получить таким образом, составляет 14%.;When a party member triggers a Hydro Crystallize reaction, it will be converted into the Lunar-Crystallize reaction, with every 100 DEF that Linnea has increasing Lunar-Crystallize's Base DMG by 0.7%, up to a maximum of 14%.
+
+feature_other;linnea_lunar_bonus;Базовый урон Лунной кристаллизации;Lunar-Crystallize Base Bonus

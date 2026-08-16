@@ -1,9 +1,13 @@
 import { Condition } from "../../classes/Condition";
+import { ConditionAnd } from "../../classes/Condition/And";
 import { ConditionAscensionChar } from "../../classes/Condition/Ascension/Char";
 import { ConditionBoolean } from "../../classes/Condition/Boolean";
 import { ConditionBooleanCharElement } from "../../classes/Condition/Boolean/CharElement";
 import { ConditionDropdownElement } from "../../classes/Condition/Dropdown/Element";
+import { ConditionHexereiResonance } from "../../classes/Condition/HexereiResonance";
+import { ConditionNot } from "../../classes/Condition/Not";
 import { ConditionNumber } from "../../classes/Condition/Number";
+import { ConditionWitchHomework } from "../../classes/Condition/WitchHomework";
 import { ConditionStatic } from "../../classes/Condition/Static";
 import { DbObjectChar } from "../../classes/DbObject/Char";
 import { DbObjectConstellation } from "../../classes/DbObject/Constellation";
@@ -21,6 +25,14 @@ import { PostEffectStatsMastery } from "../../classes/PostEffect/Stats/Mastery";
 import { StatTable } from "../../classes/StatTable";
 import { charTables } from "../generated/CharTables";
 import { charTalentTables } from "../generated/CharTalentTables";
+
+const condWitchHomeworkOn  = new ConditionBoolean({name: 'sucrose_witch_homework'});
+const condWitchHomeworkOff = new ConditionNot([condWitchHomeworkOn]);
+const condPartyWitchHomeworkOn  = new ConditionBoolean({name: 'party.sucrose_witch_homework'});
+const condPartyWitchHomeworkOff = new ConditionNot([condPartyWitchHomeworkOn]);
+
+const condHexereiResonanceOn = new ConditionHexereiResonance({});
+const condIsWitch = new ConditionWitchHomework({});
 
 const Talents = new DbObjectTalents({
     attack: {
@@ -251,6 +263,49 @@ export const Sucrose = new DbObjectChar({
         }),
     ],
     conditions: [
+        new ConditionBoolean({
+            name: 'sucrose_witch_homework',
+            serializeId: 3,
+            title: 'talent_name.sucrose_sevenfold_transmutation',
+            description: 'talent_descr.sucrose_sevenfold_transmutation',
+            info: {hexerei: true},
+        }),
+        new ConditionBoolean({
+            name: 'sucrose_small_wind_spirit',
+            serializeId: 4,
+            title: 'talent_name.sucrose_small_wind_spirit',
+            condition: new ConditionAnd([
+                condHexereiResonanceOn,
+                condWitchHomeworkOn,
+            ]),
+            hideCondition: [condWitchHomeworkOff],
+            stats: {
+                dmg_normal: 5.71428,
+                dmg_charged: 5.71428,
+                dmg_plunge: 5.71428,
+                dmg_skill: 5.71428,
+                dmg_burst: 5.71428,
+            },
+            info: {hexerei: true},
+        }),
+        new ConditionBoolean({
+            name: 'sucrose_large_wind_spirit',
+            serializeId: 5,
+            title: 'talent_name.sucrose_large_wind_spirit',
+            condition: new ConditionAnd([
+                condHexereiResonanceOn,
+                condWitchHomeworkOn,
+            ]),
+            hideCondition: [condWitchHomeworkOff],
+            stats: {
+                dmg_normal: 7.14285,
+                dmg_charged: 7.14285,
+                dmg_plunge: 7.14285,
+                dmg_skill: 7.14285,
+                dmg_burst: 7.14285,
+            },
+            info: {hexerei: true},
+        }),
         new ConditionStatic({
             title: 'talent_name.sucrose_catalyst_conversion',
             description: 'talent_descr.sucrose_catalyst_conversion',
@@ -324,6 +379,8 @@ export const Sucrose = new DbObjectChar({
                     serializeId: 1,
                     title: 'talent_name.sucrose_chaotic_entropy',
                     description: 'talent_descr.sucrose_chaotic_entropy',
+                    hideCondition: [condWitchHomeworkOn],
+                    condition: condWitchHomeworkOff,
                     values: [
                         {
                             value: 'cryo',
@@ -355,6 +412,44 @@ export const Sucrose = new DbObjectChar({
                         },
                     ],
                 }),
+                new ConditionDropdownElement({
+                    name: 'sucrose_chaotic_entropy',
+                    serializeId: 1,
+                    title: 'talent_name.sucrose_chaotic_entropy',
+                    description: 'talent_descr.sucrose_chaotic_entropy_buffed',
+                    hideCondition: [condWitchHomeworkOff],
+                    condition: condWitchHomeworkOn,
+                    values: [
+                        {
+                            value: 'cryo',
+                            serializeId: 1,
+                            conditions: [
+                                new Condition({stats: {dmg_cryo: 28.57142}}),
+                            ],
+                        },
+                        {
+                            value: 'electro',
+                            serializeId: 2,
+                            conditions: [
+                                new Condition({stats: {dmg_electro: 28.57142}}),
+                            ],
+                        },
+                        {
+                            value: 'hydro',
+                            serializeId: 3,
+                            conditions: [
+                                new Condition({stats: {dmg_hydro: 28.57142}}),
+                            ],
+                        },
+                        {
+                            value: 'pyro',
+                            serializeId: 4,
+                            conditions: [
+                                new Condition({stats: {dmg_pyro: 28.57142}}),
+                            ],
+                        },
+                    ],
+                }),
             ],
         },
     ]),
@@ -363,6 +458,53 @@ export const Sucrose = new DbObjectChar({
             stats: ['mastery_total'],
         },
         conditions: [
+            new ConditionBoolean({
+                name: 'party.sucrose_witch_homework',
+                serializeId: 8,
+                rotation: 'party',
+                title: 'talent_name.sucrose_sevenfold_transmutation',
+                description: 'talent_descr.sucrose_sevenfold_transmutation',
+                info: {hexerei: true},
+            }),
+            new ConditionBoolean({
+                name: 'party.sucrose_small_wind_spirit',
+                serializeId: 9,
+                rotation: 'party',
+                title: 'talent_name.sucrose_small_wind_spirit',
+                condition: new ConditionAnd([
+                    condHexereiResonanceOn,
+                    condPartyWitchHomeworkOn,
+                ]),
+                hideCondition: [condPartyWitchHomeworkOff],
+                stats: {
+                    dmg_normal: 5.71428,
+                    dmg_charged: 5.71428,
+                    dmg_plunge: 5.71428,
+                    dmg_skill: 5.71428,
+                    dmg_burst: 5.71428,
+                },
+                info: {hexerei: true},
+            }),
+            new ConditionBoolean({
+                name: 'party.sucrose_large_wind_spirit',
+                serializeId: 10,
+                rotation: 'party',
+                title: 'talent_name.sucrose_large_wind_spirit',
+                condition: new ConditionAnd([
+                    condHexereiResonanceOn,
+                    condIsWitch,
+                    condPartyWitchHomeworkOn,
+                ]),
+                hideCondition: [condPartyWitchHomeworkOff],
+                stats: {
+                    dmg_normal: 7.14285,
+                    dmg_charged: 7.14285,
+                    dmg_plunge: 7.14285,
+                    dmg_skill: 7.14285,
+                    dmg_burst: 7.14285,
+                },
+                info: {hexerei: true},
+            }),
             new ConditionNumber({
                 name: 'sucrose_mastery',
                 title: 'stat.mastery',
@@ -405,6 +547,8 @@ export const Sucrose = new DbObjectChar({
                 rotation: 'party',
                 title: 'talent_name.sucrose_chaotic_entropy',
                 description: 'talent_descr.sucrose_chaotic_entropy',
+                hideCondition: [condPartyWitchHomeworkOn],
+                condition: condPartyWitchHomeworkOff,
                 info: {constellation: 6},
                 values: [
                     {
@@ -437,6 +581,62 @@ export const Sucrose = new DbObjectChar({
                     },
                 ],
 
+            }),
+            new ConditionDropdownElement({
+                name: 'party.sucrose_chaotic_entropy',
+                serializeId: 4,
+                rotation: 'party',
+                title: 'talent_name.sucrose_chaotic_entropy',
+                description: 'talent_descr.sucrose_chaotic_entropy_buffed',
+                hideCondition: [condPartyWitchHomeworkOff],
+                condition: condPartyWitchHomeworkOn,
+                info: {constellation: 6},
+                values: [
+                    {
+                        value: 'cryo',
+                        serializeId: 1,
+                        conditions: [
+                            new Condition({stats: {dmg_cryo: 20}}),
+                            new Condition({
+                                condition: new ConditionWitchHomework({}),
+                                stats: {dmg_cryo: 8.57142},
+                            }),
+                        ],
+                    },
+                    {
+                        value: 'electro',
+                        serializeId: 2,
+                        conditions: [
+                            new Condition({stats: {dmg_electro: 20}}),
+                            new Condition({
+                                condition: new ConditionWitchHomework({}),
+                                stats: {dmg_electro: 8.57142},
+                            }),
+                        ],
+                    },
+                    {
+                        value: 'hydro',
+                        serializeId: 3,
+                        conditions: [
+                            new Condition({stats: {dmg_hydro: 20}}),
+                            new Condition({
+                                condition: new ConditionWitchHomework({}),
+                                stats: {dmg_hydro: 8.57142},
+                            }),
+                        ],
+                    },
+                    {
+                        value: 'pyro',
+                        serializeId: 4,
+                        conditions: [
+                            new Condition({stats: {dmg_pyro: 20}}),
+                            new Condition({
+                                condition: new ConditionWitchHomework({}),
+                                stats: {dmg_pyro: 8.57142},
+                            }),
+                        ],
+                    },
+                ],
             }),
         ],
         postEffects: [

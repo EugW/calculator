@@ -41,7 +41,7 @@ char_mona = TemplateList(
     ),
     prophecy_of_submersion_eng=Template(
         sentences=[
-            ['ignore', 'dmg_reaction_electrocharged', 'dmg_reaction_lunarcharged', 'dmg_reaction_vaporize', 'dmg_reaction_swirl_hydro', 'duration_frozen'],
+            ['ignore', 'dmg_reaction_electrocharged', 'dmg_reaction_lunarcharged', 'dmg_reaction_vaporize', 'dmg_reaction_swirl_hydro', 'dmg_reaction_lunarcrystalize', 'duration_frozen'],
         ],
     ),
     lunar_chain=Template(

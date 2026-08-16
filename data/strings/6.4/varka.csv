@@ -1,0 +1,33 @@
+category;name;rus;eng
+
+feature_skill;varka_skill_dmg;Урон навыка;Skill DMG
+feature_skill;varka_skill_normal_hit_1;Урон 1-й атаки Бури и натиска;Sturm und Drang 1-Hit DMG
+feature_skill;varka_skill_normal_hit_2;Урон 2-й атаки Бури и натиска;Sturm und Drang 2-Hit DMG
+feature_skill;varka_skill_normal_hit_3;Урон 3-й атаки Бури и натиска;Sturm und Drang 3-Hit DMG
+feature_skill;varka_skill_normal_hit_4;Урон 4-й атаки Бури и натиска;Sturm und Drang 4-Hit DMG
+feature_skill;varka_skill_normal_hit_5;Урон 5-й атаки Бури и натиска;Sturm und Drang 5-Hit DMG
+feature_skill;varka_skill_charged_hit;Урон заряженной атаки Бури и натиска;Sturm und Drang Charged Attack DMG
+feature_skill;varka_skill_normal_hit_2_1;Урон 2-й атаки Бури и натиска 1;Sturm und Drang 2-Hit DMG 1
+feature_skill;varka_skill_normal_hit_2_2;Урон 2-й атаки Бури и натиска 2;Sturm und Drang 2-Hit DMG 2
+feature_skill;varka_skill_normal_hit_3_1;Урон 3-й атаки Бури и натиска 1;Sturm und Drang 3-Hit DMG 1
+feature_skill;varka_skill_normal_hit_3_2;Урон 3-й атаки Бури и натиска 2;Sturm und Drang 3-Hit DMG 2
+feature_skill;varka_skill_normal_hit_4_1;Урон 4-й атаки Бури и натиска 1;Sturm und Drang 4-Hit DMG 1
+feature_skill;varka_skill_normal_hit_4_2;Урон 4-й атаки Бури и натиска 2;Sturm und Drang 4-Hit DMG 2
+feature_skill;varka_skill_normal_hit_5_1;Урон 5-й атаки Бури и натиска 1;Sturm und Drang 5-Hit DMG 1
+feature_skill;varka_skill_normal_hit_5_2;Урон 5-й атаки Бури и натиска 2;Sturm und Drang 5-Hit DMG 2
+feature_skill;varka_skill_charged_hit_1;Урон заряженной атаки Бури и натиска 1;Sturm und Drang Charged Attack DMG 1
+feature_skill;varka_skill_charged_hit_2;Урон заряженной атаки Бури и натиска 2;Sturm und Drang Charged Attack DMG 2
+feature_skill;varka_four_winds_ascension_dmg;Урон Восхождения четырёх ветров;Four Winds' Ascension DMG
+feature_skill;varka_four_winds_ascension_anemo_dmg;Анемо урон Восхождения четырёх ветров;Four Winds' Ascension Anemo DMG
+feature_skill;varka_azure_devour_dmg;Урон Лазурного поглощения;Azure Devour DMG
+feature_skill;varka_azure_devour_anemo_dmg;Анемо урон Лазурного поглощения;Azure Devour Anemo DMG
+feature_burst;burst_1_hit_dmg;Урон 1-й атаки навыка;Skill 1-Hit DMG
+feature_burst;burst_2_hit_dmg;Урон 2-й атаки навыка;Skill 2-Hit DMG
+
+feature_skill;varka_when_dawn_breaks_our_journey_shall_take_flight;«С лучами рассвета нам в путь выступать»;"When Dawn Breaks, Our Journey Shall Take Flight"
+
+feature_skill;varka_sturm_und_drang_duration;Длительность «Бури и натиска»;Sturm und Drang Duration
+feature_skill;varka_four_winds_ascension_cd;Откат «Вознесения четырёх ветров»;Four Winds' Ascension CD
+
+features_view;stat_varka_a1_multiplier;A1;A1
+features_view;stat_varka_a1_c1_multiplier;A1+C1;A1+C1

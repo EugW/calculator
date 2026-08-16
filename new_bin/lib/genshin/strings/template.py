@@ -23,11 +23,11 @@ class TemplateSentence:
         self.source = source
         self.values = []
 
-        def repalce_callback(match):
+        def replace_callback(match):
             self.values.append(match.group(1))
             return '{value_%d}' % (len(self.values),)
 
-        self.formatted = re.sub(r'\b(\d+(?:(?:,|\.)\d+)?\%?)', repalce_callback, source)
+        self.formatted = re.sub(r'\b(\d+(?:(?:,|\.)\d+)?\%?)', replace_callback, source)
 
     def apply(self, values: list):
         if len(self.values) != len(values):
@@ -65,6 +65,7 @@ class TemplateString:
         self.source = source
         self.sentences = []
 
+        # разбиение исходного текста на предложения
         text = re.sub(r'\. ([A-ZА-Я])', ".\n\\1", source)
         for item in re.split(r'\n', text):
             self.sentences.append(TemplateSentence(item))
@@ -100,14 +101,15 @@ class TemplateString:
 
 
 class Template:
-    def __init__(self, replace={}, names=[], sentences=[], patterns=[], keywords=[], skills={}, results=None):
+    def __init__(self, replace={}, names=[], sentences=[], patterns=[], keywords=[], skills={}, results=None, debug=False):
         self.replace = replace
         self.names = names
         self.sentences = sentences
         self.patterns = patterns
         self.keywords = keywords
-        self.results = results
         self.skills = skills
+        self.results = results
+        self.debug = debug
 
     def process(self, string: str):
         result = string
@@ -120,9 +122,13 @@ class Template:
             ret = []
             for sent in sen_result:
                 ret.append(self.apply_names(sent))
-            return ret
+            ret_result = ret
         else:
-            return self.apply_names(sen_result)
+            ret_result = self.apply_names(sen_result)
+        if self.debug:
+            logger.error(string)
+            logger.error('\n'.join(ret_result))
+        return ret_result
 
     def apply_replace(self, string):
         result = string

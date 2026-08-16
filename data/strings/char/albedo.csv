@@ -1,3 +1,10 @@
 category;name;rus;eng
 feature_skill;albedo_blossom;Урон Цветков мимолётности;Transient Blossom DMG
 feature_burst;albedo_fatal_blossom;Урон Цветков неизбежности;Fatal Blossom DMG
+feature_burst;albedo_c2_fatal_blossom;С2 Урон Цветков неизбежности;C2 Fatal Blossom DMG
+talent_name;albedo_hexerei_secret_rite;Ведьмовство: Тайный обряд;Hexerei: Secret Rite
+talent_descr;albedo_hexerei_secret_rite;Активен при наличии 2+ Ведьмовских персонажей в отряде.;Active when 2+ Hexerei characters are in the party.
+talent_name;albedo_solar_isotoma_buff;После Цветка солнца (20с);After Solar Isotoma (20s)
+talent_descr;albedo_solar_isotoma_buff;Урон обычной атаки, заряженной атаки, атаки в падении, элементального навыка и взрыва стихии персонажей отряда поблизости повышается на 4% за каждые 1 000 ед. защиты Альбедо. Максимум: 12%.;Nearby party members' Normal Attack, Charged Attack, Plunging Attack, Elemental Skill, and Elemental Burst DMG is increased by 4% for every 1,000 DEF Albedo has. Max: 12%.
+talent_name;albedo_silver_isotoma_buff;После Цветка серебра (20с);After Silver Isotoma (20s)
+talent_descr;albedo_silver_isotoma_buff;Урон обычной атаки, заряженной атаки, атаки в падении, элементального навыка и взрыва стихии Ведьмовских персонажей отряда поблизости повышается на 10% за каждые 1 000 ед. защиты Альбедо. Максимум: 30%.;Nearby Hexerei party members' Normal Attack, Charged Attack, Plunging Attack, Elemental Skill, and Elemental Burst DMG is increased by 10% for every 1,000 DEF Albedo has. Max: 30%.

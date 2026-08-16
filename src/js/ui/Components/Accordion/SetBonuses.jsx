@@ -23,14 +23,14 @@ export class AccordionSetBonuses extends React.Component {
             pieces_3: this.lang.get('artifact_set.pieces_3'),
             pieces_4: this.lang.get('artifact_set.pieces_4'),
             pieces_5: this.lang.get('artifact_set.pieces_5'),
-        }
+        };
     }
 
     getItem(setName) {
         let setData = DB.Artifacts.Sets.get(setName);
         let pieces = [];
 
-        let itemData = this.props.sets[setName]
+        let itemData = this.props.sets[setName];
 
         for (let p of itemData.pieces) {
             let id = setName +'-'+ p;
@@ -39,9 +39,9 @@ export class AccordionSetBonuses extends React.Component {
                     key={id}
                     checked={!!this.props.settings[id]}
                     title={this.strings['pieces_'+ p]}
-                    onChange={(value) => {this.props.onChange(id, value)}}
+                    onChange={(value) => {this.props.onChange(id, value);}}
                 />
-            )
+            );
         }
 
         let appSettings = Object.assign({char_element: 'anemo'}, this.props.setsSettings);
@@ -76,7 +76,7 @@ export class AccordionSetBonuses extends React.Component {
     render() {
         let setBonuses = [];
 
-        for (const setName of DB.Artifacts.Sets.getKeysSorted()) {
+        for (const setName of DB.Artifacts.Sets.getKeysSorted(null, this.props.showBeta)) {
             if (!this.props.sets[setName]) {
                 continue;
             }

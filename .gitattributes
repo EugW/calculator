@@ -1,0 +1,16 @@
+# Keep importer output line endings stable on Windows.
+/data/strings/generated/*.csv whitespace=cr-at-eol
+/data/raw/char_texts.txt text eol=lf
+/data/raw/weapon_texts.txt text eol=lf
+/data/strings_casino/weapon_names.csv text eol=lf
+
+/new_bin/import_char2.py text eol=lf
+/new_bin/lib/genshin/datafiles/base.py text eol=lf
+/new_bin/lib/genshin/datafiles/char.py text eol=lf
+/new_bin/lib/genshin/datafiles/hyperlinks.py text eol=lf
+/new_bin/lib/genshin/sprite.py text eol=lf
+/new_bin/lib/genshin/strings/csv.py text eol=lf
+/new_bin/lib/genshin/strings/text.py text eol=lf
+
+/src/css/generated/icons_weapons_*.css text eol=lf
+/src/js/db/generated/*.js text eol=lf

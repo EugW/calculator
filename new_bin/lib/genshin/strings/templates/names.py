@@ -15,6 +15,7 @@ names_eng = Template(
         'Normal Attack DMG',
         'Normal Attack SPD',
         'Plunging Attack DMG',
+        'Lunar Reaction DMG',
         'Reaction DMG',
         'Elemental DMG',
 
@@ -46,6 +47,7 @@ names_eng = Template(
 
         'Vaporize',
         'Melt',
+        'Lunar Reactions',
 
         'Sword',
         'Claymore',
@@ -101,6 +103,7 @@ keywords_eng = Template(
 
         ('Electro-Charged', 'electro'),
         ('Lunar-Charged', 'electro'),
+        ('Lunar-Crystallize', 'geo'),
         ('Crystallize Reaction', 'geo'),
         ('Electro Crystallize', 'electro'),
         ('Hydro Crystallize', 'hydro'),
@@ -117,6 +120,7 @@ keywords_eng = Template(
         ('Quicken', 'dendro'),
         ('Burgeon', 'dendro'),
         ('Hyperbloom', 'dendro'),
+        ('Lunar-Bloom', 'dendro'),
         ('Bloom', 'dendro'),
         ('Aggravate', 'electro'),
         ('Spread', 'dendro'),
@@ -136,10 +140,14 @@ keywords_eng = Template(
 
 patterns_eng = Template(
     patterns=[
+        (r'<<color=', '<color='),
         (r'{M#(.*?)}', '\\1'),
         (r'{F#(.*?)}', ''),
         (r'{LAYOUT_PC#(.*?)}', '\\1'),
         (r'{LAYOUT_\w+#.*?}', ''),
+        # Empty source glossary links have no display text and must not become
+        # empty calculator skill tags.
+        (r'{LINK\#N\d+}{/LINK}', ''),
         (r'{LINK\#N(\d+)}<color=\#\w+>(.*?)<\/color>{/LINK}', 'skill{n\\1:\\2}'),
         (r'{LINK\#N(\d+)}<color style=\'color\:\#\w+;\'>(.*?)<\/color>{/LINK}', 'skill{n\\1:\\2}'),
         (r'{LINK\#N(\d+)}(.*?){/LINK}', 'skill{n\\1:\\2}'),
@@ -170,6 +178,12 @@ patterns_eng = Template(
         (r'(\\n)*$', '</p>'),
         (r'<p><h2>', '<h2>'),
         (r'<p>#', '<p>'),
+        # Preserve a source glossary link without wrapping it in a second
+        # calculator markup tag when the source colors the whole link.
+        (r'(?:name|skill)\{(skill\{n\d+:[^{}]+\})\}', '\\1'),
+        # Likewise, unwrap display markup produced inside a keyed glossary
+        # link while retaining that link's canonical numeric key.
+        (r'(skill\{n\d+:)(?:name|skill)\{([^{}]+)\}\}', '\\1\\2}'),
     ]
 )
 
@@ -223,6 +237,7 @@ names_rus = Template(
         'Обычные атаки',
         'обычная атака',
         'обычными атаками',
+        'заряженная атака',
         'заряженной атаки',
         'заряженной атакой',
         'заряженных атак',
@@ -240,6 +255,8 @@ names_rus = Template(
         'элементальной энергии',
         'Пар',
         'Таяние',
+        'Лунные реакции',
+        'Лунных реакций',
         'скорость передвижения',
         'скорость атаки',
 
@@ -311,6 +328,7 @@ keywords_rus = Template(
 
         ('Заряжен', 'electro'),
         ('Лунный заряд', 'electro'),
+        ('Лунный кристалл', 'geo'),
         ('Электро Кристалл', 'electro'),
         ('Гидро Кристалл', 'hydro'),
         ('Крио Кристалл', 'cryo'),
@@ -324,11 +342,13 @@ keywords_rus = Template(
         ('Гидро Рассеивание', 'hydro'),
         ('Электро Рассеивание', 'electro'),
         ('Рассеивание', 'anemo'),
-        ('Рассеиваниe', 'anemo'),
         ('Рассеивания', 'anemo'),
         ('Рассенивание', 'anemo'),
         ('Стимуляцию', 'dendro'),
         ('Стимуляция', 'dendro'),
+        ('Лунная бутонизация', 'dendro'),
+        ('Лунную бутонизацию', 'dendro'),
+        ('Лунной бутонизации', 'dendro'),
         ('Бутонизацию', 'dendro'),
         ('Бутонизация', 'dendro'),
         ('Цветение', 'dendro'),

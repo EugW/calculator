@@ -75,9 +75,9 @@ export class ArtifactWidget {
     getSubstats(art, opts) {
         let html = '';
 
-        for (const substat of art.subStats) {
+        for (const substat of art.getDisplaySubStats()) {
             let stat = UI.Lang.get('stat_mini.'+ substat.stat.replace('_percent', ''));
-            html += '<div class="artifact-list-box-substat"><span class="stat">'+ stat +'</span> ';
+            html += '<div class="artifact-list-box-substat'+ (substat.inactive ? ' inactive' : '') +'"><span class="stat">'+ stat +'</span> ';
             html += '<span class="value '+ (substat.stat == opts.selectedStat ? 'selected' : '') +'">';
             html += Stats.format(substat.stat, substat.value, {signed: false}) +'</span></div>';
         }

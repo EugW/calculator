@@ -17,7 +17,9 @@ class Parser:
         raise NotImplementedError
 
     def parse(self):
-        file = open(DATA_FILES_PATH + f'/{self.path}/{self.filename}', 'r')
+        file_path = DATA_FILES_PATH + f'/{self.path}/{self.filename}'
+        # print(file_path)
+        file = open(file_path, 'r', encoding='utf-8')
         self.data = json.load(file)
 
     def assert_result(self):
@@ -41,11 +43,20 @@ class ListParser(Parser):
         self.cache = {}
         super().__init__()
 
+    def get_id(self, item):
+        if isinstance(self.id_field, (list, tuple)):
+            for field in self.id_field:
+                value = item.get(field)
+                if value is not None:
+                    return value
+            return None
+        return item.get(self.id_field)
+
     def parse(self):
         super().parse()
         if self.id_field:
             for item in self.get_list():
-                id = item.get(self.id_field)
+                id = self.get_id(item)
                 if not isinstance(id, int):
                     raise IdTypeException
                 if not id:

@@ -1,6 +1,7 @@
 export class BuildSettings {
     constructor(data) {
         Object.assign(this, data);
+        normalizeRadianceStellarGlimmer(this);
     }
 
     /**
@@ -9,6 +10,7 @@ export class BuildSettings {
      */
     set(name, value) {
         this[name] = value;
+        normalizeRadianceStellarGlimmer(this);
     }
 
     /**
@@ -34,6 +36,7 @@ export class BuildSettings {
         for (let item of arguments) {
             Object.assign(this, item);
         }
+        normalizeRadianceStellarGlimmer(this);
     }
 
     /**
@@ -44,6 +47,36 @@ export class BuildSettings {
     getLevel(name) {
         return getSkillLevelByName(name, this);
     }
+}
+
+/**
+ * Resolve paired Stellar Glimmer Radiance checkboxes as one exclusive state.
+ * The condition names follow the shared mode-suffix convention and retain
+ * their serialize IDs. If both flags are present, Stellar-Conduct wins.
+ */
+export function normalizeRadianceStellarGlimmer(settings) {
+    for (let name of Object.keys(settings)) {
+        let match = /^(.*radiance_)stellarconduct$/.exec(name);
+        if (!match || !settings[name]) continue;
+
+        let swirlName = match[1] + 'stellarswirl';
+        if (settings[swirlName]) {
+            settings[swirlName] = false;
+        }
+    }
+
+    // Mizuki and Vesna expose only the Swirl switch. Polestar Field is their
+    // competing Conduct state, so it receives the same persistent priority.
+    if (settings.polestar_field) {
+        if (settings.mizuki_radiance_stellarswirl) {
+            settings.mizuki_radiance_stellarswirl = false;
+        }
+        if (settings.vesna_radiance_stellarswirl) {
+            settings.vesna_radiance_stellarswirl = false;
+        }
+    }
+
+    return settings;
 }
 
 export function getSkillLevelByName(name, settings) {

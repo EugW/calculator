@@ -65,7 +65,7 @@ function ConditionItem(props) {
     }
 
     if (type == 'party_weapon') {
-        return <PartyWeaponItem {...props} />
+        return <PartyWeaponItem {...props} />;
     }
 
     let subcond = true;
@@ -90,21 +90,23 @@ function ConditionItem(props) {
     }
 
     let stats = cond.getStats(props.settings);
+    let separateControlLine = cond.params.separateControlLine && !props.hideControls;
+    let control = props.hideControls ? '' : <div className="control">
+        <ConditionControl
+            item={cond}
+            type={type}
+            settings={props.settings}
+            onChange={props.onChange}
+            subcond={subcond}
+        />
+    </div>;
     let result = (
         <div
             className="condition-list-item"
             data-char={props.charId}
         >
             <div className="top-line">
-                {props.hideControls ? '' : <div className="control">
-                    <ConditionControl
-                        item={cond}
-                        type={type}
-                        settings={props.settings}
-                        onChange={props.onChange}
-                        subcond={subcond}
-                    />
-                </div>}
+                {separateControlLine ? '' : control}
                 <div className="title">{cond.getTitle(stats)}</div>
                 <ConditionLoadStat
                     stat={cond.params.loadPartyStat}
@@ -113,12 +115,13 @@ function ConditionItem(props) {
                 />
                 <ConditionInfo item={cond} />
             </div>
+            {separateControlLine ? <div className="top-line condition-control-line">{control}</div> : ''}
             <ConditionDescription item={cond} stats={stats} />
         </div>
     );
 
     if (!props.noWrap) {
-        result = <GroupBox>{result}</GroupBox>
+        result = <GroupBox>{result}</GroupBox>;
     }
 
     return result;
@@ -161,6 +164,11 @@ class PartyWeaponItem extends React.Component {
             if (statCond) {
                 this.props.onChange(statCond.getName(), 0);
             }
+
+            let modeCond = this.props.item.createModeCond(number);
+            if (modeCond) {
+                this.props.onChange(modeCond.getName(), '');
+            }
         }
     }
 
@@ -190,37 +198,50 @@ class PartyWeaponItem extends React.Component {
         for (let i = 1; i <= itemsCnt; ++i) {
             let levelCond = cond.createLevelCond(i);
             let statCond = cond.createStatCond(i);
-            let isVisible = i == 1 || this.state.visible[i-2] || levelCond.isActive(this.props.settings);
+            let modeCond = cond.createModeCond(i);
+            let isVisible = i == 1 || this.state.visible[i-2] || levelCond.isActive(this.props.settings) || modeCond?.isActive(this.props.settings);
 
             if (i >= 2 && isVisible) {
                 this.state.visible[i-2] = true;
             }
 
             items.push(
-                <div key={i} className={'top-line' + (isVisible ? '' : ' hidden')}>
-                    {statCond ? <div className="control">
-                        <ConditionControl
-                            item={statCond}
-                            type={statCond.getType()}
-                            settings={this.props.settings}
-                            onChange={this.props.onChange}
-                        />
-                    </div> : ''}
-                    <div className="control">
-                        <ConditionControl
-                            item={levelCond}
-                            type={levelCond.getType()}
-                            settings={this.props.settings}
-                            onChange={this.props.onChange}
-                        />
+                <div key={i} className={isVisible ? '' : 'hidden'}>
+                    <div className="top-line">
+                        {statCond ? <div className="control">
+                            <ConditionControl
+                                item={statCond}
+                                type={statCond.getType()}
+                                settings={this.props.settings}
+                                onChange={this.props.onChange}
+                            />
+                        </div> : ''}
+                        <div className="control">
+                            <ConditionControl
+                                item={levelCond}
+                                type={levelCond.getType()}
+                                settings={this.props.settings}
+                                onChange={this.props.onChange}
+                            />
+                        </div>
+                        <div className="title">{cond.getTitle()}</div>
+                        {statCond && cond.params.partyStat ? <div className="weapon party-load" onClick={() => this.loadStats(i)} /> : ''}
+                        {i == 1 ? <ConditionInfo item={cond} /> : ''}
+                        {i == 1 ?
+                            (itemsCnt > 1 ? <div className="info" onClick={() => this.addLine()}>+</div> : '')
+                            : <div className="info" onClick={() => this.removeLine(i)}>-</div>
+                        }
                     </div>
-                    <div className="title">{cond.getTitle()}</div>
-                    {statCond && cond.params.partyStat ? <div className="weapon party-load" onClick={() => this.loadStats(i)} /> : ''}
-                    {i == 1 ? <ConditionInfo item={cond} /> : ''}
-                    {i == 1 ?
-                        (itemsCnt > 1 ? <div className="info" onClick={() => this.addLine()}>+</div> : '')
-                        : <div className="info" onClick={() => this.removeLine(i)}>-</div>
-                    }
+                    {modeCond ? <div className="top-line party-weapon-mode-line">
+                        <div className="control party-weapon-mode-control">
+                            <ConditionControl
+                                item={modeCond}
+                                type={modeCond.getType()}
+                                settings={this.props.settings}
+                                onChange={this.props.onChange}
+                            />
+                        </div>
+                    </div> : ''}
                 </div>
             );
         }
@@ -305,13 +326,9 @@ function ConditionControl(props) {
             />
         );
     } else if (type == 'dropdown' || type == 'dropdown_multiple') {
-        let selectedValues = [''];
+        let selectedValues = [];
         let items = [];
-        if (props.settings[id]) {
-            selectedValues = (''+ props.settings[id]).split(';');
-        } else if (cond.params.defaultValue) {
-            selectedValues = [cond.params.defaultValue];
-        }
+        selectedValues = cond.getSelectedValues(props.settings);
 
         if (!cond.params.hideEmpty) {
             items.push({
@@ -354,12 +371,12 @@ function ConditionControl(props) {
                 disableSelectNew={!allowSelectNew}
                 items={items}
                 selected={selectedValues}
-                onChange={(item) => props.onChange(id, dropwdownValue(item))}
+                onChange={(item) => changeDropdownValue(props, id, dropwdownValue(item))}
                 isMultiple={type == 'dropdown_multiple'}
             />
         );
     } else if (type == 'static') {
-        return <div className={'static '+ (props.subcond ? 'active' : '')} />
+        return <div className={'static '+ (props.subcond ? 'active' : '')} />;
     }
 
     return (
@@ -398,7 +415,7 @@ function ConditionDescription(props) {
         icon = <DescriptionIcon
             rarity={condIcon.rarity}
             name={condIcon.name}
-        />
+        />;
     }
 
     return (
@@ -445,19 +462,37 @@ class ConditionLoadStat extends React.Component {
 
 function dropwdownValue(item) {
     if (Array.isArray(item)) {
-        return item.map((i) => {return i.value}).join(';');
+        return item.map((i) => {return i.value;}).join(';');
     } else {
         return item.value;
     }
 }
 
+function changeDropdownValue(props, id, value) {
+    props.onChange(id, value);
+
+    let linkedSettings = props.item.params.linkedSettings;
+    if (!linkedSettings) {
+        return;
+    }
+
+    for (const item of linkedSettings) {
+        let linkedValue = value;
+        if (item.limit) {
+            linkedValue = linkedValue.split(';').filter((value) => value !== '').slice(0, item.limit).join(';');
+        }
+
+        props.onChange(item.name, linkedValue);
+    }
+}
+
 function DescriptionIcon(props) {
-    let className = `item-icon icon-40`
+    let className = `item-icon icon-40`;
 
     if (props.rarity) {
-        className += ` border-rarity-${props.rarity}`
+        className += ` border-rarity-${props.rarity}`;
     } else {
-        className += ' no-border'
+        className += ' no-border';
     }
 
     return (

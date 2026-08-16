@@ -140,21 +140,29 @@ function getEmptyIds(items) {
 function getDuplicatedIds(items) {
     let result = [];
     let ids = {};
+    let keys = {};
 
     for (const data of items) {
         let id = data.id;
         if (!id) continue;
 
-        if (!ids[id]) {
-            ids[id] = [];
-        }
-
-        ids[id].push(data.key);
+        ids[id] ||= {};
+        keys[data.key] ||= {};
+        ids[id][data.key] = 1;
+        keys[data.key][id] = 1;
     }
 
     for (const id of Object.keys(ids)) {
-        if (ids[id].length > 1) {
-            result.push('id='+ id +' keys='+ ids[id].join(','));
+        const uniqueKeys = Object.keys(ids[id]);
+        if (uniqueKeys.length > 1) {
+            result.push('id='+ id +' keys='+ uniqueKeys.join(','));
+        }
+    }
+
+    for (const key of Object.keys(keys)) {
+        const uniqueIds = Object.keys(keys[key]);
+        if (uniqueIds.length > 1) {
+            result.push('key='+ key +' ids='+ uniqueIds.join(','));
         }
     }
 

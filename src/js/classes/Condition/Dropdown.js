@@ -19,7 +19,18 @@ export class ConditionDropdown extends Condition {
     }
 
     getSelectedValue(settings) {
-        return settings[this.getName()] || this.params.defaultValue || '';
+        let value = settings[this.getName()];
+
+        if (!value && this.params.valueAliases) {
+            for (const name of this.params.valueAliases) {
+                value = settings[name];
+                if (value) {
+                    break;
+                }
+            }
+        }
+
+        return value || this.params.defaultValue || '';
     }
 
     getSelectedValues(settings) {
@@ -30,10 +41,18 @@ export class ConditionDropdown extends Condition {
         }
 
         let values = [];
-        if (this.params.multiple) {
-            values = selectedValue.split(';');
+        if (this.params.multiple || (''+ selectedValue).includes(';')) {
+            values = (''+ selectedValue).split(';').filter((item) => item !== '');
         } else {
             values = [''+ selectedValue];
+        }
+
+        let limit = this.getLimit(settings);
+        if (!this.params.multiple && values.length > 1) {
+            limit = 1;
+        }
+        if (limit) {
+            values = values.slice(0, limit);
         }
 
         return values;
@@ -50,7 +69,7 @@ export class ConditionDropdown extends Condition {
     getSelectedItems(settings) {
         let values = this.getSelectedValues(settings);
         let items = [];
-        let limit = this.getLimit(settings)
+        let limit = this.getLimit(settings);
 
         for (const item of this.params.values) {
             if (values.includes(''+ item.value)) {

@@ -61,6 +61,24 @@ export class FeatureCompiler {
                 this.processed.items.push(...postTree.revert);
             }
         }
+
+        // Re-collect stats from processed tree to capture any that were introduced
+        // during processing (e.g. assigned stats from CStatIncrease/CStatDecrease/CStatSet).
+        // Without this, the GPU stat index map may be missing stats like dmg_anemo.
+        this._collectProcessedStats();
+    }
+
+    _collectProcessedStats() {
+        // Static-stat processing can replace CStat nodes with constants. Build
+        // the physical dependency set from the final AST instead of retaining
+        // the broader pre-folding set collected by the constructor. Assigned
+        // lanes are included because +=/-=/set operations still need storage
+        // even when the final tree never reads the destination explicitly.
+        let stats = new Set(getUsedStats(this.processed));
+        for (let stat of getAssignedStats(this.processed)) {
+            stats.add(stat);
+        }
+        this.usedStats = [...stats];
     }
 
     processBlock(tree, opts) {
@@ -94,9 +112,9 @@ export class FeatureCompiler {
         let byPriority = postPyPriority(postItems);
         usedStats = [].concat(usedStats);
 
-        for (let priority of Object.keys(byPriority).sort().reverse()) {
+        for (let priority of Object.keys(byPriority).sort((a, b) => Number(b) - Number(a))) {
             for (let post of byPriority[priority]) {
-                let origStat = baseStatName(post.stat)
+                let origStat = baseStatName(post.stat);
                 if (!post.stat || (!usedStats.includes(post.stat) && !usedStats.includes(origStat))) continue;
 
                 filtered.push(post);
@@ -118,7 +136,7 @@ export class FeatureCompiler {
 
         let byPriority = postPyPriority(postItems);
 
-        for (let priority of Object.keys(byPriority).sort()) {
+        for (let priority of Object.keys(byPriority).sort((a, b) => Number(a) - Number(b))) {
             let vars = [];
             let localAssig = [];
 
@@ -222,7 +240,7 @@ export class FeatureCompiler {
                         }
                     }
                 },
-                (item) => {return item.getType() == 'isolated'},
+                (item) => {return item.getType() == 'isolated';},
             );
 
             let duplicates = [];
@@ -259,7 +277,7 @@ export class FeatureCompiler {
                 if (sig) {
                     if (nonChild.includes(sig)) {
                         if (!replaced[sig]) {
-                            let varItem = new CVar([item])
+                            let varItem = new CVar([item]);
                             replaced[sig] = varItem;
                             variables[varItem.name] = varItem;
                         }
@@ -285,11 +303,11 @@ function insertVariables(items, variables) {
             let usedVars = {};
             item.walk((item) => {
                 if (item.isVariableGet() && !item.isVariableSet()) {
-                    usedVars[item.name] = 1
+                    usedVars[item.name] = 1;
                 }
             });
 
-            for (var name of Object.keys(usedVars)) {
+            for (let name of Object.keys(usedVars)) {
                 if (variables[name]) {
                     newItems.push(variables[name]);
                     delete variables[name];
@@ -330,7 +348,7 @@ export function getAssignedStats() {
 function postPyPriority(postItems) {
     let byPriority = {};
     for (let item of postItems) {
-        let priority = item.priority
+        let priority = item.priority;
 
         if (!byPriority[priority]) {
             byPriority[priority] = [];

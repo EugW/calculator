@@ -1,11 +1,6 @@
 category;name;rus;eng
 weapon_name;calamity_of_eshu;Бедствие Эшу;Calamity of Eshu
 weapon_name;flower_wreathed_feathers;Украшенные цветами перья;Flower-Wreathed Feathers
-weapon_name;astral_vultures_crimson_plumage;Алое перо звёздного грифа;Astral Vulture's Crimson Plumage
-
-talent_name;astral_vultures_crimson_plumage;Глаза с лунным ореолом;The Moonring Sighted
-talent_descr;astral_vultures_crimson_plumage_1;Повышает name{силу атаки} на %{atk_percent} на 12 сек. после активации реакции anemo{Рассеивание}.;For 12s after triggering a anemo{Swirl} reaction, name{ATK} increases by %{atk_percent}.
-talent_descr;astral_vultures_crimson_plumage_2;Кроме того, если в отряде format{text_number_f=1|1}/format{text_number_f=2|2} и более персонажей с элементом, отличным от элемента экипированного персонажа, то урон name{заряженной атаки} экипированного персонажа увеличивается на format{text_number_f=1|%{text_percent_1}}/format{text_number_f=2|%{text_percent_2}}, а урон name{взрыва стихии} - на format{text_number_f=1|%{text_percent_3}}/format{text_number_f=2|%{text_percent_4}}.;In addition, when format{text_number_f=1|1}/format{text_number_f=2|2} or more characters in the party are of a different Elemental Type from the equipping character, the DMG dealt by the equipping character's name{Charged Attacks} is increased by format{text_number_f=1|%{text_percent_1}}/format{text_number_f=2|%{text_percent_2}} and name{Elemental Burst} DMG dealt is increased by format{text_number_f=1|%{text_percent_3}}/format{text_number_f=2|%{text_percent_4}}.
 
 talent_name;flower_wreathed_feathers;Недостижимое цветение;Inflorescence Unattainable
 talent_descr;flower_wreathed_feathers_1;Уменьшает потребление выносливости во время полёта на %{text_percent}.;Decreases Gliding Stamina consumption by %{text_percent}.
