@@ -3,7 +3,6 @@ import { ConditionAnd } from "../../classes/Condition/And";
 import { ConditionAscensionChar } from "../../classes/Condition/Ascension/Char";
 import { ConditionBoolean } from "../../classes/Condition/Boolean";
 import { ConditionBooleanLevels } from "../../classes/Condition/Boolean/Levels";
-import { ConditionBooleanValue } from "../../classes/Condition/Boolean/Value";
 import { ConditionConstellation } from "../../classes/Condition/Constellation";
 import { ConditionNot } from "../../classes/Condition/Not";
 import { ConditionNumber } from "../../classes/Condition/Number";
@@ -534,6 +533,15 @@ export const Odette = new DbObjectChar({
             },
             subConditions: [doubleCondition],
         }),
+        // Apply C5 before Snow Swan's Dream reads the Burst table. Constellation
+        // conditions are otherwise appended after regular character conditions.
+        new Condition({
+            isHidden: true,
+            settings: {
+                char_skill_burst_bonus: 3,
+            },
+            condition: new ConditionConstellation({constellation: 5}),
+        }),
         new ConditionBooleanLevels({
             name: 'odette_snow_swans_dream',
             serializeId: 3,
@@ -706,13 +714,7 @@ export const Odette = new DbObjectChar({
             ],
         },
         {
-            conditions: [
-                new Condition({
-                    settings: {
-                        char_skill_burst_bonus: 3,
-                    },
-                }),
-            ],
+            conditions: [],
         },
         {
             conditions: [
@@ -738,10 +740,12 @@ export const Odette = new DbObjectChar({
                     },
                     condition: new ConditionAnd([
                         new ConditionConstellation({constellation: 6}),
-                        new ConditionBooleanValue({
-                            setting: splendorName,
-                            cond: 'gt',
-                            value: 0,
+                        // This toggle represents the source state that grants
+                        // Marvelous Splendor to the entire nearby party. Odette
+                        // is necessarily affected too, even though her stack
+                        // counter is a separate rotation value.
+                        new ConditionBoolean({
+                            name: 'odette_all_party_marvelous_splendor',
                         }),
                     ]),
                 }),
@@ -915,14 +919,7 @@ export const Odette = new DbObjectChar({
                 stats: {
                     dmg_stellarglimmer_special: C6SplendorElevation,
                 },
-                condition: new ConditionAnd([
-                    new ConditionBoolean({name: 'party.odette_c6_splendor'}),
-                    new ConditionBooleanValue({
-                        setting: partySplendorName,
-                        cond: 'gt',
-                        value: 0,
-                    }),
-                ]),
+                condition: new ConditionBoolean({name: 'party.odette_c6_splendor'}),
             }),
         ],
         postEffects: [

@@ -187,6 +187,13 @@ const buffStellarSwirl = new PostEffectStatsMastery({
     ],
 });
 
+const buffVastMastery = new PostEffectStatsMastery({
+    percent: new StatTable('mastery', [VastMasteryRatio]),
+    conditions: [
+        new ConditionBoolean({name: 'mizuki_dreamdrifter'}),
+    ],
+});
+
 const buffElemental = new PostEffectStatsMastery({
     percent: [
         new StatTable('dmg_pyro', [C2ElemBonus / 100]),
@@ -489,7 +496,7 @@ export const Mizuki = new DbObjectChar({
             name: 'mizuki_vast_be_the_dream',
             serializeId: 4,
             title: 'talent_name.yumemizuki_mizuki_vast_be_the_dream',
-            description: 'talent_descr.yumemizuki_mizuki_vast_be_the_dream',
+            description: 'talent_descr.yumemizuki_mizuki_vast_be_the_dream_1',
             info: {special: true},
             subConditions: [
                 new ConditionBoolean({name: 'mizuki_dreamdrifter'}),
@@ -498,12 +505,21 @@ export const Mizuki = new DbObjectChar({
         new ConditionBoolean({
             name: radianceSwirlName,
             serializeId: 5,
-            title: 'talent_name.yumemizuki_mizuki_vast_be_the_dream',
-            description: 'talent_descr.yumemizuki_mizuki_vast_be_the_dream',
+            title: 'talent_name.radiance_stellarswirl',
+            description: 'talent_descr.yumemizuki_mizuki_vast_be_the_dream_2',
             info: {special: true},
             condition: new ConditionNot([
                 new ConditionBoolean({name: 'polestar_field'}),
             ]),
+        }),
+        new ConditionStatic({
+            title: 'talent_name.yumemizuki_mizuki_vast_be_the_dream',
+            description: 'talent_descr.yumemizuki_mizuki_vast_be_the_dream_3',
+            info: {special: true},
+            stats: {
+                text_percent: VastMasteryRatio * 100,
+            },
+            condition: new ConditionBoolean({name: 'mizuki_dreamdrifter'}),
         }),
     ],
     multipliers: [
@@ -539,6 +555,7 @@ export const Mizuki = new DbObjectChar({
     postEffects: [
         buffSwirl,
         buffStellarSwirl,
+        buffVastMastery,
         buffElemental,
         buffC6CritRate,
         buffC6CritDmg,
@@ -660,6 +677,15 @@ export const Mizuki = new DbObjectChar({
                 title: 'talent_name.yumemizuki_mizuki_dreamdrifter',
                 description: 'talent_descr.yumemizuki_mizuki_dreamdrifter',
                 rotation: 'party',
+            }),
+            new ConditionStatic({
+                title: 'talent_name.yumemizuki_mizuki_vast_be_the_dream',
+                description: 'talent_descr.yumemizuki_mizuki_vast_be_the_dream_3',
+                info: {special: true},
+                stats: {
+                    text_percent: VastMasteryRatio * 100,
+                },
+                condition: new ConditionBoolean({name: 'party.mizuki_dreamdrifter'}),
             }),
             new ConditionBoolean({
                 name: 'party.mizuki_in_mist_like_waters',

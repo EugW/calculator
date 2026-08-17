@@ -1,10 +1,12 @@
 import fs from "fs";
 import path from "path";
 import { BuildData } from "../src/js/classes/Build/Data";
+import { CalcSet } from "../src/js/classes/CalcSet";
 import { Odette } from "../src/js/db/Char/Odette";
 import { DB } from "../src/js/db/DB";
 import { Rotation } from "../src/js/db/Features/Rotation";
 import { charTalentTables } from "../src/js/db/generated/CharTalentTables";
+import { Serializer } from "../src/js/classes/Serializer";
 
 function applyConditions(data, conditions) {
     for (const condition of conditions) {
@@ -244,6 +246,16 @@ test("Snow Swan uses generated burst p3, C4 grants half, and C5 adds three level
     applyConditions(self, Odette.getConditions());
     expect(self.stats.get("dmg_stellarglimmer")).toBe(charTalentTables.Odette.s3.p3[0]);
 
+    const selfC5 = new BuildData({
+        char_constellation: 5,
+        char_skill_burst: 10,
+        odette_snow_swans_dream: true,
+    }, {});
+    applyConditions(selfC5, localConditions(5));
+    expect(selfC5.settings.char_skill_burst_bonus).toBe(3);
+    expect(selfC5.stats.get("dmg_stellarglimmer"))
+        .toBe(charTalentTables.Odette.s3.p3[12]);
+
     const party = new BuildData({
         odette_char_skill_burst: 1,
         "party.odette_snow_swans_dream": true,
@@ -330,27 +342,48 @@ test("C2 Double RES shred follows the exclusive Conduct and Swirl element pairs"
     expect(party.stats.get("enemy_res_electro")).toBe(-20);
 });
 
-test("C6 stops modeled self decay and applies 25% affected plus 20% Odette elevation", () => {
+test("C6 applies 25% to the modeled all-party Splendor state plus 20% to Odette", () => {
     const c6 = new BuildData({
         char_ascension: 1,
         char_constellation: 6,
-        odette_marvelous_splendor: 4,
         odette_all_party_marvelous_splendor: true,
     }, {});
     applyConditions(c6, localConditions(6));
     expect(c6.stats.get("dmg_stellarglimmer_special")).toBe(45);
     expect(getCondition("odette_all_party_marvelous_splendor").getBuffRotationSection()).toBe("self");
 
-    const noSelfStacks = new BuildData({char_constellation: 6}, {});
-    applyConditions(noSelfStacks, localConditions(6));
-    expect(noSelfStacks.stats.get("dmg_stellarglimmer_special")).toBe(20);
+    const noAllPartyState = new BuildData({char_constellation: 6}, {});
+    applyConditions(noAllPartyState, localConditions(6));
+    expect(noAllPartyState.stats.get("dmg_stellarglimmer_special")).toBe(20);
 
     const party = new BuildData({
         "party.odette_c6_splendor": true,
-        "party.odette_marvelous_splendor": 1,
     }, {});
     applyConditions(party, Odette.getPartyConditions());
     expect(party.stats.get("dmg_stellarglimmer_special")).toBe(25);
+});
+
+test("supplied C6 URL restores the all-party Splendor state as 45% elevation", () => {
+    const previousDB = global.DB;
+    global.DB = DB;
+
+    try {
+        const build = CalcSet.deserialize(Serializer.unpack(
+            "bEwDwggkkkebcdibbabaaabcbagrcEvaExaCsCtmDagCpdCyhdaadaaa",
+        ));
+
+        expect(build.char.getId()).toBe(Odette.getId());
+        expect(build.char.getSettings()).toMatchObject({
+            odette_all_party_marvelous_splendor: true,
+        });
+        expect(build.char.getSettings()).not.toHaveProperty("odette_marvelous_splendor");
+        const data = build.getBuildData();
+        expect(data.settings.char_skill_burst_bonus).toBe(3);
+        expect(data.stats.get("dmg_stellarglimmer")).toBe(0.62);
+        expect(data.stats.get("dmg_stellarglimmer_special")).toBe(0.45);
+    } finally {
+        global.DB = previousDB;
+    }
 });
 
 test("Odette uses only reserved Rotation IDs 830-859", () => {

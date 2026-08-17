@@ -7,6 +7,7 @@ import { ConditionConstellation } from "../../classes/Condition/Constellation";
 import { ConditionNumberTalent } from "../../classes/Condition/Number/Talent";
 import { ConditionStacksLevels } from "../../classes/Condition/Stacks/Levels";
 import { ConditionStatic } from "../../classes/Condition/Static";
+import { ConditionStaticLevel } from "../../classes/Condition/Static/Level";
 import { DbObjectChar } from "../../classes/DbObject/Char";
 import { DbObjectConstellation } from "../../classes/DbObject/Constellation";
 import { DbObjectTalents } from "../../classes/DbObject/Talents";
@@ -354,6 +355,15 @@ export const Alyosha = new DbObjectChar({
             title: 'talent_name.n11480001',
             description: 'talent_descr.n11480001',
         }),
+        // Apply C3 before Hunter's Precision reads the Skill table. Constellation
+        // conditions are otherwise appended after regular character conditions.
+        new Condition({
+            isHidden: true,
+            settings: {
+                char_skill_elemental_bonus: 3,
+            },
+            condition: new ConditionConstellation({constellation: 3}),
+        }),
         new ConditionStacksLevels({
             name: 'alyosha_hunters_precision',
             serializeId: 1,
@@ -379,11 +389,12 @@ export const Alyosha = new DbObjectChar({
                 new ConditionBoolean({name: 'polestar_field'}),
             ],
         }),
-        new Condition({
+        new ConditionStaticLevel({
             isHidden: true,
-            stats: {
-                dmg_stellarconduct: PassiveStellarConductBonus,
-            },
+            levelSetting: 'alyosha_hunters_precision',
+            stats: [
+                new StatTable('dmg_stellarconduct', [PassiveStellarConductBonus, PassiveStellarConductBonus * 2]),
+            ],
             condition: new ConditionAnd([
                 new ConditionBooleanValue({
                     setting: 'alyosha_hunters_precision',
@@ -442,13 +453,7 @@ export const Alyosha = new DbObjectChar({
             ],
         },
         {
-            conditions: [
-                new Condition({
-                    settings: {
-                        char_skill_elemental_bonus: 3,
-                    },
-                }),
-            ],
+            conditions: [],
         },
         {
             conditions: [
@@ -490,6 +495,16 @@ export const Alyosha = new DbObjectChar({
                 partySetting: 'char_skill_elemental',
                 serializeId: 1,
             }),
+            new ConditionBoolean({
+                name: 'party.alyosha_constellation_3',
+                serializeId: 5,
+                title: 'talent_name.alyosha_friendly_call',
+                description: 'talent_descr.char_constellation_skill',
+                info: {constellation: 3},
+                settings: {
+                    alyosha_char_skill_elemental_bonus: 3,
+                },
+            }),
             new ConditionStacksLevels({
                 name: 'party.alyosha_hunters_precision',
                 serializeId: 2,
@@ -520,11 +535,12 @@ export const Alyosha = new DbObjectChar({
                 info: {constellation: 6},
                 rotation: 'party',
             }),
-            new Condition({
+            new ConditionStaticLevel({
                 isHidden: true,
-                stats: {
-                    dmg_stellarconduct: PassiveStellarConductBonus,
-                },
+                levelSetting: 'party.alyosha_hunters_precision',
+                stats: [
+                    new StatTable('dmg_stellarconduct', [PassiveStellarConductBonus, PassiveStellarConductBonus * 2]),
+                ],
                 condition: new ConditionAnd([
                     new ConditionBooleanValue({
                         setting: 'party.alyosha_hunters_precision',

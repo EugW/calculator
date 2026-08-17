@@ -71,6 +71,15 @@ test("Hunter's Precision uses skill p5, is party-wide, and only reaches two stac
     expect(c0.stats.get("atk_percent")).toBeCloseTo(charTalentTables.Alyosha.s2.p5[0], 5);
     expect(c0.stats.get("mastery")).toBe(0);
 
+    const c3 = new BuildData({
+        char_constellation: 3,
+        char_skill_elemental: 10,
+        alyosha_hunters_precision: 1,
+    }, {});
+    applyConditions(c3, Alyosha.getConditions());
+    expect(c3.settings.char_skill_elemental_bonus).toBe(3);
+    expect(c3.stats.get("atk_percent")).toBeCloseTo(charTalentTables.Alyosha.s2.p5[12], 5);
+
     const c6 = new BuildData({
         char_constellation: 6,
         char_skill_elemental: 1,
@@ -78,31 +87,47 @@ test("Hunter's Precision uses skill p5, is party-wide, and only reaches two stac
     }, {});
     applyConditions(c6, Alyosha.getConditions());
 
-    expect(c6.stats.get("atk_percent")).toBeCloseTo(charTalentTables.Alyosha.s2.p5[0] * 2, 5);
+    expect(c6.stats.get("atk_percent")).toBeCloseTo(charTalentTables.Alyosha.s2.p5[3] * 2, 5);
     expect(c6.stats.get("mastery")).toBe(100);
 
     const party = new BuildData({
-        alyosha_char_skill_elemental: 1,
+        alyosha_char_skill_elemental: 10,
+        "party.alyosha_constellation_3": true,
         "party.alyosha_hunters_precision": 2,
         "party.alyosha_standard_reclaimed": true,
     }, {});
     applyConditions(party, Alyosha.getPartyConditions());
 
-    expect(party.stats.get("atk_percent")).toBeCloseTo(charTalentTables.Alyosha.s2.p5[0] * 2, 5);
+    expect(party.settings.alyosha_char_skill_elemental_bonus).toBe(3);
+    expect(party.stats.get("atk_percent")).toBeCloseTo(charTalentTables.Alyosha.s2.p5[12] * 2, 5);
     expect(party.stats.get("mastery")).toBe(100);
+
+    const c3Toggle = getCondition("party.alyosha_constellation_3", true);
+    expect(c3Toggle.getId()).toBe(5);
+    expect(c3Toggle.getInfo()).toEqual({constellation: 3});
 });
 
-test("Polestar Precision grants 20% Stellar-Conduct DMG only with the field and Precision active", () => {
-    const active = new BuildData({
+test("Polestar Precision grants 20% Stellar-Conduct DMG for each Precision stack", () => {
+    const oneStack = new BuildData({
         polestar_field: true,
         alyosha_hunters_precision: 1,
         alyosha_radiance_stellarconduct: true,
         char_skill_elemental: 1,
     }, {});
-    applyConditions(active, Alyosha.getConditions());
+    applyConditions(oneStack, Alyosha.getConditions());
 
-    expect(active.settings.allowed_stellarconduct).toBe(1);
-    expect(active.stats.get("dmg_stellarconduct")).toBe(20);
+    expect(oneStack.settings.allowed_stellarconduct).toBe(1);
+    expect(oneStack.stats.get("dmg_stellarconduct")).toBe(20);
+
+    const twoStacks = new BuildData({
+        char_constellation: 6,
+        polestar_field: true,
+        alyosha_hunters_precision: 2,
+        alyosha_radiance_stellarconduct: true,
+        char_skill_elemental: 1,
+    }, {});
+    applyConditions(twoStacks, Alyosha.getConditions());
+    expect(twoStacks.stats.get("dmg_stellarconduct")).toBe(40);
 
     const noPrecision = new BuildData({
         polestar_field: true,
@@ -121,14 +146,24 @@ test("Polestar Precision grants 20% Stellar-Conduct DMG only with the field and 
     expect(noField.settings.allowed_stellarconduct).toBeUndefined();
     expect(noField.stats.get("dmg_stellarconduct")).toBe(0);
 
-    const party = new BuildData({
+    const partyOneStack = new BuildData({
         polestar_field: true,
         alyosha_char_skill_elemental: 1,
         "party.alyosha_hunters_precision": 1,
         "party.alyosha_radiance_stellarconduct": true,
     }, {});
-    applyConditions(party, Alyosha.getPartyConditions());
-    expect(party.stats.get("dmg_stellarconduct")).toBe(20);
+    applyConditions(partyOneStack, Alyosha.getPartyConditions());
+    expect(partyOneStack.stats.get("dmg_stellarconduct")).toBe(20);
+
+    const partyTwoStacks = new BuildData({
+        polestar_field: true,
+        alyosha_char_skill_elemental: 1,
+        "party.alyosha_hunters_precision": 2,
+        "party.alyosha_radiance_stellarconduct": true,
+        "party.alyosha_standard_reclaimed": true,
+    }, {});
+    applyConditions(partyTwoStacks, Alyosha.getPartyConditions());
+    expect(partyTwoStacks.stats.get("dmg_stellarconduct")).toBe(40);
 });
 
 test("Suffer the Winter Wheat Will scales Skill and Burst from ER and caps both at 70%", () => {

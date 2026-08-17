@@ -34,6 +34,46 @@ char_yumemizuki_mizuki = TemplateList(
             ['100:mastery', '4:ignore'],
         ],
     ),
+    vast_be_the_dream_rus=Template(
+        patterns=[
+            (r'<br>skill\{Сияние - Звёздное рассеивание\}:', r'\nskill{Сияние - Звёздное рассеивание}:'),
+            (r'<br><br>Кроме того,', r'\nКроме того,'),
+            (r'<br>На 8 сек\. после того как', r'\nНа 8 сек. после того как'),
+        ],
+        sentences=[
+            ['1000:ignore'],
+            ['2.5:ignore'],
+            ['1000:ignore'],
+            [],
+            ['10:ignore'],
+            ['8:ignore'],
+        ],
+        results=[
+            [0, 1],
+            [2, 3, 5],
+            [4],
+        ],
+    ),
+    vast_be_the_dream_eng=Template(
+        patterns=[
+            (r'<br>skill\{Radiance: Stellar Swirl\}:', r'\nskill{Radiance: Stellar Swirl}:'),
+            (r'<br><br>Additionally,', r'\nAdditionally,'),
+            (r'<br>name\{Yumemizuki Mizuki\} will also enter', r'\nname{Yumemizuki Mizuki} will also enter'),
+        ],
+        sentences=[
+            ['1000:ignore'],
+            ['2.5:ignore'],
+            ['1000:ignore'],
+            [],
+            ['10:ignore'],
+            ['8:ignore'],
+        ],
+        results=[
+            [0, 1],
+            [2, 3, 5],
+            [4],
+        ],
+    ),
     in_mist_like_waters=Template(
         sentences=[
             ['3:ignore', '3.5:ignore'],

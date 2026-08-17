@@ -1,4 +1,6 @@
 import { BuildData } from "../src/js/classes/Build/Data";
+import { CalcSet } from "../src/js/classes/CalcSet";
+import { Serializer } from "../src/js/classes/Serializer";
 import { FeatureDamageStellarConduct } from "../src/js/classes/Feature2/Damage/StellarConduct";
 import { FeatureDamageStellarSwirl } from "../src/js/classes/Feature2/Damage/StellarSwirl";
 import { FeatureMultiplier } from "../src/js/classes/Feature2/Multiplier";
@@ -9,6 +11,7 @@ import { Mizuki } from "../src/js/db/Char/Mizuki";
 import { Qiqi } from "../src/js/db/Char/Qiqi";
 import { Sandrone } from "../src/js/db/Char/Sandrone";
 import { Reactions } from "../src/js/db/Features/Reactions";
+import { DB } from "../src/js/db/DB";
 import { charTalentTables } from "../src/js/db/generated/CharTalentTables";
 
 function applyConditions(data, conditions) {
@@ -131,6 +134,21 @@ test("Mizuki pending 6.7 effects cover Vast, C2 RES, C4 healing, and capped C6 s
     expect(vastStellar.isActive(vastData)).toBe(true);
     expect(vastStellar.multipliers[0].values.getValue(1)).toBe(1000);
 
+    const vastCondition = Mizuki.getAllConditions().find((condition) =>
+        condition.getName() === 'mizuki_vast_be_the_dream'
+    );
+    const radianceCondition = Mizuki.getAllConditions().find((condition) =>
+        condition.getName() === 'mizuki_radiance_stellarswirl'
+    );
+    expect(vastCondition.params.description)
+        .toBe('talent_descr.yumemizuki_mizuki_vast_be_the_dream_1');
+    expect(radianceCondition.params.title).toBe('talent_name.radiance_stellarswirl');
+    expect(radianceCondition.params.description)
+        .toBe('talent_descr.yumemizuki_mizuki_vast_be_the_dream_2');
+    expect(Mizuki.getAllConditions().find((condition) =>
+        condition.params.description === 'talent_descr.yumemizuki_mizuki_vast_be_the_dream_3'
+    ).getType()).toBe('static');
+
     const c2Data = new BuildData({
         char_constellation: 2,
         mizuki_dreamdrifter: true,
@@ -156,6 +174,15 @@ test("Mizuki pending 6.7 effects cover Vast, C2 RES, C4 healing, and capped C6 s
 });
 
 test("Mizuki party data shares 10% EM and fixed 30/100 versus 10/20 subtype CRIT", () => {
+    const selfData = new BuildData({
+        mizuki_dreamdrifter: true,
+    }, {
+        mastery: 1155,
+    });
+    selfData.postEffects = Mizuki.getPostEffects();
+    selfData.applyPostEffects();
+    expect(selfData.stats.get("mastery")).toBeCloseTo(1270.5, 5);
+
     const data = new BuildData({
         "party.mizuki_dreamdrifter": true,
         "party.mizuki_the_heart_lingers_long": true,
@@ -171,6 +198,27 @@ test("Mizuki party data shares 10% EM and fixed 30/100 versus 10/20 subtype CRIT
     expect(data.stats.get("crit_dmg_swirl")).toBe(100);
     expect(data.stats.get("crit_rate_stellarswirl")).toBe(10);
     expect(data.stats.get("crit_dmg_stellarswirl")).toBe(20);
+});
+
+test("supplied Mizuki URL applies Vast's self EM effect", () => {
+    const previousDB = global.DB;
+    global.DB = DB;
+
+    try {
+        const build = CalcSet.deserialize(Serializer.unpack(
+            "bDxDwgakkkebcefBrbabaaabcbaerdEvbbbExaEwcdgDagCpdCyhdaadaaa",
+        ));
+        const data = build.getBuildData();
+        data.applyPostEffects();
+
+        expect(build.char.getSettings()).toMatchObject({
+            mizuki_dreamdrifter: true,
+            mizuki_vast_be_the_dream: true,
+        });
+        expect(data.stats.getTotal("mastery")).toBeCloseTo(236.72, 5);
+    } finally {
+        global.DB = previousDB;
+    }
 });
 
 test("Sandrone Swirl direct tables and constellation rows stay exactly 1.5x Conduct", () => {
