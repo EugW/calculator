@@ -1,15 +1,7 @@
-/**
- * GPU-Accelerated Artifact Optimizer
- * Uses WebGPU compute shaders to evaluate artifact combinations
- */
-
-import { WGSLMegaKernelCompiler } from "./Feature2/WGSLCompiler";
-import {
-    MAX_GPU_STAT_CONSTRAINTS,
-    normalizeSetConstraintThresholds,
-    normalizeStatConstraintBounds,
-} from "./OptimizerConstraints";
-import { resolveOptimizationPlanVariation } from "./OptimizationPlan";
+/** Normal full-build search and GPU top-20 reduction. */
+import {GPUDeviceContext, createGPUStorageBuffer} from './GPUDeviceContext';
+import {GPUOptimizerInputs, GPU_SLOT_NAMES} from './GPUOptimizerInputs';
+import {gpuNow, prepareGPUProgram, resolveGPUSemantics} from './GPUOptimizerProgram';
 import {
     GPU_TOP_K_CAPACITY,
     GPU_TOP_K_ENTRY_BYTES,
@@ -20,16 +12,12 @@ import {
     getGPUScoreTopKShader,
 } from "./GPUTopK";
 
-const MAX_GPU_SET_COUNT = 128;
-const SET_BONUS_LEVELS = MAX_GPU_SET_COUNT * 2;
-const VARIATION_LOOKUP_SIZE = 257 + MAX_GPU_SET_COUNT * MAX_GPU_SET_COUNT;
 const DEFAULT_BATCH_SIZE = 1024 * 1024;
 const MAX_GPU_SHARD_COMBINATIONS = 0xFFFFFFFF;
 const MAX_RETAINED_BATCH_PROFILES = 2048;
 const GPU_PROGRESS_INTERVAL_MS = 100;
 const GPU_QUEUE_CHECKPOINT_BATCHES = 64;
 const GPU_SHARD_TOP_K_MERGE_COUNT = GPU_TOP_K_CAPACITY * 2;
-const GPU_SLOT_NAMES = Object.freeze(['flower', 'plume', 'sands', 'goblet', 'circlet']);
 
 /**
  * Plan a row-major Cartesian traversal as contiguous shards whose local linear
@@ -212,7 +200,7 @@ export async function isWebGPUAvailable() {
  * GPU-accelerated artifact optimizer
  */
 export class GPUArtifactOptimizer {
-    constructor({ maxShardCombinations = MAX_GPU_SHARD_COMBINATIONS } = {}) {
+    constructor({ maxShardCombinations = MAX_GPU_SHARD_COMBINATIONS, context } = {}) {
         if (
             !Number.isSafeInteger(maxShardCombinations) ||
             maxShardCombinations < 1 ||
@@ -222,31 +210,89 @@ export class GPUArtifactOptimizer {
                 `GPU shard limit must be an integer from 1 through ${MAX_GPU_SHARD_COMBINATIONS}; got ${maxShardCombinations}`
             );
         }
-        this.device = null;
+        this.context = context || new GPUDeviceContext();
+        this.ownsContext = !context;
+        this.prepared = null;
         this.pipeline = null;
         this.bindGroupLayout = null;
-        this.megaKernel = null;
-        this.statIndexMap = null;
-        this.variationMap = null;
-        this.optimizationPlan = null;
         this.maxShardCombinations = maxShardCombinations;
         this.topKBindGroupLayout = null;
         this.topKScorePipeline = null;
         this.topKEntryPipeline = null;
     }
 
-    now() {
-        return typeof performance !== 'undefined' && performance.now ? performance.now() : Date.now();
+    get device() { return this.context.device; }
+    get statIndexMap() { return this.prepared?.statIndexMap || null; }
+    get optimizationPlan() { return this.prepared?.optimizationPlan || null; }
+    get featureVariants() { return this.prepared?.featureVariants || null; }
+    get variationMap() { return this.prepared?.variationMap || null; }
+    get maxBufferSize() { return this.device?.limits?.maxBufferSize; }
+    get maxStorageBufferBindingSize() { return this.device?.limits?.maxStorageBufferBindingSize; }
+    now() { return gpuNow(); }
+
+    async initialize() {
+        const previous = this.device;
+        const ready = await this.context.initialize(4);
+        if (previous !== this.device) {
+            this.pipeline = null;
+            this.prepared = null;
+            this.topKBindGroupLayout = null;
+            this.topKScorePipeline = null;
+            this.topKEntryPipeline = null;
+        }
+        return ready;
     }
 
-    /**
-     * Prepare the feature-independent score/entry reduction pipelines once per
-     * device. Every GPU optimization uses this fixed-width top-20 path.
-     *
-     * @returns {Promise<Object>}
-     */
+    async preparePipeline(planOrFeatureVariants) {
+        if (!this.device) {
+            throw new Error('WebGPU not initialized');
+        }
+
+        this.pipeline = null;
+        this.bindGroupLayout = null;
+        this.prepared = null;
+        const prepareStart = this.now();
+        const prepared = await prepareGPUProgram(this.context, planOrFeatureVariants, compiler => compiler.getMegaKernel({}));
+        const profile = {...prepared.profile};
+        const shaderModule = prepared.module;
+        let stageStart;
+        // Create bind group layout
+        // Consolidated bindings: 0=combined_artifacts, 1=set_bonuses, 2=variation_lookup,
+        //                        3=result_values, 4=params (uniform with base_stats and constraints)
+        stageStart = this.now();
+        this.bindGroupLayout = this.device.createBindGroupLayout({
+            entries: [
+                { binding: 0, visibility: GPUShaderStage.COMPUTE, buffer: { type: 'read-only-storage' } },  // combined artifacts
+                { binding: 1, visibility: GPUShaderStage.COMPUTE, buffer: { type: 'read-only-storage' } },  // set_bonuses
+                { binding: 2, visibility: GPUShaderStage.COMPUTE, buffer: { type: 'read-only-storage' } },  // set_to_variation
+                { binding: 3, visibility: GPUShaderStage.COMPUTE, buffer: { type: 'storage' } },            // result_values
+                { binding: 4, visibility: GPUShaderStage.COMPUTE, buffer: { type: 'uniform' } },            // params
+            ],
+        });
+        profile.createBindGroupLayoutMs = this.now() - stageStart;
+
+        // Create pipeline
+        const pipelineDescriptor = {
+            layout: this.device.createPipelineLayout({
+                bindGroupLayouts: [this.bindGroupLayout],
+            }),
+            compute: {
+                module: shaderModule,
+                entryPoint: 'main',
+            },
+        };
+
+        stageStart = this.now();
+        this.pipeline = this.device.createComputePipeline(pipelineDescriptor);
+        profile.pipelineMode = 'sync';
+        profile.createPipelineMs = this.now() - stageStart;
+        profile.totalMs = this.now() - prepareStart;
+        this.prepared = prepared;
+        this.lastPrepareProfile = profile;
+    }
+
     async ensureTopKPipelines() {
-        if (this.topKScorePipeline && this.topKEntryPipeline && this.topKBindGroupLayout) {
+        if (this.topKDevice === this.device && this.topKScorePipeline && this.topKEntryPipeline && this.topKBindGroupLayout) {
             return {reused: true, totalMs: 0};
         }
 
@@ -266,7 +312,7 @@ export class GPUArtifactOptimizer {
             ['entry', entryModule],
         ];
         for (const [name, module] of moduleEntries) {
-            const info = await module.getCompilationInfo();
+            const info = await this.context.waitFor(module.getCompilationInfo());
             for (const message of info.messages) {
                 if (message.type === 'error') {
                     throw new Error(
@@ -301,633 +347,8 @@ export class GPUArtifactOptimizer {
         this.topKBindGroupLayout = bindGroupLayout;
         this.topKScorePipeline = scorePipeline;
         this.topKEntryPipeline = entryPipeline;
+        this.topKDevice = this.device;
         return {reused: false, totalMs: this.now() - started};
-    }
-
-    /**
-     * Initialize WebGPU device
-     * @returns {Promise<boolean>}
-     */
-    async initialize() {
-        if (!navigator.gpu) {
-            console.warn('WebGPU not supported');
-            return false;
-        }
-
-        try {
-            const adapter = await navigator.gpu.requestAdapter({
-                powerPreference: 'high-performance',
-            });
-
-            if (!adapter) {
-                console.warn('No WebGPU adapter found');
-                return false;
-            }
-
-            // We now use only 4 storage buffers (3 read-only + 1 read-write)
-            // Down from 9, for broader device compatibility
-            const requiredStorageBuffers = 4;
-            if (adapter.limits.maxStorageBuffersPerShaderStage < requiredStorageBuffers) {
-                console.warn(`WebGPU adapter only supports ${adapter.limits.maxStorageBuffersPerShaderStage} storage buffers, need ${requiredStorageBuffers}`);
-                return false;
-            }
-
-            const device = await adapter.requestDevice({
-                requiredLimits: {
-                    maxStorageBufferBindingSize: adapter.limits.maxStorageBufferBindingSize,
-                    maxBufferSize: adapter.limits.maxBufferSize,
-                    maxStorageBuffersPerShaderStage: requiredStorageBuffers,
-                },
-            });
-            this.device = device;
-            this.topKBindGroupLayout = null;
-            this.topKScorePipeline = null;
-            this.topKEntryPipeline = null;
-
-            // Store limits for autoscaling
-            this.maxStorageBufferBindingSize = adapter.limits.maxStorageBufferBindingSize;
-            this.maxBufferSize = adapter.limits.maxBufferSize;
-
-            device.lost.then((info) => {
-                console.error('WebGPU device lost:', info.message);
-                if (this.device === device) {
-                    this.device = null;
-                    this.topKBindGroupLayout = null;
-                    this.topKScorePipeline = null;
-                    this.topKEntryPipeline = null;
-                }
-            });
-
-            return true;
-        } catch (e) {
-            console.error('WebGPU initialization failed:', e);
-            return false;
-        }
-    }
-
-    /**
-     * Prepare the compute pipeline from a canonical shared optimization plan.
-     * A legacy feature-variant map is accepted only for isolated compatibility
-     * tests; production callers bind all semantics through OptimizationPlan.
-     * @param {Object} planOrFeatureVariants
-     * @param {Object} buildData - Build data with base stats
-     */
-    async preparePipeline(planOrFeatureVariants, buildData) {
-        if (!this.device) {
-            throw new Error('WebGPU not initialized');
-        }
-
-        // A failed re-prepare must never leave an old executable pipeline
-        // paired with newly supplied semantics or layouts.
-        this.pipeline = null;
-        this.bindGroupLayout = null;
-        this.megaKernel = null;
-        this.statIndexMap = null;
-        this.variationMap = null;
-        this.optimizationPlan = null;
-        this.featureVariants = null;
-
-        const profile = {};
-        const prepareStart = this.now();
-        let stageStart = this.now();
-
-        const isPlan = planOrFeatureVariants?.kind === 'optimization-plan';
-        const optimizationPlan = isPlan ? planOrFeatureVariants : null;
-        if (isPlan) {
-            validateOptimizationPlanForGPU(optimizationPlan);
-        }
-        this.optimizationPlan = optimizationPlan;
-        this.featureVariants = isPlan ? null : planOrFeatureVariants;
-
-        // Build mega-kernel from all variations
-        this.megaKernel = new WGSLMegaKernelCompiler();
-
-        if (isPlan) {
-            this.megaKernel.addOptimizationPlan(this.optimizationPlan);
-        } else {
-            for (const [variationId, compiler] of Object.entries(planOrFeatureVariants)) {
-                this.megaKernel.addVariation(variationId, compiler);
-            }
-        }
-
-        const kernelCode = this.megaKernel.getMegaKernel({});
-        this.statIndexMap = this.megaKernel.getStatIndexMap();
-        this.variationMap = this.megaKernel.buildVariationMap();
-        profile.kernelBuildMs = this.now() - stageStart;
-
-        // Create shader module
-        stageStart = this.now();
-        const shaderModule = this.device.createShaderModule({
-            code: kernelCode,
-        });
-        profile.createShaderModuleMs = this.now() - stageStart;
-
-        // Check for compilation errors
-        stageStart = this.now();
-        const compilationInfo = await shaderModule.getCompilationInfo();
-        profile.compilationInfoMs = this.now() - stageStart;
-        for (const message of compilationInfo.messages) {
-            if (message.type === 'error') {
-                console.error('WGSL compilation error:', message.message);
-                throw new Error(`WGSL compilation failed: ${message.message}`);
-            } else if (message.type === 'warning') {
-                console.warn('WGSL warning:', message.message);
-            }
-        }
-
-        // Create bind group layout
-        // Consolidated bindings: 0=combined_artifacts, 1=set_bonuses, 2=variation_lookup,
-        //                        3=result_values, 4=params (uniform with base_stats and constraints)
-        stageStart = this.now();
-        this.bindGroupLayout = this.device.createBindGroupLayout({
-            entries: [
-                { binding: 0, visibility: GPUShaderStage.COMPUTE, buffer: { type: 'read-only-storage' } },  // combined artifacts
-                { binding: 1, visibility: GPUShaderStage.COMPUTE, buffer: { type: 'read-only-storage' } },  // set_bonuses
-                { binding: 2, visibility: GPUShaderStage.COMPUTE, buffer: { type: 'read-only-storage' } },  // set_to_variation
-                { binding: 3, visibility: GPUShaderStage.COMPUTE, buffer: { type: 'storage' } },            // result_values
-                { binding: 4, visibility: GPUShaderStage.COMPUTE, buffer: { type: 'uniform' } },            // params
-            ],
-        });
-        profile.createBindGroupLayoutMs = this.now() - stageStart;
-
-        // Create pipeline
-        const pipelineDescriptor = {
-            layout: this.device.createPipelineLayout({
-                bindGroupLayouts: [this.bindGroupLayout],
-            }),
-            compute: {
-                module: shaderModule,
-                entryPoint: 'main',
-            },
-        };
-
-        stageStart = this.now();
-        this.pipeline = this.device.createComputePipeline(pipelineDescriptor);
-        profile.pipelineMode = 'sync';
-        profile.createPipelineMs = this.now() - stageStart;
-        profile.totalMs = this.now() - prepareStart;
-        profile.variationCount = isPlan
-            ? this.optimizationPlan.variations.length
-            : Object.keys(planOrFeatureVariants).length;
-        profile.statCount = Object.keys(this.statIndexMap).length;
-        profile.kernelCodeLength = kernelCode.length;
-        this.lastPrepareProfile = profile;
-    }
-
-    /**
-     * Convert artifacts to GPU buffer format
-     * @param {Array} artifacts - Array of artifacts
-     * @param {Object} statIndexMap - Stat name to index mapping
-     * @returns {ArrayBuffer}
-     */
-    artifactsToBuffer(artifacts, statIndexMap) {
-        const statCount = Object.keys(statIndexMap).length;
-        // No padding - just stats + set_id
-        const artifactSize = statCount + 1;
-        const bytesPerArtifact = artifactSize * 4;
-
-        // Create ArrayBuffer and views for both f32 and u32 access
-        const arrayBuffer = new ArrayBuffer(artifacts.length * bytesPerArtifact);
-        const floatView = new Float32Array(arrayBuffer);
-        const uintView = new Uint32Array(arrayBuffer);
-
-        for (let i = 0; i < artifacts.length; i++) {
-            const art = artifacts[i];
-            const offset = i * artifactSize;
-
-            // Copy stats as f32
-            if (art.calculated) {
-                for (const [stat, value] of Object.entries(art.calculated)) {
-                    const idx = statIndexMap[stat];
-                    if (idx !== undefined) {
-                        floatView[offset + idx] = value;
-                    }
-                }
-            }
-
-            // Set ID as u32 (NOT as float!)
-            const setName = art.getSetName ? art.getSetName() : art.set;
-            const setId = this.getSetIdNumber(setName);
-            uintView[offset + statCount] = setId;
-            // Padding stays as 0
-        }
-
-        return floatView;
-    }
-
-    /**
-     * Combine all artifact slots into a single buffer with offsets
-     * Reduces 5 bindings to 1 for broader device compatibility
-     * @param {Object} slots - Artifact slots
-     * @param {Object} statIndexMap - Stat name to index mapping
-     * @returns {Object} { buffer, offsets, counts }
-     */
-    artifactsToCombinedBuffer(slots, statIndexMap) {
-        const statCount = Object.keys(statIndexMap).length;
-        const artifactSize = statCount + 1;
-        const slotNames = ['flower', 'plume', 'sands', 'goblet', 'circlet'];
-        const counts = {};
-        const offsets = {};
-        
-        let totalArtifacts = 0;
-        for (const slot of slotNames) {
-            offsets[slot] = totalArtifacts;
-            counts[slot] = slots[slot].length;
-            totalArtifacts += slots[slot].length;
-        }
-        
-        const arrayBuffer = new ArrayBuffer(totalArtifacts * artifactSize * 4);
-        const floatView = new Float32Array(arrayBuffer);
-        const uintView = new Uint32Array(arrayBuffer);
-        
-        let globalIndex = 0;
-        for (const slot of slotNames) {
-            for (const art of slots[slot]) {
-                const offset = globalIndex * artifactSize;
-                if (art.calculated) {
-                    for (const [stat, value] of Object.entries(art.calculated)) {
-                        const idx = statIndexMap[stat];
-                        if (idx !== undefined) {
-                            floatView[offset + idx] = value;
-                        }
-                    }
-                }
-                const setName = art.getSetName ? art.getSetName() : art.set;
-                uintView[offset + statCount] = this.getSetIdNumber(setName);
-                globalIndex++;
-            }
-        }
-        
-        return { buffer: floatView, offsets, counts };
-    }
-
-    /**
-     * Convert set name to numeric ID
-     * @param {string} setName
-     * @returns {number}
-     */
-    getSetIdNumber(setName) {
-        if (!this._setIdMap) {
-            this._setIdMap = new Map();
-            this._setIdCounter = 0;
-        }
-        if (!this._setIdMap.has(setName)) {
-            this._setIdMap.set(setName, this._setIdCounter++);
-        }
-        return this._setIdMap.get(setName);
-    }
-
-    /**
-     * Pre-scan all GPU-visible set names to build a deterministic set ID mapping.
-     * @param {Object} slots - Artifact slots
-     * @param {Object} setData - Set bonus data from ArtifactsSuggest
-     * @param {Object} settings - Suggester settings with min/max set constraints
-     * @param {Object} variationSource - OptimizationPlan or legacy variants
-     */
-    preBuildSetIdMap(slots, setData = {}, settings = {}, variationSource = {}) {
-        this._setIdMap = new Map();
-        this._setIdCounter = 0;
-        const setNames = new Set();
-
-        for (const slotName of Object.keys(slots)) {
-            for (const art of slots[slotName]) {
-                // Get set name - could be property or method
-                const setName = art.getSetName ? art.getSetName() : art.set;
-                if (setName) {
-                    setNames.add(setName);
-                }
-            }
-        }
-
-        for (const setName of Object.keys(setData || {})) {
-            setNames.add(setName);
-        }
-
-        for (const setName of Object.keys(settings.setMinValues || {})) {
-            setNames.add(setName);
-        }
-
-        for (const setName of Object.keys(settings.setMaxValues || {})) {
-            setNames.add(setName);
-        }
-
-        for (const setInfo of getVariationSetInfo(variationSource)) {
-            for (const { setName } of setInfo) {
-                if (setName) {
-                    setNames.add(setName);
-                }
-            }
-        }
-
-        for (const setName of Array.from(setNames).sort()) {
-            this._setIdMap.set(setName, this._setIdCounter++);
-        }
-
-        if (this._setIdCounter > MAX_GPU_SET_COUNT) {
-            throw new RangeError(
-                `GPU optimizer supports at most ${MAX_GPU_SET_COUNT} visible artifact sets; got ${this._setIdCounter}`
-            );
-        }
-    }
-
-    /**
-     * Compute the set key the same way the GPU shader does
-     * @param {number[]} setIds - Array of 5 set IDs
-     * @returns {number}
-     */
-    computeSetKeyFromIds(setIds) {
-        // Count pieces per set
-        const counts = {};
-        for (const id of setIds) {
-            if (id !== undefined && id < 128) {
-                counts[id] = (counts[id] || 0) + 1;
-            }
-        }
-
-        // Compact collision-free key:
-        //   0             -> default/no dynamic set
-        //   1+s           -> one 2pc set
-        //   129+s         -> one 4pc set
-        //   257+lo*128+hi -> two 2pc sets, lo < hi
-        const sortedSetIds = Object.keys(counts).map(Number).sort((a, b) => a - b);
-        const twoPieceSets = [];
-
-        for (const setId of sortedSetIds) {
-            const count = counts[setId];
-            if (count >= 4) {
-                return 129 + setId;
-            } else if (count >= 2) {
-                twoPieceSets.push(setId);
-            }
-        }
-
-        if (twoPieceSets.length >= 2) {
-            return 257 + twoPieceSets[0] * MAX_GPU_SET_COUNT + twoPieceSets[1];
-        }
-        if (twoPieceSets.length === 1) {
-            return 1 + twoPieceSets[0];
-        }
-
-        return 0;
-    }
-
-    /**
-     * Convert base stats to GPU buffer format
-     * @param {Object} stats - Stats object
-     * @param {Object} statIndexMap - Stat name to index mapping
-     * @returns {Float32Array}
-     */
-    statsToBuffer(stats, statIndexMap) {
-        const statCount = Object.keys(statIndexMap).length;
-        const buffer = new Float32Array(statCount);
-
-        for (const [stat, idx] of Object.entries(statIndexMap)) {
-            buffer[idx] = stats[stat] || 0;
-        }
-
-        return buffer;
-    }
-
-    /**
-     * Build set bonus buffer
-     * The shader applies bonuses separately: 2-piece at index set_id*2, 4-piece at set_id*2+1
-     * When count >= 4, BOTH indices are added, so we need to store:
-     *   - Index set_id*2: 2-piece bonus stats
-     *   - Index set_id*2+1: ADDITIONAL 4-piece stats (delta from 2-piece)
-     *
-     * setData[setId][pieces].stats contains CUMULATIVE stats up to that piece count
-     * So setData[setId][4].stats = 2pc + 4pc stats combined
-     * We need to compute the delta for 4-piece
-     *
-     * Respects settings.setMaxValues to skip disabled set bonuses:
-     * - setMaxValues[setName] = N means "don't apply >= N piece bonus"
-     * - If setMaxValues['marechausse_hunter'] = 4, skip the 4pc bonus
-     * - If setMaxValues['some_set'] = 2, skip both 2pc and 4pc bonuses
-     *
-     * @param {Object} setData - Set bonus data from ArtifactsSuggest
-     * @param {Object} statIndexMap - Stat name to index mapping
-     * @param {Object} settings - Settings with setMaxValues for disabled sets
-     * @returns {Float32Array}
-     */
-    setBonusesToBuffer(setData, statIndexMap, settings = {}) {
-        const statCount = Object.keys(statIndexMap).length;
-        // 128 possible set IDs * 2 bonus levels.
-        const buffer = new Float32Array(SET_BONUS_LEVELS * statCount);
-
-        if (!setData) {
-            console.warn('GPU: setData is null/undefined!');
-            return buffer;
-        }
-
-        const setMaxValues = settings.setMaxValues || {};
-
-        for (const [setId, piecesData] of Object.entries(setData)) {
-            const setIdNum = this.getSetIdNumber(setId);
-            if (setIdNum >= MAX_GPU_SET_COUNT) {
-                continue;
-            }
-
-            // Check if this set is limited by setMaxValues
-            // setMaxValues keys match setData keys directly (e.g., "MarechausseeHunter")
-            const maxPieces = setMaxValues[setId];
-            const maxPiecesNum = maxPieces !== undefined ? parseInt(maxPieces, 10) : Infinity;
-
-            // Get 2-piece stats (if any)
-            const twopiece = piecesData['2'];
-            const fourpiece = piecesData['4'];
-
-            // Store 2-piece bonus at index setIdNum * 2
-            // Skip if setMaxValues limits us to < 2 pieces
-            const skip2pc = maxPiecesNum <= 2;
-            if (twopiece && twopiece.stats && !skip2pc) {
-                const offset = setIdNum * 2 * statCount;
-                for (const [stat, value] of Object.entries(twopiece.stats)) {
-                    const idx = statIndexMap[stat];
-                    if (idx !== undefined) {
-                        buffer[offset + idx] = value;
-                    }
-                }
-            }
-
-            // Store 4-piece DELTA at index setIdNum * 2 + 1
-            // Skip if setMaxValues limits us to < 4 pieces
-            const skip4pc = maxPiecesNum <= 4;
-            if (fourpiece && fourpiece.stats && !skip4pc) {
-                const offset = (setIdNum * 2 + 1) * statCount;
-                const twopieceStats = twopiece ? twopiece.stats : {};
-
-                for (const [stat, value] of Object.entries(fourpiece.stats)) {
-                    const idx = statIndexMap[stat];
-                    if (idx !== undefined) {
-                        // Store the delta: 4pc cumulative minus 2pc
-                        const twopieceValue = twopieceStats[stat] || 0;
-                        const deltaValue = value - twopieceValue;
-                        buffer[offset + idx] = deltaValue;
-                    }
-                }
-            }
-        }
-
-        return buffer;
-    }
-
-    /**
-     * Build stat constraint data for the params uniform buffer from the shared,
-     * strictly normalized CPU/GPU bounds.
-     *
-     * @param {Array.<Object>} normalizedBounds
-     * @param {Object} statIndexMap - Stat name to array index mapping
-     * @returns {Object} - { data: number[], count: number }
-     */
-    buildConstraintData(normalizedBounds, statIndexMap) {
-        const constraints = [];
-        const statBounds = new Map();
-
-        if (!Array.isArray(normalizedBounds)) {
-            throw new TypeError('GPU optimizer constraint bounds must be an array');
-        }
-
-        for (const bound of normalizedBounds) {
-            if (
-                !bound ||
-                typeof bound.stat !== 'string' ||
-                !bound.stat ||
-                (bound.op !== 'min' && bound.op !== 'max') ||
-                !Number.isFinite(bound.value)
-            ) {
-                throw new RangeError('GPU optimizer received an invalid normalized stat constraint');
-            }
-            const f32Value = Math.fround(bound.value);
-            if (!Number.isFinite(f32Value)) {
-                throw new RangeError(
-                    `GPU optimizer constraint ${bound.stat}_${bound.op}=${bound.value} is outside the finite f32 domain`
-                );
-            }
-
-            if (!statBounds.has(bound.stat)) {
-                statBounds.set(bound.stat, {
-                    min: undefined,
-                    max: undefined,
-                    isRealTotal: !!bound.isRealTotal,
-                });
-            }
-            const grouped = statBounds.get(bound.stat);
-            if (grouped.isRealTotal !== !!bound.isRealTotal) {
-                throw new RangeError(`GPU optimizer constraint metadata disagrees for "${bound.stat}"`);
-            }
-            grouped[bound.op] = f32Value;
-        }
-
-        if (statBounds.size > MAX_GPU_STAT_CONSTRAINTS) {
-            throw new RangeError(
-                `GPU optimizer supports at most ${MAX_GPU_STAT_CONSTRAINTS} constrained stats; got ${statBounds.size}`
-            );
-        }
-
-        for (const [stat, bounds] of statBounds) {
-            if (bounds.min !== undefined && bounds.max !== undefined && bounds.min > bounds.max) {
-                throw new RangeError(`GPU optimizer constraint "${stat}" has min greater than max`);
-            }
-
-            const statIndex = statIndexMap[stat];
-            const baseIndex = statIndexMap[stat + '_base'];
-            const pctIndex = bounds.isRealTotal ? statIndexMap[stat + '_percent'] : undefined;
-
-            // A missing lane must reject the run, never silently remove a user
-            // constraint and expand the feasible set.
-            if (statIndex === undefined || baseIndex === undefined) {
-                throw new RangeError(`GPU constraint stat "${stat}" is missing from the shader stat layout`);
-            }
-            if (bounds.isRealTotal && pctIndex === undefined) {
-                throw new RangeError(`GPU constraint stat "${stat}_percent" is missing from the shader stat layout`);
-            }
-
-            constraints.push({
-                stat_index: statIndex,
-                stat_base_index: baseIndex,
-                stat_pct_index: bounds.isRealTotal ? pctIndex : 0xFFFFFFFF,
-                min_value: bounds.min !== undefined ? bounds.min : -3.4e38,
-                max_value: bounds.max !== undefined ? bounds.max : 3.4e38,
-                is_real_total: bounds.isRealTotal ? 1 : 0,
-            });
-        }
-
-        // Build flat array for uniform buffer
-        // Each constraint: [stat_index, base_index, pct_index, is_real_total, min_value(f32 bits), max_value(f32 bits), pad, pad]
-        // Fixed size: 8 constraints * 8 values = 64 u32s
-        const CONSTRAINT_SIZE = 8;
-        const data = new Uint32Array(MAX_GPU_STAT_CONSTRAINTS * CONSTRAINT_SIZE);
-        const floatView = new Float32Array(data.buffer);
-
-        for (let i = 0; i < constraints.length; i++) {
-            const c = constraints[i];
-            const offset = i * CONSTRAINT_SIZE;
-
-            data[offset + 0] = c.stat_index;
-            data[offset + 1] = c.stat_base_index;
-            data[offset + 2] = c.stat_pct_index;
-            data[offset + 3] = c.is_real_total;
-            floatView[offset + 4] = c.min_value;
-            floatView[offset + 5] = c.max_value;
-            data[offset + 6] = 0;
-            data[offset + 7] = 0;
-        }
-
-        return { data, count: constraints.length };
-    }
-
-    /**
-     * Build set flags array for the params uniform buffer.
-     * Handles both setMaxValues (disabled set bonuses) and setMinValues (required sets).
-     * Returns a 128-entry array where each entry encodes constraints for one set.
-     *
-     * Flag encoding per set:
-     *   bits 0-7:  max_pieces (0=unlimited, 2=reject >=2pc, 4=reject >=4pc)
-     *   bits 8-15: min_pieces (0=none required, 2=require 2+, 4=require 4+)
-     *
-     * @param {Object} settings - Settings with setMaxValues and setMinValues
-     * @returns {Uint32Array} - 128-entry flags array
-     */
-    buildSetFlagsData(settings) {
-        const flags = new Uint32Array(128);
-        const setMaxValues = settings.setMaxValues || {};
-        const setMinValues = settings.setMinValues || {};
-
-        // Add max constraints (disabled sets): reject if count >= pieces
-        for (const [setName, pieces] of Object.entries(setMaxValues)) {
-            const setId = this._setIdMap ? this._setIdMap.get(setName) : undefined;
-            if (setId === undefined || setId >= 128) {
-                console.warn(`GPU set flags: set "${setName}" not found or out of range`);
-                continue;
-            }
-
-            const piecesNum = parseInt(pieces, 10);
-            // Store in bits 0-7
-            flags[setId] = (flags[setId] & 0xFF00) | (piecesNum & 0xFF);
-        }
-
-        // Add min constraints (required sets): reject if count < pieces
-        for (const [setName, pieces] of Object.entries(setMinValues)) {
-            const setId = this._setIdMap ? this._setIdMap.get(setName) : undefined;
-            if (setId === undefined || setId >= 128) {
-                console.warn(`GPU set flags: required set "${setName}" not found or out of range`);
-                continue;
-            }
-
-            const piecesNum = parseInt(pieces, 10);
-            // Store in bits 8-15
-            flags[setId] = (flags[setId] & 0x00FF) | ((piecesNum & 0xFF) << 8);
-        }
-
-        return flags;
-    }
-
-    hasSetMinConstraints(settings) {
-        return Object.keys(settings.setMinValues || {}).length > 0 ? 1 : 0;
-    }
-
-    hasSetMaxConstraints(settings) {
-        return Object.keys(settings.setMaxValues || {}).length > 0 ? 1 : 0;
     }
 
     resolveBatchSize(value, totalCombinations) {
@@ -945,247 +366,28 @@ export class GPUArtifactOptimizer {
         return Math.max(1, Math.min(requested, totalCombinations, maxBatchByLimits));
     }
 
-    /**
-     * Build variation lookup table
-     * Uses the same key encoding as the GPU shader
-     * @param {Object|Map} planOrVariationMap - Shared plan or legacy mapping
-     * @param {Object} featureVariants - Feature variants with setInfo
-     * @returns {Uint32Array}
-     */
-    buildVariationLookup(planOrVariationMap, featureVariants) {
-        if (planOrVariationMap?.kind === 'optimization-plan') {
-            return this.buildPlanVariationLookup(planOrVariationMap);
-        }
-
-        const variationMap = planOrVariationMap;
-        const buffer = new Uint32Array(VARIATION_LOOKUP_SIZE);
-        const entries = [];
-        let defaultVariation = 0;
-
-        for (const [variationId, idx] of variationMap) {
-            // Get set info directly from the compiler (more reliable than parsing)
-            const compiler = featureVariants[variationId];
-            const setInfo = compiler?.setInfo || [];
-
-            if (setInfo.length === 0) {
-                defaultVariation = idx;
-                entries.push({ idx, key: 0, setInfo, setIds: [] });
-                continue;
-            }
-
-            // Build array of set IDs (repeated by piece count)
-            const setIds = [];
-            for (const { setName, pieces } of setInfo) {
-                const setId = this._setIdMap ? this._setIdMap.get(setName) : undefined;
-                if (setId !== undefined) {
-                    for (let i = 0; i < pieces; i++) {
-                        setIds.push(setId);
-                    }
-                }
-            }
-
-            // Compute key the same way GPU does
-            const key = this.computeSetKeyFromIds(setIds);
-            if (key < buffer.length) {
-                entries.push({ idx, key, setInfo, setIds });
-            } else {
-                console.warn(`GPU variation key ${key} is outside lookup size ${buffer.length}`);
-            }
-        }
-
-        // Every unrecognized physical set state must use the semantic default,
-        // even if future compiler ordering no longer assigns it variation 0.
-        buffer.fill(defaultVariation);
-
-        // A semantic single-dynamic-2pc variation remains active when the
-        // other two pieces form an ordinary static set. The shader key includes
-        // both physical 2pc sets, while compiler.setInfo intentionally lists
-        // only variation-bearing sets, so populate those equivalent aliases.
-        const dynamicTwoPieceSetIds = new Set();
-        for (const entry of entries) {
-            const semanticSetIds = [...new Set(entry.setIds)];
-            if (entry.setInfo.length === 1 && semanticSetIds.length === 1 && Number(entry.setInfo[0].pieces) === 2) {
-                dynamicTwoPieceSetIds.add(semanticSetIds[0]);
-            }
-        }
-
-        const visibleSetIds = this._setIdMap
-            ? [...this._setIdMap.values()].filter((setId) => setId < MAX_GPU_SET_COUNT)
-            : [];
-
-        for (const entry of entries) {
-            const semanticSetIds = [...new Set(entry.setIds)];
-            if (entry.setInfo.length !== 1 || semanticSetIds.length !== 1 || Number(entry.setInfo[0].pieces) !== 2) {
-                continue;
-            }
-
-            const dynamicSetId = semanticSetIds[0];
-            for (const partnerSetId of visibleSetIds) {
-                if (partnerSetId === dynamicSetId || dynamicTwoPieceSetIds.has(partnerSetId)) {
-                    continue;
-                }
-
-                const lo = Math.min(dynamicSetId, partnerSetId);
-                const hi = Math.max(dynamicSetId, partnerSetId);
-                buffer[257 + lo * MAX_GPU_SET_COUNT + hi] = entry.idx;
-            }
-        }
-
-        // Explicit semantic entries, especially two-dynamic-2pc combinations,
-        // always override the physical aliases above.
-        for (const entry of entries) {
-            buffer[entry.key] = entry.idx;
-        }
-
-        return buffer;
-    }
-
-    /**
-     * Lower every representable compact GPU set key through the shared plan's
-     * pure threshold-selector oracle. Unlike the former alias patching, this
-     * also keeps a 2pc semantic variation active for a physical 4pc state and
-     * lets an explicit 4pc or mixed-2pc selector win by specificity.
-     */
-    buildPlanVariationLookup(plan) {
-        const buffer = new Uint32Array(VARIATION_LOOKUP_SIZE);
-        const invalidVariation = 0xFFFFFFFF;
-        const resolveIndex = (counts) => {
-            const variation = resolveOptimizationPlanVariation(plan, counts);
-            return variation ? variation.index : invalidVariation;
-        };
-        const defaultIndex = resolveIndex({});
-        if (defaultIndex === invalidVariation) {
-            throw new RangeError('Optimization plan has no unambiguous default variation');
-        }
-        buffer.fill(defaultIndex);
-
-        const visibleSets = this._setIdMap
-            ? [...this._setIdMap.entries()]
-                .filter(([, setId]) => setId < MAX_GPU_SET_COUNT)
-                .sort((left, right) => left[1] - right[1])
-            : [];
-
-        for (const [setName, setId] of visibleSets) {
-            buffer[1 + setId] = resolveIndex({[setName]: 2});
-            buffer[129 + setId] = resolveIndex({[setName]: 4});
-        }
-
-        for (let i = 0; i < visibleSets.length; ++i) {
-            const [leftName, leftId] = visibleSets[i];
-            for (let j = i + 1; j < visibleSets.length; ++j) {
-                const [rightName, rightId] = visibleSets[j];
-                const lo = Math.min(leftId, rightId);
-                const hi = Math.max(leftId, rightId);
-                buffer[257 + lo * MAX_GPU_SET_COUNT + hi] = resolveIndex({
-                    [leftName]: 2,
-                    [rightName]: 2,
-                });
-            }
-        }
-
-        return buffer;
-    }
-
-    /**
-     * The compact shader model has cumulative thresholds at 2pc and 4pc.
-     * Reject reachable 1pc/3pc/5pc changes explicitly instead of silently
-     * scoring them as the nearest 2pc/4pc state.
-     */
-    validateSetBonusModel(setData = {}, slots = {}, variationSource = {}) {
-        const reachablePieces = new Map();
-        for (const [slotName, artifacts] of Object.entries(slots || {})) {
-            const seenInSlot = new Set();
-            for (const art of artifacts || []) {
-                const setName = art.getSetName ? art.getSetName() : art.set;
-                if (setName) {
-                    seenInSlot.add(setName);
-                }
-            }
-            for (const setName of seenInSlot) {
-                reachablePieces.set(setName, (reachablePieces.get(setName) || 0) + 1);
-            }
-        }
-
-        for (const [setName, piecesData] of Object.entries(setData || {})) {
-            const reachable = reachablePieces.get(setName) || 0;
-            if (reachable >= 1 && !setBonusEntriesEqual(piecesData?.['1'], undefined)) {
-                throw new RangeError(`GPU optimizer does not support a reachable 1-piece effect for set "${setName}"`);
-            }
-            if (reachable >= 3 && !setBonusEntriesEqual(piecesData?.['3'], piecesData?.['2'])) {
-                throw new RangeError(`GPU optimizer does not support a distinct 3-piece effect for set "${setName}"`);
-            }
-            if (reachable >= 5 && !setBonusEntriesEqual(piecesData?.['5'], piecesData?.['4'])) {
-                throw new RangeError(`GPU optimizer does not support a distinct 5-piece effect for set "${setName}"`);
-            }
-        }
-
-        for (const setInfo of getVariationSetInfo(variationSource)) {
-            for (const { setName, pieces } of setInfo) {
-                const threshold = Number(pieces);
-                if (threshold !== 2 && threshold !== 4) {
-                    throw new RangeError(
-                        `GPU optimizer variation for set "${setName}" uses unsupported ${pieces}-piece semantics`
-                    );
-                }
-            }
-        }
-    }
-
-    /**
-     * Run the GPU optimization in batches to prevent OOM
-     * @param {Object} opts - Options including artifacts, buildData, etc.
-     * @returns {Promise<Array>} - Top results
-     */
     async optimize(opts) {
         const {
             slots,
             buildData,
             setData,
-            settings: requestedSettings,
             limit = 20,
-            damageIndex: requestedDamageIndex,
             batchSize: requestedBatchSize,
             callback,
-            constraintBounds: requestedConstraintBounds,
         } = opts;
 
-        if (!this.device || !this.pipeline) {
+        if (!this.device || !this.pipeline || this.prepared?.device !== this.device) {
             throw new Error('GPU optimizer not prepared');
         }
 
-        const plan = this.optimizationPlan;
-        if (plan && (
-            Object.prototype.hasOwnProperty.call(opts, 'settings') ||
-            Object.prototype.hasOwnProperty.call(opts, 'damageIndex') ||
-            Object.prototype.hasOwnProperty.call(opts, 'constraintBounds')
-        )) {
-            throw new TypeError(
-                'GPU optimizer semantics are bound by OptimizationPlan; settings, damageIndex, and constraintBounds cannot be overridden'
-            );
-        }
-        const rawSettings = plan
-            ? {
-                setMinValues: plan.setConstraints.minValues,
-                setMaxValues: plan.setConstraints.maxValues,
-            }
-            : (requestedSettings || {});
-        const damageIndex = plan
-            ? plan.objective.vectorIndex
-            : (requestedDamageIndex === undefined ? 2 : requestedDamageIndex);
-        const constraintBounds = plan
-            ? plan.statConstraints.bounds
-            : requestedConstraintBounds;
-        const variationSource = plan || this.featureVariants;
+        const {plan, settings, constraintBounds, damageIndex, variationSource} = resolveGPUSemantics(this.prepared, opts);
+        const inputs = new GPUOptimizerInputs();
 
         if (limit !== GPU_TOP_K_CAPACITY) {
             throw new RangeError(
                 `GPU optimizer result limit is fixed at ${GPU_TOP_K_CAPACITY}; got ${limit}`
             );
         }
-        if (!Number.isInteger(damageIndex) || damageIndex < 0 || damageIndex > 2) {
-            throw new RangeError(`GPU optimizer damageIndex must be 0, 1, or 2, got ${damageIndex}`);
-        }
-
         const profile = {
             totalCombinations: 0,
             shardCount: 0,
@@ -1243,26 +445,11 @@ export class GPUArtifactOptimizer {
         // API callers are normalized strictly and validated before allocating
         // any GPU buffers.
         stageStart = this.now();
-        const normalizedConstraintBounds = constraintBounds === undefined
-            ? normalizeStatConstraintBounds(rawSettings.stats)
-            : constraintBounds;
-        const constraintData = this.buildConstraintData(normalizedConstraintBounds, this.statIndexMap);
-        const constraintCount = constraintData.count;
-        const hasStatConstraints = constraintCount > 0 ? 1 : 0;
+        const constraintData = inputs.buildConstraintData(constraintBounds, this.statIndexMap);
         addStageTime('constraintBuildMs', stageStart);
 
         stageStart = this.now();
-        const normalizedSetConstraints = plan ? null : normalizeSetConstraintThresholds(
-            rawSettings.setMinValues,
-            rawSettings.setMaxValues
-        );
-        const settings = plan
-            ? rawSettings
-            : Object.assign({}, rawSettings, {
-                setMinValues: normalizedSetConstraints.minValues,
-                setMaxValues: normalizedSetConstraints.maxValues,
-            });
-        this.validateSetBonusModel(setData, slots, variationSource);
+        inputs.validateSetBonusModel(setData, slots, variationSource);
         addStageTime('setModelValidationMs', stageStart);
 
         if (callback) {
@@ -1280,7 +467,7 @@ export class GPUArtifactOptimizer {
 
         // Pre-build set ID mapping before any buffer encodes set names.
         stageStart = this.now();
-        this.preBuildSetIdMap(slots, setData, settings, variationSource);
+        inputs.preBuildSetIdMap(slots, setData, settings, variationSource);
         addStageTime('setIdMapMs', stageStart);
 
         const runBuffers = [];
@@ -1292,38 +479,30 @@ export class GPUArtifactOptimizer {
         try {
         // Now build variation lookup using the set ID mapping
         stageStart = this.now();
-        const variationLookup = trackBuffer(this.createStorageBuffer(
-            this.buildVariationLookup(plan || this.variationMap, this.featureVariants)
+        const variationLookup = trackBuffer(createGPUStorageBuffer(this.device,
+            inputs.buildVariationLookup(plan || this.variationMap, this.featureVariants)
         ));
         addStageTime('variationLookupUploadMs', stageStart);
 
         // Create single combined artifact buffer for all slots (saves 4 bindings)
         stageStart = this.now();
         const { buffer: artifactsData, offsets: artifactOffsets } =
-            this.artifactsToCombinedBuffer(slots, this.statIndexMap);
-        const artifactsBuffer = trackBuffer(this.createStorageBuffer(artifactsData));
+            inputs.artifactsToCombinedBuffer(slots, this.statIndexMap);
+        const artifactsBuffer = trackBuffer(createGPUStorageBuffer(this.device, artifactsData));
         addStageTime('artifactUploadMs', stageStart);
 
         // Base stats are now embedded in params uniform buffer
         stageStart = this.now();
-        const baseStatsData = this.statsToBuffer(buildData.stats, this.statIndexMap);
+        const baseStatsData = inputs.statsToBuffer(buildData.stats, this.statIndexMap);
         addStageTime('baseStatsBuildMs', stageStart);
 
         // Set bonus buffer - contains static set bonus stats (e.g., +18% ATK from 2-piece)
         // This is applied by apply_set_bonuses() in the shader BEFORE variation dispatch
         // Pass settings to respect setMaxValues (disabled set bonuses)
         stageStart = this.now();
-        const setBonusData = this.setBonusesToBuffer(setData, this.statIndexMap, settings);
-        const setBonusBuffer = trackBuffer(this.createStorageBuffer(setBonusData));
+        const setBonusData = inputs.setBonusesToBuffer(setData, this.statIndexMap, settings);
+        const setBonusBuffer = trackBuffer(createGPUStorageBuffer(this.device, setBonusData));
         addStageTime('setBonusUploadMs', stageStart);
-
-        // Set flags for disabled/required sets (128 entries, one per possible set)
-        // Embedded in params uniform buffer
-        stageStart = this.now();
-        const setFlagsData = this.buildSetFlagsData(settings);
-        const hasSetMinConstraints = this.hasSetMinConstraints(settings);
-        const hasSetMaxConstraints = this.hasSetMaxConstraints(settings);
-        addStageTime('setFlagsBuildMs', stageStart);
 
         const batchSize = this.resolveBatchSize(
             requestedBatchSize,
@@ -1427,28 +606,8 @@ export class GPUArtifactOptimizer {
         // Params uniform buffer with batch offset, artifact offsets, base_stats, and constraints.
         // Must match ComputeParams struct layout (aligned to 16 bytes).
         stageStart = this.now();
-        const statCount = Object.keys(this.statIndexMap).length;
-        const baseStatsAligned = Math.ceil(statCount / 4) * 4;
-        const headerSize = 20; // 18 u32s + 2 padding u32s before vec4-aligned base_stats
-        const totalParamsSize = headerSize + baseStatsAligned + 64 + 128;
-
-        const paramsData = new Uint32Array(totalParamsSize);
-        const paramsFloatView = new Float32Array(paramsData.buffer);
-
-        paramsData[8] = damageIndex;
-        paramsData[9] = constraintCount;
-        paramsData[15] = statCount;
-        paramsData[16] = hasSetMinConstraints;
-        paramsData[17] = hasSetMaxConstraints;
-        paramsData[18] = hasStatConstraints;
-
-        for (let i = 0; i < baseStatsData.length; i++) {
-            paramsFloatView[headerSize + i] = baseStatsData[i];
-        }
-
-        const constraintOffset = headerSize + baseStatsAligned;
-        paramsData.set(constraintData.data, constraintOffset);
-        paramsData.set(setFlagsData, constraintOffset + 64);
+        const paramsData = inputs.buildParamsData({statIndexMap: this.statIndexMap,
+            baseStatsData, constraintData, settings, damageIndex});
 
         const paramsBuffer = trackBuffer(this.device.createBuffer({
             size: paramsData.byteLength,
@@ -1707,7 +866,7 @@ export class GPUArtifactOptimizer {
 
                 if (isLastShardBatch) {
                     const mapStart = this.now();
-                    await stagingBuffer.mapAsync(GPUMapMode.READ);
+                    await this.context.waitFor(stagingBuffer.mapAsync(GPUMapMode.READ), this.prepared.device);
                     // mapAsync resolves only after the shard copy and all
                     // preceding GPU work complete. This is completion-wait
                     // time, not CPU mapping overhead.
@@ -1731,7 +890,7 @@ export class GPUArtifactOptimizer {
                     // This preserves UI progress on multi-billion shards while
                     // keeping the shard top-20 resident until its final batch.
                     const queueWaitStart = this.now();
-                    await this.device.queue.onSubmittedWorkDone();
+                    await this.context.waitFor(this.device.queue.onSubmittedWorkDone(), this.prepared.device);
                     batchProfile.queueWaitMs = this.now() - queueWaitStart;
                     profile.queueCheckpointCount++;
                     reportProgress(globalBatchEnd);
@@ -1763,27 +922,6 @@ export class GPUArtifactOptimizer {
         }
     }
 
-    /**
-     * Create a storage buffer from typed array
-     * @param {TypedArray} data
-     * @returns {GPUBuffer}
-     */
-    createStorageBuffer(data) {
-        const buffer = this.device.createBuffer({
-            size: data.byteLength,
-            usage: GPUBufferUsage.STORAGE | GPUBufferUsage.COPY_DST,
-        });
-        this.device.queue.writeBuffer(buffer, 0, data);
-        return buffer;
-    }
-
-    /**
-     * Decode combination index to artifact array
-     * @param {number} index
-     * @param {Object} slots
-     * @param {Object} counts
-     * @returns {Array}
-     */
     decodeArtifactIndices(index, slots, counts) {
         const n1 = counts.plume;
         const n2 = counts.sands;
@@ -1810,85 +948,13 @@ export class GPUArtifactOptimizer {
         ];
     }
 
-    /**
-     * Clean up GPU resources
-     */
     destroy() {
-        if (this.device) {
-            this.device.destroy();
-            this.device = null;
-        }
         this.pipeline = null;
         this.bindGroupLayout = null;
+        this.prepared = null;
         this.topKScorePipeline = null;
         this.topKEntryPipeline = null;
         this.topKBindGroupLayout = null;
-    }
-}
-
-function setBonusEntriesEqual(left, right) {
-    const leftVariation = left?.variation || '';
-    const rightVariation = right?.variation || '';
-    if (leftVariation !== rightVariation) {
-        return false;
-    }
-
-    const leftStats = left?.stats || {};
-    const rightStats = right?.stats || {};
-    const statNames = new Set([...Object.keys(leftStats), ...Object.keys(rightStats)]);
-    for (const stat of statNames) {
-        if (/^text_/.test(stat)) {
-            continue;
-        }
-        const leftValue = Number(leftStats[stat] || 0);
-        const rightValue = Number(rightStats[stat] || 0);
-        if (!Number.isFinite(leftValue) || !Number.isFinite(rightValue)) {
-            return false;
-        }
-        const tolerance = 1e-7 * Math.max(1, Math.abs(leftValue), Math.abs(rightValue));
-        if (Math.abs(leftValue - rightValue) > tolerance) {
-            return false;
-        }
-    }
-    return true;
-}
-
-function getVariationSetInfo(source) {
-    if (source?.kind === 'optimization-plan') {
-        return source.variations.map((variation) => {
-            return variation.selector.terms.map((term) => ({
-                setName: term.setName,
-                pieces: term.minimumInclusive,
-            }));
-        });
-    }
-
-    return Object.values(source || {}).map((variation) => variation?.setInfo || []);
-}
-
-function validateOptimizationPlanForGPU(plan) {
-    if (plan.numericPolicy?.gpuArithmetic !== 'f32') {
-        throw new RangeError('GPU optimization plan must declare f32 GPU arithmetic');
-    }
-    if (!Number.isInteger(plan.objective?.vectorIndex) || plan.objective.vectorIndex < 0 || plan.objective.vectorIndex > 2) {
-        throw new RangeError('GPU optimization plan objective vector index is invalid');
-    }
-    if (!Array.isArray(plan.statConstraints?.predicates)) {
-        throw new TypeError('GPU optimization plan has no stat constraint predicates');
-    }
-    if (plan.statConstraints.predicates.length > MAX_GPU_STAT_CONSTRAINTS) {
-        throw new RangeError(
-            `GPU optimizer supports at most ${MAX_GPU_STAT_CONSTRAINTS} constrained stats; got ${plan.statConstraints.predicates.length}`
-        );
-    }
-
-    for (const variation of plan.variations || []) {
-        for (const term of variation.selector?.terms || []) {
-            if (term.minimumInclusive !== 2 && term.minimumInclusive !== 4) {
-                throw new RangeError(
-                    `GPU optimizer variation for set "${term.setName}" uses unsupported ${term.minimumInclusive}-piece semantics`
-                );
-            }
-        }
+        if (this.ownsContext) this.context.destroy();
     }
 }

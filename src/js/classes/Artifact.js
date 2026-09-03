@@ -1,6 +1,7 @@
 import { Serializer } from './Serializer';
-import { Stats } from './Stats';
+import { Stats, isPercent } from './Stats';
 import { substatCheck } from './SubstatCheck';
+import { normalizeArtifactMetadata, serializeArtifactMetadata, deserializeArtifactMetadata, mergeArtifactMetadata, displaySubstatValue, correctHalfwayValue } from './ArtifactMetadata';
 
 export class Artifact {
     constructor(rarity, level, slot, set, mainStat, subStats, unactivatedSubstats) {
@@ -14,6 +15,42 @@ export class Artifact {
         this.locked = false;
         this.groups = [];
         this.calculated = null;
+        this.metadata = {};
+    }
+
+    setMetadata(input) {
+        this.metadata = normalizeArtifactMetadata(this, input);
+    }
+
+    getMetadata() {
+        return normalizeArtifactMetadata(this, this.metadata);
+    }
+
+    isCrafted() {
+        return this.metadata.elixirCrafted === true;
+    }
+
+    getInitialLineCount() {
+        const total = this.getMetadata().totalRolls;
+        return total === undefined ? undefined : total - Math.floor(this.level / 4);
+    }
+
+    // Stats-only identity for importing metadata into older storage entries.
+    // getHash() remains the complete serialized payload used by builds/storage.
+    getStatsHash() {
+        const copy = new Artifact(this.rarity, this.level, this.slot, this.set, this.mainStat,
+            [...this.subStats].sort((a, b) => a.stat.localeCompare(b.stat)),
+            [...this.getUnactivatedSubStats()]);
+        return copy.getHash();
+    }
+
+    enrichFrom(artifact) {
+        if (this.getStatsHash() !== artifact.getStatsHash()) return null;
+        const metadata = mergeArtifactMetadata(this.getMetadata(), artifact.getMetadata(), this.rarity);
+        if (!metadata) return null;
+        const result = this.clone();
+        result.setMetadata(metadata);
+        return result;
     }
 
     addStat(stat, value) {
@@ -55,10 +92,88 @@ export class Artifact {
         return result;
     }
 
+    calcOptimizerStats(usedStats) {
+        const calculated = this.calcStats();
+        calculated.truncate(usedStats);
+        calculated.processPercent();
+        return calculated;
+    }
+
+    /**
+     * Exact twin of calcOptimizerStats(usedStats) for lowering many artifacts:
+     * the same keys in the same order with bit-identical values, without
+     * building, truncating and rescaling a Stats object per artifact.
+     * lower(artifact) returns a scratch {keys, values, length} that the next
+     * call overwrites.
+     */
+    static createOptimizerStatsLowering(usedStats) {
+        const used = new Set(usedStats);
+        const percent = new Map();
+        const mains = new Map();
+        // getPreciseValue indexes an object by the value's string form;
+        // numeric Map keys avoid that conversion for repeated values.
+        const precise = new Map();
+        const preciseValue = (stat, value, rarity) => {
+            const key = stat + '/' + rarity;
+            let cache = precise.get(key);
+            if (!cache) precise.set(key, cache = new Map());
+            let result = cache.get(value);
+            if (result === undefined) {
+                result = DB.Artifacts.Substats.get(stat).getPreciseValue(value, rarity);
+                cache.set(value, result);
+            }
+            return result;
+        };
+        const keys = [];
+        const values = [];
+        const result = {keys, values, length: 0};
+        let count = 0;
+        // Stats#add: (current || 0) + value.
+        const add = (stat, value) => {
+            for (let i = 0; i < count; ++i) {
+                if (keys[i] === stat) {
+                    values[i] = (values[i] || 0) + value;
+                    return;
+                }
+            }
+            keys[count] = stat;
+            values[count++] = 0 + value;
+        };
+        const get = stat => {
+            for (let i = 0; i < count; ++i) if (keys[i] === stat) return values[i] || 0;
+            return 0;
+        };
+        return artifact => {
+            count = 0;
+            const mainKey = artifact.mainStat + '/' + artifact.rarity + '/' + artifact.level;
+            let main = mains.get(mainKey);
+            if (main === undefined) {
+                const mainData = DB.Artifacts.Mainstats.get(artifact.mainStat);
+                main = mainData ? mainData.values[artifact.rarity - 1].getValue(artifact.level) : null;
+                mains.set(mainKey, main);
+            }
+            if (main !== null) add(artifact.mainStat, main);
+            for (const item of artifact.subStats) {
+                add(item.stat, preciseValue(item.stat, item.value, artifact.rarity));
+            }
+            add('crit_value', get('crit_rate') * 2 + get('crit_dmg'));
+            // truncate(usedStats) keeps order; processPercent rescales.
+            let kept = 0;
+            for (let i = 0; i < count; ++i) {
+                const stat = keys[i];
+                if (!used.has(stat)) continue;
+                let isPercentStat = percent.get(stat);
+                if (isPercentStat === undefined) percent.set(stat, isPercentStat = isPercent(stat));
+                keys[kept] = stat;
+                values[kept++] = isPercentStat ? values[i] / 100 : values[i];
+            }
+            result.length = kept;
+            return result;
+        };
+    }
+
     calcCache(usedStats) {
-        this.calculated = this.calcStats();
-        this.calculated.truncate(usedStats);
-        this.calculated.processPercent();
+        this.calculated = this.calcOptimizerStats(usedStats);
     }
 
     replace(art) {
@@ -70,6 +185,7 @@ export class Artifact {
         this.subStats = art.subStats;
         this.unactivatedSubstats = art.unactivatedSubstats || [];
         this.groups = art.getGroups();
+        this.setMetadata(art.getMetadata());
 
         this.calculated = null;
     }
@@ -143,15 +259,9 @@ export class Artifact {
         return result;
     }
 
+    // Only a stated count: never estimated from roll values.
     getTotalRolls() {
-        let result = 0;
-
-        for (const sub of this.getSubStats()) {
-            let rollData = substatCheck(sub.stat, this.rarity, sub.value);
-            result += rollData.steps.length || 0;
-        }
-
-        return result;
+        return this.getMetadata().totalRolls;
     }
 
     activateUnlockedSubstats() {
@@ -333,12 +443,23 @@ export class Artifact {
             rarity: this.rarity,
             mainStatKey: statData.goodId,
             location: "",
-            lock: false,
+            lock: this.isLocked(),
             substats: [],
-            totalRolls: this.getTotalRolls(),
         };
 
-        for (const item of this.subStats) {
+        const metadata = this.getMetadata();
+        for (const key of ['totalRolls', 'elixirCrafted']) {
+            if (metadata[key] !== undefined) result[key] = metadata[key];
+        }
+
+        // GOOD v3 defines the crafted pair as the first two substats.
+        const pair = metadata.definedSubstats || [];
+        const ordered = [...this.subStats].sort((a, b) => Number(pair.includes(b.stat)) - Number(pair.includes(a.stat)));
+        // Extension prevents a known crafted flag with an unknown pair from
+        // accidentally claiming the first two displayed rows on round-trip.
+        if (metadata.elixirCrafted === true) result.definedSubstats = pair.map(stat => DB.Artifacts.Substats.get(stat).goodId);
+
+        for (const item of ordered) {
             let data = DB.Artifacts.Substats.get(item.stat);
             if (!data) {
                 return null;
@@ -347,7 +468,7 @@ export class Artifact {
             result.substats.push({
                 key: data.goodId,
                 value: item.value,
-                initialValue: item.value,
+                ...(metadata.initialValues?.[item.stat] !== undefined ? {initialValue: metadata.initialValues[item.stat]} : {}),
             });
         }
 
@@ -363,7 +484,7 @@ export class Artifact {
                 result.unactivatedSubstats.push({
                     key: data.goodId,
                     value: item.value,
-                    initialValue: item.value,
+                    ...(metadata.initialValues?.[item.stat] !== undefined ? {initialValue: metadata.initialValues[item.stat]} : {}),
                 });
             }
         }
@@ -372,7 +493,13 @@ export class Artifact {
     }
 
     serialize() {
-        let result = [2];
+        const metadata = this.getMetadata();
+        const hasMetadata = Object.keys(metadata).length > 0;
+        let result = [hasMetadata ? 3 : 2];
+        // Metadata stores the defined pair explicitly, so v3 active rows can
+        // have a canonical order across importers. Legacy v2 stays byte-stable.
+        // Inactive row order still determines reveal order and is not sorted.
+        const active = hasMetadata ? [...this.subStats].sort((a, b) => a.stat.localeCompare(b.stat)) : this.subStats;
 
         result.push(DB.Artifacts.Sets.getId(this.set));
         result.push(this.rarity);
@@ -381,7 +508,7 @@ export class Artifact {
         result.push(DB.Artifacts.Mainstats.getId(this.mainStat) || 0);
         result.push(this.subStats.length);
 
-        for (const stat of this.subStats) {
+        for (const stat of active) {
             result.push(DB.Artifacts.Substats.getId(stat.stat));
 
             let substat = DB.Artifacts.Substats.get(stat.stat);
@@ -409,26 +536,35 @@ export class Artifact {
             result.push(value);
         }
 
+        if (hasMetadata) {
+            const suffix = serializeArtifactMetadata(metadata);
+            result.push(suffix.length, ...suffix);
+        }
         return result;
     }
 
     clone() {
-        return Artifact.deserialize(this.serialize());
+        const result = Artifact.deserialize(this.serialize());
+        if (result) {
+            result.setLocked(this.isLocked());
+            result.setGroups([...this.getGroups()]);
+        }
+        return result;
     }
 
     static deserialize(input) {
         let version = input.shift();
         let result = null;
 
-        if (version == 1 || version == 2) {
+        if (version == 1 || version == 2 || version == 3) {
             let set = DB.Artifacts.Sets.getKeyId(input.shift());
             if (!set) return null;
 
             let rarity = input.shift();
-            if (rarity < 1 || rarity > 5) return null;
+            if (!Number.isInteger(rarity) || rarity < 1 || rarity > 5) return null;
 
             let level = input.shift();
-            if (level < 0 || level > 20) return null;
+            if (!Number.isInteger(level) || level < 0 || level > 20) return null;
 
             let slot = DB.Artifacts.Slots.getKeyId(input.shift());
             if (!slot) return null;
@@ -437,7 +573,7 @@ export class Artifact {
             // if (!mainStat) return null;
 
             let substatCnt = input.shift();
-            if (substatCnt < 0 || substatCnt > 4) return null;
+            if (!Number.isInteger(substatCnt) || substatCnt < 0 || substatCnt > 4) return null;
 
             result = new Artifact(rarity, level, slot, set, mainStat);
 
@@ -450,7 +586,7 @@ export class Artifact {
 
             if (version >= 2) {
                 let unactivatedCnt = input.shift();
-                if (unactivatedCnt < 0 || unactivatedCnt > 4) return null;
+                if (!Number.isInteger(unactivatedCnt) || unactivatedCnt < 0 || substatCnt + unactivatedCnt > 4) return null;
 
                 for (let i = 1; i <= unactivatedCnt; ++i) {
                     let data = Artifact.deserializeSubStat(input);
@@ -460,13 +596,37 @@ export class Artifact {
                 }
             }
 
+            const legacy = version < 3 ? Artifact.legacyMetadata(result) : null;
             result.activateUnlockedSubstats();
+            if (legacy) result.setMetadata(legacy);
+            if (version === 3) {
+                const length = input.shift();
+                if (!Number.isInteger(length) || length < 4 || length > 14 || input.length < length) return null;
+                const metadata = deserializeArtifactMetadata(input.splice(0, length));
+                if (!metadata) return null;
+                result.setMetadata(metadata);
+                if (JSON.stringify(serializeArtifactMetadata(result.getMetadata())) !== JSON.stringify(serializeArtifactMetadata(metadata))) return null;
+            }
         }
 
         return result;
     }
 
+    // Deployed v1/v2 records stored no roll history. Below +4 no upgrade has happened,
+    // so the active lines are the start and each value is its first roll. A stored
+    // unactivated line also proves the start. Nothing else is inferred. Values
+    // imported from Irminsul get the same half-way correction as GOOD imports.
+    static legacyMetadata(artifact) {
+        artifact.subStats = artifact.subStats.map(({stat, value}) => ({stat, value: correctHalfwayValue(stat, artifact.rarity, value)}));
+        const unactivated = artifact.getUnactivatedSubStats();
+        if (artifact.level >= 4 && !unactivated.length) return null;
+        const initialValues = Object.fromEntries(unactivated.map(({stat, value}) => [stat, value]));
+        if (artifact.level < 4) for (const {stat, value} of artifact.subStats) initialValues[stat] = value;
+        return {totalRolls: artifact.subStats.length + Math.floor(artifact.level / 4), initialValues};
+    }
+
     static fromGood(data) {
+        if (!data || typeof data !== 'object' || Array.isArray(data)) return null;
         let setName = DB.Artifacts.Sets.getKeyIdGood(data.setKey);
         let setData = DB.Artifacts.Sets.get(setName);
         if (!setData) return null;
@@ -480,28 +640,34 @@ export class Artifact {
 
         if (!mainData.slots.includes(data.slotKey)) return null;
 
-        if (data.rarity < setData.minRarity && data.rarity > setData.maxRarity) return null;
+        if (!Number.isInteger(data.rarity) || data.rarity < setData.minRarity || data.rarity > setData.maxRarity) return null;
 
         let rarityData = DB.Artifacts.Rarity[data.rarity - 1];
-        if (data.level < 0 && data.level > rarityData.maxLevel) return null;
+        if (!Number.isInteger(data.level) || data.level < 0 || data.level > rarityData.maxLevel) return null;
 
         let result = new Artifact(data.rarity, data.level, data.slotKey, setName, mainStat);
+        const initialValues = {};
 
         let activeSubstats = Array.isArray(data.substats) ? data.substats : [];
-        let inactiveSubstats = Array.isArray(data.unactivatedSubstats) ? data.unactivatedSubstats : [];
+        // Only a 5★ can hold an unactivated line; lower rarities never expose one.
+        let inactiveSubstats = data.rarity === 5 && Array.isArray(data.unactivatedSubstats) ? data.unactivatedSubstats : [];
 
         if (activeSubstats.length) {
             if (activeSubstats.length > 4) return null;
 
             for (const item of activeSubstats) {
-                if (!item.key) {
+                if (!item || !item.key) {
                     continue;
                 }
                 let subStat = DB.Artifacts.Substats.getKeyIdGood(item.key);
                 if (!subStat) return null;
 
                 let value = item.value ?? item.initialValue;
+                if (!Number.isFinite(value) || value <= 0) return null;
+                value = correctHalfwayValue(subStat, data.rarity, displaySubstatValue(subStat, value));
                 result.addStat(subStat, value);
+                // Before +4 no upgrade has happened, so a value is still its first roll.
+                initialValues[subStat] = item.initialValue ?? (data.level < 4 ? value : undefined);
             }
         }
 
@@ -509,7 +675,7 @@ export class Artifact {
             if (activeSubstats.length + inactiveSubstats.length > 4) return null;
 
             for (const item of inactiveSubstats) {
-                if (!item.key) {
+                if (!item || !item.key) {
                     continue;
                 }
 
@@ -517,11 +683,26 @@ export class Artifact {
                 if (!subStat) return null;
 
                 let value = item.initialValue ?? item.value;
+                if (!Number.isFinite(value) || value <= 0) return null;
+                value = displaySubstatValue(subStat, value);
                 result.addUnactivatedStat(subStat, value);
+                initialValues[subStat] = value;
             }
         }
 
         result.activateUnlockedSubstats();
+        if (new Set(result.getAllSubStats().map(item => item.stat)).size !== result.getAllSubStats().length) return null;
+        const crafted = typeof data.elixirCrafted === 'boolean' ? data.elixirCrafted : data.elixerCrafted;
+        // Below +4 the active lines are the start, whether or not the source says so.
+        const totalRolls = Number.isInteger(data.totalRolls) ? data.totalRolls
+            : data.level < 4 ? result.getSubStats().length : undefined;
+        result.setMetadata({
+            initialValues, totalRolls, elixirCrafted: crafted,
+            definedSubstats: Object.prototype.hasOwnProperty.call(data, 'definedSubstats')
+                ? (Array.isArray(data.definedSubstats) ? data.definedSubstats.map(key => DB.Artifacts.Substats.getKeyIdGood(key)) : [])
+                : crafted === true ? result.getAllSubStats().slice(0, 2).map(item => item.stat) : undefined,
+        });
+        result.setLocked(data.lock === true);
 
         return result;
     }
@@ -577,7 +758,7 @@ export class Artifact {
         if (!statKey) return null;
 
         let value = input.shift();
-        if (value < 1) return null;
+        if (!Number.isFinite(value) || value < 1) return null;
 
         let substat = DB.Artifacts.Substats.get(statKey);
         if (!substat) return null;

@@ -9,11 +9,13 @@ import { Checkbox, FileInput, TextInput } from "../Components/Inputs/Input";
 import { ImporterGood } from "../../classes/Importer/Good";
 import { Lang } from "../Lang";
 import { Modal } from "../Modal";
-import { Serializer } from "../../classes/Serializer";
+import { planArtifactImport, prepareGoodImportAdded } from "../../classes/Importer/Good";
 import { RoundButton, TitledButton } from "../Components/Inputs/Buttons";
 import { Dropdown } from "../Components/Inputs/Dropdown";
 
 let lang = new Lang();
+
+export { prepareGoodImportAdded };
 
 export class GoodImportModal extends Modal {
     createContent() {
@@ -37,6 +39,7 @@ export class GoodImportComponent extends React.Component {
             actionAdd: true,
             actionUpdate: true,
             actionMissing: false,
+            applyLocks: false,
             groupNames: [""],
             manualGroupName: "",
         };
@@ -83,6 +86,10 @@ export class GoodImportComponent extends React.Component {
         this.setState({actionMissing: value});
     }
 
+    handleApplyLocks(value) {
+        this.setState({applyLocks: value});
+    }
+
     handleGroupName(items) {
         let result = items.map((i) => {return i.value;});
         if (result.length == 0) {
@@ -110,10 +117,15 @@ export class GoodImportComponent extends React.Component {
     handleConfirm() {
         if (!this.state.canImport) { return; }
 
+        if (this.state.actionUpdate) {
+            this.props.storage.updateMetadata(this.items.updated);
+        }
+
         if (this.state.actionAdd) {
-            for (let item of this.items.added) {
-                item.setGroups(this.state.groupNames);
-            }
+            prepareGoodImportAdded(this.items.added, {
+                applyLocks: this.state.applyLocks,
+                groupNames: this.state.groupNames,
+            });
             this.props.storage.addArtifacts(this.items.added);
         }
 
@@ -123,7 +135,7 @@ export class GoodImportComponent extends React.Component {
             }
         }
 
-        this.props.app.refresh();
+        this.props.app.refresh({objects: ['storage.artifacts']});
         this.handleClose();
     }
 
@@ -158,23 +170,7 @@ export class GoodImportComponent extends React.Component {
     }
 
     refreshItemsList(result) {
-        let existedHashes = this.props.storage.storageHashes();
-
-        for (let artifact of result.items) {
-            let hash = artifact.getHash();
-
-            if (existedHashes[hash]) {
-                this.items.matched.push(artifact);
-                delete existedHashes[hash];
-            } else {
-                this.items.added.push(artifact);
-            }
-        }
-
-        for (let hash of Object.keys(existedHashes)) {
-            let artifact = Artifact.deserialize(Serializer.unpack(hash));
-            this.items.missing.push(artifact);
-        }
+        this.items = planArtifactImport(this.props.storage.listArtifacts(), result.items);
 
         this.setState({
             count: result.items.length,
@@ -265,7 +261,18 @@ export class GoodImportComponent extends React.Component {
                             />
                         </ControlsBar>
                     </div>
-                    {/* <div className="gi-good-result-line">
+                    <div className="gi-good-result-line">
+                        <div className="title">{lang.get('good_import.import_locks')}</div>
+                        <div className="value">{this.items.added.filter((item) => item.isLocked()).length}</div>
+                        <div className="full">
+                            <Checkbox
+                                title={lang.get('good_import.action_locks')}
+                                checked={this.state.applyLocks}
+                                onChange={(checked) => this.handleApplyLocks(checked)}
+                            />
+                        </div>
+                    </div>
+                    <div className="gi-good-result-line">
                         <div className="title">{lang.get('good_import.import_updated')}</div>
                         <div className="value">{this.items.updated.length}</div>
                         <div className="full">
@@ -275,7 +282,7 @@ export class GoodImportComponent extends React.Component {
                                 onChange={(checked) => this.handleActionUpdate(checked)}
                             />
                         </div>
-                    </div> */}
+                    </div>
                     <div className="gi-good-result-line">
                         <div className="title">{lang.get('good_import.import_missing')}</div>
                         <div className="value">{this.items.missing.length}</div>

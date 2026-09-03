@@ -10,6 +10,7 @@ export class DialogContainer extends React.Component {
                 width={this.props.width}
                 height={this.props.height}
                 maxHeight={this.props.maxHeight}
+                centered={this.props.centered}
                 isVisible={this.props.isVisible}
                 addClass={this.props.addClass}
             >
@@ -48,6 +49,12 @@ class Modal extends React.Component {
     }
 
     resizeModal() {
+        // Content-sized dialogs can center in CSS without measuring transient
+        // accordion/SimpleBar heights. Existing fixed-height dialogs keep their sizing.
+        if (this.props.centered) {
+            this.el.style.width = this.props.width ? this.props.width + 'px' : null;
+            return;
+        }
         let left = 6;
         let top = 6;
         let width = 0;
@@ -97,7 +104,8 @@ class Modal extends React.Component {
 
     dialogNode() {
         let hiddenClass = this.props.isVisible ? '' : ' hidden';
-        let classPart = hiddenClass + (this.props.addClass ? ' '+ this.props.addClass : '');
+        let classPart = hiddenClass + (this.props.addClass ? ' '+ this.props.addClass : '')
+            + (this.props.centered ? ' dialog-centered' : '');
         return (
             <>
                 <div ref={el => this.el = el} className={'dialog' + classPart}>

@@ -1,5 +1,6 @@
 import $ from "jquery";
 import "../../../css/ui/Widget/Artifact.css"
+import "../../../css/Components/ArtifactCraftedBadge.css"
 import { Stats } from "../../classes/Stats";
 
 const defaultOpts = {
@@ -26,7 +27,11 @@ export class ArtifactWidget {
         }
 
         let html = '<div class="artifact-list-box-line">';
-        html += '<div class="artifact-list-box-image sprite sprite-artifact sprite-60 '+ imgClass +' '+ art.slot +'"></div>';
+        html += '<div class="artifact-list-box-image sprite sprite-artifact sprite-60 '+ imgClass +' '+ art.slot +'">';
+        if (art.isCrafted()) {
+            html += '<span class="artifact-crafted-badge" role="img" title="'+ UI.Lang.get('artifact_view.crafted') +'" aria-label="'+ UI.Lang.get('artifact_view.crafted') +'"></span>';
+        }
+        html += '</div>';
         html += '<div class="artifact-list-box-main">';
 
         html += '<div class="artifact-list-box-buttons">';

@@ -56,23 +56,17 @@ export function buildStatIndexMap(usedStats) {
     return getStatIndexMap();
 }
 
-// Variable name counter for WGSL (similar to JS variableName helper)
-let wgslVarCounter = 0n;
-
 /**
- * Generate unique WGSL variable name
- * @param {string} suffix - Optional suffix for readability
+ * Map expression-tree identities to stable names within one WGSL function.
+ * Declarations, reads and updates share the map without mutating the AST.
+ * @param {string} name - Original expression variable name
+ * @param {Object} opts - Function-local compilation options
  * @returns {string}
  */
-export function wgslVariableName(suffix) {
-    return (suffix || 'v') + '_' + (++wgslVarCounter);
-}
-
-/**
- * Reset WGSL variable counter
- */
-export function resetWGSLVariables() {
-    wgslVarCounter = 0n;
+export function wgslVariableName(name, opts) {
+    const names = opts.variableNames ??= new Map();
+    if (!names.has(name)) names.set(name, `local_${names.size}`);
+    return names.get(name);
 }
 
 /**
@@ -81,6 +75,7 @@ export function resetWGSLVariables() {
  * @property {Object} statIndex - Map of stat name to array index
  * @property {boolean} [useF32=true] - Legacy option metadata; production WGSL is fixed to f32
  * @property {string} [statsVar='stats'] - Name of stats array variable
+ * @property {Map<string, string>} variableNames - Variable names for one emitted function
  */
 
 /**
@@ -92,6 +87,7 @@ export function defaultWGSLOptions() {
         statIndex: {},
         useF32: true,
         statsVar: 'stats',
+        variableNames: new Map(),
     };
 }
 

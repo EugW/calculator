@@ -25,6 +25,7 @@ import { SuggestResult } from '../Components/SuggestResult';
 import { Tab } from "../Tab";
 import { TitledButton } from '../Components/Inputs/Buttons';
 import { WorkerFactorySuggestArtifacts } from '../../classes/WorkerFactory/SuggestArtifacts';
+import { loadArtifactSuggestPreferences, restoreArtifactSuggestPreferences, saveArtifactSuggestPreferences } from '../../classes/ArtifactSuggestPreferences';
 
 const MIN_THREADS = 1;
 const MAX_THREADS = 16;
@@ -48,10 +49,26 @@ export class BestArtifactTab extends Tab {
     }
 
     getSuggestData() {
+        // Tabs are mounted eagerly, but React may not have committed this
+        // component during the brief window immediately after Layout.init().
+        // Callers outside this tab must be able to fall back safely instead of
+        // reaching through an unset ref.
+        if (!this.component) {
+            return null;
+        }
+
+        // The cached filtered list is normally refreshed by render(). A caller
+        // on another tab can observe settings/storage changes before that
+        // render, so derive the list synchronously at the hand-off boundary.
+        this.component.filterArtifacts();
+
         const useGPU = this.component.state.gpuAvailable && this.component.state.useGPU;
         return {
-            artifacts: this.component.getFilteredArtifacts(),
-            settings: this.component.getSettings(),
+            artifacts: this.component.getFilteredArtifacts().slice(),
+            // WorkerFactorySuggestArtifacts adds normalized constraint fields
+            // to its input. Keep the live React state authoritative and give
+            // every consumer an isolated plain-data snapshot.
+            settings: cloneSuggestSettings(this.component.getSettings()),
             featureType: this.component.state.featureType,
             maxThreads: useGPU ? 1 : this.component.state.maxThreads,
             useGPU: useGPU,
@@ -70,6 +87,10 @@ export class BestArtifactTab extends Tab {
             />
         );
     }
+}
+
+function cloneSuggestSettings(settings) {
+    return JSON.parse(JSON.stringify(settings || {}));
 }
 
 class BestArtifact extends React.Component {
@@ -109,13 +130,19 @@ class BestArtifact extends React.Component {
                 },
                 required_sets: {},
             },
-            maxThreads: getBrowserNavigator().hardwareConcurrency || 4,
+            maxThreads: Math.max(MIN_THREADS, Math.min(MAX_THREADS, getBrowserNavigator().hardwareConcurrency || 4)),
             artifactFilter: false,
             gpuAvailable: false,
             useGPU: false,
         };
 
         this.setInitialSettings();
+        const saved = loadArtifactSuggestPreferences();
+        // Keep the preference separate from detected availability. A CPU-only
+        // visit must not erase the user's GPU choice, nor enable an absent GPU.
+        this.preferredGPU = saved?.useGPU;
+        Object.assign(this.state, restoreArtifactSuggestPreferences(this.state, saved), {useGPU: false});
+        this.savedPreferences = JSON.stringify(this.getPreferences());
 
         this.strings = {
             title: this.lang.get('tab_header.artifact_pool_suggest'),
@@ -147,9 +174,22 @@ class BestArtifact extends React.Component {
         this.isMountedForGPUCheck = true;
         checkWebGPUAvailability().then((available) => {
             if (this.isMountedForGPUCheck) {
-                this.setState({ gpuAvailable: available, useGPU: available });
+                this.setState({ gpuAvailable: available, useGPU: available && this.preferredGPU !== false });
             }
         });
+    }
+
+    componentDidUpdate() {
+        const preferences = this.getPreferences();
+        const serialized = JSON.stringify(preferences);
+        if (serialized !== this.savedPreferences && saveArtifactSuggestPreferences(preferences)) {
+            this.savedPreferences = serialized;
+        }
+    }
+
+    getPreferences() {
+        return {settings: this.state.settings, featureType: this.state.featureType,
+            maxThreads: this.state.maxThreads, useGPU: this.preferredGPU};
     }
 
     componentWillUnmount() {
@@ -287,7 +327,7 @@ class BestArtifact extends React.Component {
     }
 
     savedHashes() {
-        return this.props.app.storage.char.savedHashes();
+        return this.props.app.storage.char.savedHashes(this.props.app.storage.artifacts);
     }
 
     handleFeature(selectedItem) {
@@ -329,7 +369,7 @@ class BestArtifact extends React.Component {
         } else {
             slotSettings[slot] = selected;
         }
-        this.modifySettings('slot', slotSettings);
+        this.modifySettings('slots', slotSettings);
     }
 
     handleRequiredSets(slot, name) {
@@ -439,6 +479,11 @@ class BestArtifact extends React.Component {
 
     handleMaxThreads(value) {
         this.setState({ maxThreads: Math.max(MIN_THREADS, Math.min(MAX_THREADS, value)) });
+    }
+
+    handleUseGPU(checked) {
+        this.preferredGPU = checked;
+        this.setState({ useGPU: this.state.gpuAvailable && checked });
     }
 
     handleLockWindowOpen() {
@@ -706,7 +751,7 @@ class BestArtifact extends React.Component {
                             <div className="value right">
                                 <Checkbox
                                     checked={this.state.useGPU}
-                                    onChange={(checked) => this.setState({ useGPU: checked })}
+                                    onChange={(checked) => this.handleUseGPU(checked)}
                                 />
                             </div>
                             <div className="title">GPU</div>

@@ -3,7 +3,7 @@ import "../../../css/Components/ControlsBar.css"
 
 export function ControlsBar(props) {
     return (
-        <div className='controls-bar'>
+        <div className={'controls-bar' + (props.wrap ? ' wrap' : '')}>
         {React.Children.map(props.children, child => {
                 if (!child) return null;
                 if (child.type == ControlsBarDivider) {

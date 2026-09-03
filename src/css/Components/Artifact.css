@@ -96,6 +96,10 @@
     background-color: rgba(40, 28, 15, 0.7);
     cursor: pointer;
     margin: 2px 4px;
+    /* Native buttons are border-box in the UA stylesheet, which would crop
+    the 20px sprite cell to the 18px padding box and push the glyph off
+    center. Content-box restores the exact cell mapping. */
+    box-sizing: content-box;
 
     background-image: url("../../images/icons/editart.png");
     background-repeat: no-repeat;

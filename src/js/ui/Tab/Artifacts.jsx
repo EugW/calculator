@@ -12,6 +12,10 @@ import { Lang } from '../Lang';
 import { Tab } from "../Tab";
 import { StatsInfo } from './Artifacts/StatsInfo';
 import { RollsInfo } from './Artifacts/RollsInfo';
+import { ArtifactCraftModal } from '../Modal/ArtifactCraft';
+import { ArtifactReshapeModal } from '../Modal/ArtifactReshape';
+import { ArtifactUpgradeModal } from '../Modal/ArtifactUpgrade';
+import { ArtifactActionHistoryModal } from '../Modal/ArtifactActionHistory';
 
 let lang = new Lang();
 
@@ -32,6 +36,8 @@ export class ArtifactsTab extends Tab {
         this.component.setState({
             feature: this.app.getFeature(),
         });
+        this.component.craftModal?.invalidate();
+        this.component.upgradeModal?.invalidate();
     }
 
     createContent() {
@@ -63,6 +69,11 @@ export class ArtifactsView extends React.Component {
         return (
             <ReactTab title={this.strings.title}>
                 {this.tabContent()}
+                <ArtifactCraftModal ref={element => { this.craftModal = element; }} app={this.props.app} />
+                <ArtifactReshapeModal ref={element => { this.reshapeModal = element; }} app={this.props.app} />
+                <ArtifactUpgradeModal ref={element => { this.upgradeModal = element; }} app={this.props.app} />
+                <ArtifactActionHistoryModal ref={element => { this.historyModal = element; }} app={this.props.app}
+                    onOpen={(entry, result) => this.openHistoryEntry(entry, result)} />
             </ReactTab>
         );
     }
@@ -155,6 +166,14 @@ export class ArtifactsView extends React.Component {
         }
     }
 
+    openHistoryEntry(entry, result) {
+        if (!entry || !result) return;
+        this.historyModal?.close();
+        if (entry.kind === 'craft') this.craftModal?.showHistoryEntry(entry, result);
+        else if (entry.kind === 'reshape') this.reshapeModal?.showHistoryEntry(entry, result);
+        else if (entry.kind === 'upgrade') this.upgradeModal?.showHistoryEntry(entry, result);
+    }
+
     tabContent() {
         let data = this.props.app.getStats();
         let conditions = this.props.app.getConditions({objects: ['artifacts']});
@@ -175,7 +194,7 @@ export class ArtifactsView extends React.Component {
         return (
             <FullHeight>
                 <FullHeightStatic>
-                    <ControlsBar>
+                    <ControlsBar wrap>
                         <TitledButton
                             icon="icon-scan"
                             title={this.strings.scan}
@@ -192,6 +211,16 @@ export class ArtifactsView extends React.Component {
                             title={this.strings.clear}
                             onClick={() => this.handleClearClick()}
                         />
+                        <ControlsBarDivider />
+                        <TitledButton icon="icon-add" title={lang.get('artifact_action.craft')}
+                            onClick={() => this.craftModal.show()} />
+                        <TitledButton icon="icon-settings" title={lang.get('artifact_action.reshape')}
+                            onClick={() => this.reshapeModal.show()} />
+                        <TitledButton icon="icon-edit" title={lang.get('artifact_action.upgrade_title')}
+                            onClick={() => this.upgradeModal.show()} />
+                        <ControlsBarDivider />
+                        <TitledButton icon="icon-load" title={lang.get('artifact_action.history')}
+                            onClick={() => this.historyModal.show()} />
                     </ControlsBar>
                 </FullHeightStatic>
                 <FullHeightScrollable>

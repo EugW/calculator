@@ -8,7 +8,6 @@ tab_header;share_view;Мои персонажи;My characters
 tab_header;char;Персонаж;Character
 tab_header;weapon;Оружие;Weapon
 tab_header;artifacts;Артефакты;Artifacts
-tab_header;artifact_upgrade;Прокачка артефактов;Artifact upgrade
 tab_header;enemy;Противник;Enemy
 tab_header;settings_view;Настройки;Settings
 tab_header;rotation;Ротация;Rotation

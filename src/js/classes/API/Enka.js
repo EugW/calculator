@@ -1,6 +1,7 @@
 import { Artifact } from "../Artifact";
 import { CalcSet } from "../CalcSet";
 import { prepareUid } from "./Uid";
+import { ENKA_AFFIXES } from "./EnkaAffixes";
 
 // Numeric UID -> current showcase (no trailing slash!)
 const API_UID = '/back/proxy/enka/uid/<uid>';
@@ -63,6 +64,7 @@ export class EnkaApi {
         } catch(e) {
             return null;
         }
+        if (!json || typeof json !== 'object' || Array.isArray(json)) return null;
 
         if (mode === 'uid') {
             return this.processUidData(json);
@@ -133,7 +135,9 @@ export class EnkaApi {
 
         for (let avatarId of Object.keys(json)) {
             let builds = json[avatarId];
+            if (!Array.isArray(builds)) continue;
             for (let build of builds) {
+                if (!build?.avatar_data) continue;
                 let calcset = processChar(build.avatar_data);
                 if (calcset) {
                     characters.push({
@@ -241,8 +245,8 @@ function processChar(data) {
         set.setCharSkills(skillLevels);
 
         let weaponData;
-        for (let item of data.equipList) {
-            if (item.weapon) {
+        for (let item of data.equipList || []) {
+            if (item?.weapon) {
                 weaponData = item;
             }
         }
@@ -277,38 +281,55 @@ function processChar(data) {
 }
 
 function listArtifacts(data) {
-    let artifactData = [];
-    let result = [];
+    return (Array.isArray(data) ? data : []).map(importEnkaArtifact).filter(Boolean);
+}
 
-    for (let item of data) {
-        if (item.reliquary) {
-            artifactData.push(item);
-        }
+export function importEnkaArtifact(item) {
+    if (!item?.reliquary || !item.flat?.reliquaryMainstat) return null;
+    try {
+        const main = DB.Artifacts.Mainstats.get(DB.Artifacts.Mainstats.getKeyIdGame(item.flat.reliquaryMainstat.mainPropId));
+        const set = DB.Artifacts.Sets.get(DB.Artifacts.Sets.getKeyByItem(item.itemId));
+        const substats = (item.flat.reliquarySubstats || []).map(ss => ({
+            key: DB.Artifacts.Substats.get(DB.Artifacts.Substats.getKeyIdGame(ss.appendPropId))?.goodId,
+            value: ss.statValue,
+        }));
+        if (!main || !set || substats.some(ss => !ss.key)) return null;
+        const art = Artifact.fromGood({
+            setKey: set.getGoodId(), slotKey: SLOT_DATA[item.flat.equipType],
+            rarity: item.flat.rankLevel, level: item.reliquary.level - 1,
+            mainStatKey: main.goodId, substats,
+        });
+        if (!art) return null;
+        art.setMetadata({...art.getMetadata(), ...enkaRollMetadata(art, item.reliquary.appendPropIdList)});
+        return art;
+    } catch (error) {
+        // A malformed or newly introduced item must not discard the character.
+        return null;
     }
+}
 
-    for (let item of artifactData) {
-        let mainStat = DB.Artifacts.Mainstats.getKeyIdGame(item.flat.reliquaryMainstat.mainPropId);
-        let setId = DB.Artifacts.Sets.getKeyByItem(item.itemId);
-        let slot = SLOT_DATA[item.flat.equipType];
-        let rarity = item.flat.rankLevel;
-        let level = item.reliquary.level - 1;
-
-        let subStats = [];
-        for (let ss of item.flat.reliquarySubstats) {
-            let stat = DB.Artifacts.Substats.getKeyIdGame(ss.appendPropId);
-            if (stat) {
-                subStats.push({
-                    stat: stat,
-                    value: ss.statValue,
-                });
-            }
-        }
-
-        let art = new Artifact(rarity, level, slot, setId, mainStat, subStats);
-        result.push(art);
+function enkaRollMetadata(artifact, ids) {
+    if (!Array.isArray(ids) || ids.length > 9) return {};
+    const byStat = {};
+    for (const id of ids) {
+        const affix = ENKA_AFFIXES[id];
+        if (!affix || Math.floor(Number(id) / 100000) !== artifact.rarity) return {};
+        const [stat, value] = affix;
+        (byStat[stat] ||= []).push(value);
     }
-
-    return result;
+    if (Object.keys(byStat).length !== artifact.subStats.length) return {};
+    const initialValues = {};
+    for (const {stat, value} of artifact.subStats) {
+        const rolls = byStat[stat];
+        if (!rolls) return {};
+        const scale = DB.Artifacts.Substats.get(stat).type === 'percent' ? 10 : 1;
+        const sum = rolls.reduce((a, b) => a + b, 0);
+        if (Math.round((sum + 0.00001) * scale) !== Math.round(value * scale)) return {};
+        // Enka documents the roll IDs, not their chronological order. A single
+        // roll quality is unambiguous regardless of ordering; mixed tiers are not.
+        if (new Set(rolls).size === 1) initialValues[stat] = Math.round(rolls[0] * scale) / scale;
+    }
+    return {totalRolls: ids.length, initialValues};
 }
 
 function shuffleArray(array) {

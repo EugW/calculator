@@ -3,14 +3,18 @@ import '../../../../css/Components/Inputs/Buttons.css'
 
 export class TitledButton extends React.PureComponent {
     render() {
+        const Tag = this.props.type ? 'button' : 'div';
         return (
-            <div
-                className={'inputs-button' + (this.props.disabled ? ' disabled' : '')}
+            <Tag
+                className={'inputs-button' + (this.props.type ? ' native' : '') + (this.props.disabled ? ' disabled' : '')}
+                type={this.props.type}
+                disabled={this.props.type ? this.props.disabled : undefined}
+                autoFocus={this.props.type ? this.props.autoFocus : undefined}
                 onClick={this.props.disabled ? undefined : this.props.onClick}
             >
                 <span className={'inputs-button-icon ' + this.props.icon} />
                 {this.props.title}
-            </div>
+            </Tag>
         );
     }
 }

@@ -1,0 +1,4 @@
+.pager { display: flex; align-items: center; gap: 10px; font-size: 12px; color: #BEAEA9; }
+.pager .inputs-text { width: 65px; }
+.pager button.inputs-button { width: 32px; height: 32px; padding: 0; display: inline-flex; align-items: center; justify-content: center; border: 0; border-radius: 50%; font: inherit; font-size: 26px; line-height: 1; }
+.pager button:disabled { opacity: .4; cursor: default; }

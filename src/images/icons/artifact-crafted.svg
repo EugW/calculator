@@ -1,0 +1,7 @@
+<!-- Calculator-native crafted badge; not an extracted in-game asset. -->
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 24 24">
+  <circle cx="12" cy="12" r="11" fill="#30233f" stroke="#d0a4ff" stroke-width="1.5"/>
+  <path d="M9 5h6M10 5v5l-4 7c-.5 1 .2 2 1.3 2h9.4c1.1 0 1.8-1 1.3-2l-4-7V5" fill="none" stroke="#d0a4ff" stroke-linecap="round" stroke-linejoin="round" stroke-width="1.5"/>
+  <path d="M9 14h6l2 4H7z" fill="#bb83ef"/>
+  <path d="m18 4 .7 1.7L20.5 6l-1.8.6L18 8l-.6-1.4L16 6l1.4-.3z" fill="#f5eaff"/>
+</svg>

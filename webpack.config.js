@@ -21,6 +21,14 @@ module.exports = (env, argv) => {
             chunkFilename: 'js/[id]_[chunkhash].js',
             clean: true,
         },
+        // Persistent cache: restarts and watch rebuilds reuse module results
+        // (lives in node_modules/.cache, never committed).
+        cache: {
+            type: 'filesystem',
+            buildDependencies: {
+                config: [__filename],
+            },
+        },
         plugins: [
             new webpack.DefinePlugin({
                 __VERSION__: JSON.stringify(pkg.version),
@@ -39,7 +47,7 @@ module.exports = (env, argv) => {
                 templateParameters: {
                     'version': pkg.version,
                 },
-                excludeChunks: ['cli'],
+                    excludeChunks: ['cli'],
             }),
             new CopyPlugin({
                 patterns: [
@@ -109,5 +117,19 @@ module.exports = (env, argv) => {
             ],
         },
         devtool: argv.mode === 'development' ? 'eval-source-map' : false,
+        // Memory serve for development (`npm run serve`): the bundle comes
+        // from memory with live reload; dist/ on disk covers copied assets
+        // (images/help/lang) from the last full build.
+        devServer: {
+            static: {
+                directory: path.join(__dirname, 'dist'),
+            },
+            port: 3000,
+            liveReload: true,
+            hot: false,
+            client: {
+                overlay: true,
+            },
+        },
     };
 };

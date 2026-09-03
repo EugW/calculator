@@ -13,6 +13,7 @@
 .gi-good-result-line {
     width: 100%;
     display: flex;
+    align-items: flex-start;
 }
 
 .gi-good-result-line.big {
@@ -25,7 +26,7 @@
 }
 
 .gi-good-result-line > div {
-    height: 30px;
+    min-height: 30px;
     line-height: 30px;
 }
 
@@ -41,8 +42,21 @@
 
 .gi-good-result-line .full {
     flex-grow: 1;
+    min-width: 0;
 }
 
 .gi-good-result-line .group {
     width: 100%;
+}
+
+.gi-window-good .checkbox-wrapper {
+    height: auto;
+    min-height: 30px;
+}
+
+.gi-window-good .checkbox-label {
+    line-height: 20px;
+    padding-top: 5px;
+    padding-bottom: 5px;
+    white-space: normal;
 }

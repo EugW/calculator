@@ -37,7 +37,6 @@ import { ArtifactSetTab } from './ui/Tab/ArtifactSetTab';
 import { ArtifactsGeneratorTab } from './ui/Tab/ArtifactsGenerator';
 import { ArtifactsStorageTab } from './ui/Tab/ArtifactStorage';
 import { ArtifactsTab } from './ui/Tab/Artifacts';
-import { ArtifactUpgradePredictorTab } from './ui/Tab/ArtifactUpgradePredictor';
 import { ArtifactSubstatTab } from './ui/Tab/ArtifactSubstatTab';
 import { ArtifactTooltip } from './ui/Components/ArtifactTooltip.jsx';
 import { ArtifactWindow } from './ui/Window/ArtifactWindow'
@@ -85,7 +84,6 @@ window.UI = {
     ArtifactsGeneratorTab: new ArtifactsGeneratorTab(),
     SettingsTab: new SettingsTab(),
     ArtifactSubstatTab: new ArtifactSubstatTab(),
-    ArtifactUpgradePredictorTab: new ArtifactUpgradePredictorTab({position: 'right'}),
     BestArtifactTab: new BestArtifactTab({position: 'right'}),
     BuffsTab: new BuffsTab({position: 'right'}),
     CharTab: new CharTab({position: 'right'}),

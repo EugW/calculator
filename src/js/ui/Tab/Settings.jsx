@@ -10,7 +10,8 @@ import { Accordion, AccordionItem } from '../Components/Accordion';
 import { GroupBox } from '../Components/Inputs/GroupBox';
 import { TitledButton } from '../Components/Inputs/Buttons';
 import { Dropdown } from '../Components/Inputs/Dropdown';
-import { Checkbox, CheckboxList, FileInput } from '../Components/Inputs/Input';
+import { Checkbox, CheckboxList, FileInput, NumberInput } from '../Components/Inputs/Input';
+import { normalizePrepWorkers } from '../../classes/ArtifactActionPredictor';
 import { Backup } from '../../classes/Backup';
 import {
     GPU_TOP_K_MAX_BATCH_COMBINATIONS,
@@ -176,6 +177,11 @@ export class SettingsView extends React.Component {
         this.refresh();
     }
 
+    handleArtifactActionWorkers(value) {
+        this.props.app.setSetting('artifact_action_workers', normalizePrepWorkers(value));
+        this.refresh();
+    }
+
     getGpuBatchSize() {
         const value = normalizeGPUOptimizerBatchSize(
             this.props.app.getSetting(GPU_BATCH_SIZE_SETTING)
@@ -292,6 +298,14 @@ export class SettingsView extends React.Component {
                                     />
                                 </div>
                                 <div className="settings-gpu-note">{lang.get('settings_view.gpu_batch_size_note')}</div>
+                                <label className="settings-gpu-row">
+                                    <span className="settings-gpu-row-title">{lang.get('settings_view.artifact_action_workers')}</span>
+                                    <NumberInput addClass="settings-action-workers" nonEmpty clampValue
+                                        minValue={1} maxValue={globalThis.navigator?.hardwareConcurrency || 1}
+                                        value={normalizePrepWorkers(this.props.app.getSetting('artifact_action_workers'))}
+                                        onChange={value => this.handleArtifactActionWorkers(value)} />
+                                </label>
+                                <div className="settings-gpu-note">{lang.get('settings_view.artifact_action_workers_note')}</div>
                             </AccordionItem>
                             <AccordionItem id="beta" title={lang.get('settings_view.beta')}>
                                 <Checkbox

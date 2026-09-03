@@ -1,3 +1,16 @@
+/** Display-only count abbreviation. Keep small counts exact, otherwise use three
+ * significant digits and promote rounded boundaries (999,500 -> 1M).
+ */
+export function formatCompactCount(value) {
+    const count = Number.isFinite(value) ? Math.max(0, Math.round(value)) : 0;
+    if (count < 1000) return String(count);
+    const rounded = Number(count.toPrecision(3));
+    if (rounded >= 1e15) return rounded.toExponential().replace('e+', 'E');
+    for (const [scale, suffix] of [[1e12, 'T'], [1e9, 'B'], [1e6, 'M'], [1e3, 'K']]) {
+        if (rounded >= scale) return Number((rounded / scale).toPrecision(3)) + suffix;
+    }
+}
+
 export function formatNumber(value, opts) {
     opts ||= {};
 

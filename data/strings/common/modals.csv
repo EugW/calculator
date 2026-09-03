@@ -4,6 +4,7 @@ modal;disclaimer;Внимание;Disclaimer
 modal;disclaimer_text;Это всего лишь превью версия. Калькулятор в процессе разработки.;This is preview version. Work is still in progress.
 modal_buttons;confirm;Подтвердить;Confirm
 modal_buttons;cancel;Отмена;Cancel
+modal_buttons;close;Закрыть;Close
 modal_buttons;reset;Сбросить;Reset
 modal_buttons;save;Сохранить;Save
 modal_buttons;gotit;Понятно;Got it

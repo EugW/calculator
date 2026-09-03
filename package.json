@@ -7,17 +7,19 @@
         "build": "npm run build:lang && webpack --mode=production",
         "build:lang": "python bin/gen_string_table.py base casino",
         "watch": "npm run build:lang && webpack --mode=development --watch",
+        "serve": "webpack serve --mode=development",
         "build:draft": "npm run build:draft:lang && webpack --config ./webpack.config.draft.js --mode=production",
         "build:draft:lang": "python bin/gen_string_table.py draft",
         "watch:draft": "npm run build:draft:lang && webpack --config ./webpack.config.draft.js --mode=development --watch",
         "dev:backend": "cd backend && bun run index.ts",
         "dev": "npm run build:lang && npx concurrently -n webpack,backend -c cyan,green \"webpack --mode=development --watch\" \"npm run dev:backend\"",
-        "test": "jest"
+        "test": "node --experimental-vm-modules ./node_modules/jest/bin/jest.js",
+        "test:gpu": "node --experimental-vm-modules ./node_modules/jest/bin/jest.js test/gpuFusedNode.test.js"
     },
     "jest": {
         "cache": false,
         "verbose": true,
-        "testRegex": ".*.js$",
+        "testRegex": ".*\\.test\\.js$",
         "rootDir": "./test/",
         "transform": {
             "^.+\\.jsx?$": [
@@ -69,7 +71,9 @@
         "npm-watch": "^0.13.0",
         "style-loader": "^4.0.0",
         "terser-webpack-plugin": "^5.6.1",
+        "webgpu": "^0.6.1",
         "webpack": "^5.105.2",
-        "webpack-cli": "^7.2.3"
+        "webpack-cli": "^7.2.3",
+        "webpack-dev-server": "^6.0.0"
     }
 }

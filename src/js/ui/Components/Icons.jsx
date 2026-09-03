@@ -1,5 +1,9 @@
 import React from 'react';
 import "../../../css/Components/Icons.css"
+import "../../../css/Components/ArtifactCraftedBadge.css"
+import { Lang } from '../Lang';
+
+const lang = new Lang();
 
 export function CharIcon(props) {
     let size = props.size || 80;
@@ -63,6 +67,7 @@ export function ArtifactIcon(props) {
             addClass={props.addClass}
             slot={props.artifact.getSlot()}
             locked={props.locked}
+            crafted={props.artifact.isCrafted()}
             onClick={props.onClick}
         />
     );
@@ -92,6 +97,8 @@ export function ArtifactSetIcon(props) {
         >
             <div className={`sprite sprite-artifact ${slotName} sprite-${size} ${artSet ? artSet.getImage() : 'artifact-icon-unknown'}`} />
             {props.locked ? <div className="locked" /> : ''}
+            {props.crafted ? <span className="artifact-crafted-badge" role="img"
+                title={lang.get('artifact_view.crafted')} aria-label={lang.get('artifact_view.crafted')} /> : null}
         </div>
     );
 }

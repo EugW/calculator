@@ -74,7 +74,7 @@ class ArtifactSetSelectComponent extends ModalSelectBase {
         for (let item of this.items) {
             item.selected = this.state.selectedId == item.id;
             item.hidden = this.state.weaponType && this.state.weaponType != item.weapon
-                || this.state.minRarity && this.state.rarity < this.state.minRarity
+                || this.state.minRarity && item.rarity < this.state.minRarity
                 || this.state.slot && !item.item.canEquipSlot(this.state.slot)
                 || item.beta && !showBeta
             ;

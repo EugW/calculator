@@ -16,9 +16,11 @@ good_import;status_error_1;Ошибка;Error
 good_import;status_error_2;Ошибка;Error
 
 good_import;import_added;Новые;New
-good_import;import_updated;Обновлённые;Updated
+good_import;import_updated;Новые метаданные;New metadata
 good_import;import_missing;Нет в Хранилище;Not in Storage
 
 good_import;action_added;Добавить в Хранилише;Add to Storage
-good_import;action_updated;Обновить в Хранилише;Update existed
+good_import;action_updated;Дополнить в Хранилище;Enrich existing artifacts
 good_import;action_missing;Удалить из Хранилища;Delete from Storage
+good_import;import_locks;Новые заблокированные;Locked new
+good_import;action_locks;Применить игровые замки;Apply game locks

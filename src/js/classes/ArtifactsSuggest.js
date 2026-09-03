@@ -4,6 +4,10 @@ import { Condition } from "./Condition";
 import { FeatureCompiler } from "./Feature2/Compiler";
 import { Stats } from "./Stats";
 import { GPUArtifactOptimizer } from "./GPUArtifactOptimizer";
+import { GPUForcedOutcomeOptimizer, chunkDenseBlocks, FUSED_CHUNK_LIMIT, packForcedOutcomeInputs,
+    reduceForcedOutcomeReadback } from "./GPUForcedOutcomeOptimizer";
+import { GPU_SLOT_NAMES } from "./GPUOptimizerInputs";
+import { GPUDeviceContext } from "./GPUDeviceContext";
 import {
     GPU_TOP_K_CAPACITY,
     normalizeGPUOptimizerBatchSize,
@@ -22,8 +26,10 @@ import { compileOptimizationPlanCPU } from "./OptimizationPlanCPU";
 
 const DYNAMIC_STATS = ['crit_value'];
 
-// Global GPU optimizer instance (reused across optimizations)
+// Worker-local device, with independent pipeline/resource owners.
+const gpuContext = new GPUDeviceContext();
 let gpuOptimizer = null;
+let forcedOutcomeOptimizer = null;
 
 export class ArtifactsSuggest {
     constructor(data) {
@@ -294,14 +300,18 @@ export class ArtifactsSuggest {
             goblet: [],
             circlet: [],
         };
+        this.explicitArtifactCache = new WeakMap();
+        this.explicitArtifactSetSlots = new Map(
+            Object.keys(this.slots).map((slot) => [slot, new Set()])
+        );
         this.setNames = {};
         this.totalCombinations = 1;
 
         for (let art of this.artifacts) {
             this.setNames[art.set] = 1;
 
-            art.calcCache(this.usedStats);
-            art.concatFunc = art.calculated.getConcatFunc();
+            this.prepareExplicitArtifact(art);
+            this.explicitArtifactSetSlots.get(art.slot).add(art.set);
             this.slots[art.slot].push(art);
         }
 
@@ -310,14 +320,15 @@ export class ArtifactsSuggest {
                 let curArt = this.currentArts[slot];
                 if (curArt) {
                     this.setNames[curArt.set] = 1;
-                    curArt.calcCache(this.usedStats);
-                    curArt.concatFunc = curArt.calculated.getConcatFunc();
+                    this.prepareExplicitArtifact(curArt);
+                    this.explicitArtifactSetSlots.get(slot).add(curArt.set);
                     this.slots[slot].push(curArt);
                 } else {
                     let emptyArtifact = new Artifact(5, 0, slot, 'none', 'none', []);
                     emptyArtifact.isEmpty = true;
-                    emptyArtifact.calculated = new Stats();
-                    emptyArtifact.concatFunc = emptyArtifact.calculated.getConcatFunc();
+                    this.setNames[emptyArtifact.set] = 1;
+                    this.prepareExplicitArtifact(emptyArtifact);
+                    this.explicitArtifactSetSlots.get(slot).add(emptyArtifact.set);
                     this.slots[slot].push(emptyArtifact);
                 }
             }
@@ -547,6 +558,197 @@ export class ArtifactsSuggest {
         return result;
     }
 
+    /**
+     * Evaluate one explicit, already-correlated artifact combination through
+     * the prepared authoritative CPU plan. Missing slots are treated as empty;
+     * duplicate slots are invalid. The artifacts do not have to be members of
+     * the original candidate array, but their slots and sets must belong to the
+     * topology for which this suggester was prepared.
+     *
+     * @param {Artifact[]} artifacts at most one artifact per slot
+     * @param {Artifact|null} transientArtifact an outcome to score without
+     * retaining numerical caches or a generated concatenation function
+     * @returns {number|undefined} finite f64 objective, or undefined when the
+     * combination violates complete-set/stat constraints or has no variation
+     */
+    evaluateArtifactCombination(artifacts, transientArtifact = null) {
+        if (
+            !this.cpuOptimizationProgram ||
+            !this.buildData ||
+            !this.setData ||
+            !this.slots ||
+            !this.explicitArtifactCache ||
+            !this.explicitArtifactSetSlots
+        ) {
+            throw new Error('Artifact suggester must be prepared before evaluating a combination');
+        }
+        if (!Array.isArray(artifacts)) {
+            throw new TypeError('Artifact combination must be an array');
+        }
+
+        let artSets = {};
+        let usedSlots = new Set();
+
+        for (let artifact of artifacts) {
+            if (
+                !artifact ||
+                typeof artifact.getSlot !== 'function' ||
+                typeof artifact.getSet !== 'function' ||
+                typeof artifact.calcCache !== 'function'
+            ) {
+                throw new TypeError('Artifact combination contains an invalid artifact');
+            }
+
+            let slot = artifact.getSlot();
+            if (!Object.prototype.hasOwnProperty.call(this.slots, slot)) {
+                throw new RangeError(`Artifact combination contains unknown slot "${slot}"`);
+            }
+            if (usedSlots.has(slot)) {
+                throw new RangeError(`Artifact combination contains more than one "${slot}" artifact`);
+            }
+            usedSlots.add(slot);
+
+            let setName = artifact.getSet();
+            if (!this.explicitArtifactSetSlots.get(slot).has(setName)) {
+                throw new RangeError(
+                    `Artifact set "${setName}" in slot "${slot}" is outside the prepared optimizer topology`
+                );
+            }
+
+            if (artifact !== transientArtifact) this.prepareExplicitArtifact(artifact);
+            artSets[setName] = (artSets[setName] || 0) + 1;
+        }
+
+        if (this.cpuOptimizationProgram.rejectsCompleteSetsTrusted(artSets)) {
+            return undefined;
+        }
+
+        let variationId = this.cpuOptimizationProgram.resolveVariationIdTrusted(artSets);
+        if (variationId === undefined) {
+            return undefined;
+        }
+
+        let artStats = new Stats(this.buildData.stats);
+        for (let artifact of artifacts) {
+            if (artifact === transientArtifact) {
+                // Forced outcomes are each rescored once. Do not retain a
+                // Stats object/cache/generated function for millions of them.
+                const calculated = artifact.calcOptimizerStats(this.usedStats);
+                for (const stat of Object.keys(calculated)) artStats[stat] += calculated[stat];
+            } else {
+                artifact.concatFunc(artStats);
+            }
+        }
+
+        for (let setName in artSets) {
+            let setData = this.setData[setName] && this.setData[setName][artSets[setName]];
+            if (setData && setData.concatFunc) {
+                setData.concatFunc(artStats);
+            }
+        }
+
+        return this.cpuOptimizationProgram.evaluate(variationId, artStats);
+    }
+
+    /**
+     * Rescore many forced outcomes of one run (same target slot and set):
+     * scorer(outcome, key, decode) equals
+     * evaluateArtifactCombination([outcome, ...decode()], outcome), bit for bit.
+     * Validation, set counts, the variation and set-bonus functions are
+     * resolved once per distinct companion build (`key`), the base stats copy
+     * is precompiled, and outcome stats use the shared exact lowering.
+     * Additions keep the original order: base, outcome, companions, sets.
+     * Returns {value, complement}; value is undefined when rejected.
+     */
+    createForcedOutcomeScorer(targetSlot, outcomeSet) {
+        if (!this.cpuOptimizationProgram || !this.buildData || !this.setData || !this.slots
+            || !this.explicitArtifactSetSlots) {
+            throw new Error('Artifact suggester must be prepared before evaluating a combination');
+        }
+        if (!this.explicitArtifactSetSlots.get(targetSlot)?.has(outcomeSet)) {
+            throw new RangeError(
+                `Artifact set "${outcomeSet}" in slot "${targetSlot}" is outside the prepared optimizer topology`
+            );
+        }
+        const base = this.buildData.stats;
+        // Constant property names keep the per-outcome copy monomorphic.
+        const copyBase = Function('Stats', 'base', `return function () {
+    const stats = new Stats();
+${Object.keys(base).map(stat => `    stats[${JSON.stringify(stat)}] = base[${JSON.stringify(stat)}];`).join('\n')}
+    return stats;
+};`)(Stats, base);
+        const lower = Artifact.createOptimizerStatsLowering(this.usedStats);
+        const complements = new Map();
+        const prepare = complement => {
+            const artSets = {[outcomeSet]: 1};
+            const usedSlots = new Set([targetSlot]);
+            for (const artifact of complement) {
+                if (!artifact || typeof artifact.getSlot !== 'function' || typeof artifact.getSet !== 'function'
+                    || typeof artifact.calcCache !== 'function') {
+                    throw new TypeError('Artifact combination contains an invalid artifact');
+                }
+                const slot = artifact.getSlot();
+                if (!Object.prototype.hasOwnProperty.call(this.slots, slot)) {
+                    throw new RangeError(`Artifact combination contains unknown slot "${slot}"`);
+                }
+                if (usedSlots.has(slot)) {
+                    throw new RangeError(`Artifact combination contains more than one "${slot}" artifact`);
+                }
+                usedSlots.add(slot);
+                const setName = artifact.getSet();
+                if (!this.explicitArtifactSetSlots.get(slot).has(setName)) {
+                    throw new RangeError(
+                        `Artifact set "${setName}" in slot "${slot}" is outside the prepared optimizer topology`
+                    );
+                }
+                this.prepareExplicitArtifact(artifact);
+                artSets[setName] = (artSets[setName] || 0) + 1;
+            }
+            const variationId = this.cpuOptimizationProgram.rejectsCompleteSetsTrusted(artSets)
+                ? undefined : this.cpuOptimizationProgram.resolveVariationIdTrusted(artSets);
+            const setFuncs = [];
+            for (const setName in artSets) {
+                const setData = this.setData[setName] && this.setData[setName][artSets[setName]];
+                if (setData && setData.concatFunc) setFuncs.push(setData.concatFunc);
+            }
+            return {complement, variationId, setFuncs};
+        };
+        return (outcome, key, decode) => {
+            let entry = complements.get(key);
+            if (!entry) {
+                entry = prepare(decode());
+                complements.set(key, entry);
+            }
+            if (entry.variationId === undefined) return {value: undefined, complement: entry.complement};
+            const stats = copyBase();
+            const {keys, values, length} = lower(outcome);
+            for (let i = 0; i < length; ++i) stats[keys[i]] += values[i];
+            for (const artifact of entry.complement) artifact.concatFunc(stats);
+            for (const concat of entry.setFuncs) concat(stats);
+            return {value: this.cpuOptimizationProgram.evaluate(entry.variationId, stats), complement: entry.complement};
+        };
+    }
+
+    /** Keep artifact stat lowering valid across different prepared suggesters. */
+    prepareExplicitArtifact(artifact) {
+        let cached = this.explicitArtifactCache && this.explicitArtifactCache.get(artifact);
+        if (
+            cached &&
+            cached.calculated === artifact.calculated &&
+            cached.concatFunc === artifact.concatFunc
+        ) {
+            return;
+        }
+
+        artifact.calcCache(this.usedStats);
+        artifact.concatFunc = artifact.calculated.getConcatFunc();
+        this.explicitArtifactCache ||= new WeakMap();
+        this.explicitArtifactCache.set(artifact, {
+            calculated: artifact.calculated,
+            concatFunc: artifact.concatFunc,
+        });
+    }
+
     getResult(callback) {
         let combination;
         let results = [];
@@ -583,6 +785,10 @@ export class ArtifactsSuggest {
             }
 
             ++this.currentCombinations;
+            // Keep this trillion-scale hot loop inlined. The public explicit
+            // scorer above deliberately performs boundary validation and lazy
+            // artifact preparation that would be wasteful for enumerated pool
+            // artifacts; parity tests keep both semantic paths aligned.
             artSets = {};
             artifacts = combination.value;
             artStats = new Stats();
@@ -651,29 +857,10 @@ export class ArtifactsSuggest {
      * @returns {Promise<Array>}
      */
     async getResultGPU(callback) {
-        if (this.requestedLimit !== GPU_TOP_K_CAPACITY) {
-            throw new RangeError(
-                `GPU optimizer result limit is fixed at ${GPU_TOP_K_CAPACITY}; got ${this.requestedLimit}`
-            );
-        }
-
-        // A worker can be reused after adapter/device loss. Recreate the
-        // optimizer whenever its device is absent instead of caching an
-        // unusable instance for every later run.
-        if (!gpuOptimizer || !gpuOptimizer.device) {
-            gpuOptimizer = new GPUArtifactOptimizer();
-            const initialized = await gpuOptimizer.initialize();
-            if (!initialized) {
-                gpuOptimizer = null;
-                throw new Error('WebGPU is unavailable on this device');
-            }
-        }
-
-        // The pipeline is bound to the same semantic plan as the CPU lowerer.
-        await gpuOptimizer.preparePipeline(this.optimizationPlan, this.buildData);
+        const optimizer = await this.prepareGPUOptimizer();
 
         // Run GPU optimization
-        const results = await gpuOptimizer.optimize({
+        const results = await optimizer.optimize({
             slots: this.slots,
             buildData: this.buildData,
             setData: this.setData,
@@ -682,8 +869,8 @@ export class ArtifactsSuggest {
             callback: callback,
         });
         this.gpuProfile = {
-            prepare: gpuOptimizer.lastPrepareProfile,
-            optimize: gpuOptimizer.lastOptimizeProfile,
+            prepare: optimizer.lastPrepareProfile,
+            optimize: optimizer.lastOptimizeProfile,
         };
 
         // Remove empty artifacts from results
@@ -693,6 +880,165 @@ export class ArtifactsSuggest {
         }
 
         return results;
+    }
+
+    /**
+     * Fused forced-outcome search: one best complement per outcome artifact in
+     * a complement-major GPU search, then an authoritative f64 CPU rescore
+     * of every winner (the "CPU operations on the final map"). Returns one
+     * entry per input outcome, in input order: {value, artifacts} where value
+     * is Number.NEGATIVE_INFINITY and artifacts null when infeasible.
+     * With opts.onOutcome(index, value, artifacts), deliver each CPU-rescored
+     * result directly instead of retaining a second object graph in `scored`.
+     */
+    async getResultGPUForcedOutcomes(targetSlot, outcomeArtifacts, opts = {}) {
+        // K===0 guard before enumeration: ForSpec reads outcomeArtifacts[0].
+        if (!outcomeArtifacts.length) {
+            if (opts.onOutcome) outcomeArtifacts.forEach((_, index) => opts.onOutcome(index, Number.NEGATIVE_INFINITY, null));
+            return {scored: opts.onOutcome ? null
+                : outcomeArtifacts.map(() => ({value: Number.NEGATIVE_INFINITY, artifacts: null})),
+                raw: opts.debug ? outcomeArtifacts.map(() => ({v: 'NEG_INF', c: 0xFFFFFFFF})) : null,
+                complementCount: 0, regions: []};
+        }
+        // Dense region experiment (md/dense_region_experiment.md): one segment
+        // plan, one optimizer run, one readback. No per-region dispatches.
+        // Callers may pass a prebuilt plan (same slots/outcomes/topology) to
+        // avoid enumerating twice; it is used as-is.
+        const plan = opts.densePlan || buildFusedOutcomeSegments(this.slots, targetSlot, outcomeArtifacts, opts.topology);
+        if (!plan.validCount || !plan.regions.length) {
+            if (opts.onOutcome) outcomeArtifacts.forEach((_, index) => opts.onOutcome(index, Number.NEGATIVE_INFINITY, null));
+            return {scored: opts.onOutcome ? null
+                : outcomeArtifacts.map(() => ({value: Number.NEGATIVE_INFINITY, artifacts: null})),
+                raw: opts.debug ? outcomeArtifacts.map(() => ({v: 'NEG_INF', c: 0xFFFFFFFF})) : null,
+                complementCount: 0, regions: []};
+        }
+        // Resolve packed-pool row offsets now so the host decode mirror works
+        // even if the optimizer is mocked; the real run overwrites them with
+        // the identical artifactsToCombinedBuffer offsets.
+        resolveDenseRows(plan);
+        let values, complementIndices, chunkIndices, complementCount, profile;
+        if (opts.executeGPU) {
+            // The candidate owns live artifacts, CPU functions and the full
+            // precision outcome data. Only WGSL and numeric inputs leave it.
+            const packed = packForcedOutcomeInputs(opts.preparedProgram, {
+                slots: plan.packedSlots, buildData: this.buildData, setData: this.setData,
+                targetSlot, outcomeArtifacts, densePlan: plan,
+            });
+            packed.outcomeRows = opts.preparedRows.rows;
+            packed.mapKeys = opts.preparedRows.mapKeys;
+            const {code, statIndexMap, profile: programProfile} = opts.preparedProgram;
+            const reply = await opts.executeGPU({
+                program: {kind: 'gpu-program', code, statIndexMap, profile: programProfile},
+                inputs: packed,
+            }, update => {
+                if (update.phase === 'upload') opts.onSetupProgress?.('upload');
+                else opts.onProgress?.(update.current, update.total);
+            });
+            ({bestValues: values, complementIndices, chunkIndices} = reduceForcedOutcomeReadback(
+                reply.readback, reply.outcomeCount, reply.shards));
+            complementCount = reply.complementCount;
+            profile = reply.profile;
+        } else {
+            const optimizer = await this.prepareForcedOutcomeOptimizer();
+            // Stats and the outcome upload are independent of topology. Prepare
+            // once, then bind the same rows in the single run.
+            const preparedOutcomes = optimizer.prepareForcedOutcomes(outcomeArtifacts, targetSlot, {
+                getStats: artifact => artifact.calcOptimizerStats(this.usedStats),
+                onSetupProgress: opts.onSetupProgress,
+            });
+            try {
+                ({bestValues: values, complementIndices, chunkIndices, complementCount} = await optimizer.optimizeForcedOutcomes({
+                    slots: plan.packedSlots, buildData: this.buildData, setData: this.setData,
+                    preparedOutcomes, targetSlot, densePlan: plan, compact: true,
+                    onProgress: opts.onProgress,
+                }));
+            } finally {
+                preparedOutcomes.destroy();
+            }
+            this.gpuProfile = {prepare: optimizer.lastPrepareProfile, optimize: optimizer.lastOptimizeProfile};
+            profile = optimizer.lastOptimizeProfile;
+        }
+
+        const artifactRefs = GPU_SLOT_NAMES.flatMap((slot) => plan.packedSlots[slot]);
+        const raw = opts.debug ? Array.from(values, (value, index) => ({
+            v: Number.isFinite(value) ? value : 'NEG_INF', c: complementIndices[index],
+            ...(chunkIndices[index] > 0 && chunkIndices[index] !== 0xFFFFFFFF ? {chunk: chunkIndices[index]} : {}),
+        })) : null;
+        // CPU rescore is a real stage of the run (one f64 evaluation per
+        // winner); report it so large unions do not look frozen after the GPU.
+        const onRescoreProgress = opts.onRescoreProgress;
+        if (onRescoreProgress) onRescoreProgress(0, outcomeArtifacts.length);
+        const scored = opts.onOutcome ? null : [];
+        const first = outcomeArtifacts[0];
+        let scorer = null;
+        // GPU winners that the f64 rescore rejects (a constraint or set rule
+        // at the f32/f64 boundary): the outcome is reported infeasible even
+        // though another companion build might pass. Counted, not hidden.
+        let rescoreRejected = 0;
+        for (let outcomeIndex = 0; outcomeIndex < outcomeArtifacts.length; ++outcomeIndex) {
+            const complementIndex = complementIndices[outcomeIndex];
+            let value = Number.NEGATIVE_INFINITY;
+            let complement = null;
+            let rejected = false;
+            if (Number.isFinite(values[outcomeIndex]) && complementIndex !== 0xFFFFFFFF) {
+                const chunk = chunkIndices[outcomeIndex];
+                scorer ||= this.createForcedOutcomeScorer(targetSlot, first.getSetName ? first.getSetName() : first.set);
+                const rescored = scorer(outcomeArtifacts[outcomeIndex], chunk * 0x100000000 + complementIndex,
+                    () => decodeDenseComplement(plan.chunks[chunk].base + complementIndex, plan, artifactRefs));
+                if (rescored.value !== undefined) {
+                    value = rescored.value;
+                    complement = rescored.complement;
+                } else {
+                    rejected = true;
+                    ++rescoreRejected;
+                }
+            }
+            if (opts.onOutcome) opts.onOutcome(outcomeIndex, value, complement, rejected);
+            else scored.push({value, artifacts: complement && complement.slice(), rejected});
+            if (onRescoreProgress && ((outcomeIndex + 1) & 8191) === 0) {
+                onRescoreProgress(outcomeIndex + 1, outcomeArtifacts.length);
+            }
+        }
+        if (onRescoreProgress) onRescoreProgress(outcomeArtifacts.length, outcomeArtifacts.length);
+        return {scored, raw, complementCount, regions: plan.logical.map(region => region.size),
+            profile, rescoreRejected};
+    }
+
+    async prepareGPUOptimizer() {
+        if (this.requestedLimit !== GPU_TOP_K_CAPACITY) {
+            throw new RangeError(
+                `GPU optimizer result limit is fixed at ${GPU_TOP_K_CAPACITY}; got ${this.requestedLimit}`
+            );
+        }
+
+        // The shared context reacquires a lost device. Preparation binds this
+        // engine's program to that device without touching the fused engine.
+        if (!gpuOptimizer) gpuOptimizer = new GPUArtifactOptimizer({context: gpuContext});
+        if (!await gpuOptimizer.initialize()) {
+            throw new Error('WebGPU is unavailable on this device');
+        }
+
+        // The pipeline is bound to the same semantic plan as the CPU lowerer.
+        await gpuOptimizer.preparePipeline(this.optimizationPlan);
+        return gpuOptimizer;
+    }
+
+    async prepareForcedOutcomeOptimizer() {
+        if (!forcedOutcomeOptimizer) forcedOutcomeOptimizer = new GPUForcedOutcomeOptimizer({context: gpuContext});
+        if (!await forcedOutcomeOptimizer.initialize()) {
+            throw new Error('WebGPU forced-outcome search is unavailable on this device');
+        }
+        await forcedOutcomeOptimizer.preparePipeline(this.optimizationPlan);
+        return forcedOutcomeOptimizer;
+    }
+
+    /** The coordinator owns GPU resources on its shared device. */
+    async createForcedOutcomeOptimizer() {
+        const optimizer = new GPUForcedOutcomeOptimizer({context: gpuContext});
+        if (!await optimizer.initialize()) {
+            throw new Error('WebGPU forced-outcome search is unavailable on this device');
+        }
+        return optimizer;
     }
 }
 
@@ -819,4 +1165,183 @@ function removeCombinationIndices(results) {
     for (const item of results) {
         delete item.combinationIndex;
     }
+}
+
+/**
+ * Complement enumeration regions for the fused forced-outcome search.
+ *
+ * Without a topology: one region, the full pools.
+ * With a baseline topology ({kind: '4pc'|'2+2'|'2pc', sets: [...]}): only
+ * complements that keep the baseline set bonuses active. Each axis is
+ * assigned to one required set pool or to the free pool (pieces of any set
+ * outside the required ones); an assignment is legal when every required set
+ * reaches its piece threshold counting the target artifact own piece.
+ * Regions are disjoint and jointly cover every final build that preserves
+ * the baseline bonus structure (a 4pc or 2+2 automatically excludes any other
+ * 2pc because only one piece remains).
+ *
+ * This is a deliberate design restriction, not a mechanic: results are best
+ * within the baseline set topology and may miss rare alternate-topology flips
+ * (a different 4pc, or a 2pc+2pc pair overtaking the baseline bonuses).
+ */
+export function buildFusedOutcomeRegions(slots, targetSlot, outcomeArtifacts, topology) {
+    const axes = ['flower', 'plume', 'sands', 'goblet', 'circlet'].filter((slot) => slot !== targetSlot);
+    const fullSize = axes.reduce((total, slot) => total * slots[slot].length, 1);
+    const requested = Array.isArray(topology) ? topology : topology ? [topology] : [];
+    const specs = [];
+    const seen = new Set();
+    for (const spec of requested) {
+        if (!spec || !Array.isArray(spec.sets) || !spec.sets.length) continue;
+        const signature = JSON.stringify([spec.kind, [...spec.sets].sort()]);
+        if (seen.has(signature)) continue;
+        seen.add(signature);
+        specs.push(spec);
+    }
+    if (!specs.length) {
+        return [{slots, size: fullSize}];
+    }
+    const regions = [];
+    for (const spec of specs) {
+        regions.push(...buildFusedOutcomeRegionsForSpec(slots, axes, outcomeArtifacts, spec));
+    }
+    // Requested topology is a constraint. An impossible topology must not
+    // silently fall back to unrestricted search (including after RV filtering).
+    return regions;
+}
+
+function buildFusedOutcomeRegionsForSpec(slots, axes, outcomeArtifacts, topology) {
+    const threshold = topology.kind === '4pc' ? 4 : 2;
+    const first = outcomeArtifacts[0];
+    const targetSet = first.getSetName ? first.getSetName() : first.set;
+    const required = topology.sets.slice(0, topology.kind === '4pc' ? 1 : 2);
+    const requiredSet = new Set(required);
+    const needs = required.map((name) => Math.max(0, threshold - (targetSet === name ? 1 : 0)));
+    const pools = required.map((name) => axes.map((axis) => slots[axis].filter((artifact) => {
+        const setName = artifact.getSetName ? artifact.getSetName() : artifact.set;
+        return setName === name;
+    })));
+    const freePools = axes.map((axis) => slots[axis].filter((artifact) => {
+        const setName = artifact.getSetName ? artifact.getSetName() : artifact.set;
+        return !requiredSet.has(setName);
+    }));
+    const regions = [];
+    const assignment = new Array(axes.length);
+    const choices = required.length + 1;
+    const build = (depth) => {
+        if (depth === axes.length) {
+            const counts = new Array(required.length).fill(0);
+            const regionSlots = Object.assign({}, slots);
+            let size = 1;
+            for (let axis = 0; axis < axes.length; ++axis) {
+                const pick = assignment[axis];
+                const pool = pick === required.length ? freePools[axis] : pools[pick][axis];
+                if (!pool.length) { size = 0; break; }
+                if (pick < required.length) ++counts[pick];
+                regionSlots[axes[axis]] = pool;
+                size *= pool.length;
+            }
+            if (size > 0 && counts.every((count, index) => count >= needs[index])) {
+                regions.push({slots: regionSlots, size});
+            }
+            return;
+        }
+        for (let pick = 0; pick < choices; ++pick) {
+            assignment[depth] = pick;
+            build(depth + 1);
+        }
+    };
+    build(0);
+    return regions;
+}
+
+/**
+ * Dense region experiment (md/dense_region_experiment.md): pack the logical
+ * regions of buildFusedOutcomeRegions into one segment plan for a single
+ * optimizer run. Each complement axis is interned by pool identity, so pools
+ * shared across regions upload once; pools that differ (multi-spec) get
+ * separate segments. Regions stay disjoint within one spec; overlapping specs
+ * concatenate (duplicate work preserved, matching serial behavior).
+ *
+ * Returns {axes, packedSlots, regions, chunks, validCount, logical} where each
+ * region is {end (exclusive global dense endpoint), divs[3] (mixed-radix
+ * divisors), dims[4], localRows[4] (offsets into packedSlots axes), size}.
+ * validCount = Σ size and may exceed u32: regions larger than `chunkLimit`
+ * are sliced and grouped into chunks ({base, count, regionStart, regionEnd})
+ * that each fit the shader's u32 index. An impossible topology yields no
+ * regions (never falls back to unrestricted search).
+ */
+export function buildFusedOutcomeSegments(slots, targetSlot, outcomeArtifacts, topology, chunkLimit = FUSED_CHUNK_LIMIT) {
+    const axes = GPU_SLOT_NAMES.filter((slot) => slot !== targetSlot);
+    const logical = buildFusedOutcomeRegions(slots, targetSlot, outcomeArtifacts, topology);
+    const packedSlots = {[targetSlot]: slots[targetSlot]};
+    for (const axis of axes) packedSlots[axis] = [];
+    const interned = axes.map(() => new Map());
+    const blocks = [];
+    for (const region of logical) {
+        if (!region.size) continue;
+        const dims = axes.map((slot) => region.slots[slot].length);
+        if (dims.some((dim) => !Number.isInteger(dim) || dim < 1)) continue;
+        const localRows = axes.map((slot, axis) => {
+            const pool = region.slots[slot];
+            let base = interned[axis].get(pool);
+            if (base === undefined) {
+                base = packedSlots[slot].length;
+                interned[axis].set(pool, base);
+                for (const artifact of pool) packedSlots[slot].push(artifact);
+            }
+            return base;
+        });
+        blocks.push({dims, localRows});
+    }
+    return {axes, packedSlots, ...chunkDenseBlocks(blocks, chunkLimit), logical};
+}
+
+/**
+ * Resolve absolute packed-pool row offsets onto plan regions. Same arithmetic
+ * as artifactsToCombinedBuffer (GPU_SLOT_NAMES order, slots concatenated):
+ * the optimizer overwrites these with the authoritative combined offsets.
+ * Mutates the plan.
+ */
+export function resolveDenseRows(plan) {
+    const offsets = {};
+    let cursor = 0;
+    for (const slot of GPU_SLOT_NAMES) {
+        offsets[slot] = cursor;
+        cursor += plan.packedSlots[slot].length;
+    }
+    for (const region of plan.regions) {
+        region.rows = plan.axes.map((slot, axis) => offsets[slot] + region.localRows[axis]);
+    }
+    return plan;
+}
+
+/**
+ * Mirror of the dense shader decode: global index c over concatenated regions,
+ * first exclusive end above c wins, then row-major mixed-radix within the
+ * region (last axis fastest — the same convention as
+ * decodeFusedOutcomeComplement). artifactRefs is the packed pools flattened in
+ * GPU_SLOT_NAMES order; region.rows holds absolute row offsets (resolved by
+ * the optimizer from artifactsToCombinedBuffer offsets). A GPU winner is
+ * chunk-local: pass plan.chunks[chunk].base + local.
+ */
+export function decodeDenseComplement(index, plan, artifactRefs) {
+    if (!Number.isInteger(index) || index < 0 || index >= plan.validCount) {
+        throw new RangeError(`Dense complement index out of range; got ${index}`);
+    }
+    let low = 0;
+    let high = plan.regions.length;
+    while (low < high) {
+        const mid = low + Math.floor((high - low) / 2);
+        if (index < plan.regions[mid].end) high = mid;
+        else low = mid + 1;
+    }
+    const region = plan.regions[low];
+    let q = index - (low === 0 ? 0 : plan.regions[low - 1].end);
+    const picks = region.divs.map((divisor) => {
+        const pick = Math.floor(q / divisor);
+        q %= divisor;
+        return pick;
+    });
+    picks.push(q);
+    return picks.map((pick, axis) => artifactRefs[region.rows[axis] + pick]);
 }

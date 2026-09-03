@@ -179,6 +179,62 @@ test('repeated CPU getResult calls are deterministic and leave prepared stats un
     expect(suggester.buildData.stats).toEqual(preparedStats);
 });
 
+test('explicit correlated CPU evaluation matches ordinary optimizer enumeration', () => {
+    const gladiatorArtifacts = makeArtifacts('GladiatorFinale');
+    const alternateFlower = new Artifact(
+        5,
+        20,
+        'flower',
+        'WandererTroupe',
+        MAIN_STATS.flower,
+        [],
+    );
+    const suggester = makeSuggester(
+        makeBuild(),
+        gladiatorArtifacts.concat([alternateFlower]),
+        {
+            settings: {
+                sets_settings: {},
+                stats: {},
+                setMinValues: {GladiatorFinale: 5},
+                setMaxValues: {},
+            },
+        },
+    );
+
+    suggester.prepare();
+    const preparedStats = new Stats(suggester.buildData.stats);
+    const results = suggester.getResult();
+
+    expect(results).toHaveLength(1);
+    expect(suggester.evaluateArtifactCombination(
+        [...results[0].artifacts].reverse()
+    )).toBeCloseTo(results[0].value, 10);
+
+    // Upgrade outcomes need not be objects from the prepared candidate pool.
+    const freshEquivalentFlower = new Artifact(
+        5,
+        20,
+        'flower',
+        'GladiatorFinale',
+        MAIN_STATS.flower,
+        [],
+    );
+    const freshCombination = results[0].artifacts.map((artifact) => {
+        return artifact.getSlot() == 'flower' ? freshEquivalentFlower : artifact;
+    });
+    expect(suggester.evaluateArtifactCombination(freshCombination)).toBeCloseTo(
+        results[0].value,
+        10,
+    );
+
+    const rejectedCombination = gladiatorArtifacts.map((artifact) => {
+        return artifact.getSlot() == 'flower' ? alternateFlower : artifact;
+    });
+    expect(suggester.evaluateArtifactCombination(rejectedCombination)).toBeUndefined();
+    expect(suggester.buildData.stats).toEqual(preparedStats);
+});
+
 test('CPU keeps finite negative scores and does not require a progress callback', () => {
     const suggester = makeSuggester(makeBuild(), makeArtifacts());
 
@@ -189,6 +245,114 @@ test('CPU keeps finite negative scores and does not require a progress callback'
 
     expect(results).toHaveLength(1);
     expect(results[0].value).toBe(-5);
+});
+
+test.each([4, 5])('transient %i-star outcome scoring is exact without retained per-outcome caches', rarity => {
+    const pool = makeArtifacts();
+    const suggester = makeSuggester(makeBuild({xiphos: true}), pool);
+    suggester.prepare();
+    const outcome = new Artifact(rarity, rarity === 5 ? 20 : 16, 'flower', 'GladiatorFinale', 'hp',
+        rarity === 5 ? [
+            {stat: 'crit_rate', value: 15.6}, {stat: 'crit_dmg', value: 23.3},
+            {stat: 'atk_percent', value: 5.8}, {stat: 'atk', value: 19},
+        ] : [
+            {stat: 'crit_rate', value: 9.3}, {stat: 'crit_dmg', value: 12.4},
+            {stat: 'atk_percent', value: 4.7}, {stat: 'atk', value: 16},
+        ]);
+    const control = outcome.clone();
+    const companions = pool.filter(artifact => artifact.slot !== 'flower');
+    const expected = suggester.evaluateArtifactCombination([control, ...companions]);
+    expect(Number.isFinite(expected)).toBe(true);
+    expect(suggester.evaluateArtifactCombination([outcome, ...companions], outcome)).toBe(expected);
+    expect(outcome.calculated).toBeNull();
+    expect(outcome.concatFunc).toBeUndefined();
+    expect(suggester.explicitArtifactCache.has(outcome)).toBe(false);
+
+    const rejected = makeSuggester(makeBuild(), pool, {settings: {stats: {atk_min: 100000}}});
+    rejected.prepare();
+    expect(rejected.evaluateArtifactCombination([outcome, ...companions], outcome)).toBeUndefined();
+    expect(outcome.calculated).toBeNull();
+    expect(rejected.explicitArtifactCache.has(outcome)).toBe(false);
+});
+
+function seededRandom(seed) {
+    return () => ((seed = (seed * 1103515245 + 12345) % 2147483648) / 2147483648);
+}
+
+function randomArtifact(random, rarity, slot, set) {
+    const mains = DB.Artifacts.Slots.get(slot).mainStats;
+    const main = mains[Math.floor(random() * mains.length)];
+    const pool = DB.Artifacts.Substats.getKeys().filter(stat => stat !== main);
+    const stats = [];
+    const lines = Math.min(4, DB.Artifacts.Rarity[rarity - 1].maxSubstats);
+    while (stats.length < lines) {
+        const stat = pool[Math.floor(random() * pool.length)];
+        if (!stats.includes(stat)) stats.push(stat);
+    }
+    const subs = stats.map(stat => {
+        const data = DB.Artifacts.Substats.get(stat);
+        const rolls = data.rolls[rarity - 1];
+        let units = 0;
+        for (let roll = 0, count = 1 + Math.floor(random() * 3); roll < count; ++roll) {
+            units += Math.round(rolls[Math.floor(random() * rolls.length)] * 100);
+        }
+        const scale = data.type === 'percent' ? 10 : 1;
+        return {stat, value: Math.round((units / 100 + 1e-8) * scale) / scale};
+    });
+    const maxLevel = DB.Artifacts.Rarity[rarity - 1].maxLevel;
+    return new Artifact(rarity, Math.floor(random() * (maxLevel + 1)), slot, set, main, subs);
+}
+
+test('the exact optimizer-stat lowering matches calcOptimizerStats key for key', () => {
+    const random = seededRandom(3);
+    const suggester = makeSuggester(makeBuild({xiphos: true}), makeArtifacts());
+    suggester.prepare();
+    for (const usedStats of [suggester.usedStats, ['crit_value'], ['crit_rate', 'hp', 'mastery'],
+        DB.Artifacts.Substats.getKeys().concat(['crit_value', 'dmg_phys', 'healing'])]) {
+        const lower = Artifact.createOptimizerStatsLowering(usedStats);
+        for (let i = 0; i < 400; ++i) {
+            const slot = SLOTS[i % SLOTS.length];
+            const artifact = randomArtifact(random, 3 + i % 3, slot, 'GladiatorFinale');
+            const expected = artifact.calcOptimizerStats(usedStats);
+            const {keys, values, length} = lower(artifact);
+            expect(keys.slice(0, length)).toEqual(Object.keys(expected));
+            keys.slice(0, length).forEach((stat, at) => expect(Object.is(values[at], expected[stat])).toBe(true));
+        }
+    }
+});
+
+test('the forced-outcome scorer reproduces evaluateArtifactCombination bit for bit', () => {
+    const random = seededRandom(5);
+    const sets = ['GladiatorFinale', 'WandererTroupe', 'NoblesseOblige'];
+    const pool = [];
+    for (const slot of SLOTS) {
+        if (slot === 'flower') continue;
+        for (let i = 0; i < 6; ++i) pool.push(randomArtifact(random, 5, slot, sets[i % sets.length]));
+    }
+    pool.push(new Artifact(5, 20, 'flower', 'GladiatorFinale', 'hp', []));
+    for (const settings of [undefined, {stats: {atk_min: 1500}}, {stats: {atk_min: 100000}}]) {
+        const suggester = makeSuggester(makeBuild({xiphos: true}), pool, settings ? {settings} : {});
+        suggester.prepare();
+        const scorer = suggester.createForcedOutcomeScorer('flower', 'GladiatorFinale');
+        const companions = ['plume', 'sands', 'goblet', 'circlet'].map(slot => suggester.slots[slot]);
+        let rejected = 0;
+        for (let i = 0; i < 300; ++i) {
+            const outcome = randomArtifact(random, 5, 'flower', 'GladiatorFinale');
+            outcome.level = 20;
+            const picks = companions.map(pieces => Math.floor(random() * pieces.length));
+            const complement = picks.map((pick, axis) => companions[axis][pick]);
+            const expected = suggester.evaluateArtifactCombination([outcome, ...complement], outcome);
+            const scored = scorer(outcome, picks.join('/'), () => complement);
+            expect(Object.is(scored.value, expected)).toBe(true);
+            expect(scored.complement).toEqual(complement);
+            if (expected === undefined) ++rejected;
+        }
+        // The impossible constraint rejects every build through the cache.
+        if (settings?.stats.atk_min === 100000) expect(rejected).toBe(300);
+    }
+    const suggester = makeSuggester(makeBuild(), pool);
+    suggester.prepare();
+    expect(() => suggester.createForcedOutcomeScorer('flower', 'WandererTroupe')).toThrow('outside the prepared');
 });
 
 test('missing objective output is invalid rather than a feasible zero score', () => {

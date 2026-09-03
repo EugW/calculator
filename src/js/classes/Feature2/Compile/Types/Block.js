@@ -1,6 +1,6 @@
 import { variableName } from "../Helpers";
 import { CBlock } from "../Types";
-import { wgslNumber, wgslStatAccess } from "../WGSL";
+import { wgslNumber, wgslStatAccess, wgslVariableName } from "../WGSL";
 import { CConst, CStat } from "./Item";
 
 
@@ -393,7 +393,7 @@ export class CVar extends CSum {
 
     compileWGSL(opts) {
         // Use 'var' instead of 'let' because variables may be modified later with CVarIncrease
-        return 'var '+ this.name +' = '+ super.compileWGSL(opts);
+        return 'var '+ wgslVariableName(this.name, opts) +' = '+ super.compileWGSL(opts);
     }
 
     // compile(opts) {
@@ -420,7 +420,7 @@ export class CVarIncrease extends CSum {
     }
 
     compileWGSL(opts) {
-        return this.name +' += '+ super.compileWGSL(opts);
+        return wgslVariableName(this.name, opts) +' += '+ super.compileWGSL(opts);
     }
 }
 

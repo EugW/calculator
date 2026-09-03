@@ -78,6 +78,7 @@ export class FullHeightScrollable extends React.Component {
                 let item = items[i];
                 progressMessages.push(
                     <div key={'item'+ i} className="loading-progress">
+                        {item.label ? item.label + ': ' : ''}
                         {Stats.format('text', item.completed) || 0}/{Stats.format('text', item.total)} ({item.total ? Math.round(100 * item.completed / item.total) : 0}%)
                     </div>
                 );

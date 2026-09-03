@@ -21,6 +21,10 @@
     width: 120px;
 }
 
+.settings-action-workers {
+    width: 80px;
+}
+
 .settings-gpu-note {
     color: #7f7465;
     font-size: 12px;

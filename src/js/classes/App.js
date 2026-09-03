@@ -319,6 +319,7 @@ export class App {
 
     refresh(opts) {
         opts = Object.assign({}, opts);
+        this.storage.artifacts.enrichBuild(this.currentSet());
         this.currentSet().refreshCommonSettings();
         this.saveLastBuild();
 

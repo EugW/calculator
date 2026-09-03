@@ -18,7 +18,7 @@ export class StorageItemChar extends StorageItem {
         return item.data +'-'+ (item.title || '');
     }
 
-    savedHashes() {
+    savedHashes(artifactStorage) {
         let result = {};
 
         for (let item of this.listDecoded(1)) {
@@ -26,7 +26,7 @@ export class StorageItemChar extends StorageItem {
 
             for (const [slot, art] of Object.entries(item.data.getArtifacts())) {
                 if (art) {
-                    let hash = art.getHash();
+                    let hash = artifactStorage?.getByHash(art.getHash())?.getHash() || art.getHash();
                     if (!result[hash]) {
                         result[hash] = [];
                     }

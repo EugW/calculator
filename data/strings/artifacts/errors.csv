@@ -9,3 +9,6 @@ artifact_error;substat_equal_main;Доп. параметр совпадает с
 artifact_error;substat_value_rolls;Значение доп. параметра не совпадает с возможными;Substat value is not correct
 artifact_error;substat_value_range;Значение доп. параметра слишком большое;Substat value is too much
 artifact_error;substat_duplicate;Доп. параметр повторяется;Substat duplicates
+artifact_error;provenance_lines;Не указано или неверно число начальных строк для этих строк и уровня;Initial line count missing or inconsistent with substats and level
+artifact_error;provenance_initial;Не указаны начальные роллы активных строк;Missing initial rolls for active substats
+artifact_error;provenance_pair;Выбранная пара: нужны два разных введённых параметра;Defined pair needs two different entered substats

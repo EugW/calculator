@@ -55,3 +55,9 @@
     font-size: 12px;
     width: 20px;
 }
+
+/* Compact counters share the available width instead of reserving equal halves
+   for a short count and a longer total + percentage. Other consumers are unchanged. */
+.progress-bar.compact .line { justify-content: center; }
+.progress-bar.compact .line .value { flex: 0 1 auto; white-space: nowrap; }
+.progress-bar.compact .line .sep { flex-shrink: 0; }

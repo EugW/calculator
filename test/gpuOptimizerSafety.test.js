@@ -1,3 +1,5 @@
+import {GPUOptimizerInputs} from '../src/js/classes/GPUOptimizerInputs';
+import {installGPUConstants, makeArtifact, makeSlots, makePreparedOptimizer} from './support/gpuOptimizer';
 import {
     GPUArtifactOptimizer,
     countGPUCombinationBatches,
@@ -7,24 +9,7 @@ import {
 import { ArtifactsSuggest } from "../src/js/classes/ArtifactsSuggest";
 import { WGSLMegaKernelCompiler } from "../src/js/classes/Feature2/WGSLCompiler";
 
-const previousGPUBufferUsage = global.GPUBufferUsage;
-const previousGPUMapMode = global.GPUMapMode;
-
-beforeAll(() => {
-    global.GPUBufferUsage = {
-        STORAGE: 1,
-        COPY_SRC: 2,
-        COPY_DST: 4,
-        MAP_READ: 8,
-        UNIFORM: 16,
-    };
-    global.GPUMapMode = { READ: 1 };
-});
-
-afterAll(() => {
-    global.GPUBufferUsage = previousGPUBufferUsage;
-    global.GPUMapMode = previousGPUMapMode;
-});
+installGPUConstants();
 
 function makeConstantCompiler() {
     return {
@@ -33,93 +18,6 @@ function makeConstantCompiler() {
             compileWGSL: () => 'return vec3<f32>(0.0, 0.0, 0.0);',
         },
     };
-}
-
-function makeArtifact(id) {
-    return {
-        id,
-        set: 'test_set',
-        calculated: {},
-    };
-}
-
-function makeSlots(flowerCount = 1) {
-    return {
-        flower: Array.from({ length: flowerCount }, (_, index) => makeArtifact(`flower-${index}`)),
-        plume: [makeArtifact('plume')],
-        sands: [makeArtifact('sands')],
-        goblet: [makeArtifact('goblet')],
-        circlet: [makeArtifact('circlet')],
-    };
-}
-
-function makePreparedOptimizer(mappedResults = [], optimizerOptions = {}) {
-    const optimizer = new GPUArtifactOptimizer(optimizerOptions);
-    const gpuCalls = {
-        mapAsync: jest.fn(() => Promise.resolve()),
-        onSubmittedWorkDone: jest.fn(() => Promise.resolve()),
-        copyBufferToBuffer: jest.fn(),
-        dispatchWorkgroups: jest.fn(),
-    };
-    const reducedResults = mappedResults
-        .map((value, index) => ({value, index}))
-        .filter((item) => Number.isFinite(item.value))
-        .sort((left, right) => right.value - left.value || left.index - right.index)
-        .slice(0, 20);
-
-    const device = {
-        queue: {
-            writeBuffer: jest.fn(),
-            submit: jest.fn(),
-            onSubmittedWorkDone: gpuCalls.onSubmittedWorkDone,
-        },
-        createBuffer: jest.fn(({ size, usage }) => {
-            const mappedData = new ArrayBuffer(size);
-            if ((usage & global.GPUBufferUsage.MAP_READ) !== 0) {
-                const values = new Float32Array(mappedData);
-                const words = new Uint32Array(mappedData);
-                for (let index = 0; index < size / 8; index++) {
-                    values[index * 2] = NaN;
-                    words[index * 2 + 1] = 0xFFFFFFFF;
-                }
-                for (let index = 0; index < Math.min(reducedResults.length, size / 8); index++) {
-                    values[index * 2] = reducedResults[index].value;
-                    words[index * 2 + 1] = reducedResults[index].index;
-                }
-            }
-
-            return {
-                usage,
-                destroy: jest.fn(),
-                getMappedRange: jest.fn(() => mappedData),
-                mapAsync: gpuCalls.mapAsync,
-                unmap: jest.fn(),
-            };
-        }),
-        createBindGroup: jest.fn(() => ({})),
-        createCommandEncoder: jest.fn(() => ({
-            beginComputePass: jest.fn(() => ({
-                setPipeline: jest.fn(),
-                setBindGroup: jest.fn(),
-                dispatchWorkgroups: gpuCalls.dispatchWorkgroups,
-                end: jest.fn(),
-            })),
-            copyBufferToBuffer: gpuCalls.copyBufferToBuffer,
-            finish: jest.fn(() => ({})),
-        })),
-    };
-
-    optimizer.device = device;
-    optimizer.pipeline = {};
-    optimizer.topKScorePipeline = {};
-    optimizer.topKEntryPipeline = {};
-    optimizer.topKBindGroupLayout = {};
-    optimizer.featureVariants = { default: { setInfo: [] } };
-    optimizer.variationMap = new Map([['default', 0]]);
-    optimizer.statIndexMap = { __test_dummy_stat__: 0 };
-    optimizer.testGPUCalls = gpuCalls;
-
-    return optimizer;
 }
 
 test('constant objectives use a non-empty GPU stat layout', () => {
@@ -431,7 +329,7 @@ test.each([
 
 test('a prepared shared plan rejects semantic overrides at dispatch time', async () => {
     const optimizer = makePreparedOptimizer();
-    optimizer.optimizationPlan = {
+    optimizer.prepared.optimizationPlan = {
         kind: 'optimization-plan',
         objective: {vectorIndex: 2},
         statConstraints: {bounds: []},
@@ -449,7 +347,7 @@ test('a prepared shared plan rejects semantic overrides at dispatch time', async
 });
 
 test('GPU rejects finite f64 bounds that overflow its f32 uniform ABI', () => {
-    const optimizer = new GPUArtifactOptimizer();
+    const optimizer = new GPUOptimizerInputs();
 
     expect(() => optimizer.buildConstraintData([{
         stat: 'atk',
@@ -465,9 +363,10 @@ test('GPU rejects finite f64 bounds that overflow its f32 uniform ABI', () => {
 
 test('a failed pipeline re-prepare invalidates the old executable state', async () => {
     const optimizer = new GPUArtifactOptimizer();
-    optimizer.device = {};
+    optimizer.context.device = {};
+    optimizer.prepared = {};
     optimizer.pipeline = {old: true};
-    optimizer.optimizationPlan = {kind: 'optimization-plan', old: true};
+    optimizer.prepared.optimizationPlan = {kind: 'optimization-plan', old: true};
 
     await expect(optimizer.preparePipeline({
         kind: 'optimization-plan',

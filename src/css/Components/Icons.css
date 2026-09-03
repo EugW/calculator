@@ -48,6 +48,13 @@
     border: 0 none;
 }
 
+.item-icon.no-border.icon-80 > div,
+.item-icon.no-border.icon-60 > div,
+.item-icon.no-border.icon-40 > div {
+    top: 0;
+    left: 0;
+}
+
 .icon-80 > div {
     width: 80px;
     height: 80px;

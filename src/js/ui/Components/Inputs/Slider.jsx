@@ -10,6 +10,10 @@ export class Slider extends React.Component {
         this.rendered = false;
     }
 
+    componentDidMount() {
+        this.positionHandler();
+    }
+
     componentDidUpdate() {
         this.positionHandler();
     }

@@ -122,7 +122,7 @@ export class ArtifactListItem extends React.Component {
                 onMouseLeave={this.props.onOver ? () => UI.TooltipArtifact.hide() : undefined}
             >
                 <div className="line">
-                    <ArtifactSetIcon size={60} set={art.getSetName()} slot={art.getSlot()} />
+                    <ArtifactSetIcon size={60} set={art.getSetName()} slot={art.getSlot()} crafted={art.isCrafted()} />
                     {!art.isValid() ? <div className="invalid"></div> : null}
                     <div className="main">
                         <ArtifactListItemButtons

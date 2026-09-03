@@ -70,6 +70,9 @@
     min-width: 0;
 }
 
+.dropdown-current.disabled { cursor: default; opacity: 0.65; }
+.dropdown-current.disabled::before { display: none; }
+
 .dropdown-wrapper.feature-dropdown .dropdown-current .dropdown-option {
     flex: 1 1 auto;
     min-width: 0;
@@ -134,6 +137,12 @@
 
 .dropdown-options .dropdown-option {
     padding-left: 10px;
+}
+
+.dropdown-options.dropdown-portal {
+    display: block;
+    position: fixed;
+    z-index: 2000;
 }
 
 .dropdown-wrapper.feature-dropdown .dropdown-options .dropdown-option {

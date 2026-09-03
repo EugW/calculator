@@ -1,0 +1,41 @@
+.dialog.artifact-outcomes-modal { z-index: 911; }
+.dialog-back.artifact-outcomes-modal { z-index: 910; }
+.dialog.artifact-outcome-compare-modal { z-index: 921; }
+.dialog-back.artifact-outcome-compare-modal { z-index: 920; }
+.outcome-compare-button { border: 0; font-family: inherit; font-size: inherit; padding: 0 10px; }
+.outcome-compare-fields { display: grid; gap: 16px; padding: 4px 0 16px; }
+.outcome-compare-line { min-width: 0; margin: 0; padding: 8px 0 12px; border: 0; border-bottom: 1px solid #626770; }
+.outcome-compare-line legend { padding: 0; color: #BEAEA9; font-size: 12px; }
+.outcome-compare-stat-picker { display: grid; grid-template-columns: repeat(auto-fit, minmax(80px, 1fr)); gap: 4px; }
+.outcome-compare-stat { min-height: 25px; padding: 3px 6px; border: 1px solid transparent; border-radius: 4px;
+    background: rgba(236, 229, 216, .3); color: #000; font: inherit; font-size: 12px; cursor: pointer; }
+.outcome-compare-stat.active { background: #ECE5D8; }
+.outcome-compare-stat:hover:not(:disabled) { border-color: #2B2D33; }
+.outcome-compare-stat:disabled { background: rgba(236, 229, 216, .1); color: #747474; cursor: not-allowed; }
+.outcome-compare-stat:focus-visible, .outcome-compare-slider:focus-visible { outline: 2px solid #D3BC8E; outline-offset: 2px; }
+.outcome-compare-value { display: flex; align-items: center; gap: 12px; margin-top: 10px; }
+.outcome-compare-value .inputs-text { width: 80px; flex-shrink: 0; }
+.outcome-compare-slider { flex: 1; min-width: 0; }
+.outcome-selectable { cursor: pointer; }
+.outcome-selectable:hover, .outcome-selectable:focus-visible, .outcome-card.active { outline: 2px solid #D3BC8E; outline-offset: -2px; }
+.outcome-summary { display: flex; flex-wrap: wrap; gap: 8px 20px; margin: 14px 0; font-size: 12px; color: #BEAEA9; }
+.outcome-list-heading { display: flex; justify-content: space-between; gap: 10px; font-size: 14px; color: #D3BC8E; margin-top: 14px; }
+.outcome-chance-slider { margin: 10px 0 2px; }
+.outcome-chance-label { display: flex; justify-content: space-between; gap: 10px; font-size: 12px; color: #BEAEA9; margin-bottom: 2px; }
+.outcome-chance-label > span:last-child { color: #FFF7E9; }
+.outcome-chance-ticks { display: flex; justify-content: space-between; margin: 4px 35px 0; font-size: 11px; color: #BEAEA9; }
+.outcome-cards .outcome-substats { min-height: 88px; }
+.outcome-substats .craft-result-metric > span:first-child { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.outcome-substats .craft-result-metric > span:last-child { flex-shrink: 0; }
+.outcome-void { color: #BEAEA9; font-size: 11px; line-height: 22px; }
+.outcome-value { font-size: 14px; color: #FFF7E9; margin-top: 10px; }
+.outcome-card .craft-result-gain { font-size: 17px; margin: 6px 0; }
+.outcome-loadout-piece { min-width: 0; display: flex; flex-direction: column; }
+.outcome-loadout-piece > .artifact-list-box { width: 100%; box-sizing: border-box; height: auto; min-height: 100px;
+    display: flow-root; flex: 1; margin: 0; padding-bottom: 6px; }
+.outcome-piece-label { font-size: 11px; text-align: center; color: #BEAEA9; margin-bottom: 6px; }
+.outcome-loadout-piece.target .outcome-piece-label, .outcome-loadout-piece.changed .outcome-piece-label { color: #D3BC8E; }
+.outcome-loadout-piece.changed > .artifact-list-box { outline: 1px solid #D3BC8E; outline-offset: -1px; }
+.outcome-predicted-above { flex: 1; display: flex; align-items: center; justify-content: center; text-align: center;
+    min-height: 100px; padding: 12px; box-sizing: border-box; border: 1px dashed #626770; border-radius: 15px;
+    font-size: 12px; color: #BEAEA9; }

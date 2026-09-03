@@ -2,6 +2,7 @@ import { Artifact } from "./Artifact";
 import { Backup } from "./Backup";
 import { Serializer } from "./Serializer";
 import { StorageItemArtifacts } from "./StorageItem/Artifacts";
+import { StorageItemArtifactActionHistory } from "./StorageItem/ArtifactActionHistory";
 import { StorageItemChar } from "./StorageItem/Char";
 import { StorageItemRotation } from "./StorageItem/Rotation";
 import { StorageItemSettings } from "./StorageItem/Settings";
@@ -17,6 +18,7 @@ export class Storage {
         this.char = new StorageItemChar();
         this.rotation = new StorageItemRotation();
         this.artifacts = new StorageItemArtifacts();
+        this.actionHistory = new StorageItemArtifactActionHistory();
         this.settings = new StorageItemSettings();
         this.sync = new Syncronize(app);
     }

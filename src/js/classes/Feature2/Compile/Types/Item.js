@@ -1,5 +1,5 @@
 import { CItem } from "../Types";
-import { wgslNumber, wgslStatAccess } from "../WGSL";
+import { wgslNumber, wgslStatAccess, wgslVariableName } from "../WGSL";
 import { CMulti, CSum, CSumPlusOne } from "./Block";
 
 export class CConst extends CItem {
@@ -109,7 +109,7 @@ export class CVarValue extends CItem {
     }
 
     compileWGSL(opts) {
-        return this.name;
+        return wgslVariableName(this.name, opts);
     }
 
     getSignature() {

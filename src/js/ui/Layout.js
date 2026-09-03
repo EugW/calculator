@@ -30,7 +30,6 @@ export class Layout {
         UI.CharTab.init(app);
         UI.WeaponTab.init(app);
         UI.ArtifactsTab.init(app);
-        UI.ArtifactUpgradePredictorTab.init(app);
         UI.BestArtifactTab.init(app);
         UI.EnemyTab.init(app);
         UI.BuffsTab.init(app);
@@ -119,6 +118,9 @@ export class Layout {
         if (!this.initialized) {
             return;
         }
+
+        // A portal modal can remain open when responsive layout changes the active tab.
+        UI.ArtifactsTab.component?.reshapeModal?.invalidate();
 
         let changed = this.toggleLayout($(window).width() < 1150);
         if (!changed) {

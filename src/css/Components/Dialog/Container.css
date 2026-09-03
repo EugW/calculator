@@ -129,3 +129,14 @@
     top: 0;
     right: 0;
 }
+
+.dialog.dialog-centered, .narrow .dialog.dialog-centered {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    right: auto;
+    bottom: auto;
+    transform: translate(-50%, -50%);
+    min-width: 0;
+    max-width: calc(100vw - 64px);
+}

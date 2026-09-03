@@ -8,7 +8,7 @@ export class Accordion extends React.Component {
         let firstChild = this.props.children && Array.isArray(this.props.children) ? this.props.children[0] : this.props.children;
 
         this.state = {
-            openedId: firstChild ? firstChild.props.id : '',
+            openedId: props.defaultOpenedId ?? (firstChild ? firstChild.props.id : ''),
         };
     }
 
@@ -61,7 +61,10 @@ class AccordionItemContainer extends React.Component {
     render() {
         return (
             <div className={'accordion-item' + (this.props.isActive ? ' active' : '')}>
-                <div className="accordion-item-caption" onClick={this.props.onClick}>{this.props.title}</div>
+                <div className="accordion-item-caption" role="button" tabIndex={0} aria-expanded={this.props.isActive}
+                    onKeyDown={event => {
+                        if (event.key === 'Enter' || event.key === ' ') { event.preventDefault(); this.props.onClick(); }
+                    }} onClick={this.props.onClick}>{this.props.title}</div>
                 <div className="accordion-item-content">
                     {this.props.children}
                 </div>

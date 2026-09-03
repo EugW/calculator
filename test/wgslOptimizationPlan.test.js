@@ -1,6 +1,8 @@
-import { CPostEffect } from "../src/js/classes/Feature2/Compile/Types/Block";
-import { CStat } from "../src/js/classes/Feature2/Compile/Types/Item";
-import { WGSLMegaKernelCompiler } from "../src/js/classes/Feature2/WGSLCompiler";
+import { CPostEffect, CVar, CVarIncrease } from "../src/js/classes/Feature2/Compile/Types/Block";
+import { CConst, CStat, CVarValue } from "../src/js/classes/Feature2/Compile/Types/Item";
+import { CReturn } from "../src/js/classes/Feature2/Compile/Types";
+import { CDamageResult, CDamageRotation } from "../src/js/classes/Feature2/Compile/Types/Damage";
+import { WGSLFeatureCompiler, WGSLMegaKernelCompiler } from "../src/js/classes/Feature2/WGSLCompiler";
 
 function objectiveAst(marker) {
     return {
@@ -156,4 +158,65 @@ test('legacy addVariation remains compatible with the shared descriptor lowerer'
     expect(compiler.getStatIndexMap()).toEqual({a_stat: 0, m_stat: 1, z_stat: 2});
     expect(functionBody(kernel, 'eval_v0')).toContain('vec3<f32>(7.0, 7.0, 7.0)');
     expect([...compiler.buildVariationMap()]).toEqual([['default', 0]]);
+});
+
+test('WGSL variable names are independent of AST allocation history and preserve reads and updates', () => {
+    const kernels = [];
+    const variableNames = [];
+    for (let iteration = 0; iteration < 2; ++iteration) {
+        // Same readable prefix, distinct variables, with cross-references and an update.
+        const first = new CVar([new CConst({value: 2})], {name: 'normal'});
+        const second = new CVar([new CConst({value: 3})], {name: 'normal'});
+        const objective = new CReturn([
+            first, second,
+            new CVarIncrease([new CVarValue({ref: second})], {ref: first}),
+            new CDamageResult([
+                new CVarValue({ref: first}), new CVarValue({ref: second}), new CVarValue({ref: first}),
+            ]),
+        ]);
+        const originalCPUCode = objective.compile({});
+        variableNames.push([first.name, second.name]);
+        const compiler = new WGSLMegaKernelCompiler();
+        compiler.addOptimizationPlan(plan([
+            variation({id: 'default', index: 0, objective,
+                postEffects: [new CPostEffect([new CStat({stat: 'mastery'})], {stat: 'recharge', priority: 1})],
+                constraintStats: ['mastery', 'recharge']}),
+            variation({id: 'other', index: 1, objective}),
+        ]));
+        const kernel = compiler.getMegaKernel({});
+        kernels.push(kernel);
+        expect(compiler.getMegaKernel({})).toBe(kernel);
+        expect(objective.compile({})).toBe(originalCPUCode);
+        expect([first.name, second.name]).toEqual(variableNames[iteration]);
+        expect(Function('stats', originalCPUCode)({})).toEqual([5, 3, 5]);
+        for (const name of ['eval_v0', 'eval_v1']) {
+            const body = functionBody(kernel, name);
+            expect(body).toContain('var local_0 = 2.0');
+            expect(body).toContain('var local_1 = 3.0');
+            expect(body).toContain('local_0 += local_1');
+            expect(body).toContain('return vec3<f32>(local_0, local_1, local_0)');
+        }
+        expect(functionBody(kernel, 'check_stat_constraints_v0')).toContain('var local_0 =');
+    }
+    expect(variableNames[0]).not.toEqual(variableNames[1]);
+    expect(kernels[0]).toBe(kernels[1]);
+});
+
+test('standalone WGSL functions get fresh variable mappings on every emission', () => {
+    const functions = [];
+    for (let iteration = 0; iteration < 2; ++iteration) {
+        const value = new CVar([new CConst({value: 7})], {name: 'normal'});
+        const objective = new CDamageRotation([value], {vars: [
+            new CVarValue({ref: value}), new CVarValue({ref: value}), new CVarValue({ref: value}),
+        ]});
+        const compiler = new WGSLFeatureCompiler(objective);
+        compiler.prepareWGSL(null, {dontInsertVariables: true});
+        const options = {variableNames: new Map([['unrelated', 'local_0']])};
+        const source = compiler.getWGSLCode(options);
+        expect(source).toContain('var local_0 = 7.0');
+        expect(compiler.getWGSLCode(options)).toBe(source);
+        expect(options.variableNames.size).toBe(1);
+        functions.push(source);
+    }
+    expect(functions[0]).toBe(functions[1]);
 });

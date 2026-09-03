@@ -1,6 +1,7 @@
 import { Artifact } from "../Artifact";
 import { Serializer } from "../Serializer";
 import { StorageItem } from "../StorageItem";
+import { planArtifactImport } from "../Importer/Good";
 
 export class StorageItemArtifacts extends StorageItem {
     constructor() {
@@ -12,7 +13,8 @@ export class StorageItemArtifacts extends StorageItem {
         let input = Serializer.unpack(string);
         if (!input) return null;
 
-        return Artifact.deserialize(input);
+        const artifact = Artifact.deserialize(input);
+        return input.length ? null : artifact;
     }
 
     fromPool(pool) {
@@ -97,12 +99,37 @@ export class StorageItemArtifacts extends StorageItem {
     getByHash(hash) {
         this.requireCache();
         let index = this.indexByHash[hash];
-        return this.artifactsCache[index];
+        if (index !== undefined) return this.artifactsCache[index];
+        try {
+            const artifact = this.decodeItem(hash);
+            return artifact ? this.findMatching(artifact) : undefined;
+        } catch (error) { return undefined; }
+    }
+
+    findMatching(artifact) {
+        this.requireCache();
+        const exact = this.indexByHash[artifact.getHash()];
+        if (exact !== undefined) return this.artifactsCache[exact];
+        const matches = (this.indexByStatsHash[artifact.getStatsHash()] || [])
+            .filter(item => item.enrichFrom(artifact));
+        return matches.length === 1 ? matches[0] : undefined;
+    }
+
+    enrichBuild(build) {
+        for (const artifact of Object.values(build.getArtifacts())) {
+            if (!artifact) continue;
+            const stored = this.findMatching(artifact);
+            if (stored) {
+                const enriched = artifact.enrichFrom(stored);
+                if (enriched) artifact.setMetadata(enriched.getMetadata());
+            }
+        }
     }
 
     getItemByHash(hash) {
         this.requireCache();
-        let index = this.indexByHash[hash];
+        const artifact = this.getByHash(hash);
+        let index = artifact ? this.indexByHash[artifact.getHash()] : undefined;
         return this.items[index];
     }
 
@@ -112,24 +139,20 @@ export class StorageItemArtifacts extends StorageItem {
     }
 
     addArtifacts(items, replace) {
+        if (this.error) return;
         this.requireCache();
-
-        let newArts = [];
-
-        for (let art of items) {
-            let hash = art.getHash();
-            if (!replace && this.indexByHash[hash]) {
-                continue;
-            }
-
-            newArts.push({
-                data: hash,
-                locked: art.isLocked(),
-                group: art.getGroups(),
-            });
+        const unique = [...new Map(items.map(art => [art.getHash(), art])).values()];
+        const plan = planArtifactImport(replace ? [] : this.artifactsCache, unique);
+        for (const {previous, artifact} of plan.updated) {
+            this.items[this.indexByHash[previous.getHash()]].data = artifact.getHash();
         }
+        const newArts = plan.added.map(art => ({
+            data: art.getHash(),
+            locked: art.isLocked(),
+            group: art.getGroups(),
+        }));
 
-        if (newArts.length) {
+        if (newArts.length || plan.updated.length || replace) {
             if (replace) {
                 this.items = newArts;
             } else {
@@ -137,6 +160,16 @@ export class StorageItemArtifacts extends StorageItem {
             }
             this.save();
         }
+    }
+
+    updateMetadata(updates) {
+        if (this.error || !updates.length) return;
+        this.requireCache();
+        for (const {previous, artifact} of updates) {
+            const index = this.indexByHash[previous.getHash()];
+            if (index !== undefined) this.items[index].data = artifact.getHash();
+        }
+        this.save();
     }
 
     updateByHash(hash, art) {
@@ -167,7 +200,8 @@ export class StorageItemArtifacts extends StorageItem {
 
     deleteByHash(hash) {
         this.requireCache();
-        this.remove(this.indexByHash[hash]);
+        const artifact = this.getByHash(hash);
+        this.remove(artifact ? this.indexByHash[artifact.getHash()] : undefined);
     }
 
     getLocked() {
@@ -190,12 +224,14 @@ export class StorageItemArtifacts extends StorageItem {
         this.artifactsCache = null;
         this.groupsCache = null;
         this.indexByHash = null;
+        this.indexByStatsHash = null;
     }
 
     refreshCache() {
         this.artifactsCache = [];
         this.groupsCache = [];
         this.indexByHash = {};
+        this.indexByStatsHash = {};
 
         let groups_hash = {};
         let groups_counter = {'': 0};
@@ -222,6 +258,8 @@ export class StorageItemArtifacts extends StorageItem {
 
             this.indexByHash[item.data] = index;
             this.indexByHash[hash] = index;
+            const statsHash = art.getStatsHash();
+            (this.indexByStatsHash[statsHash] ||= []).push(art);
 
             art.setLocked(item.locked);
             art.setGroups(item.group);
@@ -275,7 +313,8 @@ export class StorageItemArtifacts extends StorageItem {
         let canonicalHashes = {};
 
         for (let hash of artifacts) {
-            let index = this.indexByHash[hash];
+            const artifact = this.getByHash(hash);
+            let index = artifact ? this.indexByHash[artifact.getHash()] : undefined;
             if (index !== undefined) {
                 canonicalHashes[this.artifactsCache[index].getHash()] = 1;
             }

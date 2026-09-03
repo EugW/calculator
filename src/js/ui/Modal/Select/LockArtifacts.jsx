@@ -56,11 +56,6 @@ class LockArtifactComponent extends ModalSelectBase {
         this.needReloadItems = false;
         this.items = [];
 
-        let allArtHash = [];
-        for (let item of this.props.artifactStorage.listDecoded(1)) {
-            allArtHash.push(item.data.getHash());
-        }
-
         let index = 0;
         let showBeta = this.props.app.showBetaContent();
 
@@ -71,7 +66,7 @@ class LockArtifactComponent extends ModalSelectBase {
 
             let storageArts = [];
             for (let hash of build.getArtifactsHashList()) {
-                if (allArtHash.includes(hash)) {
+                if (this.props.artifactStorage.getByHash(hash)) {
                     storageArts.push(hash);
                 }
             }
@@ -91,14 +86,12 @@ class LockArtifactComponent extends ModalSelectBase {
     }
 
     refreshArtLocked() {
-        let lockedHash = this.props.artifactStorage.getLocked();
-
         for (let item of this.items) {
             let artifacts = item.build.getArtifacts();
             for (let slot of Object.keys(artifacts)) {
                 let art = artifacts[slot];
                 if (art) {
-                    art.setLocked(lockedHash.includes(art.getHash()));
+                    art.setLocked(!!this.props.artifactStorage.getByHash(art.getHash())?.isLocked());
                 }
             }
         }

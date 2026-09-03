@@ -8,3 +8,12 @@ artifact_view;total_stats;Характеристики артефактов;Arti
 artifact_view;useful_rolls;Полезные роллы доп. характеристик;Useful substat rolls
 artifact_view;substat_active;Активен;Active
 artifact_view;substat_inactive;Неактивен;Inactive
+artifact_view;crafted;Создан с помощью Освящённого эликсира;Crafted with Sanctifying Elixir
+artifact_view;unknown;Неизвестно;Unknown
+artifact_view;initial_roll;Начальный ролл;Initial roll
+artifact_view;initial_roll_auto;Авто;Auto
+artifact_view;initial_roll_auto_hint;Начальный ролл не закреплён. Выберите значение, чтобы закрепить его при изменении суммы.;Initial roll is automatic. Choose a value to lock it while changing the total.
+artifact_view;initial_roll_locked;Начальный ролл закреплён. Сумма округляется до ближайшего достижимого значения. Выберите «Авто», чтобы снять закрепление.;Initial roll is locked. Totals snap to the nearest reachable value. Choose Auto to unlock.
+artifact_view;initial_roll_conflict;Сумма несовместима с закреплённым начальным роллом. Измените сумму или выберите «Авто».;The total cannot be reached with the locked initial roll. Adjust the total or choose Auto.
+artifact_view;elixir;Освящённый эликсир;Sanctifying Elixir
+artifact_view;elixir_hint;Создан с помощью Освящённого эликсира. Первые две дополнительные характеристики выбраны при создании.;Crafted with Sanctifying Elixir. The first two substats were chosen when crafting.

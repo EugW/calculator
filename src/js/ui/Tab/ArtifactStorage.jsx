@@ -249,7 +249,7 @@ export class ArtifactsPoolView extends React.Component {
     }
 
     savedHashes() {
-        return this.props.app.storage.char.savedHashes();
+        return this.props.app.storage.char.savedHashes(this.props.app.storage.artifacts);
     }
 
     getSettingsForArt(art) {

@@ -1,10 +1,11 @@
 import $ from "jquery";
 
 import {Artifact} from "../../classes/Artifact"
+import {describeManualProvenance} from "../../classes/ArtifactMetadata"
 import {Window} from "../Window"
 
 import "../../../css/modal/ArtifactWindow.css"
-import { substatCheck } from "../../classes/SubstatCheck";
+import { artifactInitialRollOptions, artifactRollCounts, artifactRollDraft } from "../../classes/ArtifactRollDraft";
 import { Stats } from "../../classes/Stats";
 
 export class ArtifactWindow extends Window{
@@ -17,13 +18,17 @@ export class ArtifactWindow extends Window{
         this.mainStat = '';
         this.setName = '';
         this.substats = [
-            {stat: '', value: 0, inactive: false, canToggle: false},
-            {stat: '', value: 0, inactive: false, canToggle: false},
-            {stat: '', value: 0, inactive: false, canToggle: false},
-            {stat: '', value: 0, inactive: false, canToggle: false},
+            {stat: '', value: 0},
+            {stat: '', value: 0},
+            {stat: '', value: 0},
+            {stat: '', value: 0},
         ];
         this.groups = [];
         this.groupsList = [];
+        this.initialLines = null;
+        this.fourthInactive = false;
+        this.marked = false;
+        this.initialRolls = {};
     }
 
     init() {
@@ -89,7 +94,13 @@ export class ArtifactWindow extends Window{
         }
         html += '</div>';
 
-        html += '<div class="gi-hr"></div><div class="gi-modal-substat-lines">';
+        html += '<div class="gi-hr"></div><div class="gi-artifact-provenance">';
+        html += '<label class="gi-artifact-mark-label" title="'+ UI.Lang.get('artifact_view.elixir_hint') +'">';
+        html += '<input type="checkbox" class="gi-artifact-mark-switch">';
+        html += '<span class="gi-artifact-mark-track" aria-hidden="true"></span>';
+        html += UI.Lang.get('artifact_view.elixir');
+        html += '<span class="gi-artifact-mark-unknown">('+ UI.Lang.get('artifact_view.unknown') +')</span></label></div>';
+        html += '<div class="gi-modal-substat-lines">';
 
         for (let i = 1; i <= 4; ++i) {
             html += '<div class="gi-modal-substat-line slot-'+ i +'" data-slot="'+ i +'"><div class="gi-modal-substat-stats">';
@@ -133,6 +144,7 @@ export class ArtifactWindow extends Window{
     }
 
     setRarity(value) {
+        const previous = this.rarity;
         this.rarity = value;
 
         let minRarity = 1;
@@ -151,6 +163,10 @@ export class ArtifactWindow extends Window{
             this.rarity = maxRarity;
         }
 
+        if (this.rarity !== previous) {
+            this.initialRolls = {};
+            if (this.rarity !== 5) this.marked = false;
+        }
         let rarityInfo = DB.Artifacts.Rarity[this.rarity-1];
         let stars = this.rarity;
 
@@ -176,6 +192,7 @@ export class ArtifactWindow extends Window{
         this.setLevel(this.level);
 
         this.refreshSubstats();
+        this.refreshProvenance();
         this.refreshError();
     }
 
@@ -191,6 +208,7 @@ export class ArtifactWindow extends Window{
         }
 
         this.root.find('.gi-artifact-window-level-value').text('+'+ this.level);
+        this.refreshProvenance();
         this.refreshError();
     }
 
@@ -239,59 +257,140 @@ export class ArtifactWindow extends Window{
 
     setSubstatStat(slot, stat) {
         if (slot >= 1 && slot <= 4) {
+            const previous = this.substats[slot-1].stat;
+            if (previous !== stat) delete this.initialRolls[previous];
             this.substats[slot-1].stat = stat;
-
-            if (!stat) {
-                this.substats[slot-1].inactive = false;
-            }
 
             this.root.find('.gi-modal-substat-line.slot-'+ slot +' .gi-modal-substat-item').removeClass('active');
             this.root.find('.gi-modal-substat-line.slot-'+ slot +' .gi-modal-substat-item[data-stat="'+ stat +'"]').addClass('active');
             this.root.find('.gi-modal-substat-line.slot-'+ slot +' .gi-inputs-number-input').data('stat', stat);
 
             this.refreshSubstats(slot);
-            this.refreshSubstatToggle(slot);
+
+            this.refreshProvenance();
         }
 
         this.refreshError();
     }
 
-    setSubstatInactive(slot, inactive) {
-        if (slot < 1 || slot > 4) {
-            return;
-        }
-
-        let substat = this.substats[slot - 1];
-        substat.inactive = !!inactive && !!substat.stat;
-        this.root.find('.gi-modal-substat-line.slot-' + slot).toggleClass('inactive', substat.inactive);
-        this.refreshSubstatToggle(slot);
+    resetProvenance() {
+        this.initialLines = null;
+        this.fourthInactive = false;
+        this.marked = false;
+        this.initialRolls = {};
     }
 
-    setSubstatToggleEnabled(slot, enabled) {
-        if (slot < 1 || slot > 4) {
-            return;
+    // Known first rolls: locked by the user, or a line that holds a single roll.
+    getInitialRolls() {
+        const initials = {};
+        for (const row of this.substats) {
+            if (!row.stat) continue;
+            const value = artifactRollDraft(row.stat, this.rarity, row.value, this.initialRolls[row.stat]).initialValue;
+            if (value !== undefined) initials[row.stat] = value;
         }
-
-        this.substats[slot - 1].canToggle = !!enabled;
-        this.refreshSubstatToggle(slot);
+        return initials;
     }
 
-    refreshSubstatToggle(slot) {
-        if (slot < 1 || slot > 4) {
-            return;
+    getProvenanceForm() {
+        const initials = this.getInitialRolls();
+        const active = this.getActiveStats();
+        const source = this.sourceArtifact?.getMetadata() || {};
+        return {
+            // Below +4 the active lines are the start. From +4 a known start is kept,
+            // otherwise the first rolls settle it when they can.
+            lines: this.level < 4 ? active.length : this.initialLines ?? this.getAutoInitialLines(active, initials),
+            crafted: this.marked ?? source.elixirCrafted,
+            pair: this.marked === true ? this.substats.slice(0, 2).map(row => row.stat)
+                : this.marked === false ? [] : source.definedSubstats,
+            initials,
+        };
+    }
+
+    refreshProvenance() {
+        let low = Math.max(0, this.rarity - 2);
+        let high = Math.max(0, this.rarity - 1);
+
+        if (this.initialLines !== null && (this.initialLines < low || this.initialLines > high)) {
+            this.initialLines = null;
         }
 
-        let substat = this.substats[slot - 1];
-        let hasStat = !!substat.stat;
-        let isInactive = !!substat.inactive && hasStat;
-        let canToggle = !!substat.canToggle && hasStat;
-        let line = this.root.find('.gi-modal-substat-line.slot-' + slot);
-        let toggle = this.root.find('.gi-modal-substat-line.slot-' + slot + ' .gi-modal-substat-toggle');
+        this.root.find('.gi-artifact-mark-switch').prop('checked', this.marked === true)
+            .prop('indeterminate', this.marked === undefined).prop('disabled', this.rarity !== 5);
+        this.root.find('.gi-artifact-mark-unknown').toggle(this.marked === undefined);
 
-        line.toggleClass('inactive', isInactive);
-        toggle.toggle(canToggle);
-        toggle.toggleClass('inactive', isInactive);
-        toggle.text(UI.Lang.get(isInactive ? 'artifact_view.substat_inactive' : 'artifact_view.substat_active'));
+        // Below +4 a 5★ shows its 4th line before it activates, as the game does.
+        const canToggle = this.canToggleFourth();
+        const inactive = canToggle && this.fourthInactive;
+        this.root.find('.gi-modal-substat-line.slot-4 .gi-modal-substat-toggle').toggle(canToggle)
+            .toggleClass('inactive', inactive)
+            .text(UI.Lang.get(inactive ? 'artifact_view.substat_inactive' : 'artifact_view.substat_active'));
+        for (let slot = 1; slot <= 4; ++slot) {
+            const row = this.root.find('.gi-modal-substat-line.slot-' + slot);
+            row.toggleClass('inactive', inactive && slot === 4);
+            row.toggleClass('elixir-defined', this.marked === true && slot <= 2);
+            row.find('.gi-modal-substat-stats').attr('title', this.marked === true && slot <= 2
+                ? UI.Lang.get('artifact_view.elixir') : '');
+            this.refreshRolls(slot);
+        }
+
+        this.refreshError();
+    }
+
+    refreshRolls(slot) {
+        const row = this.substats[slot - 1];
+        const container = this.root.find('.gi-modal-substat-line.slot-' + slot + ' .gi-modal-substat-value-rolls');
+        container.empty();
+        if (!row.stat) return;
+
+        const initial = this.initialRolls[row.stat];
+        const locked = initial !== undefined;
+        const data = artifactRollDraft(row.stat, this.rarity, row.value, initial);
+        const first = data.steps[0];
+        const hint = UI.Lang.get('artifact_view.' + (locked ? 'initial_roll_locked' : 'initial_roll_auto_hint'));
+        const label = UI.Lang.get('artifact_view.initial_roll') + ': ' + UI.Lang.get('stat.' + row.stat);
+        let html = '<label class="gi-modal-substat-value-roll gi-artifact-initial-roll ' + (locked ? 'locked' : 'auto')
+            + ' border-rarity-' + (first?.rarity || 1) + '" title="' + hint + '">';
+        html += '<select class="gi-artifact-initial-select" data-slot="' + slot + '" aria-label="' + label + '">';
+        html += '<option value=""' + (locked ? '' : ' selected') + '>' + UI.Lang.get('artifact_view.initial_roll_auto')
+            + (first && !locked ? ' · ' + first.value : '') + '</option>';
+        for (const option of artifactInitialRollOptions(row.stat, this.rarity, initial)) {
+            html += '<option value="' + option.value + '"' + (option.selected ? ' selected' : '') + '>'
+                + option.label + '</option>';
+        }
+        html += '</select></label>';
+        for (const roll of data.steps.slice(1)) {
+            html += '<div class="gi-modal-substat-value-roll border-rarity-' + roll.rarity + '">' + roll.value + '</div>';
+        }
+        if (data.last !== 0) {
+            html += '<button type="button" class="gi-modal-substat-value-roll last" title="'
+                + UI.Lang.get('tooltip.remove_roll') + '">' + Stats.format(row.stat, data.last, {signed: true}) + '</button>';
+        }
+        container.html(html);
+        container.find('.last').on('click', () => this.setSubstatValue(slot, Number(row.value) - data.last));
+    }
+
+    setInitialRoll(slot, value) {
+        const row = this.substats[slot - 1];
+        if (!row?.stat) return;
+        if (Number.isFinite(value)) {
+            const option = artifactInitialRollOptions(row.stat, this.rarity, this.initialRolls[row.stat])
+                .find(option => option.value === value);
+            // Re-selecting an equivalent tier is a no-op: preserve imported
+            // precision and do not snap a total merely because 4.1 is 4.08.
+            if (!option || option.selected) return;
+            this.initialRolls[row.stat] = option.value;
+        } else {
+            delete this.initialRolls[row.stat];
+        }
+        this.setSubstatValue(slot, row.value);
+    }
+
+    hasRollConflict() {
+        return this.substats.some(row => {
+            if (!row.stat || this.initialRolls[row.stat] === undefined) return false;
+            const data = artifactRollDraft(row.stat, this.rarity, row.value, this.initialRolls[row.stat]);
+            return data.invalid || data.last !== 0;
+        });
     }
 
     refreshSubstats(filter) {
@@ -305,23 +404,15 @@ export class ArtifactWindow extends Window{
 
             if (stat) {
                 const db = DB.Artifacts.Substats.get(stat);
-                const rarityInfo = DB.Artifacts.Rarity[this.rarity-1];
-
-                let step = db.type == 'percent' ? 0.1 : 1;
                 let rolls = db.rolls[this.rarity-1];
                 let min = Stats.roundStatValue(stat, rolls[0]);
-                let max = Stats.roundStatValue(stat, rolls[rolls.length - 1] * rarityInfo.maxUpgrades);
 
-                this.root.find('.gi-modal-substat-line.slot-'+ slot +' .gi-artifact-substat-slider').giSlider('range', min, max, step);
-
-                this.setSubstatValue(slot, substat.value || min);
+                this.setSubstatValue(slot, substat.value || min, false);
             }
         }
     }
 
-    setSubstatValue(slot, value) {
-        const that = this;
-
+    setSubstatValue(slot, value, snap = true) {
         if (slot >= 1 && slot <= 4) {
             if (value < 0) {
                 value = 0;
@@ -350,30 +441,32 @@ export class ArtifactWindow extends Window{
                 value = 0;
             }
 
-            let divRolls = this.root.find('.gi-modal-substat-line.slot-'+ slot +' .gi-modal-substat-value-rolls');
-            divRolls.empty();
-
-            if (stat) {
-                let data = substatCheck(stat, this.rarity, value);
-
-                for (const roll of data.steps) {
-                    divRolls.append('<div class="gi-modal-substat-value-roll border-rarity-'+ roll.rarity +'">'+ roll.value +'</div>');
-                }
-
-                if (data.last > 0) {
-                    divRolls.append('<div class="gi-modal-substat-value-roll last" data-tooltip="'+ UI.Lang.get('tooltip.remove_roll') +'" data-value="'+ data.last  +'">'+ data.last +'</div>');
-                }
+            if (stat && snap && this.initialRolls[stat] !== undefined) {
+                value = artifactRollDraft(stat, this.rarity, value, this.initialRolls[stat]).total;
             }
 
             this.substats[slot-1].value = value;
 
             this.root.find('.gi-modal-substat-line.slot-'+ slot +' .gi-inputs-number-input').val(value);
-            this.root.find('.gi-modal-substat-line.slot-'+ slot +' .gi-artifact-substat-slider').giSlider('set value', value);
+            const slider = this.root.find('.gi-modal-substat-line.slot-' + slot + ' .gi-artifact-substat-slider');
+            if (stat) {
+                const draft = artifactRollDraft(stat, this.rarity, value, this.initialRolls[stat]);
+                if (draft.totals) {
+                    // Index reachable totals so +/- and keyboard steps cannot
+                    // get stuck snapping back across a gap between roll sums.
+                    slider.giSlider('range', 0, draft.totals.length - 1, 1);
+                    slider.giSlider('set value', draft.totals.indexOf(draft.total));
+                } else {
+                    const data = DB.Artifacts.Substats.get(stat);
+                    const tiers = data.rolls[this.rarity - 1];
+                    const maximum = DB.Artifacts.Rarity[this.rarity - 1].maxUpgrades;
+                    slider.giSlider('range', Stats.roundStatValue(stat, tiers[0]),
+                        Stats.roundStatValue(stat, tiers.at(-1) * maximum), data.type === 'percent' ? 0.1 : 1);
+                    slider.giSlider('set value', value);
+                }
+            }
 
-            divRolls.find('.gi-modal-substat-value-roll.last').on('click', function() {
-                that.setSubstatValue(slot, value - $(this).data('value'));
-                $('.tooltip-wrapper').hide();
-            });
+            this.refreshRolls(slot);
         }
 
         this.refreshError();
@@ -408,6 +501,7 @@ export class ArtifactWindow extends Window{
     }
 
     save() {
+        if (this.hasRollConflict()) return;
         if (this.callback) {
             this.callback(this.getArtifact());
         }
@@ -423,6 +517,14 @@ export class ArtifactWindow extends Window{
             errors.push( UI.Lang.get('artifact_error.'+ name) );
         }
 
+        const provenance = describeManualProvenance(art, this.getProvenanceForm());
+        for (const name of provenance.errors) {
+            errors.push(UI.Lang.get('artifact_error.' + name));
+        }
+        const conflict = this.hasRollConflict();
+        if (conflict) errors.push(UI.Lang.get('artifact_view.initial_roll_conflict'));
+        this.root.find('.modal-save').attr('aria-disabled', conflict ? 'true' : 'false');
+
         let html = errors.join('; ');
 
         if (errors.length > 0) {
@@ -432,24 +534,43 @@ export class ArtifactWindow extends Window{
         this.root.find('.gi-modal-line-error').html(html);
     }
 
-    getArtifact() {
-        let result = new Artifact(this.rarity, this.level, this.activeSlot, this.setName, this.mainStat);
-        let maxSubstats = DB.Artifacts.Rarity[this.rarity-1].maxSubstats;
+    getEnteredStats() {
+        const maximum = DB.Artifacts.Rarity[this.rarity - 1].maxSubstats;
+        return this.substats.slice(0, maximum).filter(item => item.stat && item.value)
+            .map(item => ({stat: item.stat, value: +item.value}));
+    }
 
-        for (let i = 0; i < maxSubstats; ++i) {
-            let item = this.substats[i];
-            if (!item.stat || !item.value) {
-                continue;
-            }
+    canToggleFourth() {
+        const row = this.substats[3];
+        return this.rarity === 5 && this.level < 4 && !!row.stat && !!+row.value;
+    }
 
-            if (item.inactive) {
-                result.addUnactivatedStat(item.stat, item.value - 0);
-            } else {
-                result.addStat(item.stat, item.value - 0);
-            }
+    // Entered rows without an inactive 4th line.
+    getActiveStats(stats = this.getEnteredStats()) {
+        return this.canToggleFourth() && this.fourthInactive ? stats.slice(0, -1) : stats;
+    }
+
+    // From +4 the rolls decide the start, but only when every line's first roll is
+    // known and its displayed total cannot hide a different roll count.
+    getAutoInitialLines(stats, initials) {
+        const events = Math.floor(this.level / 4);
+        let total = 0;
+        for (const {stat, value} of stats) {
+            const counts = initials[stat] === undefined ? [] : artifactRollCounts(stat, this.rarity, value, initials[stat]);
+            if (counts.length !== 1) return undefined;
+            total += counts[0];
         }
+        return total - events;
+    }
 
+    getArtifact() {
+        const stats = this.getEnteredStats();
+        const active = this.getActiveStats(stats);
+        const result = new Artifact(this.rarity, this.level, this.activeSlot, this.setName,
+            this.mainStat, active, stats.slice(active.length));
         result.setGroups(this.groups);
+        result.setMetadata(describeManualProvenance(result, this.getProvenanceForm()).input);
+        if (this.sourceArtifact) result.setLocked(this.sourceArtifact.isLocked());
 
         return result;
     }
@@ -494,9 +615,20 @@ export class ArtifactWindow extends Window{
             that.setSubstatStat(slot, stat);
         });
 
-        this.root.find('.gi-modal-substat-toggle').on('click', function() {
-            let slot = $(this).closest('.gi-modal-substat-line').data('slot');
-            that.setSubstatInactive(slot, !that.substats[slot - 1].inactive);
+        this.root.find('.gi-modal-substat-line.slot-4 .gi-modal-substat-toggle').on('click', function() {
+            that.fourthInactive = !that.fourthInactive;
+            that.refreshProvenance();
+        });
+
+        this.root.find('.gi-artifact-mark-switch').on('change', function() {
+            that.marked = this.checked;
+            that.refreshProvenance();
+        });
+
+        this.root.on('change', '.gi-artifact-initial-select', function() {
+            const slot = +$(this).data('slot');
+            that.setInitialRoll(slot, parseFloat($(this).val()));
+            that.root.find('.gi-artifact-initial-select[data-slot="' + slot + '"]').trigger('focus');
         });
 
         this.root.find('.gi-modal-set-icon').on('click', function() {
@@ -567,8 +699,6 @@ export class ArtifactWindow extends Window{
                 }
 
                 that.setSubstatValue(slot, new_value);
-
-                $input.val(new_value);
             });
         });
 
@@ -593,7 +723,10 @@ export class ArtifactWindow extends Window{
                 showSelected: false,
                 showValues: false,
                 change: function(value) {
-                    that.setSubstatValue(slot, value);
+                    const row = that.substats[slot - 1];
+                    if (!row.stat) return;
+                    const draft = artifactRollDraft(row.stat, that.rarity, row.value, that.initialRolls[row.stat]);
+                    that.setSubstatValue(slot, draft.totals ? draft.totals[Number(value)] : value);
                 }
             });
         });
@@ -635,9 +768,11 @@ export class ArtifactWindow extends Window{
     }
 
     show(callback, artifact, slot, opts) {
+        this.sourceArtifact = artifact ? artifact.clone() : null;
         opts = Object.assign({}, opts);
         this.init();
         this.callback = callback;
+        this.initialRolls = {};
 
         super.show();
 
@@ -656,29 +791,29 @@ export class ArtifactWindow extends Window{
                 this.lockedSlot = true;
             }
 
+            const metadata = artifact.getMetadata();
+            const pair = metadata.definedSubstats || [];
+            // Stored lines are sorted: move a crafted pair to rows 1–2; an unactivated line goes last.
+            const ordered = [...artifact.getSubStats()]
+                .sort((a, b) => Number(pair.includes(b.stat)) - Number(pair.includes(a.stat)))
+                .concat(artifact.getUnactivatedSubStats());
             let slot = 1;
-            for (let stats of artifact.subStats) {
-                this.setSubstatToggleEnabled(slot, false);
+            for (let stats of ordered) {
                 this.setSubstatStat(slot, stats.stat);
-                this.setSubstatValue(slot, stats.value);
-                this.setSubstatInactive(slot, false);
-                ++slot;
-            }
-
-            for (let stats of (artifact.getUnactivatedSubStats ? artifact.getUnactivatedSubStats() : [])) {
-                this.setSubstatToggleEnabled(slot, true);
-                this.setSubstatStat(slot, stats.stat);
-                this.setSubstatValue(slot, stats.value);
-                this.setSubstatInactive(slot, true);
+                this.setSubstatValue(slot, stats.value, false);
                 ++slot;
             }
 
             for (let i = slot; i <= 4; ++i) {
-                this.setSubstatToggleEnabled(i, false);
                 this.setSubstatStat(i, '');
                 this.setSubstatValue(i, 0);
-                this.setSubstatInactive(i, false);
             }
+
+            this.initialLines = artifact.getInitialLineCount() ?? null;
+            this.fourthInactive = artifact.getUnactivatedSubStats().length > 0;
+            this.marked = metadata.elixirCrafted === false ? false
+                : metadata.elixirCrafted === true && pair.length === 2 ? true : undefined;
+            this.initialRolls = Object.assign({}, metadata.initialValues);
 
             this.root.find('.gi-artifact-slider-level').giSlider('set value', this.level);
         } else {
@@ -690,11 +825,11 @@ export class ArtifactWindow extends Window{
             for (let i = 1; i <= 4; ++i) {
                 let data = this.substats[i-1];
 
-                this.setSubstatToggleEnabled(i, false);
                 this.setSubstatStat(i, data && data.stat ? data.stat : '');
                 this.setSubstatValue(i, data && data.value ? data.value : 0);
-                this.setSubstatInactive(i, data && data.inactive ? data.inactive : false);
             }
+
+            this.resetProvenance();
 
             this.setSet(this.setName);
         }
@@ -709,6 +844,18 @@ export class ArtifactWindow extends Window{
         }
 
         this.refreshError();
+        this.refreshSubstats();
+        this.refreshProvenance();
         this.root.find('.gi-modal-art-line').toggleClass('locked', this.lockedSlot);
+        this.resizeContent();
+    }
+
+    resizeContent() {
+        super.resizeContent();
+        if (this.root.is(':visible')) {
+            this.root.find('.gi-artifact-substat-slider, .gi-artifact-slider-level').each(function() {
+                $(this).giSlider('refresh');
+            });
+        }
     }
 }

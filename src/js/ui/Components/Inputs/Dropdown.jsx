@@ -1,5 +1,6 @@
 import SimpleBar from 'simplebar-react';
 import React from 'react';
+import { createPortal } from 'react-dom';
 import parse from 'html-react-parser';
 
 import "../../../../css/Components/Inputs/Dropdown.css"
@@ -23,6 +24,9 @@ export class Dropdown extends React.Component {
         };
 
         this.openEvent = () => this.handleDropdownEvent();
+        this.portalViewportEvent = event => {
+            if (this.props.portal && this.state.opened && !this.optionsRef?.contains(event.target)) this.setState({opened: false});
+        };
 
         document.addEventListener('dropdown_open', this.openEvent);
     }
@@ -39,6 +43,7 @@ export class Dropdown extends React.Component {
     }
 
     toggleOpened(e) {
+        if (this.props.disabled) return;
         let newState = !this.state.opened;
         let clickY = e && Number.isFinite(e.clientY)
             ? e.clientY
@@ -64,6 +69,7 @@ export class Dropdown extends React.Component {
     }
 
     selectItem(item) {
+        if (this.props.disabled) return;
         if (this.props.isMultiple) {
             let alreadySelected = false;
             let selected = [];
@@ -162,11 +168,19 @@ export class Dropdown extends React.Component {
     }
 
     componentDidMount() {
+        if (this.props.portal) {
+            document.addEventListener('scroll', this.portalViewportEvent, true);
+            window.addEventListener('resize', this.portalViewportEvent);
+        }
         this.setupResizeObserver();
         this.updateMarqueeText(true);
     }
 
     componentDidUpdate(prevProps) {
+        if (this.props.disabled && this.state.opened) {
+            this.setState({opened: false});
+            return;
+        }
         this.setupResizeObserver();
         this.updateMarqueeText(prevProps.selected !== this.props.selected);
         if (this.state.opened && this.currentRef) {
@@ -188,12 +202,23 @@ export class Dropdown extends React.Component {
                 this.optionsRef.classList.remove('up');
             }
 
-            setTimeout(() => {this.shrinkOptionsHeight();}, 1);
+            if (this.props.portal) {
+                const bounds = this.currentRef.getBoundingClientRect();
+                const width = Math.max(190, bounds.width);
+                const up = bounds.bottom + height > window.innerHeight && bounds.top > height;
+                Object.assign(this.optionsRef.style, {width: width + 'px',
+                    left: Math.max(6, Math.min(bounds.left, window.innerWidth - width - 6)) + 'px',
+                    top: up ? 'auto' : bounds.bottom + 2 + 'px',
+                    bottom: up ? window.innerHeight - bounds.top + 2 + 'px' : 'auto'});
+            }
+            setTimeout(() => {if (this.optionsRef && this.state.opened) this.shrinkOptionsHeight();}, 1);
         }
     }
 
     componentWillUnmount() {
         document.removeEventListener('dropdown_open', this.openEvent);
+        document.removeEventListener('scroll', this.portalViewportEvent, true);
+        window.removeEventListener('resize', this.portalViewportEvent);
         if (this.resizeObserver) {
             this.resizeObserver.disconnect();
         }
@@ -250,6 +275,14 @@ export class Dropdown extends React.Component {
             );
         }
 
+        const optionsNode = <div ref={obj => {this.optionsRef = obj;}}
+            className={'dropdown-options' + (this.props.portal ? ' dropdown-portal ' + (this.props.portalClassName || '') : '')}>
+            <SimpleBar ref={obj => {this.bar = obj;}}
+                style={{maxHeight: this.state.maxHeight || this.props.height || 350}} autoHide={true}>
+                {options}
+            </SimpleBar>
+        </div>;
+
         return (
             <DropdownWrapper
                 rootRef={(obj) => {this.rootRef = obj;}}
@@ -257,25 +290,21 @@ export class Dropdown extends React.Component {
             >
                 <div
                     ref={(obj) => {this.currentRef = obj;}}
-                    className={'dropdown-current' + (this.state.opened ? ' opened' : '')}
-                    role={isFeatureDropdown ? 'button' : undefined}
-                    tabIndex={isFeatureDropdown ? 0 : undefined}
-                    aria-expanded={isFeatureDropdown ? this.state.opened : undefined}
+                    className={'dropdown-current' + (this.state.opened ? ' opened' : '') + (this.props.disabled ? ' disabled' : '')}
+                    role={isFeatureDropdown || this.props.ariaLabel ? 'button' : undefined}
+                    tabIndex={this.props.disabled ? -1 : isFeatureDropdown || this.props.ariaLabel ? 0 : undefined}
+                    aria-label={this.props.ariaLabel}
+                    aria-disabled={this.props.disabled || undefined}
+                    aria-expanded={isFeatureDropdown || this.props.ariaLabel ? this.state.opened : undefined}
                     onFocus={() => restartMarquee(this.currentRef && this.currentRef.querySelector('.dropdown-text.marquee-enabled'))}
                     onKeyDown={(e) => this.handleCurrentKeyDown(e)}
                     onClick={(e) => this.toggleOpened(e)}
                 >
-                    {currentItems}
+                    {this.props.selectedText !== undefined ? <div className="dropdown-option">
+                        <div className="text dropdown-selection-text" title={this.props.selectedText}>{this.props.selectedText}</div>
+                    </div> : currentItems}
                 </div>
-                <div ref={obj => {this.optionsRef = obj;}} className="dropdown-options">
-                    <SimpleBar
-                        ref={(obj) => {this.bar = obj;}}
-                        style={{ maxHeight: this.state.maxHeight ? this.state.maxHeight : this.props.height || 350 }}
-                        autoHide={true}
-                    >
-                        {options}
-                    </SimpleBar>
-                </div>
+                {this.props.portal ? this.state.opened && createPortal(optionsNode, document.body) : optionsNode}
             </DropdownWrapper>
         );
     }

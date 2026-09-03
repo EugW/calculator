@@ -12,6 +12,12 @@
     display: inline-block;
 }
 
+.inputs-button.native {
+    border: 0;
+    font-family: inherit;
+    font-size: inherit;
+}
+
 .inputs-button.disabled {
     background-color: #9d9d9d;
     color: #494d57;

@@ -1,4 +1,5 @@
 import { Artifact } from "../Artifact";
+import { normalizeArtifactOptimizerSettings } from "../ArtifactOptimizerSettings";
 import { ArtifactsSuggestSort } from "../ArtifactsSuggestSort";
 import {
     DEFAULT_OPTIMIZER_RESULT_LIMIT,
@@ -173,22 +174,11 @@ export class WorkerFactorySuggestArtifacts extends WorkerFactory {
 
 
         data.calcset = data.calcset.serialize();
-        data.settings.setMinValues = {};
-        data.settings.setMaxValues = {};
-
-        for (let name of [data.settings.required_sets.set1, data.settings.required_sets.set2]) {
-            if (name) {
-                data.settings.setMinValues[name] = (data.settings.setMinValues[name] || 0) + 2;
-            }
-        }
-
-        for (let [id, val] of Object.entries(data.settings.sets)) {
-            if (val) continue;
-            let [setName, pieces] = id.split('-');
-
-            if (data.settings.setMaxValues[setName] && data.settings.setMaxValues[setName] < pieces) continue;
-            data.settings.setMaxValues[setName] = pieces;
-        }
+        data.settings = Object.assign(
+            {},
+            data.settings || {},
+            normalizeArtifactOptimizerSettings(data.settings)
+        );
 
         let result = [];
         for (let part of parts) {

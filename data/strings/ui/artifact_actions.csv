@@ -1,0 +1,221 @@
+category;name;rus;eng
+tab_header;artifact_craft;Создание артефактов;Artifact Crafting
+tab_header;artifact_reshape;Перераспределение артефактов;Artifact Reshaping
+artifact_action;craft;Создать;Craft
+artifact_action;craft_title;Создание;Craft
+artifact_action;auto_affix;Авто;Auto
+artifact_action;main_affix;Основная характеристика;Main stat
+artifact_action;minor_affix;Доп. характеристика;Substat
+artifact_action;advanced_settings;Дополнительные настройки;Advanced settings
+artifact_action;coverage_short;Бюджет выборки;Sampling budget
+artifact_action;four_line_short;4 начальные строки (предположение);Four-line start (assumption)
+artifact_action;craft_sampling_hint;Выборка по вероятностям, минимум 16 на рецепт. 100% — полный перебор. Используются текущие фильтры оптимизатора.;Probability-weighted samples, at least 16 per recipe. 100% runs Full enumeration. Uses current Optimizer filters.
+artifact_action;craft_baseline;База;Baseline
+artifact_action;craft_chance;Шанс улучшения;Improve chance
+artifact_action;craft_elixir_short;эликс.;elixir
+artifact_action;craft_parameters;Параметры;Parameters
+artifact_action;history;История;History
+artifact_action;history_empty;Пока нет сохранённых расчётов. Завершённые расчёты появятся здесь.;No saved calculations yet. Completed runs will appear here.
+artifact_action;history_delete;Удалить из истории;Remove from history
+artifact_action;history_delete_confirm;Удалить этот расчёт из истории?;Remove this calculation from history?
+artifact_action;history_slots;Слоты;Slots
+artifact_action;history_artifacts;Артефакты;Artifacts
+artifact_action;history_loading;Загрузка сохранённого расчёта…;Loading the saved calculation…
+artifact_action;history_open_failed;Не удалось открыть расчёт: сохранённые данные недоступны.;Could not open the calculation: stored data is unavailable.
+artifact_action;craft_outcomes;Исходы;Outcomes
+artifact_action;lowered_outcomes;Подготовленные исходы;Prepared outcomes
+artifact_action;rescored_outcomes;Перепроверенные исходы;Rescored outcomes
+artifact_action;craft_slots;Рассчитанные слоты;Completed slots
+artifact_action;craft_combinations;Комбинации;Combinations
+artifact_action;craft_searches;Полные поиски;Full searches
+artifact_action;craft_reused;Повторно;Reused
+artifact_action;action_invalid_affixes;В выбранных характеристиках нет допустимого сочетания для этого слота. Попробуйте Авто в одном из селекторов.;These choices contain no valid combination for this slot. Try Auto in one of the selectors.
+artifact_action;reshape;Перераспределить;Reshape
+artifact_action;reshape_title;Перераспределение;Reshape
+artifact_action;reshape_add;Добавить артефакты;Add artifacts
+artifact_action;target_combinations;Всего комбинаций для всех пар артефакта;Total combinations across this artifact’s pairs
+artifact_action;reshape_remove;Убрать из расчёта;Remove from prediction
+artifact_action;reshape_added;Добавлен;Added
+artifact_action;reshape_artifacts;Рассчитанные артефакты;Completed artifacts
+artifact_action;reshape_empty;Добавьте артефакты для расчёта перераспределения.;Add artifacts to predict reshaping.
+artifact_action;reshape_picker_empty;Нет артефактов с выбранными фильтрами.;No artifacts match these filters.
+artifact_action;reshape_source_unavailable;Артефакт изменён или удалён из хранилища. Уберите его из расчёта и добавьте заново.;This artifact was changed or removed from storage. Remove it from the list and add it again.
+artifact_action;action_invalid_targets;Некорректный список артефактов для перераспределения.;Invalid reshape candidate list.
+artifact_action;action_invalid_upgrades;Некорректный список артефактов для прокачки.;Invalid upgrade candidate list.
+artifact_action;upgrade_title;Прокачка;Upgrade
+artifact_action;upgrade_candidates;Кандидаты на прокачку;Upgrade candidates
+artifact_action;upgrade_empty;Нет непрокачанных артефактов в хранилище и на билде.;No underleveled artifacts in storage or on the loadout.
+artifact_action;upgrade_hint;Сканирует непрокачанные артефакты в хранилище и на билде, строит точные исходы прокачки до максимального уровня и сравнивает с лучшим билдом из оптимизатора.;Scans underleveled artifacts in storage and on the loadout, builds exact max-level upgrade outcomes and compares them against the optimizer's best build.
+artifact_action;upgrade_result_hint;Ожидаемый выигрыш от прокачки каждого кандидата до максимального уровня.;Expected gain from leveling each candidate to its maximum level.
+artifact_action;method_upgrade;Полный расчёт по модели: взвешенный выбор новых характеристик без повторов, равновероятные тиры и гарантия выбранной пары в конце усиления созданных Эликсиром артефактов. Текущие значения восстанавливаются из совместимых точных сумм роллов. Если исходное число строк неоднозначно, используется равномерное априорное распределение. Неизвестное происхождение считается обычным. Каждый различимый исход ищется один раз на GPU (f32), победитель перепроверяется на CPU (f64).;Full model computation: weighted new-substat draws without replacement, uniform tiers, and the back-loaded defined-pair guarantee for Elixir-crafted artifacts. Current values are reconstructed from compatible raw roll sums. Ambiguous starting line counts use an equal prior. Unknown origin is treated as ordinary. Each distinct outcome is searched once on the GPU (f32), with its winner rescored on the CPU (f64).
+artifact_action;variants;Вариантов;Variants
+artifact_action;upgrade_max_level;Максимальный уровень;Max level
+artifact_action;reshape_meter;Священное толкование;Hallowed Exegesis
+artifact_action;reshape_points;Очки;Points
+artifact_action;reshape_triggers;Срабатывания;Triggers
+artifact_action;reshape_locked;Закреплённая пара;Locked pair
+artifact_action;reshape_normal;Обычное;Normal
+artifact_action;reshape_advanced;Улучшенное;Advanced
+artifact_action;reshape_decreed;Предписанное;Decreed
+artifact_action;reshape_dust_short;пыль;dust
+artifact_action;reshape_unavailable;Недоступно;Unavailable
+artifact_action;reshape_refine;Уточнять перспективные пары;Refine promising pairs
+artifact_action;start;Рассчитать;Calculate
+artifact_action;cancel;Отмена;Cancel
+artifact_action;method_title;Модель, ограничения и объём вычислений;Model, constraints and computation cost
+artifact_action;meter_help;Как работает общий счётчик;How the global meter works
+artifact_action;mode;Режим расчёта;Calculation mode
+artifact_action;mode_approximate;Приближённый — полный поиск замен для каждого образца;Approximate — full replacement search per sample
+artifact_action;mode_full;Полный перебор исходов (медленно);Full outcome enumeration (slow)
+artifact_action;sample_budget;Базовое число образцов на рецепт;Base samples per recipe
+artifact_action;samples;образцов;samples
+artifact_action;seed;Сид выборки;Sampling seed
+artifact_action;adaptive;Дополнительно уточнять до трёх перспективных рецептов на слот;Refine up to three promising recipes per slot
+artifact_action;refined;Уточнённая выборка;Refined sample
+artifact_action;sample_note;Все рецепты получают базовую выборку. Уточнение использует отдельные 16 предварительных образцов на рецепт, затем до трёх претендентов получают дополнительные образцы (до 4× базового бюджета). Предварительные образцы не входят в итоговые средние. Одинаковый сид повторяет выборку. Поиск замен остаётся полным.;Every recipe receives its base sample budget. Refinement uses 16 separate pilot samples per recipe, then up to three contenders receive extra samples (up to 4× their base budget). Pilots do not enter reported averages. The same seed repeats the sample stream. Replacement searches remain full.
+artifact_action;coverage_budget;Бюджет выборки (% от числа исходов);Sampling budget (% of outcome count)
+artifact_action;coverage_slider;Логарифмическая шкала бюджета выборки;Logarithmic sampling-budget slider
+artifact_action;coverage_note;Логарифмическая шкала: 0.001%–100%, малые значения регулируются точнее. Бюджет каждого рецепта — процент от числа состояний до объединения VOID, минимум 16 образцов. Объединение бесполезных статов не уменьшает бюджет выборки. Это не доля вероятности и не гарантия охвата уникальных артефактов: возможны повторы. Уточнение добавляет образцы. 100% включает полный перебор.;Logarithmic scale: 0.001%–100%, with finer control at small values. Each recipe’s budget uses its state count before VOID merging, with at least 16 samples. Merging irrelevant stats does not reduce the sample budget. This is not probability coverage or guaranteed coverage of unique artifacts: samples can repeat. Refinement adds samples. 100% enables full enumeration.
+artifact_action;coverage_full;100%: полный перебор с дедупликацией, без случайной выборки. Может быть очень долгим.;100%: full enumeration with deduplication, no sampling. This can take a very long time.
+artifact_action;base_samples;Базовая выборка;Base samples
+artifact_action;enumerated_outcomes;Уникальные состояния рецепта;Unique recipe states
+artifact_action;action_invalid_coverage;Процент выборки должен быть от 0.001 до 100.;Sampling percentage must be between 0.001 and 100.
+artifact_action;method_approximate;Выборка по той же модели сообщества: начальные строки, веса характеристик, гарантии и качество усилений. Для каждого уникального образца оптимизируются все доступные сочетания остальных четырёх слотов. Портфели не используются, рецепты не отбрасываются. Совпадающие числовые исходы используют общий результат, сохраняя отдельные веса и счётчики рецептов. Интервал вероятности — 95% интервал Уилсона, ошибка среднего — одна стандартная ошибка выборки (если наблюдалась ненулевая дисперсия). Они не учитывают ошибки модели, точность GPU или выбор победителя среди множества рецептов. Редкие улучшения могут быть пропущены, ранг не гарантирован.;Samples follow the same community model: starting lines, substat weights, guarantees and enhancement quality. Every unique sample searches all available four-slot replacements. No portfolios or discarded recipes. Numerically identical outcomes reuse a score while retaining each recipe’s weights and sample counts. Chance bounds are pointwise 95% Wilson intervals, mean error is one sampling standard error (when nonzero variance was observed). These exclude model error, GPU precision and winner selection across many recipes. Rare improvements can be missed and ranking is not guaranteed.
+artifact_action;chance_interval;95% интервал вероятности улучшения;95% chance-to-improve interval
+artifact_action;gain_error;Стандартная ошибка ожидаемого прироста;Expected-gain sampling standard error
+artifact_action;error_unavailable;Недостаточно наблюдаемого разброса для оценки;Insufficient observed variation to estimate
+artifact_action;no_observed_wins;Улучшений в выборке не было — это не доказывает нулевую вероятность.;No sampled improvements — this does not prove zero chance.
+artifact_action;optimizer_evaluations;Выполненные полные поиски;Completed full searches
+artifact_action;cache_hits;Повторно использованные результаты;Reused results
+artifact_action;pilot_samples;Предварительные образцы (не входят в средние);Pilot samples (excluded from averages)
+artifact_action;coverage_combinations;Покрытие комбинаций, включая повторно использованные результаты;Combination coverage, including reused results
+artifact_action;phase_pilot;Предварительная выборка для уточнения;Pilot sampling for refinement
+artifact_action;phase_sample;Полная оптимизация выборки исходов;Fully optimizing sampled outcomes
+artifact_action;action_invalid_mode;Неизвестный режим прогнозирования.;Unknown prediction mode.
+artifact_action;action_invalid_samples;Число образцов должно быть целым от 2 до 4096.;Sample count must be an integer from 2 to 4096.
+artifact_action;set;Набор;Set
+artifact_action;choose_set;Выберите набор;Choose a set
+artifact_action;pair;Выбранные характеристики;Defined substats
+artifact_action;automatic;Автоматически — лучшая пара;Automatic — best pair
+artifact_action;locked;Пара закреплена при создании;Crafted pair locked
+artifact_action;initial_lines;начальные строки;initial lines
+artifact_action;four_line_chance;Вероятность 4 начальных строк (%);Four-line start probability (%)
+artifact_action;craft_assumption;34% — настраиваемое предположение, не подтверждённая игровая вероятность. Проверяются все допустимые основные характеристики и пары. В подробностях показаны отдельные результаты для наблюдаемых 3 и 4 начальных строк.;34% is an adjustable assumption, not a confirmed game rate. Every legal main stat and substat pair is evaluated. Details show separate results for observed 3-line and 4-line starts.
+artifact_action;points;Священное толкование — текущие очки;Hallowed Exegesis — current points
+artifact_action;trigger;Завершённые пороги в цикле из трёх;Completed thresholds in the three-trigger cycle
+artifact_action;normal;Обычное (не менее 2 попаданий);Normal (at least 2 hits)
+artifact_action;advanced;Улучшенное (не менее 3 попаданий);Advanced (at least 3 hits)
+artifact_action;decreed;Предписанное (не менее 4 попаданий);Decreed (at least 4 hits)
+artifact_action;after_meter;Счётчики после действия;Counters after action
+artifact_action;reshape_note;Очки общие для аккаунта. Стоимость добавляется до проверки порога, остаток сохраняется. Каждая строка — отдельная альтернатива из текущего состояния, не цепочка действий. Прогноз не тратит ресурсы и не меняет счётчики. Начальные значения сохраняются, качество новых усилений равномерно и не ограничено старым качеством.;Points are account-wide. Cost is added before the threshold check and overflow is retained. Each row is an independent alternative from the entered state, not a sequence. Prediction spends nothing and does not update counters. Initial values are preserved, new enhancement quality is uniform and not capped by old quality.
+artifact_action;method;Полный расчёт: вероятности по модели сообщества с гарантией в конце усиления. При включённом сохранении топологии (по умолчанию) поиск ограничивается текущими сет-бонусами базовой сборки: наборы могут занимать любые допустимые слоты, но альтернативные 4pc, 2pc+2pc и другие топологии не перебираются. Обычная точность GPU (f32), победители перепроверяются на CPU (f64), поэтому точный глобальный f64-оптимум не гарантируется. Неудачный результат можно отклонить, учитываемый прирост неотрицателен.;Full computation: community backloaded-guarantee probabilities. With topology preservation enabled (default), the search is restricted to the baseline build set bonuses: sets may occupy any legal slots, but alternative 4-piece, 2+2 and other topologies are not evaluated. Uses ordinary GPU precision (f32) with CPU (f64) rescoring, so a global f64 optimum is not certified. Keeping the original is allowed, so realized gain cannot be negative.
+artifact_action;filters;Используются текущие фильтры, условия наборов и ограничения вкладки оптимизатора. Новый артефакт принудительно занимает свой слот независимо от фильтров этого слота. Пустые слоты списка используют обычную подстановку экипированного артефакта. База — лучший найденный допустимый инвентарный билд, а не текущая экипировка. Для поиска требуется WebGPU.;Uses the Optimizer tab’s current filters, set conditions and constraints. The hypothetical artifact overrides filters for its own slot. Empty candidate slots use the optimizer’s equipped fallback. Baseline is the best feasible inventory build found, not the current loadout. Search requires WebGPU.
+artifact_action;expected_gain;Ожидаемый прирост;Expected gain
+artifact_action;improve_chance;Вероятность улучшения;Chance to improve
+artifact_action;cost;Стоимость;Cost
+artifact_action;elixir;Освящённый эликсир;Sanctifying Elixir
+artifact_action;dust;Пыль просветления;Dust of Enlightenment
+artifact_action;details;Подробности и альтернативы;Details and alternatives
+artifact_action;outcome_count;Сумма уникальных состояний по рецептам (без бесполезных статов);Unique states summed across recipes (irrelevant stats merged)
+artifact_action;sampled_outcomes;Всего образцов по рецептам (включая пробные и повторы);Total draws across recipes (including pilots and repeats)
+artifact_action;recipes;Рецепты;Recipes
+artifact_action;combinations_per_outcome;Комбинации для текущего исхода;Combinations per outcome
+artifact_action;slot_combinations;Всего комбинаций для всех рецептов слота;Total combinations across this slot’s recipes
+artifact_action;phase_count;Подсчёт полного объёма работы;Counting full workload
+artifact_action;phase_full;Полная оптимизация каждого исхода;Fully optimizing every outcome
+artifact_action;forced_mean;Среднее при обязательной замене, только допустимые исходы;Forced-replacement mean, feasible outcomes only
+artifact_action;infeasible;Нет допустимого сочетания при замене;No feasible forced complement
+artifact_action;rescore_rejected;Лучшее сочетание GPU отклонено точным пересчётом;GPU winner rejected by exact rescore
+artifact_action;alternatives;Рассчитанные альтернативы;Evaluated alternatives
+artifact_action;baseline;Инвентарная база (GPU-поиск, перепроверка CPU);Inventory baseline (GPU search, CPU rescored)
+artifact_action;stale;Данные изменились — пересчитайте прогноз.;Inputs changed — recalculate the prediction.
+artifact_action;combinations;Комбинации оптимизатора;Optimizer combinations
+artifact_action;phase_baseline;Оптимизация инвентарной базы;Optimizing inventory baseline
+artifact_action;phase_slot_complete;Слот рассчитан;Slot complete
+artifact_action;reshape_ineligible;Нужен артефакт 5★ уровня 20 с четырьмя характеристиками.;Requires a 5-star level-20 artifact with four substats.
+artifact_action;reshape_invalid_values;Некорректные характеристики артефакта.;Invalid artifact substats.
+artifact_action;reshape_missing_start;Неизвестно число начальных строк. Импортируйте данные totalRolls.;Starting line count is unknown. Import totalRolls metadata.
+artifact_action;reshape_missing_initial;Неизвестны точные начальные значения. Нужен импорт с initialValue — порядок усилений не угадывается.;Exact initial values are unknown. Import initialValue metadata — enhancement order is not guessed.
+artifact_action;reshape_missing_crafted;Неизвестно, создан ли артефакт эликсиром. Нужен импорт с признаком elixirCrafted.;Crafted status is unknown. Import elixirCrafted metadata.
+artifact_action;reshape_missing_pair;Неизвестна закреплённая пара созданного артефакта.;This crafted artifact’s locked pair is unknown.
+artifact_action;reshape_locked_pair;У созданного артефакта нельзя сменить закреплённую пару.;A crafted artifact’s defined pair cannot be changed.
+artifact_action;action_invalid_set;Выберите набор артефактов 5★.;Choose a 5-star artifact set.
+artifact_action;action_webgpu_required;Нужен браузер с доступным WebGPU.;A browser with available WebGPU is required.
+artifact_action;action_no_baseline;При текущих ограничениях не найден допустимый инвентарный билд. Ослабьте ограничения в оптимизаторе.;No feasible inventory baseline was found. Relax the Optimizer tab’s constraints.
+artifact_action;action_missing_filters;Не удалось получить текущие настройки оптимизатора.;Could not read the current Optimizer settings.
+artifact_action;outcomes_title;Результаты и билды;Outcomes & builds
+artifact_action;compare;Сравнить;Compare
+artifact_action;compare_ok;ОК;OK
+artifact_action;compare_not_upgrade;Этот артефакт не является улучшением в этой галерее.;This artifact is not an upgrade in this gallery.
+artifact_action;outcomes_sampled;Улучшения в выборке · по урону;Sampled improvements · ranked by damage
+artifact_action;outcomes_all;Все улучшения · по урону;All improvements · ranked by damage
+artifact_action;outcomes_empty;В модели нет улучшающих исходов для этого рецепта.;No improving outcomes in the model for this recipe.
+artifact_action;outcome_value;Оптимизированный урон;Optimized damage
+artifact_action;outcome_gain;Прирост;Gain
+artifact_action;outcome_probability;Вероятность;Probability
+artifact_action;outcome_at_least;Этот или лучше;This or better
+artifact_action;outcome_exact_probability;Вероятность именно этого исхода;Exact outcome probability
+artifact_action;outcome_at_least_note;Вероятность за одну попытку получить такой же или больший оптимизированный урон. Включает все исходы с равным уроном, даже на других страницах. Не нормируется только по улучшениям.;Chance per attempt of reaching this optimized damage or higher. Includes all equal-damage outcomes, even on other pages. Not normalized over improvements only.
+artifact_action;outcome_at_least_sampled_note;Оценка шанса получить такой же или больший оптимизированный урон: доля всех отчётных проб с таким уроном или выше, включая повторы и равные исходы. Пилотные пробы исключены. Это выборочная оценка, а не сумма точных вероятностей только встреченных исходов.;Estimated chance of reaching this optimized damage or higher: the fraction of all reporting draws meeting the threshold, including repeats and ties. Pilot draws are excluded. This is a sample estimate, not a sum of exact probabilities for only the encountered outcomes.
+artifact_action;outcome_statistics;Статистика;Statistics
+artifact_action;outcome_loadout;Оптимальный билд;Optimal loadout
+artifact_action;outcome_baseline;Базовый билд;Baseline build
+artifact_action;outcome_target;Прогнозируемый;Predicted
+artifact_action;outcome_target_above;Показан выше среди исходов;Shown above among the outcomes
+artifact_action;outcome_swapped;Замена из хранилища;Inventory swap
+artifact_action;outcome_kept;Без изменений;Unchanged
+artifact_action;outcome_observed;Встречен в выборке;Observed in sample
+artifact_action;outcome_page;Страница;Page
+artifact_action;outcome_previous;Предыдущие исходы;Previous outcomes
+artifact_action;outcome_next;Следующие исходы;Next outcomes
+artifact_action;outcome_probability_note;Вероятность рассчитана по модели на одну попытку, не только среди улучшений. Статистика сверху относится ко всему рекомендуемому рецепту.;Probability is model mass per attempt, not conditional on improving. Summary statistics describe the entire recommended recipe.
+artifact_action;outcome_void_note;VOID объединяет характеристики, не влияющие на цель и ограничения. Карточка представляет группу равнозначных артефактов, а не точные значения скрытых характеристик.;VOID groups stats irrelevant to the objective and constraints. Each card represents equivalent artifacts, not exact values for the hidden stats.
+artifact_action;action_outcome_limit;Слишком много улучшающих исходов для хранения подробностей. Уменьшите выборку. Результаты не были молча обрезаны.;Too many improving outcomes to retain details safely. Reduce sampling coverage. Results have not been silently truncated.
+artifact_action;preserve_topology;Сохранять топологию;Preserve topology
+artifact_action;preserve_topology_hint;Поиск оценивает только сборки с текущими сет-бонусами и (для крафта) 4pc крафтируемого сета. Отключите для полного перебора — он может быть очень долгим.;Only builds with the current set bonuses (and, for craft, a 4-piece set of the crafted artifact) are evaluated. Disable for the full search, which can be very long.
+artifact_action;prep_workers;Воркеры CPU;CPU workers
+artifact_action;worker;Воркер;Worker
+artifact_action;candidate;Кандидат;Candidate
+artifact_action;stage_not_needed;Этап не требовался;Stage not needed
+artifact_action;phase_waiting;Ожидание задачи;Waiting for a candidate
+artifact_action;method_craft;Полный расчёт: вероятности по модели сообщества с гарантией в конце усиления. Перебираются все допустимые рецепты выбранного сета, каждый исход ищется один раз — без сэмплирования и без кэша повторного использования. Ограничивайте число исходов, фиксируя аффиксы (основной стат и сабстаты). Обычная точность GPU (f32), победители перепроверяются на CPU (f64). Неудачный результат можно отклонить, учитываемый прирост неотрицателен.;Full computation: community backloaded-guarantee probabilities. Every legal recipe of the chosen set is evaluated and each distinct outcome is searched once, with no sampling and no reuse cache. Throttle outcomes by fixing affixes (main stat and substats). Uses ordinary GPU precision (f32) with CPU (f64) rescoring of winners. Keeping the original is allowed, so realized gain cannot be negative.
+artifact_action;action_outcomes_too_large;Слишком много исходов крафта. Зафиксируйте основной стат или сабстаты, чтобы сузить список рецептов.;Too many craft outcomes. Fix the main stat or substats to narrow the recipes.
+artifact_action;preparation;Подготовка;Preparation
+artifact_action;phase_prepare;Объединение исходов;Building deduplicated outcomes
+artifact_action;phase_lower;Подготовка исходов;Preparing outcomes
+artifact_action;phase_upload;Загрузка на GPU;Uploading to GPU
+artifact_action;phase_rescore;Перепроверка победителей (CPU);CPU-rescoring winners
+artifact_action;phase_gallery;Сборка галереи результатов;Building result gallery
+artifact_action;action_invalid_slots;Недопустимый набор слотов крафта.;Invalid craft slot selection.
+artifact_action;craft_exclude;Исключить слот из крафта;Exclude slot from craft
+artifact_action;craft_include;Включить слот в крафт;Include slot in craft
+artifact_action;upgrade_source;Исходные характеристики;Starting substats
+artifact_action;upgrade_source_unavailable;Исходный артефакт недоступен в этой записи истории.;The original artifact is unavailable in this history entry.
+artifact_action;upgrade_start_prior;Начальное число строк неоднозначно: до учёта текущих значений допустимые варианты считаются равновероятными.;Starting line count is ambiguous: possible starts have equal prior probability before conditioning on current values.
+artifact_action;upgrade_raw_prior;Точные суммы роллов восстановлены из совместимых историй с равновероятными тирами и учётом распределения усилений.;Raw roll totals are weighted over compatible histories using uniform tiers and the enhancement-allocation model.
+artifact_action;upgrade_ordinary_assumption;Происхождение неизвестно: предполагается обычный артефакт. Для созданного Эликсиром укажите происхождение и выбранную пару.;Origin is unknown: ordinary enhancement is assumed. For an Elixir-crafted artifact, record its origin and defined pair.
+artifact_action;action_upgrade_missing_pair;Для созданного Эликсиром артефакта нужны две выбранные характеристики. Укажите их в редакторе.;This Elixir-crafted artifact needs its two defined substats. Record them in the artifact editor.
+artifact_action;action_upgrade_missing_start;Неизвестно число начальных строк. Повторно импортируйте артефакт с totalRolls.;Starting line count is unknown. Re-import the artifact with totalRolls.
+artifact_action;action_upgrade_missing_initial;Неизвестны начальные значения характеристик. Повторно импортируйте артефакт с initialValue.;Initial substat values are unknown. Re-import the artifact with initialValue.
+artifact_action;action_upgrade_missing_crafted;Неизвестно, создан ли артефакт эликсиром. Повторно импортируйте артефакт с elixirCrafted.;Crafted status is unknown. Re-import the artifact with elixirCrafted.
+artifact_action;action_upgrade_missing_unactivated;У 5★ артефакта с тремя строками ниже +4 нет неактивной 4-й характеристики. Повторно импортируйте артефакт с unactivatedSubstats или добавьте неактивную строку в редакторе.;This 3-line 5★ artifact below +4 is missing its inactive 4th substat. Re-import it with unactivatedSubstats or add the inactive row in the editor.
+artifact_action;action_upgrade_invalid_values;Характеристики или история роллов не соответствуют уровню артефакта. Проверьте значения и исходные роллы в редакторе.;The substats or roll history do not match this artifact's level. Check its values and initial rolls in the editor.
+artifact_action;rv_outcomes;Полезный RV исходов;Outcome useful RV
+artifact_action;rv_companions;Полезный RV остальных артефактов;Companion useful RV
+artifact_action;rv_min;Мин.;Min
+artifact_action;rv_max;Макс.;Max
+artifact_action;rv_outcomes_hint;Фильтрует итоговый артефакт. Исходы вне диапазона исключаются, вероятности и выигрыш рассчитываются только для оставшихся.;Filters the final artifact. Outcomes outside the range are discarded, and probabilities and gain use only the retained subset.
+artifact_action;rv_companions_hint;Фильтрует каждый из четырёх остальных артефактов по текущему уровню. Базовая сборка не меняется.;Filters each of the four companion artifacts at its current level. The baseline build stays unchanged.
+artifact_action;rv_units_hint;100 RV — максимальный ролл для редкости артефакта. Учитываются только полезные доп. характеристики. Границы включены, пустое поле — без ограничения.;100 RV is one maximum roll for the artifact’s rarity. Only useful substats count. Bounds are inclusive, and blank fields are unbounded.
+artifact_action;rv_subset_note;Вероятности и ожидаемый выигрыш рассчитаны для выбранного диапазона RV. Оставшиеся исходы каждого рецепта нормированы до 100%.;Probabilities and expected gain describe the selected RV subset. Retained outcomes are normalized to 100% for each recipe.
+artifact_action;action_rv_invalid_range;Укажите неотрицательные границы RV. Минимум не должен превышать максимум.;Enter nonnegative RV bounds. Minimum must not exceed maximum.
+artifact_action;action_rv_invalid_stat;Не удалось восстановить RV доп. характеристики. Проверьте значения и редкость артефактов.;Could not reconstruct a substat’s RV. Check the artifact values and rarity.
+artifact_action;action_rv_no_outcomes;Нет исходов в выбранном диапазоне RV.;No outcomes match the selected RV range.
+artifact_action;action_rv_no_companions;Для одного из остальных слотов нет артефактов в выбранном диапазоне RV.;A companion slot has no artifacts within the selected RV range.
+artifact_action;upgrade_select_all;Выбрать все;Select all
+artifact_action;upgrade_deselect_all;Снять все;Deselect all
+artifact_action;upgrade_select_set;Выбрать набор;Select set
+artifact_action;upgrade_deselect_set;Убрать набор;Deselect set
+artifact_action;upgrade_deselect_useless_mains;Убрать бесполезные мейн-статы;Deselect useless mains
+artifact_action;upgrade_include;Включить в прокачку;Include in upgrade
+artifact_action;upgrade_exclude;Исключить из прокачки;Exclude from upgrade

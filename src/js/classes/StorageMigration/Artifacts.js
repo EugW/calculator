@@ -2,7 +2,8 @@ import { Artifact } from "../Artifact";
 import { CalcSet } from "../CalcSet";
 import { Serializer } from "../Serializer";
 
-const TARGET_ARTIFACT_VERSION = 2;
+// v2 remains byte-stable for artifacts without provenance; known metadata uses v3.
+const TARGET_ARTIFACT_VERSIONS = [2, 3];
 
 const STORAGE_TARGETS = [
     {
@@ -301,7 +302,7 @@ function canonicalData(data, deserialize, validateObject) {
 
 function artifactUsesTargetVersion(artifact) {
     let serialized = artifact.serialize();
-    return Array.isArray(serialized) && serialized[0] == TARGET_ARTIFACT_VERSION;
+    return Array.isArray(serialized) && TARGET_ARTIFACT_VERSIONS.includes(serialized[0]);
 }
 
 function buildUsesTargetArtifactVersion(build) {

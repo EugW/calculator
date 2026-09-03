@@ -1,4 +1,4 @@
-import { GPUArtifactOptimizer } from "../src/js/classes/GPUArtifactOptimizer";
+import { GPUOptimizerInputs } from "../src/js/classes/GPUOptimizerInputs";
 import { createOptimizationPlan } from "../src/js/classes/OptimizationPlan";
 
 function planVariation(id, setInfo = []) {
@@ -22,7 +22,7 @@ function makePlan(variations) {
 }
 
 test("GPU variation keys are canonical for two 2pc sets", () => {
-    const optimizer = new GPUArtifactOptimizer();
+    const optimizer = new GPUOptimizerInputs();
     const expected = 257 + 3 * 128 + 10;
 
     expect(optimizer.computeSetKeyFromIds([3, 3, 10, 10, 1])).toBe(expected);
@@ -30,14 +30,14 @@ test("GPU variation keys are canonical for two 2pc sets", () => {
 });
 
 test("GPU variation keys do not collide between high single 2pc and high two 2pc sets", () => {
-    const optimizer = new GPUArtifactOptimizer();
+    const optimizer = new GPUOptimizerInputs();
 
     expect(optimizer.computeSetKeyFromIds([63, 63, 1, 2, 3])).toBe(64);
     expect(optimizer.computeSetKeyFromIds([62, 62, 63, 63, 1])).toBe(257 + 62 * 128 + 63);
 });
 
 test("GPU variation lookup uses direct keys without modulo folding", () => {
-    const optimizer = new GPUArtifactOptimizer();
+    const optimizer = new GPUOptimizerInputs();
     optimizer._setIdMap = new Map([
         ["HighA", 62],
         ["HighB", 63],
@@ -66,7 +66,7 @@ test("GPU variation lookup uses direct keys without modulo folding", () => {
 });
 
 test("a dynamic 2pc variation remains active beside an ordinary static 2pc set", () => {
-    const optimizer = new GPUArtifactOptimizer();
+    const optimizer = new GPUOptimizerInputs();
     optimizer._setIdMap = new Map([
         ["StaticSet", 3],
         ["DynamicSet", 10],
@@ -89,7 +89,7 @@ test("a dynamic 2pc variation remains active beside an ordinary static 2pc set",
 });
 
 test("missing lookup states use the semantic default even when it is not variation zero", () => {
-    const optimizer = new GPUArtifactOptimizer();
+    const optimizer = new GPUOptimizerInputs();
     optimizer._setIdMap = new Map([["DynamicSet", 10]]);
 
     const variationMap = new Map([
@@ -110,7 +110,7 @@ test("missing lookup states use the semantic default even when it is not variati
 });
 
 test("plan lookup resolves every physical key by threshold specificity", () => {
-    const optimizer = new GPUArtifactOptimizer();
+    const optimizer = new GPUOptimizerInputs();
     optimizer._setIdMap = new Map([
         ['Alpha', 3],
         ['Beta', 10],

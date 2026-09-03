@@ -5,7 +5,7 @@
 
 import { CBlock } from "./Compile/Types";
 import { FeatureCompiler, getAssignedStats } from "./Compiler";
-import { buildStatIndexMap, resetWGSLVariables } from "./Compile/WGSL";
+import { buildStatIndexMap } from "./Compile/WGSL";
 
 const VARIATION_LOOKUP_SIZE = 257 + 128 * 128;
 const SET_BONUS_LEVELS = 128 * 2;
@@ -27,7 +27,6 @@ export class WGSLFeatureCompiler extends FeatureCompiler {
      */
     prepareWGSL(data, opts) {
         opts = Object.assign({}, opts);
-        resetWGSLVariables();
 
         let isRotation = this.tree.getType() == 'damage_rotation_result';
         let resultTree = this.tree.makeResult();
@@ -77,6 +76,7 @@ export class WGSLFeatureCompiler extends FeatureCompiler {
         opts = Object.assign({}, opts, {
             statIndex: this.statIndexMap,
             statsVar: '(*stats)',
+            variableNames: new Map(),
         });
 
         return this.processed.compileWGSL(opts);
@@ -245,9 +245,8 @@ export class WGSLMegaKernelCompiler {
             const wgslOpts = Object.assign({}, opts, {
                 statIndex: this.globalStatIndexMap,
                 statsVar: '(*stats)',
+                variableNames: new Map(),
             });
-
-            resetWGSLVariables();
 
             const bodyCode = variation.objectiveAst.compileWGSL(wgslOpts);
 
@@ -271,7 +270,7 @@ export class WGSLMegaKernelCompiler {
                     return {stat, index};
                 })
                 .sort((left, right) => left.index - right.index);
-            resetWGSLVariables();
+            wgslOpts.variableNames = new Map();
             const constraintAssignCode = constraintAssign.length
                 ? constraintAssignBlock.compileWGSL(wgslOpts)
                 : '';
@@ -343,8 +342,15 @@ ${constraintSwitchCases.join('\n')}
             statCount,
         } = this.buildVariationFunctions({});
 
-        const variationMap = this.buildVariationMap();
+        return this.getKernelPreamble({functions, dispatchSwitch, constraintFunctions, constraintDispatchSwitch, statCount})
+            + this._mainEntry(statCount);
+    }
 
+    /**
+     * Shared ABI, objective/constraint functions, and set helpers. Each engine
+     * selects its result binding and set-bonus pointer address space.
+     */
+    getKernelPreamble({functions, dispatchSwitch, constraintFunctions, constraintDispatchSwitch, statCount}, {resultBuffer = true, setBonusAddressSpace = 'function'} = {}) {
         return `
 // ============================================
 // Auto-generated WGSL Mega-Kernel
@@ -376,7 +382,7 @@ struct StatConstraint {
 @group(0) @binding(0) var<storage, read> artifacts: array<Artifact>;        // Combined all slots
 @group(0) @binding(1) var<storage, read> set_bonuses: array<array<f32, ${statCount}>, ${SET_BONUS_LEVELS}>;
 @group(0) @binding(2) var<storage, read> set_to_variation: array<u32, ${VARIATION_LOOKUP_SIZE}>;
-@group(0) @binding(3) var<storage, read_write> result_values: array<f32>;
+${resultBuffer ? '@group(0) @binding(3) var<storage, read_write> result_values: array<f32>;' : ''}
 @group(0) @binding(4) var<uniform> params: ComputeParams;
 
 struct ComputeParams {
@@ -478,20 +484,20 @@ fn compute_set_key(s0: u32, s1: u32, s2: u32, s3: u32, s4: u32) -> u32 {
     var four_piece_set = 128u;
     var two_piece_a = 128u;
     var two_piece_b = 128u;
-    
+
     // Process each unique set ID (skip duplicates)
     let sets = array<u32, 5>(s0, s1, s2, s3, s4);
     for (var i = 0u; i < 5u; i++) {
         let set_id = sets[i];
         if (set_id >= 128u) { continue; }
-        
+
         // Skip if we've already processed this set_id
         var already_processed = false;
         for (var j = 0u; j < i; j++) {
             if (sets[j] == set_id) { already_processed = true; break; }
         }
         if (already_processed) { continue; }
-        
+
         let count = count_set(set_id, s0, s1, s2, s3, s4);
         if (count >= 4u) {
             if (set_id < four_piece_set) {
@@ -506,7 +512,7 @@ fn compute_set_key(s0: u32, s1: u32, s2: u32, s3: u32, s4: u32) -> u32 {
             }
         }
     }
-    
+
     if (four_piece_set < 128u) {
         return 129u + four_piece_set;
     }
@@ -520,37 +526,7 @@ fn compute_set_key(s0: u32, s1: u32, s2: u32, s3: u32, s4: u32) -> u32 {
     return 0u;
 }
 
-fn apply_set_bonuses(stats: ptr<function, array<f32, ${statCount}>>, s0: u32, s1: u32, s2: u32, s3: u32, s4: u32) {
-    // Only check the 5 set IDs that are actually present
-    let sets = array<u32, 5>(s0, s1, s2, s3, s4);
-    for (var i = 0u; i < 5u; i++) {
-        let set_id = sets[i];
-        if (set_id >= 128u) { continue; }
-        
-        // Skip if we've already processed this set_id
-        var already_processed = false;
-        for (var j = 0u; j < i; j++) {
-            if (sets[j] == set_id) { already_processed = true; break; }
-        }
-        if (already_processed) { continue; }
-        
-        let count = count_set(set_id, s0, s1, s2, s3, s4);
-        if (count >= 2u) {
-            // Apply 2-piece bonus (index = set_id * 2)
-            let bonus_idx_2 = set_id * 2u;
-            for (var s = 0u; s < ${statCount}u; s++) {
-                (*stats)[s] += set_bonuses[bonus_idx_2][s];
-            }
-        }
-        if (count >= 4u) {
-            // Apply 4-piece bonus (index = set_id * 2 + 1)
-            let bonus_idx_4 = set_id * 2u + 1u;
-            for (var s = 0u; s < ${statCount}u; s++) {
-                (*stats)[s] += set_bonuses[bonus_idx_4][s];
-            }
-        }
-    }
-}
+${this.setBonusHelper(statCount, setBonusAddressSpace)}
 
 // ============================================
 // Stat Constraint Validation
@@ -609,17 +585,17 @@ fn check_set_constraints(s0: u32, s1: u32, s2: u32, s3: u32, s4: u32) -> bool {
         for (var i = 0u; i < 5u; i++) {
             let set_id = sets[i];
             if (set_id >= 128u) { continue; }
-            
+
             // Skip if we've already processed this set_id
             var already_processed = false;
             for (var j = 0u; j < i; j++) {
                 if (sets[j] == set_id) { already_processed = true; break; }
             }
             if (already_processed) { continue; }
-            
+
             let flags = get_set_flag(set_id);
             if (flags == 0u) { continue; }
-            
+
             let max_pcs = flags & 0xFFu;
             if (max_pcs > 0u) {
                 let count = count_set(set_id, s0, s1, s2, s3, s4);
@@ -629,7 +605,7 @@ fn check_set_constraints(s0: u32, s1: u32, s2: u32, s3: u32, s4: u32) -> bool {
             }
         }
     }
-    
+
     // Phase 2: Check min constraints (required sets) - scan all 128 flags
     // Must check ALL sets because a required set may have 0 pieces in the combination
     if (params.has_set_min_constraints == 0u) {
@@ -640,16 +616,23 @@ fn check_set_constraints(s0: u32, s1: u32, s2: u32, s3: u32, s4: u32) -> bool {
         let flags = get_set_flag(set_id);
         let min_pcs = (flags >> 8u) & 0xFFu;
         if (min_pcs == 0u) { continue; }
-        
+
         let count = count_set(set_id, s0, s1, s2, s3, s4);
         if (count < min_pcs) {
             return false;
         }
     }
-    
+
     return true;
 }
+`;
+    }
 
+    /**
+     * Original exhaustive Cartesian entry point (one score per combination).
+     */
+    _mainEntry(statCount) {
+        return `
 // ============================================
 // Main Compute Kernel
 // ============================================
@@ -757,6 +740,51 @@ fn main(@builtin(global_invocation_id) gid: vec3<u32>, @builtin(num_workgroups) 
     result_values[local_idx] = selected_damage;
 }
 `;
+    }
+
+    /**
+     * One set-bonus body for ordinary private stats and fused shared stats.
+     * 'fused-round' writes one row of the fused kernel's flat workgroup
+     * round buffer (fusedRoundStats, declared by WGSLFusedOutcome) at
+     * `offset`, avoiding pointers to sub-arrays.
+     */
+
+    setBonusHelper(statCount, space) {
+        const round = space === 'fused-round';
+        const name = round ? 'apply_set_bonuses_round' : 'apply_set_bonuses';
+        const params = round ? 'offset: u32' : `stats: ptr<${space}, array<f32, ${statCount}>>`;
+        const stat = round ? 'fusedRoundStats[offset + s]' : '(*stats)[s]';
+        return `fn ${name}(${params}, s0: u32, s1: u32, s2: u32, s3: u32, s4: u32) {
+    // Only check the 5 set IDs that are actually present
+    let sets = array<u32, 5>(s0, s1, s2, s3, s4);
+    for (var i = 0u; i < 5u; i++) {
+        let set_id = sets[i];
+        if (set_id >= 128u) { continue; }
+
+        // Skip if we've already processed this set_id
+        var already_processed = false;
+        for (var j = 0u; j < i; j++) {
+            if (sets[j] == set_id) { already_processed = true; break; }
+        }
+        if (already_processed) { continue; }
+
+        let count = count_set(set_id, s0, s1, s2, s3, s4);
+        if (count >= 2u) {
+            // Apply 2-piece bonus (index = set_id * 2)
+            let bonus_idx_2 = set_id * 2u;
+            for (var s = 0u; s < ${statCount}u; s++) {
+                ${stat} += set_bonuses[bonus_idx_2][s];
+            }
+        }
+        if (count >= 4u) {
+            // Apply 4-piece bonus (index = set_id * 2 + 1)
+            let bonus_idx_4 = set_id * 2u + 1u;
+            for (var s = 0u; s < ${statCount}u; s++) {
+                ${stat} += set_bonuses[bonus_idx_4][s];
+            }
+        }
+    }
+}`;
     }
 
     /**
