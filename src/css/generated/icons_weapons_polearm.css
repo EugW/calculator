@@ -40,16 +40,17 @@
 .weapon-icon-polearm-fractured-halo {background-image: url("../../images/weapons/polearm/pole_perdix.png")}
 .weapon-icon-polearm-bloodsoaked-ruins {background-image: url("../../images/weapons/polearm/pole_tummalyhty.png")}
 .weapon-icon-polearm-disaster-and-remorse {background-image: url("../../images/weapons/polearm/pole_carbine.png")}
+.weapon-icon-polearm-beginners-protector {background-image: url("../../images/weapons/polearm/pole_gewalt.png")}
 .sprite-weapon-polearm.sprite-24 {
-	background-image: url("../../images/sprites/weapon_polearm_612bf298f096f02b3b0e0f27c570a58a.png");
+	background-image: url("../../images/sprites/weapon_polearm_cf469e7f676d80b4824145ae79e5b32e.png");
 	background-size: 120px 264px;
 }
 .sprite-weapon-polearm.sprite-40 {
-	background-image: url("../../images/sprites/weapon_polearm_80fc43cd8e6887420a791a6b108e9e87.png");
+	background-image: url("../../images/sprites/weapon_polearm_28137214fb94e36b08cad4518849c4f5.png");
 	background-size: 200px 440px;
 }
 .sprite-weapon-polearm.sprite-60 {
-	background-image: url("../../images/sprites/weapon_polearm_d557848e75bc441c059c0656880815d6.png");
+	background-image: url("../../images/sprites/weapon_polearm_8a6153c0d98a74c6bd8694f810960ce0.png");
 	background-size: 300px 660px;
 }
 .sprite.weapon-icon-polearm-unknown {background-position: 0 0}
@@ -94,6 +95,7 @@
 .sprite.weapon-icon-polearm-fractured-halo {background-position: 100% 70%}
 .sprite.weapon-icon-polearm-bloodsoaked-ruins {background-position: 0 80%}
 .sprite.weapon-icon-polearm-disaster-and-remorse {background-position: 25% 80%}
+.sprite.weapon-icon-polearm-beginners-protector {background-position: 50% 80%}
 
 @media
 only screen and (-webkit-min-device-pixel-ratio: 2),
@@ -144,7 +146,8 @@ only screen and (                min-resolution: 2dppx) {
 	.weapon-icon-polearm-fractured-halo {background-image: url("../../images/weapons/polearm/pole_perdix_2x.png")}
 	.weapon-icon-polearm-bloodsoaked-ruins {background-image: url("../../images/weapons/polearm/pole_tummalyhty_2x.png")}
 	.weapon-icon-polearm-disaster-and-remorse {background-image: url("../../images/weapons/polearm/pole_carbine_2x.png")}
-	.sprite-weapon-polearm.sprite-24 {background-image: url("../../images/sprites/weapon_polearm_5f08cd6c5ddbb32efe1fc2006c053c04.png")}
-	.sprite-weapon-polearm.sprite-40 {background-image: url("../../images/sprites/weapon_polearm_d75228555efd5b915b8af231132d9acd.png")}
-	.sprite-weapon-polearm.sprite-60 {background-image: url("../../images/sprites/weapon_polearm_a41b69e29d8aec55e858cbd4e0f67a7a.png")}
+	.weapon-icon-polearm-beginners-protector {background-image: url("../../images/weapons/polearm/pole_gewalt_2x.png")}
+	.sprite-weapon-polearm.sprite-24 {background-image: url("../../images/sprites/weapon_polearm_79e2cb359e43b1799b6cfd6a33e9ef56.png")}
+	.sprite-weapon-polearm.sprite-40 {background-image: url("../../images/sprites/weapon_polearm_d2365c47d6455e5b227d2a4b84d105fe.png")}
+	.sprite-weapon-polearm.sprite-60 {background-image: url("../../images/sprites/weapon_polearm_4138b092dbbc1b5ad0cc3b2dace3c960.png")}
 }

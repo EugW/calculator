@@ -1,7 +1,13 @@
 import { Condition } from "../../classes/Condition";
+import { ConditionAnd } from "../../classes/Condition/And";
 import { ConditionAscensionChar } from "../../classes/Condition/Ascension/Char";
 import { ConditionBoolean } from "../../classes/Condition/Boolean";
+import { ConditionBooleanDropdownValue } from "../../classes/Condition/Boolean/DropdownValue";
+import { ConditionBooleanValue } from "../../classes/Condition/Boolean/Value";
 import { ConditionDropdownElement } from "../../classes/Condition/Dropdown/Element";
+import { ConditionDropdownTravelerResonated } from "../../classes/Condition/Dropdown/TravelerResonated";
+import { ConditionNot } from "../../classes/Condition/Not";
+import { ConditionStacks } from "../../classes/Condition/Stacks";
 import { ConditionStatic } from "../../classes/Condition/Static";
 import { DbObjectChar } from "../../classes/DbObject/Char";
 import { DbObjectConstellation } from "../../classes/DbObject/Constellation";
@@ -15,8 +21,11 @@ import { FeatureDamagePlungeShockWave } from "../../classes/Feature2/Damage/Plun
 import { FeatureDamageSkill } from "../../classes/Feature2/Damage/Skill";
 import { FeatureHeal } from "../../classes/Feature2/Heal";
 import { FeatureMultiplier } from "../../classes/Feature2/Multiplier";
+import { FeatureMultiplierStatic } from "../../classes/Feature2/Multiplier/Static";
+import { FeatureStatic } from "../../classes/Feature2/Static";
 import { StatTable } from "../../classes/StatTable";
 import { StatTableAscensionScale } from "../../classes/StatTable/Ascension/Scale";
+import { ValueTable } from "../../classes/ValueTable";
 import { charTables } from "../generated/CharTables";
 import { charTalentTables } from "../generated/CharTalentTables";
 
@@ -120,12 +129,43 @@ const Talents = new DbObjectTalents({
 
 const SkillNames = ['traveler_initial_cutting_dmg', 'traveler_max_cutting_dmg', 'traveler_initial_storm_dmg', 'traveler_max_storm_dmg'];
 
+
+const condTravelerAether = new ConditionBoolean({name: 'traveler_aether'});
+const condLumineDefault = new ConditionNot([condTravelerAether]);
+
+function makeChargedHit2Multipliers() {
+    return [
+        new FeatureMultiplier({
+            leveling: 'char_skill_attack',
+            values: Talents.get('attack.charged_hit_2'),
+            condition: condLumineDefault,
+        }),
+        new FeatureMultiplier({
+            leveling: 'char_skill_attack',
+            values: new StatTable(
+                'charged_hit_2',
+                charTalentTables.TravelerAnemo.s1_boy.p7,
+            ),
+            condition: condTravelerAether,
+        }),
+    ];
+}
+
+const ForeignWindwrathBonus = 60;
+const ForeignBladeWindDmg = 50;
+const ForeignWindwrathCooldown = 15;
+
+const bladeReadyCondition = new ConditionBooleanValue({
+    setting: 'traveler_anemo_blade_dawn_breeze',
+    cond: 'ge',
+    value: 2,
+});
 export const TravelerAnemo = new DbObjectChar({
     name: 'traveler_anemo',
     serializeId: 24,
     gameId: [10000005, 10000007],
     depotIds: [504, 704],
-    iconClass: "char-icon-traveler-boy",
+    iconClass: "char-icon-traveler-girl",
     rarity: 5,
     element: 'anemo',
     weapon: 'sword',
@@ -204,12 +244,7 @@ export const TravelerAnemo = new DbObjectChar({
                     ],
                 },
                 {
-                    multipliers: [
-                        new FeatureMultiplier({
-                            leveling: 'char_skill_attack',
-                            values: Talents.get('attack.charged_hit_2'),
-                        }),
-                    ],
+                    multipliers: makeChargedHit2Multipliers(),
                 },
             ],
         }),
@@ -224,12 +259,7 @@ export const TravelerAnemo = new DbObjectChar({
         }),
         new FeatureDamageCharged({
             isChild: true,
-            multipliers: [
-                new FeatureMultiplier({
-                    leveling: 'char_skill_attack',
-                    values: Talents.get('attack.charged_hit_2'),
-                }),
-            ],
+            multipliers: makeChargedHit2Multipliers(),
         }),
         new FeatureDamagePlungeCollision({
             name: 'plunge',
@@ -357,8 +387,102 @@ export const TravelerAnemo = new DbObjectChar({
                 ],
             });
         }),
+        new FeatureDamageMultihit({
+            category: 'attack',
+            damageType: 'charged',
+            name: 'traveler_anemo_whirlwind',
+            element: 'anemo',
+            allowInfusion: true,
+            items: [
+                {multipliers: [
+                    new FeatureMultiplier({
+                        leveling: 'char_skill_attack',
+                        values: Talents.get('attack.charged_hit_1'),
+                    }),
+                    new FeatureMultiplier({
+                        source: 'foreign_windwrath',
+                        values: new ValueTable([ForeignWindwrathBonus]),
+                    }),
+                ]},
+                {multipliers: [
+                    ...makeChargedHit2Multipliers(),
+                    new FeatureMultiplier({
+                        source: 'foreign_windwrath',
+                        values: new ValueTable([ForeignWindwrathBonus]),
+                    }),
+                ]},
+            ],
+            condition: bladeReadyCondition,
+        }),
+        new FeatureDamageCharged({
+            name: 'traveler_anemo_whirlwind_1',
+            isChild: true,
+            element: 'anemo',
+            multipliers: [
+                new FeatureMultiplier({
+                    leveling: 'char_skill_attack',
+                    values: Talents.get('attack.charged_hit_1'),
+                }),
+                new FeatureMultiplier({
+                    source: 'foreign_windwrath',
+                    values: new ValueTable([ForeignWindwrathBonus]),
+                }),
+            ],
+            condition: bladeReadyCondition,
+        }),
+        new FeatureDamageCharged({
+            name: 'traveler_anemo_whirlwind_2',
+            isChild: true,
+            element: 'anemo',
+            multipliers: [
+                ...makeChargedHit2Multipliers(),
+                new FeatureMultiplier({
+                    source: 'foreign_windwrath',
+                    values: new ValueTable([ForeignWindwrathBonus]),
+                }),
+            ],
+            condition: bladeReadyCondition,
+        }),
+        ...['pyro', 'hydro', 'cryo', 'electro'].map((elem) => {
+            return new FeatureDamageCharged({
+                name: 'traveler_anemo_blade_wind_' + elem,
+                element: elem,
+                multipliers: [
+                    new FeatureMultiplier({
+                        source: 'foreign_windwrath_blade',
+                        values: new ValueTable([ForeignBladeWindDmg]),
+                    }),
+                ],
+                condition: new ConditionAnd([
+                    bladeReadyCondition,
+                    new ConditionBooleanDropdownValue({
+                        name: 'traveler_anemo_blade_wind_element',
+                        value: elem,
+                    }),
+                ]),
+            });
+        }),
+        new FeatureStatic({
+            category: 'other',
+            name: 'traveler_anemo_whirlwind_cooldown',
+            format: 'decimal',
+            multipliers: [
+                new FeatureMultiplierStatic({
+                    source: 'foreign_windwrath',
+                    values: new ValueTable([ForeignWindwrathCooldown]),
+                }),
+            ],
+            condition: bladeReadyCondition,
+        }),
     ],
     conditions: [
+        new ConditionBoolean({
+            name: 'traveler_aether',
+            serializeId: 5,
+            title: 'talent_name.traveler_twin_aether',
+            description: 'talent_descr.traveler_twin_aether',
+            rotation: 'self',
+        }),
         new ConditionStatic({
             title: 'talent_name.traveler_slitting_wind',
             description: 'talent_descr.traveler_slitting_wind',
@@ -400,6 +524,32 @@ export const TravelerAnemo = new DbObjectChar({
                 mastery: 15,
                 hp_base: 50,
             },
+        }),
+        new ConditionDropdownTravelerResonated({
+            name: 'traveler_anemo_resonated_elements',
+            serializeId: 6,
+        }),
+        new ConditionStacks({
+            name: 'traveler_anemo_blade_dawn_breeze',
+            serializeId: 7,
+            title: 'talent_name.traveler_foreign_windwrath',
+            description: 'talent_descr.traveler_foreign_windwrath',
+            maxStacks: 4,
+            noStat: true,
+            rotation: 'self',
+        }),
+        new ConditionDropdownElement({
+            name: 'traveler_anemo_blade_wind_element',
+            serializeId: 8,
+            title: 'talent_name.traveler_foreign_windwrath',
+            description: 'talent_descr.traveler_foreign_windwrath',
+            multiple: true,
+            values: [
+                {value: 'pyro', serializeId: 1, conditions: []},
+                {value: 'hydro', serializeId: 2, conditions: []},
+                {value: 'cryo', serializeId: 3, conditions: []},
+                {value: 'electro', serializeId: 4, conditions: []},
+            ],
         }),
     ],
     constellation: new DbObjectConstellation([

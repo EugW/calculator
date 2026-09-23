@@ -1,13 +1,13 @@
 category;name;rus;eng
-feature_skill;vodyanitsa_overture_initial_dmg;Начальный урон Увертюры;Overture Initial DMG
-feature_skill;vodyanitsa_microphone_duration;Длительность Микрофона;Microphone Duration
-feature_skill;vodyanitsa_microphone_attack_interval;Интервал атак Микрофона;Microphone Attack Interval
-feature_skill;vodyanitsa_microphone_dmg;Урон Микрофона;Microphone DMG
-feature_skill;vodyanitsa_microphone_heal;Лечение Микрофона;Microphone Healing
-feature_skill;vodyanitsa_microphone_heal_interval;Интервал лечения Микрофона;Microphone Healing Interval
+feature_skill;vodyanitsa_sonorous_dawn_initial_dmg;Начальный урон Речитатива;Rechitativ Initial DMG
+feature_skill;vodyanitsa_song_of_ages_past_duration;Длительность Песни былых веков;Song of Ages Past Duration
+feature_skill;vodyanitsa_horn_of_springs_call_attack_interval;Интервал атак Рога глашатая;Horn of Spring's Call Attack Interval
+feature_skill;vodyanitsa_horn_of_springs_call_dmg;Урон Рога глашатая;Horn of Spring's Call DMG
+feature_skill;vodyanitsa_song_of_ages_past_heal;Лечение Песни былых веков;Song of Ages Past Healing
+feature_skill;vodyanitsa_song_of_ages_past_heal_interval;Интервал лечения Песни былых веков;Song of Ages Past Healing Interval
 feature_skill;vodyanitsa_hydro_cryo_res_reduction;Снижение сопротивления Гидро и Крио;Hydro/Cryo RES Reduction
 feature_skill;vodyanitsa_res_reduction_duration;Длительность снижения сопротивления;RES Reduction Duration
-feature_burst;vodyanitsa_aria_dmg;Урон Арии;Aria DMG
-feature_burst;vodyanitsa_microphone_resonance_dmg;Дополнительный урон резонанса Микрофона;Additional Microphone Resonance DMG
-talent_name;vodyanitsa_microphone_summons;Призванный Микрофон;Microphone Summons
-talent_descr;vodyanitsa_microphone_summons;Микрофон существует 16 сек. и повышает сопротивление прерыванию активного персонажа. Его попадания на 6 сек. снижают сопротивление Гидро и Крио на значение текущего уровня навыка. Взрыв стихии получает дополнительный множитель 48% макс. HP на уровне 1, пока Микрофон призван.;The Microphone lasts 16s and increases the active character's interruption resistance. Its hits reduce Hydro and Cryo RES for 6s by the current Skill-level value. While it is summoned, the Burst gains an additional 48% Max HP multiplier at level 1.
+feature_burst;vodyanitsa_sink_with_thee_dmg;Урон Кода: Вместе в пучину;Koda: Sink With Thee DMG
+feature_burst;vodyanitsa_song_of_ages_past_dmg_bonus;Бонус урона Песни былых веков;Song of Ages Past DMG Bonus
+talent_name;vodyanitsa_song_of_ages_past;Песня былых веков;Song of Ages Past
+talent_descr;vodyanitsa_song_of_ages_past;Песня былых веков существует 16 сек. (25 сек. на C2) и повышает сопротивление прерыванию активного персонажа. Начальный удар навыка и атаки Рога глашатая на 6 сек. снижают сопротивление Гидро и Крио на значение текущего уровня навыка. Пока действует Песня былых веков, исходный урон взрыва стихии повышается на 48% на уровне 1.;Song of Ages Past lasts 16s (25s at C2) and increases the active character's interruption resistance. The initial Skill hit and Horn of Spring's Call hits reduce Hydro and Cryo RES for 6s by the current Skill-level value. While it is active, the Burst's base damage increases by 48% at level 1.

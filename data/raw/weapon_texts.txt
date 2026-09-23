@@ -1,3 +1,13 @@
+-= a_teaspoon_of_transcendence =-
+
+Коронация белой феи
+Увеличивает силу атаки на <color=#99FFFFFF>28%</color>.
+Также каждый раз после того, как заряженная атака экипированного персонажа поражает противника, персонаж на короткое время получает Превосходство: урон его реакций Звёздный проводник и Звёздное рассеивание повышается на <color=#99FFFFFF>16%</color> на 5 сек. Эффект складывается до 3 раз не чаще одного раза в 0,2 сек.
+
+White Fairy's Queening
+ATK is increased by <color=#99FFFFFF>28%</color>.
+Additionally, each time the equipping character hits an opponent with their Charged Attack, they attain "Transcendence" for a short time: their Stellar-Conduct and Stellar Swirl reaction DMG is increased by <color=#99FFFFFF>16%</color> for 5s. This effect can stack once every 0.2s, max 3 stacks.
+
 -= a_thousand_blazing_suns =-
 
 Закат распаляет рассвет
@@ -68,6 +78,8 @@ Crown of the Final Scion
 ATK is increased by <color=#99FFFFFF>12%</color>. After the equipping character creates a Shield, they gain "Pathfinder's Light" for 20s: Increases your active party member's DMG by <color=#99FFFFFF>10%</color> for every 1,000 ATK the equipping character has, up to a maximum of <color=#99FFFFFF>26%</color>. Additionally, when the equipping character creates a Shield, they will also gain "Guide's Contentment": Restores <color=#99FFFFFF>14</color> Elemental Energy to the equipping character. The aforementioned effect can trigger once every 14s, and can also be triggered when any type of chest is opened outside of combat. The equipping character may trigger this effect even when they are an off-field.
 Hexerei: Secret Rite: When your own Hexerei character is off-field in the party, they will also gain 50% of the DMG increase from Pathfinder's Light.
 
+-= apprentices_notes =-
+
 -= aqua_simulacra =-
 
 Очищающая форма
@@ -95,10 +107,10 @@ When an attack hits an opponent, deal AoE DMG equal to <color=#99FFFFFF>40%</col
 -= astral_vultures_crimson_plumage =-
 
 Глаза с лунным ореолом
-Повышает силу атаки на <color=#99FFFFFF>24%</color> на 12 сек. после активации реакции Рассеивание. Кроме того, если в отряде 1/2 и более персонажей с элементом, отличным от элемента экипированного персонажа, то урон заряженной атаки экипированного персонажа увеличивается на <color=#99FFFFFF>20%/48%</color>, а урон взрыва стихии - на <color=#99FFFFFF>10%/24%</color>.
+Повышает силу атаки на <color=#99FFFFFF>24%</color> на 12 сек. после активации Рассеивания или Звёздного рассеивания. Кроме того, если в отряде 1/2 или более персонажей с элементом, отличным от элемента экипированного персонажа, то урон заряженной атаки экипированного персонажа увеличивается на <color=#99FFFFFF>20%/48%</color>, а урон взрыва стихии - на <color=#99FFFFFF>10%/24%</color>.
 
 The Moonring Sighted
-For 12s after triggering a Swirl reaction, ATK increases by <color=#99FFFFFF>24%</color>. In addition, when 1/2 or more characters in the party are of a different Elemental Type from the equipping character, the DMG dealt by the equipping character's Charged Attacks is increased by <color=#99FFFFFF>20%/48%</color> and Elemental Burst DMG dealt is increased by <color=#99FFFFFF>10%/24%</color>.
+For 12s after triggering a Swirl or Stellar Swirl reaction, ATK increases by <color=#99FFFFFF>24%</color>. In addition, when 1/2 or more characters in the party are of a different Elemental Type from the equipping character, the DMG dealt by the equipping character's Charged Attacks is increased by <color=#99FFFFFF>20%/48%</color>, and Elemental Burst DMG dealt is increased by <color=#99FFFFFF>10%/24%</color>.
 
 -= athame_artis =-
 
@@ -142,6 +154,24 @@ When there are at least 3 different Elemental Types in your party, Elemental Mas
 Desert Watch
 After the character's Elemental Skill hits an opponent, their ATK will be increased by <color=#99FFFFFF>20%</color> for 8s. After the character takes DMG, their ATK will be increased by <color=#99FFFFFF>20%</color> for 8s. The 2 aforementioned effects can be triggered even when the character is not on the field. Additionally, when not protected by a shield, the character's Max HP will be increased by <color=#99FFFFFF>32%</color>.
 
+-= beginners_protector =-
+
+-= beyond_the_chrysalis =-
+
+Танец освобождённых крыльев
+Каждый раз, когда экипированный персонаж применяет элементальный навык или взрыв стихии, он получает один из следующих эффектов в данном порядке:
+Ветер искренности: повышает крит. урон экипированного персонажа на <color=#99FFFFFF>56%</color> на 10 сек.
+Ветер мятежа: повышает урон реакции Звёздного рассеивания экипированного персонажа на <color=#99FFFFFF>36%</color> на 10 сек.
+Ветер изобилия: восстанавливает экипированному персонажу <color=#99FFFFFF>5</color> ед. энергии. Таким способом можно восстанавливать до <color=#99FFFFFF>5</color> ед. энергии каждые 4 сек.
+Когда экипированный персонаж покидает поле боя, вышеописанные эффекты снимаются, а порядок сбрасывается.
+
+Dance of Wings Unbound
+Each time the equipping character uses their Elemental Skill or Elemental Burst, they gain one of the following three effects in sequence:
+Winds of Devotion: Increases the equipping character's CRIT DMG by <color=#99FFFFFF>56%</color> for 10s;
+Winds of Defiance: Increases Stellar Swirl reaction DMG dealt by the equipping character by <color=#99FFFFFF>36%</color> for 10s; and
+Winds of Plenty: Regenerates <color=#99FFFFFF>5</color> Elemental Energy for the equipping character. Up to <color=#99FFFFFF>5</color> Elemental Energy can be regenerated in this way every 4s.
+The aforementioned effects are removed and the sequence is reset when the equipping character leaves the field.
+
 -= black_tassel =-
 
 Бич мягкотелых
@@ -174,6 +204,14 @@ After defeating an enemy, ATK is increased by <color=#99FFFFFF>12%</color> for 3
 Token of Covenant
 Bloom DMG is increased by <color=#99FFFFFF>48%</color>, and Lunar-Bloom DMG is increased by <color=#99FFFFFF>12%</color>. Moonsign: Ascendant Gleam: Lunar-Bloom DMG is increased by an additional <color=#99FFFFFF>12%</color>.
 
+-= blade_of_atonement =-
+
+Искупление грехов
+На 12 сек. после активации элементальной реакции мастерство стихий экипированного персонажа повышается на <color=#99FFFFFF>64</color> ед. Активация реакций Звёздного блеска на 12 сек. повышает его силу атаки на <color=#99FFFFFF>16%</color>. Эффект срабатывает, даже если экипированный персонаж не на поле боя.
+
+Repentance and Redemption
+Triggering an Elemental Reaction increases the equipping character's Elemental Mastery by <color=#99FFFFFF>64</color> for 12s, while triggering a Stellar Glimmer reaction increases their ATK by <color=#99FFFFFF>16%</color> for 12s. The aforementioned effects can trigger even when the character is not on the field.
+
 -= bloodsoaked_ruins =-
 
 Дань скорби
@@ -189,6 +227,14 @@ For 3.5s after using an Elemental Burst, the equipping character's Lunar-Charged
 
 Bane of Fire and Thunder
 Increases DMG dealt against opponents affected by Pyro or Electro by <color=#99FFFFFF>12%</color>.
+
+-= breezeborne_refrain =-
+
+Баллада гадюки
+Восстановление энергии повышается на <color=#99FFFFFF>20%</color>. Когда элементальный навык или взрыв стихии экипированного персонажа поражают врага, он получает 1 уровень Гимна непорочных. Эффект складывается до 3 раз и может возникнуть один раз в 0,03 сек. При получении 3 уровней эффекта все уровни Гимна непорочных исчезают, активируя Смертельный яд змеи: урон реакций Звёздного блеска всех персонажей отряда поблизости повышается на <color=#99FFFFFF>24%</color> на 12 сек. Во время его действия нельзя получать Гимн непорочных. Эти эффекты срабатывают, даже когда экипированный персонаж не на поле боя.
+
+Viper's Ballad
+Increases Energy Recharge by <color=#99FFFFFF>20%</color>. When the equipping character hits the opponent with their Elemental Skill or Elemental Burst, they gain a stack of "Hymn of the Pure." This effect can trigger once every 0.03s, max 3 stacks, and at 3 stacks, all instances of "Hymn of the Pure" are cleared to give the equipping character "Thus Lied the Viper" instead. This grants nearby party members a <color=#99FFFFFF>24%</color> Stellar Glimmer reaction DMG boost for 12s, during which no stacks of "Hymn of the Pure" can be obtained. The aforementioned effects can still trigger even when the equipping character is not on the field.
 
 -= calamity_of_eshu =-
 
@@ -209,10 +255,10 @@ Gain <color=#99FFFFFF>12%</color> All Elemental DMG Bonus. Obtain Consummation f
 -= cashflow_supervision =-
 
 Золотая волна крови
-Увеличивает силу атаки на <color=#99FFFFFF>16%</color>. Когда текущее HP персонажа повышается или понижается, на 4 сек. урон обычной атаки увеличивается на <color=#99FFFFFF>16%</color>, а заряженной атаки - на <color=#99FFFFFF>14%</color>. Эффект складывается до 3 раз и возникает не чаще, чем 1 раз в 0,3 сек. При получении экипированным персонажем 3 уровней скорость атаки увеличивается на <color=#99FFFFFF>8%</color>.
+Увеличивает силу атаки на <color=#99FFFFFF>16%</color>. Когда текущее HP персонажа повышается или понижается, на 4 сек. урон обычной атаки увеличивается на <color=#99FFFFFF>16%</color>, а заряженной атаки и реакции Звёздный проводник - на <color=#99FFFFFF>14%</color>. Эффект складывается до 3 раз и возникает один раз в 0,3 сек. При наличии у экипированного персонажа 3 уровней скорость атаки увеличивается на <color=#99FFFFFF>8%</color>.
 
 Golden Blood-Tide
-ATK is increased by <color=#99FFFFFF>16%</color>. When current HP increases or decreases, Normal Attack DMG will be increased by <color=#99FFFFFF>16%</color> and Charged Attack DMG will be increased by <color=#99FFFFFF>14%</color> for 4s. Max 3 stacks. This effect can be triggered once every 0.3s. When the wielder has 3 stacks, ATK SPD will be increased by <color=#99FFFFFF>8%</color>.
+ATK is increased by <color=#99FFFFFF>16%</color>. When current HP increases or decreases, Normal Attack DMG is increased by <color=#99FFFFFF>16%</color>, Charged Attack DMG is increased by <color=#99FFFFFF>14%</color>, and Stellar-Conduct DMG is increased by <color=#99FFFFFF>14%</color> for 4s. Max 3 stacks. This effect can be triggered once every 0.3s. When the wielder has 3 stacks, ATK SPD will be increased by <color=#99FFFFFF>8%</color>.
 
 -= chain_breaker =-
 
@@ -229,6 +275,14 @@ For every party member from Natlan or who has a different Elemental Type from th
 
 Spotless Heart
 Elemental Skill DMG is increased by <color=#99FFFFFF>40%</color> of DEF. The effect will be triggered no more than once every 1.5s and will be cleared 0.1s after the Elemental Skill deals DMG.
+
+-= clash_of_kings =-
+
+День и ночь преданы забвению
+Применение элементального навыка на 6 сек. наделяет экипированного персонажа Законом доски: его сила атаки повышается на <color=#99FFFFFF>20%</color>, а мастерство стихий - на <color=#99FFFFFF>100</color> ед. Эффект может возникнуть один раз в 12 сек. и не складывается. Если во время действия этого эффекта экипированный персонаж поражает врага заряженной атакой, то он продлевается на 6 сек. Продлить его таким способом можно максимум на 6 сек.
+
+Without Heed for Day nor Night
+Using an Elemental Skill grants the equipping character "Laws of the Board," which increases their ATK by <color=#99FFFFFF>20%</color> and their Elemental Mastery by <color=#99FFFFFF>100</color>. This effect lasts 6s and can trigger once every 12s. Does not stack. The duration of this effect will also be extended by 6s if the equipping character hits an opponent with a Charged Attack while it is active. The effect can be extended for max 6s in this way.
 
 -= cloudforged =-
 
@@ -253,6 +307,14 @@ Normal Attack and Charged Attack hits increase ATK by <color=#99FFFFFF>4%</color
 
 Bane of Water and Ice
 Increases DMG against opponents affected by Hydro or Cryo by <color=#99FFFFFF>12%</color>.
+
+-= covenant_of_frost_and_snow =-
+
+Равновесие законов
+После использования экипированным персонажем элементального навыка его мастерство стихий повышается на <color=#99FFFFFF>120</color> ед. на 12 сек.
+
+The Law's Equilibrium
+For 12s after the equipping character uses an Elemental Skill, their Elemental Mastery is increased by <color=#99FFFFFF>120</color>.
 
 -= cranes_echoing_call =-
 
@@ -281,10 +343,10 @@ Grants a Bond of Life equal to 25% of Max HP when a Charged Attack hits an oppon
 -= dark_iron_sword =-
 
 Перегружен
-Увеличивает силу атаки на <color=#99FFFFFF>20%</color> на 12 сек. после активации реакций Перегрузка, Сверхпроводник, Заряжен, Стимуляция, Обострение, Вегетация, Лунный заряд или Электро Рассеивание.
+Увеличивает силу атаки на <color=#99FFFFFF>20%</color> на 12 сек. после активации реакций Перегрузка, Звёздный проводник, Сверхпроводник, Заряжен, Стимуляция, Обострение, Вегетация, Лунный заряд или Электро Рассеивание.
 
 Overloaded
-Upon causing an Overloaded, Superconduct, Electro-Charged, Quicken, Aggravate, Hyperbloom, Lunar-Charged, or Electro-infused Swirl reaction, ATK is increased by <color=#99FFFFFF>20%</color> for 12s.
+Upon causing an Overloaded, Superconduct, Stellar-Conduct, Electro-Charged, Quicken, Aggravate, Hyperbloom, Lunar-Charged, or Electro-infused Swirl reaction, ATK is increased by <color=#99FFFFFF>20%</color> for 12s.
 
 -= dawning_frost =-
 
@@ -358,6 +420,8 @@ Increases DMG against opponents affected by Hydro or Pyro by <color=#99FFFFFF>20
 Frost Burial
 Hitting an opponent with Normal and Charged Attacks has a <color=#99FFFFFF>60%</color> chance of forming and dropping an Everfrost Icicle above them, dealing AoE DMG equal to <color=#99FFFFFF>80%</color> of ATK. Opponents affected by Cryo are instead dealt DMG equal to <color=#99FFFFFF>200%</color> of ATK. Can only occur once every 10s.
 
+-= dull_blade =-
+
 -= earth_shaker =-
 
 Клятва Капах-Ньан
@@ -366,6 +430,14 @@ Hitting an opponent with Normal and Charged Attacks has a <color=#99FFFFFF>60%</
 Oath of Qhapaq Nan
 After a party member triggers a Pyro-related reaction, the equipping character's Elemental Skill DMG is increased by <color=#99FFFFFF>16%</color> for 8s. This effect can be triggered even when the triggering party member is not on the field.
 
+-= echoes_of_the_heart =-
+
+Эхо клятвы
+На 12 сек. после активации элементальной реакции мастерство стихий экипированного персонажа повышается на <color=#99FFFFFF>60</color> ед. Активация реакций Звёздного блеска на 12 сек. повышает их урон, наносимый экипированным персонажем, на <color=#99FFFFFF>16%</color>. Эффект срабатывает, даже если экипированный персонаж не на поле боя.
+
+Echo of a Vow
+Triggering an Elemental Reaction increases the equipping character's Elemental Mastery by <color=#99FFFFFF>60</color> for 12s, while triggering a Stellar Glimmer reaction increases their Stellar Glimmer reaction DMG dealt by <color=#99FFFFFF>16%</color> for 12s. The aforementioned effects can trigger even when the character is not on the field.
+
 -= elegy_for_the_end =-
 
 Песнь разлуки
@@ -373,6 +445,14 @@ After a party member triggers a Pyro-related reaction, the equipping character's
 
 The Parting Refrain
 A part of the "Millennial Movement" that wanders amidst the winds. Increases Elemental Mastery by <color=#99FFFFFF>60</color>. When the Elemental Skills or Elemental Bursts of the character wielding this weapon hit opponents, that character gains a Sigil of Remembrance. This effect can be triggered once every 0.2s and can be triggered even if said character is not on the field. When you possess 4 Sigils of Remembrance, all of them will be consumed and all nearby party members will obtain the "Millennial Movement: Farewell Song" effect for 12s. "Millennial Movement: Farewell Song" increases Elemental Mastery by <color=#99FFFFFF>100</color> and increases ATK by <color=#99FFFFFF>20%</color>. Once this effect is triggered, you will not gain Sigils of Remembrance for 20s. Of the many effects of the "Millennial Movement," buffs of the same type will not stack.
+
+-= emberwell =-
+
+Звёздный огонь над снежными равнинами
+На 12 сек. после активации элементальной реакции сила атаки экипированного персонажа повышается на <color=#99FFFFFF>16%</color>. Активация реакций Звёздного блеска на 12 сек. повышает урон этих реакций, наносимый экипированным персонажем, на <color=#99FFFFFF>16%</color>. Эффект срабатывает, даже если экипированный персонаж не на поле боя.
+
+Starfire Upon the Snowplains
+Triggering an Elemental Reaction increases the equipping character's ATK by <color=#99FFFFFF>16%</color> for 12s. Triggering a Stellar Glimmer reaction increases their Stellar Glimmer reaction DMG dealt by <color=#99FFFFFF>16%</color> for 12s. The aforementioned effects can trigger even when the character is not on the field.
 
 -= emerald_orb =-
 
@@ -413,6 +493,14 @@ For 20s after using an Elemental Skill, the equipping character's Elemental Mast
 
 Byakuya Kougetsu
 Healing Bonus increased by <color=#99FFFFFF>10%</color>, Normal Attack DMG is increased by <color=#99FFFFFF>1%</color> of the Max HP of the character equipping this weapon. For 12s after using an Elemental Burst, Normal Attacks that hit opponents will restore 0.6 Energy. Energy can be restored this way once every 0.1s.
+
+-= exaiphanes_blade =-
+
+Путь странствий
+#{F#Экипированная путешественница}{M#Экипированный путешественник}, поражая противника, повышает свою силу атаки на <color=#99FFFFFF>16%</color> на <color=#99FFFFFF>8</color> сек. и восстанавливает себе <color=#99FFFFFF>3</color> ед. энергии. Эффект может возникнуть один раз в <color=#99FFFFFF>5</color> сек. и срабатывает, даже когда персонаж не на поле боя.
+
+Traveler's Path
+When the Traveler equips this, their ATK will increase by <color=#99FFFFFF>16%</color> for <color=#99FFFFFF>8</color>s after they hit an opponent. At the same time, they will also regenerate <color=#99FFFFFF>3</color> Elemental Energy. This effect can trigger once every <color=#99FFFFFF>5</color>s. This can be triggered even when the character is not on the field.
 
 -= eye_of_perception =-
 
@@ -542,6 +630,16 @@ Using an Elemental Skill increases DEF by <color=#99FFFFFF>16%</color> for 15s.
 Forest Sanctuary
 After triggering Burning, Quicken, Aggravate, Spread, Bloom, Lunar-Bloom, Hyperbloom, or Burgeon, a Leaf of Consciousness will be created around the character for a maximum of 10s. When picked up, the Leaf will grant the character <color=#99FFFFFF>60</color> Elemental Mastery for 12s. Only 1 Leaf can be generated this way every 20s. This effect can still be triggered if the character is not on the field. The Leaf of Consciousness' effect cannot stack.
 
+-= forged_by_the_golden_melody =-
+
+Переплетение дня и ночи
+Каждые 10 сек. экипированный персонаж поочерёдно исполняет Гармонический фрагмент, активируя следующие эффекты в таком порядке: повышение силы атаки на <color=#99FFFFFF>18%</color> > повышение мастерства стихий на <color=#99FFFFFF>120</color> ед. > повышение урона реакций Звёздного блеска на <color=#99FFFFFF>28%</color>. Каждый эффект Гармонического фрагмента длится 10 сек. и срабатывает, даже когда экипированный персонаж не на поле боя.
+Активация реакций Звёздного блеска также дополнительно на 12 сек. наделяет эффектом Гармонический фрагмент: Полифония, аналогичным эффекту Гармонический фрагмент, который действует при активации реакций Звёздного блеска. Этот эффект складывается с исходным Гармоническим фрагментом и может возникнуть один раз в 12 сек.
+
+Day and Night in Counterpoint
+Every 10s, the equipping character plays a "Harmonic Movement" of the corresponding type for a boost in the following order: <color=#99FFFFFF>+18%</color> ATK > <color=#99FFFFFF>+120</color> Elemental Mastery > <color=#99FFFFFF>+28%</color> Stellar Glimmer reaction DMG. Each instance of Harmonic Movement lasts 10s. This effect can trigger even when the equipping character is not on the field.
+Triggering a Stellar Glimmer reaction will also grant an additional 12-second instance of "Harmonic Movement: Contrapuntal" with the same effects as the Harmonic Movement active when Stellar Glimmer is triggered. This effect stacks with the original Harmonic Movement effect, and can trigger once every 12s.
+
 -= fractured_halo =-
 
 Очищающий венец
@@ -559,6 +657,14 @@ Revolutionary Chorale
 A part of the "Millennial Movement" that wanders amidst the winds. Increases DMG by <color=#99FFFFFF>10%</color>. When the character wielding this weapon triggers Elemental Reactions, they gain a Sigil of Rebellion. This effect can be triggered once every 0.5s and can be triggered even if said character is not on the field. When you possess 2 Sigils of Rebellion, all of them will be consumed and all nearby party members will obtain "Millennial Movement: Song of Resistance" for 12s. "Millennial Movement: Song of Resistance" increases Normal, Charged and Plunging Attack DMG by <color=#99FFFFFF>16%</color> and increases ATK by <color=#99FFFFFF>20%</color>. Once this effect is triggered, you will not gain Sigils of Rebellion for 20s. Of the many effects of the "Millennial Movement," buffs of the same type will not stack.
 
 -= frostbearer =-
+
+-= frostbreath =-
+
+Бросок в безграничную даль
+Активация Крио или Гидро реакций повышает силу атаки экипированного персонажа на 15 сек. на <color=#99FFFFFF>20%</color>, а также восстанавливает другим персонажам вашего отряда <color=#99FFFFFF>6</color> ед. энергии. Эффект может возникнуть один раз в 16 сек.
+
+A Cast Real Far
+Triggering a Cryo or Hydro-related elemental reaction increases the equipping character's ATK by <color=#99FFFFFF>20%</color> for the next 15s, as well as regenerates <color=#99FFFFFF>6</color> Elemental Energy for other members of their party. This effect can trigger once every 16s.
 
 -= fruit_of_fulfillment =-
 
@@ -634,6 +740,16 @@ Obtain <color=#99FFFFFF>12%</color> All Elemental DMG Bonus. When other nearby p
 Vigorous
 When HP is above 90%, increases CRIT Rate by <color=#99FFFFFF>14%</color>.
 
+-= heretics_molten_blade =-
+
+Дар одинокого света
+Экипированный персонаж после применения элементального навыка получает Луч первого света: каждую секунду, согласно расстоянию, пройденному экипированным персонажем за последнюю секунду во время действия эффекта, он получает бонус атаки от <color=#99FFFFFF>18%</color> до <color=#99FFFFFF>36%</color>. Эффект длится 14 сек., может возникнуть один раз в 14 сек. и исчезает, когда экипированный персонаж покидает поле боя.
+
+Lone Light's Blessing
+After the equipping character uses their Elemental Skill, they gain "Gleam of First Light." While active, Gleam of First Light tracks their distance traveled. Each second, the equipping character gains an ATK Bonus ranging from <color=#99FFFFFF>18%</color> to <color=#99FFFFFF>36%</color> based on the distance traveled during the previous second. Gleam of First Light lasts 14s, can be triggered once every 14s, and is removed when the equipping character leaves the field.
+
+-= hunters_bow =-
+
 -= hunters_path =-
 
 Конец звериной тропы
@@ -641,6 +757,20 @@ When HP is above 90%, increases CRIT Rate by <color=#99FFFFFF>14%</color>.
 
 At the End of the Beast-Paths
 Gain <color=#99FFFFFF>12%</color> All Elemental DMG Bonus. Obtain the Tireless Hunt effect after hitting an opponent with a Charged Attack. This effect increases Charged Attack DMG by <color=#99FFFFFF>160%</color> of Elemental Mastery. This effect will be removed after 12 Charged Attacks or 10s. Only 1 instance of Tireless Hunt can be gained every 12s.
+
+-= hymn_of_the_maelstrom =-
+
+Рондо крепкого сна
+#Бонус лечения повышается на <color=#99FFFFFF>4%</color>.
+Экипированный персонаж, исцеляя персонажей, получает эффект Вещий мёд Уацамонги: макс. HP повышается на <color=#99FFFFFF>4%</color>, а сила атаки активного персонажа увеличивается на <color=#99FFFFFF>0,4%</color> (максимум до <color=#99FFFFFF>8%</color>) за каждые 1000 ед. свыше 40 000 ед. макс. HP экипированного персонажа. Эффект длится 10 сек. и может складываться до 3 раз.
+В течение 5 сек. после того как персонажи отряда поблизости активируют реакции Заморозка или Звёздное рассеивание, вышеописанный эффект повышения макс. HP и силы атаки дополнительно увеличивается на 75%.
+Эти эффекты срабатывают, даже если экипированный персонаж не на поле боя.
+
+Rondo of Slumber
+Increases Healing Bonus by <color=#99FFFFFF>4%</color>.
+When performing healing, the equipping character gains the "Vatsamonga's Vatic Vintage" effect, which increases Max HP by <color=#99FFFFFF>4%</color> as well as increases the currently active party member's ATK by <color=#99FFFFFF>0.4%</color> for every 1,000 Max HP the equipping character has over 40,000. A maximum of <color=#99FFFFFF>8%</color> ATK can be gained in this way. This effect lasts 10s, max 3 stacks.
+When a nearby party member triggers a Frozen or Stellar Swirl reaction, the aforementioned Max HP and ATK boosts will be further increased by 75% for the next 5s.
+The aforementioned effects can still trigger even when the equipping character is not on the field.
 
 -= ibis_piercer =-
 
@@ -657,6 +787,14 @@ The character's Elemental Mastery will increase by <color=#99FFFFFF>40</color> w
 
 Infusion Stinger
 Dealing Elemental DMG increases all DMG by <color=#99FFFFFF>6%</color> for 6s. Max 2 stacks. Can occur once every 1s.
+
+-= jade_vista =-
+
+Сотканная из ночи свеча
+За каждого персонажа в отряде, кроме экипированного: · Если тип элемента совпадает с элементом экипированного персонажа: мастерство стихий экипированного персонажа повышается на <color=#99FFFFFF>64</color> ед. · Если тип элемента отличается от элемента экипированного персонажа: сила атаки экипированного персонажа повышается на <color=#99FFFFFF>12%</color>. Вышеописанные эффекты складываются суммарно до 3 раз. В первую очередь активируется эффект при совпадении элементов.
+
+A Candle Woven From the Night
+For every party member other than the equipping character: · Who is of the same Elemental Type as the equipper: The equipping character's Elemental Mastery is increased by <color=#99FFFFFF>64</color>; · Who is not of the same Elemental Type as the equipper: The equipping character's ATK increases by <color=#99FFFFFF>12%</color>. The two effects described above can stack up to 3 times in total, with Elemental Mastery buffs applied first.
 
 -= jadefalls_splendor =-
 
@@ -677,10 +815,10 @@ When a Normal, Charged, or Plunging Attack hits an opponent, it will whip up a H
 -= kaguras_verity =-
 
 Кагура Священной сакуры
-Использование элементального навыка наделяет экипированного этим оружием персонажа эффектом «Танец кагура», который увеличивает урон его элементального навыка на <color=#99FFFFFF>12%</color>. Этот эффект длится 16 сек. и может складываться до 3 раз. На 3 уровне эффекта персонаж получает <color=#99FFFFFF>12%</color> бонус урона всеми элементами.
+Использование элементального навыка наделяет экипированного персонажа эффектом Танец кагура, который увеличивает урон его элементального навыка и реакции Звёздный проводник на <color=#99FFFFFF>12%</color>. Эффект длится 24 сек. и может складываться до 3 раз. При наличии 3 уровней эффекта персонаж получает <color=#99FFFFFF>12%</color> бонус урона всеми элементами.
 
 Kagura Dance of the Sacred Sakura
-Gains the Kagura Dance effect when using an Elemental Skill, causing the Elemental Skill DMG of the character wielding this weapon to increase by <color=#99FFFFFF>12%</color> for 16s. Max 3 stacks. This character will gain <color=#99FFFFFF>12%</color> All Elemental DMG Bonus when they possess 3 stacks.
+Using an Elemental Skill grants the Kagura Dance effect, increasing the wielding character's Elemental Skill DMG by <color=#99FFFFFF>12%</color> as well as their Stellar-Conduct DMG by <color=#99FFFFFF>12%</color> for 24s. Max 3 stacks. This character will gain a <color=#99FFFFFF>12%</color> All Elemental DMG Bonus when they possess 3 stacks.
 
 -= katsuragikiri_nagamasa =-
 
@@ -865,6 +1003,16 @@ Hope Beyond the Peaks
 Decreases Climbing Stamina Consumption by 15% and increases Elemental Skill DMG by <color=#99FFFFFF>12%</color>. Also, after other nearby party members use Elemental Skills, the equipping character's Elemental Skill DMG will also increase by <color=#99FFFFFF>12%</color> for 8s.
 
 -= mouuns_moon =-
+
+-= new_bough =-
+
+Дикая поросль
+Когда экипированный персонаж поражает врага атакой в течение 12 сек. после применения элементального навыка, он получает эффект Зарослей: сила атаки повышается на <color=#99FFFFFF>4%</color>, а мастерство стихий - на <color=#99FFFFFF>20</color> ед. Эффект длится 6 сек., складывается до 3 раз, активируется не чаще 1 раза в 1 сек. и срабатывает, даже когда экипированный персонаж не на поле боя.
+Сияние - Звёздный блеск: эффект Зарослей вместо этого повышает силу атаки на <color=#99FFFFFF>6%</color> и урон реакций Звёздного блеска экипированного персонажа на <color=#99FFFFFF>8%</color>.
+
+Wildgrowth
+When the equipping character hits the opponent with an attack within 12s after using the Elemental Skill, they gain the "Verdant" effect, which increases their ATK by <color=#99FFFFFF>4%</color> and their Elemental Mastery by <color=#99FFFFFF>20</color>. This effect lasts 6s and can trigger once every second. Max 3 stacks. The aforementioned effects can still trigger even when the equipping character is not on the field.
+Radiance: Stellar Glimmer: The effect of "Verdant" is changed to: Increases ATK by <color=#99FFFFFF>6%</color> as well as Stellar Glimmer reaction DMG dealt by the equipping character by <color=#99FFFFFF>8%</color>.
 
 -= nightweavers_looking_glass =-
 
@@ -1156,6 +1304,14 @@ Every 4s a character is on the field, they will deal <color=#99FFFFFF>6%</color>
 Precise
 Increases DMG against weak spots by <color=#99FFFFFF>24%</color>.
 
+-= silver_light =-
+
+Отблески на воде
+На 12 сек. после применения элементального навыка мастерство стихий повышается на <color=#99FFFFFF>52</color> ед. Эффект складывается до 2 раз. Отсчёт времени каждого уровня происходит отдельно.
+
+Radiance on the Water
+Increases Elemental Mastery by <color=#99FFFFFF>52</color> for 12s after Elemental Skill use. Max 2 stacks, and each stack's duration is independent of the others.
+
 -= silvershower_heartstrings =-
 
 Ночная песнь Дриаса
@@ -1262,6 +1418,14 @@ A part of the "Millennial Movement" that wanders amidst the winds. Increases ATK
 Benthic Pulse
 After the wielder is healed, they will deal <color=#99FFFFFF>16%</color> more DMG for 8s. This can be triggered even when the character is not on the field.
 
+-= song_of_the_vigil =-
+
+Аккорд былых дней
+Активация элементальной реакции восстанавливает экипированному персонажу <color=#99FFFFFF>4</color> ед. энергии. Эффект может возникнуть один раз в 9 сек. Активация реакций Звёздного блеска на 12 сек. повышает его силу атаки на <color=#99FFFFFF>20%</color>. Перечисленные эффекты срабатывают, даже если экипированный персонаж не на поле боя.
+
+Cadence of Days Gone By
+Triggering an Elemental Reaction regenerates <color=#99FFFFFF>4</color> Elemental Energy for the equipping character. This effect can trigger once every 9s. On the other hand, triggering a Stellar Glimmer reaction increases their ATK by <color=#99FFFFFF>20%</color> for 12s. The aforementioned effects can trigger even when the character is not on the field.
+
 -= splendor_of_tranquil_waters =-
 
 Рассвет и закат у озера
@@ -1307,10 +1471,10 @@ Sprint or Alternate Sprint Stamina Consumption decreased by 15%. Additionally, a
 -= sunny_morning_sleep_in =-
 
 Бани, ястребы и Наруками
-На 6 сек. после активации Рассеивания повышает мастерство стихий на <color=#99FFFFFF>120</color> ед. На 9 сек. после попадания элементального навыка по противнику повышает мастерство стихий на <color=#99FFFFFF>96</color> ед. На 30 сек. после попадания взрыва стихии по противнику повышает мастерство стихий на <color=#99FFFFFF>32</color> ед.
+На 6 сек. после активации Рассеивания или Звёздного рассеивания повышает мастерство стихий на <color=#99FFFFFF>120</color> ед. На 9 сек. после попадания элементального навыка по противнику повышает мастерство стихий на <color=#99FFFFFF>96</color> ед. На 30 сек. после попадания взрыва стихии по противнику повышает мастерство стихий на <color=#99FFFFFF>32</color> ед.
 
 Bathhouses, Hawks, and Narukami
-Elemental Mastery increases by <color=#99FFFFFF>120</color> for 6s after triggering Swirl. Elemental Mastery increases by <color=#99FFFFFF>96</color> for 9s after the wielder's Elemental Skill hits an opponent. Elemental Mastery increases by <color=#99FFFFFF>32</color> for 30s after the wielder's Elemental Burst hits an opponent.
+Elemental Mastery increases by <color=#99FFFFFF>120</color> for 6s after triggering Swirl or Stellar Swirl. Elemental Mastery increases by <color=#99FFFFFF>96</color> for 9s after the wielder's Elemental Skill hits an opponent. Elemental Mastery increases by <color=#99FFFFFF>32</color> for 30s after the wielder's Elemental Burst hits an opponent.
 
 -= surfs_up =-
 
@@ -1556,6 +1720,8 @@ ATK is increased by <color=#99FFFFFF>28%</color>. When you use a Plunging Attack
 Wildling Nightstar
 The following effect will trigger every 10s: The equipping character will gain <color=#99FFFFFF>24%</color> of their Elemental Mastery as bonus ATK for 12s, with nearby party members gaining 30% of this buff for the same duration. Multiple instances of this weapon can allow this buff to stack. This effect will still trigger even if the character is not on the field.
 
+-= waster_greatsword =-
+
 -= wavebreakers_fin =-
 
 -= waveriding_whirl =-
@@ -1584,6 +1750,14 @@ Increases Normal Attack DMG by <color=#99FFFFFF>24%</color>.
 Infusion Blade
 On hit, Normal or Charged Attacks increase ATK and DEF by <color=#99FFFFFF>6%</color> for 6s. Max 4 stacks. This effect can only occur once every 0.5s.
 
+-= whitelake_frostfeather =-
+
+Последний танец снежного лебедя
+Когда элементальный навык экипированного персонажа поражает врага, активируется эффект Скорбь цвета озёрной воды: сила атаки увеличивается на <color=#99FFFFFF>8%</color> на 8 сек. Эффект складывается до 3 раз и возникает не чаще одного раза в 0,1 сек. Длительность каждого уровня рассчитывается отдельно. Когда количество уровней достигает 3, крит. урон реакций Звёздного блеска, наносимый экипированным персонажем, повышается на <color=#99FFFFFF>50%</color>, а активация реакций Звёздного блеска или нанесение их урона также восстанавливает экипированному персонажу <color=#99FFFFFF>4</color> ед. энергии. Такой эффект восстановления энергии может возникнуть один раз в 3,5 сек. Эффекты выше срабатывают, даже если экипированный персонаж не на поле боя.
+
+Snow Swan's Finale
+When the equipping character hits an opponent with their Elemental Skill, they gain "Lake-Hued Lament": ATK increases by <color=#99FFFFFF>8%</color> for 8s. This effect can trigger once every 0.1s. Max 3 stacks, and each stack's duration is independent. At 3 stacks, the CRIT DMG of any Stellar Glimmer reaction DMG caused by the equipping character is increased by <color=#99FFFFFF>50%</color>, and triggering Stellar Glimmer reactions or Stellar Glimmer reaction DMG will also restore <color=#99FFFFFF>4</color> Elemental Energy to the character. This Energy recovery effect can trigger once every 3.5s. Can be triggered even when the equipping character is off-field.
+
 -= windblume_ode =-
 
 Желание анемонии
@@ -1599,6 +1773,16 @@ After using an Elemental Skill, receive a boon from the ancient wish of the Wind
 
 Ever-Changing
 Hitting an opponent with a Normal Attack decreases the Stamina consumption of Sprint or Alternate Sprint by <color=#99FFFFFF>14%</color> for 5s. Additionally, using a Sprint or Alternate Sprint ability increases ATK by <color=#99FFFFFF>20%</color> for 5s.
+
+-= winters_heavy_heart =-
+
+Тайна мороза
+Экипированный персонаж получает Серебряный договор крови: за каждого Крио персонажа в отряде мастерство стихий экипированного персонажа повышается на <color=#99FFFFFF>24</color> ед., а за каждого Электро персонажа в отряде сила атаки экипированного персонажа увеличивается на <color=#99FFFFFF>4,8%</color>. Эффект предоставляется максимум за 4 персонажей Крио или Электро.
+Сияние - Звёздный блеск: вместо этого Серебряный договор крови за каждого Крио или Электро персонажа в отряде повышает мастерство стихий экипированного персонажа на <color=#99FFFFFF>20</color> ед., а урон реакций Звёздного блеска - на <color=#99FFFFFF>6%</color>.
+
+Secrets of Frost
+The equipping character gains "Silver-Tinged Blood Pact": The equipping character's Elemental Mastery is increased by <color=#99FFFFFF>24</color> for every Cryo character present in the party. For every Electro character present in the party, the equipping character's ATK is increased by <color=#99FFFFFF>4.8%</color>. Up to 4 Cryo or Electro characters can provide the above buffs.
+Radiance: Stellar Glimmer: The effect of Silver-Tinged Blood Pact is changed to: For every Cryo or Electro character present in the party, the equipping character gains a <color=#99FFFFFF>20</color>-point Elemental Mastery boost and deals <color=#99FFFFFF>6%</color> increased Stellar Glimmer reaction DMG.
 
 -= wolf_fang =-
 

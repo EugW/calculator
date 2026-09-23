@@ -1,6 +1,12 @@
 import json
 from lib.genshin.datafiles.lang import LangData
-from lib.genshin.datafiles.weapons import IGNORED_WEAPONS, WeaponData, WeaponSkillData, WeaponPromoteData
+from lib.genshin.datafiles.weapons import (
+    IGNORED_WEAPONS,
+    SUPPORTED_WEAPON_RARITIES,
+    WeaponData,
+    WeaponSkillData,
+    WeaponPromoteData,
+)
 from lib.genshin.strings.templates.names import names_eng, names_rus, keywords_eng, keywords_rus, color_patterns
 
 
@@ -210,7 +216,7 @@ for weapon in weapon_data.get_list():
         continue
 
     rank = weapon.get('rankLevel', 0)
-    if rank < 3:
+    if rank not in SUPPORTED_WEAPON_RARITIES:
         continue
 
     item = {

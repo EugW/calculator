@@ -3,3 +3,7 @@ category;name;rus;eng
 char_name;traveler_pyro;Путешественник;Traveler
 feature_skill;traveler_blazing_threshold_dmg;Урон Пылающего порога;Blazing Threshold DMG
 feature_skill;traveler_scorching_threshold_dmg;Урон Испепеляющего порога;Scorching Threshold DMG
+feature_attack;traveler_pyro_inferno;Заряженная атака: Пожирающее пламя;Charged Attack: Inferno
+feature_attack;traveler_pyro_inferno_1;Заряженная атака: Пожирающее пламя 1;Charged Attack: Inferno 1
+feature_attack;traveler_pyro_inferno_2;Заряженная атака: Пожирающее пламя 2;Charged Attack: Inferno 2
+feature_other;traveler_pyro_inferno_cooldown;Откат Пожирающего пламени;Inferno Cooldown

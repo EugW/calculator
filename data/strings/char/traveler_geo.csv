@@ -20,4 +20,7 @@ talent_descr;traveler_reaction_force;name{Ударная волна} навык�
 
 talent_name;traveler_everlasting_boulder;Нетленный камень;Everlasting Boulder
 talent_descr;traveler_everlasting_boulder;Увеличивает время существование name{каменной стены}, созданной навыком skill{burst:Движение земли}, на 5 сек.<br>Увеличивает время существования name{Кометы}, созданной навыком skill{skill:Меч звездопада}, на 10 сек.;name{The barrier} created by skill{burst:Wake of Earth} lasts 5s longer.<br>name{The meteorite} created by skill{skill:Starfell Sword} lasts 10s longer.
-
+feature_attack;traveler_geo_rockfell;Заряженная атака: Камнепад;Charged Attack: Rockfell
+feature_attack;traveler_geo_rockfell_1;Заряженная атака: Камнепад 1;Charged Attack: Rockfell 1
+feature_attack;traveler_geo_rockfell_2;Заряженная атака: Камнепад 2;Charged Attack: Rockfell 2
+feature_other;traveler_geo_rockfell_cooldown;Откат Камнепада;Rockfell Cooldown

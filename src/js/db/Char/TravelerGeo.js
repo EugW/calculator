@@ -1,6 +1,10 @@
 import { Condition } from "../../classes/Condition";
 import { ConditionAscensionChar } from "../../classes/Condition/Ascension/Char";
 import { ConditionBoolean } from "../../classes/Condition/Boolean";
+import { ConditionBooleanValue } from "../../classes/Condition/Boolean/Value";
+import { ConditionDropdownTravelerResonated } from "../../classes/Condition/Dropdown/TravelerResonated";
+import { ConditionNot } from "../../classes/Condition/Not";
+import { ConditionStacks } from "../../classes/Condition/Stacks";
 import { ConditionStatic } from "../../classes/Condition/Static";
 import { DbObjectChar } from "../../classes/DbObject/Char";
 import { DbObjectConstellation } from "../../classes/DbObject/Constellation";
@@ -13,8 +17,11 @@ import { FeatureDamagePlungeCollision } from "../../classes/Feature2/Damage/Plun
 import { FeatureDamagePlungeShockWave } from "../../classes/Feature2/Damage/Plunge/ShockWave";
 import { FeatureDamageSkill } from "../../classes/Feature2/Damage/Skill";
 import { FeatureMultiplier } from "../../classes/Feature2/Multiplier";
+import { FeatureMultiplierStatic } from "../../classes/Feature2/Multiplier/Static";
+import { FeatureStatic } from "../../classes/Feature2/Static";
 import { StatTable } from "../../classes/StatTable";
 import { StatTableAscensionScale } from "../../classes/StatTable/Ascension/Scale";
+import { ValueTable } from "../../classes/ValueTable";
 import { charTables } from "../generated/CharTables";
 import { charTalentTables } from "../generated/CharTalentTables";
 
@@ -104,6 +111,36 @@ const Talents = new DbObjectTalents({
     },
 });
 
+
+const condTravelerAether = new ConditionBoolean({name: 'traveler_aether'});
+const condLumineDefault = new ConditionNot([condTravelerAether]);
+
+const ForeignRockfellBonus = 120;
+const ForeignRockfellCooldown = 15;
+
+const bladeReadyCondition = new ConditionBooleanValue({
+    setting: 'traveler_geo_blade_archaic_petra',
+    cond: 'ge',
+    value: 3,
+});
+
+function makeChargedHit2Multipliers() {
+    return [
+        new FeatureMultiplier({
+            leveling: 'char_skill_attack',
+            values: Talents.get('attack.charged_hit_2'),
+            condition: condLumineDefault,
+        }),
+        new FeatureMultiplier({
+            leveling: 'char_skill_attack',
+            values: new StatTable(
+                'charged_hit_2',
+                charTalentTables.TravelerGeo.s1_boy.p7,
+            ),
+            condition: condTravelerAether,
+        }),
+    ];
+}
 export const TravelerGeo = new DbObjectChar({
     name: 'traveler_geo',
     serializeId: 25,
@@ -188,12 +225,7 @@ export const TravelerGeo = new DbObjectChar({
                     ],
                 },
                 {
-                    multipliers: [
-                        new FeatureMultiplier({
-                            leveling: 'char_skill_attack',
-                            values: Talents.get('attack.charged_hit_2'),
-                        }),
-                    ],
+                    multipliers: makeChargedHit2Multipliers(),
                 },
             ],
         }),
@@ -208,12 +240,7 @@ export const TravelerGeo = new DbObjectChar({
         }),
         new FeatureDamageCharged({
             isChild: true,
-            multipliers: [
-                new FeatureMultiplier({
-                    leveling: 'char_skill_attack',
-                    values: Talents.get('attack.charged_hit_2'),
-                }),
-            ],
+            multipliers: makeChargedHit2Multipliers(),
         }),
         new FeatureDamagePlungeCollision({
             name: 'plunge',
@@ -260,8 +287,83 @@ export const TravelerGeo = new DbObjectChar({
                 }),
             ],
         }),
+        new FeatureDamageMultihit({
+            category: 'attack',
+            damageType: 'charged',
+            name: 'traveler_geo_rockfell',
+            element: 'geo',
+            allowInfusion: true,
+            items: [
+                {multipliers: [
+                    new FeatureMultiplier({
+                        leveling: 'char_skill_attack',
+                        values: Talents.get('attack.charged_hit_1'),
+                    }),
+                    new FeatureMultiplier({
+                        source: 'foreign_adamantine',
+                        values: new ValueTable([ForeignRockfellBonus]),
+                    }),
+                ]},
+                {multipliers: [
+                    ...makeChargedHit2Multipliers(),
+                    new FeatureMultiplier({
+                        source: 'foreign_adamantine',
+                        values: new ValueTable([ForeignRockfellBonus]),
+                    }),
+                ]},
+            ],
+            condition: bladeReadyCondition,
+        }),
+        new FeatureDamageCharged({
+            name: 'traveler_geo_rockfell_1',
+            isChild: true,
+            element: 'geo',
+            multipliers: [
+                new FeatureMultiplier({
+                    leveling: 'char_skill_attack',
+                    values: Talents.get('attack.charged_hit_1'),
+                }),
+                new FeatureMultiplier({
+                    source: 'foreign_adamantine',
+                    values: new ValueTable([ForeignRockfellBonus]),
+                }),
+            ],
+            condition: bladeReadyCondition,
+        }),
+        new FeatureDamageCharged({
+            name: 'traveler_geo_rockfell_2',
+            isChild: true,
+            element: 'geo',
+            multipliers: [
+                ...makeChargedHit2Multipliers(),
+                new FeatureMultiplier({
+                    source: 'foreign_adamantine',
+                    values: new ValueTable([ForeignRockfellBonus]),
+                }),
+            ],
+            condition: bladeReadyCondition,
+        }),
+        new FeatureStatic({
+            category: 'other',
+            name: 'traveler_geo_rockfell_cooldown',
+            format: 'decimal',
+            multipliers: [
+                new FeatureMultiplierStatic({
+                    source: 'foreign_adamantine',
+                    values: new ValueTable([ForeignRockfellCooldown]),
+                }),
+            ],
+            condition: bladeReadyCondition,
+        }),
     ],
     conditions: [
+        new ConditionBoolean({
+            name: 'traveler_aether',
+            serializeId: 4,
+            title: 'talent_name.traveler_twin_aether',
+            description: 'talent_descr.traveler_twin_aether',
+            rotation: 'self',
+        }),
         new ConditionStatic({
             title: 'talent_name.traveler_shattered_darkrock',
             description: 'talent_descr.traveler_shattered_darkrock',
@@ -301,6 +403,19 @@ export const TravelerGeo = new DbObjectChar({
                 hp_base: 50,
             },
         }),
+        new ConditionDropdownTravelerResonated({
+            name: 'traveler_geo_resonated_elements',
+            serializeId: 6,
+        }),
+        new ConditionStacks({
+            name: 'traveler_geo_blade_archaic_petra',
+            serializeId: 7,
+            title: 'talent_name.traveler_foreign_adamantine',
+            description: 'talent_descr.traveler_foreign_adamantine',
+            maxStacks: 3,
+            noStat: true,
+            rotation: 'self',
+        }),
     ],
     constellation: new DbObjectConstellation([
         {
@@ -338,6 +453,10 @@ export const TravelerGeo = new DbObjectChar({
                 new ConditionStatic({
                     title: 'talent_name.traveler_reaction_force',
                     description: 'talent_descr.traveler_reaction_force',
+                    stats: {
+                        text_value: 5,
+                        text_value_max: 25,
+                    },
                 }),
             ],
         },
@@ -355,6 +474,10 @@ export const TravelerGeo = new DbObjectChar({
                 new ConditionStatic({
                     title: 'talent_name.traveler_everlasting_boulder',
                     description: 'talent_descr.traveler_everlasting_boulder',
+                    stats: {
+                        text_duration: 5,
+                        text_duration_2: 10,
+                    },
                 }),
             ],
         },

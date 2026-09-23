@@ -49,6 +49,14 @@ export class Feature2 {
         return this.element;
     }
 
+    isDamage() {
+        return false;
+    }
+
+    getNameStyle() {
+        return '';
+    }
+
     getName() {
         return this.category +'.'+ this.name;
     }
@@ -208,6 +216,9 @@ export class Feature2 {
         return {
             [this.getName()]: new FeatureResult({
                 icon: this.icon || this.getElement(data),
+                element: this.getElement(data),
+                isDamage: this.isDamage(),
+                nameStyle: this.getNameStyle(data),
                 normal: normal,
                 crit: crit,
                 average: average,
@@ -270,7 +281,8 @@ export class Feature2 {
         opts = Object.assign({}, opts);
 
         let result = [];
-        let features = build.getFeaturesHash(build.getBuildData(), opts);
+        let buildData = build.getBuildData();
+        let features = build.getFeaturesHash(buildData, opts);
         let tree = Feature2.getTree(features);
 
         for (let section of Object.keys(tree)) {
@@ -302,6 +314,8 @@ export class Feature2 {
                 result.push({
                     value: value,
                     text: title,
+                    nameStyle: featureData.getNameStyle(buildData),
+                    isFeature: true,
                     isSubitem: true,
                     isChild: !!featureData.isChild,
                 });

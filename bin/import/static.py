@@ -145,7 +145,6 @@ char_ids = {
     702: 'TravelerPyro',
     703: 'TravelerHydro',
     704: 'TravelerAnemo',
-    505: 'TravelerCryo',
     705: 'TravelerCryo',
     706: 'TravelerGeo',
     707: 'TravelerElectro',
@@ -301,3 +300,16 @@ def getCurveName(type):
 
 def getCharById(id):
     return char_ids.get(id)
+
+# The Traveler is implemented once per element with Lumine's data. These
+# girl->boy depot pairs expose Aether's normal-attack chain, whose Charged
+# Attack hit 2 multipliers are the only gender difference in the dump.
+traveler_twin_depots = {
+    702: 502,
+    703: 503,
+    704: 504,
+    705: 505,
+    706: 506,
+    707: 507,
+    708: 508,
+}

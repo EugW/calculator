@@ -36,3 +36,8 @@ talent_descr;traveler_hydro_pouring_descent;При использовании н
 talent_name;traveler_hydro_churning_whirlpool;Вихрящийся водоворот;Churning Whirlpool
 talent_name;traveler_hydro_tides_of_justice;Прибой правосудия;Tides of Justice
 talent_descr;traveler_hydro_tides_of_justice;Подобранная путешественником name{Капля источника} восстанавливает члену отряда поблизости с наименьшим количеством name{HP} %{text_percent_hp} от его name{макс. HP}.;When the name{Traveler} picks up a name{Sourcewater Droplet}, they will restore name{HP} to the nearest party member with the lowest name{HP} percentage remaining based on %{text_percent_hp} of their name{Max HP}.
+feature_attack;traveler_hydro_tidebound;Заряженная атака: Прилив;Charged Attack: Tidebound
+feature_attack;traveler_hydro_tidebound_1;Заряженная атака: Прилив 1;Charged Attack: Tidebound 1
+feature_attack;traveler_hydro_tidebound_2;Заряженная атака: Прилив 2;Charged Attack: Tidebound 2
+feature_attack;traveler_hydro_tidebound_heal;Лечение Прилива;Tidebound Heal
+feature_other;traveler_hydro_tidebound_cooldown;Откат Прилива;Tidebound Cooldown

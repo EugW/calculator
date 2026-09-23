@@ -4,7 +4,7 @@ import { ConditionAscensionChar } from "../../classes/Condition/Ascension/Char";
 import { ConditionBoolean } from "../../classes/Condition/Boolean";
 import { ConditionBooleanValue } from "../../classes/Condition/Boolean/Value";
 import { ConditionConstellation } from "../../classes/Condition/Constellation";
-import { ConditionDropdownElement } from "../../classes/Condition/Dropdown/Element";
+import { ConditionDropdownTravelerResonated } from "../../classes/Condition/Dropdown/TravelerResonated";
 import { ConditionLevelSelect } from "../../classes/Condition/LevelSelect";
 import { ConditionNot } from "../../classes/Condition/Not";
 import { ConditionNumber } from "../../classes/Condition/Number";
@@ -27,6 +27,10 @@ import { FeatureDamagePlungeCollision } from "../../classes/Feature2/Damage/Plun
 import { FeatureDamagePlungeShockWave } from "../../classes/Feature2/Damage/Plunge/ShockWave";
 import { FeatureDamageSkill } from "../../classes/Feature2/Damage/Skill";
 import { FeatureDamageStellarConduct } from "../../classes/Feature2/Damage/StellarConduct";
+import {
+    FeatureDamageStellarConductMultihit,
+    FeatureDamageStellarSwirlMultihit,
+} from "../../classes/Feature2/Damage/StellarMultihit";
 import { FeatureDamageStellarSwirl } from "../../classes/Feature2/Damage/StellarSwirl";
 import { FeatureMultiplier } from "../../classes/Feature2/Multiplier";
 import { FeatureMultiplierStatic } from "../../classes/Feature2/Multiplier/Static";
@@ -195,6 +199,39 @@ function makeAttackMultiplier(name) {
     });
 }
 
+const condTravelerAether = new ConditionBoolean({name: 'traveler_aether'});
+const condLumineDefault = new ConditionNot([condTravelerAether]);
+
+function makeChargedHit2Multipliers() {
+    return [
+        new FeatureMultiplier({
+            leveling: 'char_skill_attack',
+            values: Talents.get('attack.charged_hit_2'),
+            condition: condLumineDefault,
+        }),
+        new FeatureMultiplier({
+            leveling: 'char_skill_attack',
+            values: new StatTable(
+                'charged_hit_2',
+                charTalentTables.TravelerCryo.s1_boy.p7,
+            ),
+            condition: condTravelerAether,
+        }),
+    ];
+}
+
+function makeFreezingIceHit(name) {
+    return [
+        ...(name === 'charged_hit_2'
+            ? makeChargedHit2Multipliers()
+            : [makeAttackMultiplier(name)]),
+        new FeatureMultiplier({
+            source: 'foreign_permafrost',
+            values: new ValueTable([ForeignPermafrostBonus]),
+        }),
+    ];
+}
+
 function makeBurstMultipliers(baseName, frostglowName, total = false) {
     const baseMultiplier = total ? 3 : 1;
     const result = [
@@ -238,30 +275,12 @@ function makeBurstMultipliers(baseName, frostglowName, total = false) {
     return result;
 }
 
-function makeFreezingIceMultipliers() {
+function makeFreezingIceItems() {
     return [
-        makeAttackMultiplier('charged_hit_1'),
-        makeAttackMultiplier('charged_hit_2'),
-        new FeatureMultiplier({
-            source: 'foreign_permafrost',
-            values: new ValueTable([ForeignPermafrostBonus]),
-        }),
+        {multipliers: makeFreezingIceHit('charged_hit_1')},
+        {multipliers: makeFreezingIceHit('charged_hit_2')},
     ];
 }
-
-const resonatedElements = [
-    ['anemo', 1, {crit_rate: 10}],
-    ['geo', 2, {def_percent: 20}],
-    ['electro', 3, {recharge: 20}],
-    ['dendro', 4, {mastery: 60}],
-    ['hydro', 5, {hp_percent: 20}],
-    ['pyro', 6, {atk_percent: 20}],
-    ['cryo', 7, {crit_dmg: 20}],
-].map(([value, serializeId, stats]) => ({
-    value,
-    serializeId,
-    conditions: [new Condition({stats})],
-}));
 
 export const TravelerCryo = new DbObjectChar({
     name: 'traveler_cryo',
@@ -295,7 +314,7 @@ export const TravelerCryo = new DbObjectChar({
             allowInfusion: true,
             items: [
                 {multipliers: [makeAttackMultiplier('charged_hit_1')]},
-                {multipliers: [makeAttackMultiplier('charged_hit_2')]},
+                {multipliers: makeChargedHit2Multipliers()},
             ],
         }),
         new FeatureDamageCharged({
@@ -306,7 +325,7 @@ export const TravelerCryo = new DbObjectChar({
         new FeatureDamageCharged({
             name: 'charged_hit_2',
             isChild: true,
-            multipliers: [makeAttackMultiplier('charged_hit_2')],
+            multipliers: makeChargedHit2Multipliers(),
         }),
         new FeatureDamagePlungeCollision({
             name: 'plunge',
@@ -341,38 +360,76 @@ export const TravelerCryo = new DbObjectChar({
             ],
             condition: frostpierceCondition,
         }),
-        new FeatureDamageCharged({
+        new FeatureDamageMultihit({
+            category: 'attack',
+            damageType: 'charged',
             name: 'traveler_cryo_freezing_ice',
             element: 'cryo',
+            allowInfusion: true,
             tags: [foreignPermafrostTag],
-            multipliers: makeFreezingIceMultipliers(),
+            items: makeFreezingIceItems(),
             condition: new ConditionAnd([
                 icepointMaxCondition,
                 noRadianceCondition,
             ]),
         }),
-        new FeatureDamageStellarConduct({
+        ...makeFreezingIceItems().map((item, index) => new FeatureDamageCharged({
+            name: 'traveler_cryo_freezing_ice_' + (index + 1),
+            isChild: true,
+            element: 'cryo',
+            tags: [foreignPermafrostTag],
+            multipliers: item.multipliers,
+            condition: new ConditionAnd([
+                icepointMaxCondition,
+                noRadianceCondition,
+            ]),
+        })),
+        new FeatureDamageStellarConductMultihit({
             category: 'attack',
             name: 'traveler_cryo_freezing_ice_stellarconduct',
             element: 'cryo',
             tags: [foreignPermafrostTag],
-            multipliers: makeFreezingIceMultipliers(),
+            items: makeFreezingIceItems(),
             condition: new ConditionAnd([
                 icepointMaxCondition,
                 radianceConductCondition,
             ]),
         }),
-        new FeatureDamageStellarSwirl({
+        ...makeFreezingIceItems().map((item, index) => new FeatureDamageStellarConduct({
+            category: 'attack',
+            name: 'traveler_cryo_freezing_ice_stellarconduct_' + (index + 1),
+            isChild: true,
+            element: 'cryo',
+            tags: [foreignPermafrostTag],
+            multipliers: item.multipliers,
+            condition: new ConditionAnd([
+                icepointMaxCondition,
+                radianceConductCondition,
+            ]),
+        })),
+        new FeatureDamageStellarSwirlMultihit({
             category: 'attack',
             name: 'traveler_cryo_freezing_ice_stellarswirl',
             element: 'cryo',
             tags: [foreignPermafrostTag],
-            multipliers: makeFreezingIceMultipliers(),
+            items: makeFreezingIceItems(),
             condition: new ConditionAnd([
                 icepointMaxCondition,
                 radianceSwirlCondition,
             ]),
         }),
+        ...makeFreezingIceItems().map((item, index) => new FeatureDamageStellarSwirl({
+            category: 'attack',
+            name: 'traveler_cryo_freezing_ice_stellarswirl_' + (index + 1),
+            isChild: true,
+            element: 'cryo',
+            tags: [foreignPermafrostTag],
+            multipliers: item.multipliers,
+            condition: new ConditionAnd([
+                icepointMaxCondition,
+                radianceSwirlCondition,
+            ]),
+        })),
         new FeatureDamageBurst({
             name: 'traveler_cryo_ice_javelin',
             element: 'cryo',
@@ -562,13 +619,9 @@ export const TravelerCryo = new DbObjectChar({
             noStat: true,
             rotation: 'self',
         }),
-        new ConditionDropdownElement({
+        new ConditionDropdownTravelerResonated({
             name: 'traveler_cryo_resonated_elements',
             serializeId: 6,
-            title: 'talent_name.n10050001',
-            description: 'talent_descr.n10050001',
-            multiple: true,
-            values: resonatedElements,
         }),
         new ConditionStatic({
             title: 'talent_name.traveler_ever_keen_frost',
@@ -611,6 +664,13 @@ export const TravelerCryo = new DbObjectChar({
                 mastery: 15,
                 hp_base: 50,
             },
+        }),
+        new ConditionBoolean({
+            name: 'traveler_aether',
+            serializeId: 11,
+            title: 'talent_name.traveler_twin_aether',
+            description: 'talent_descr.traveler_twin_aether',
+            rotation: 'self',
         }),
     ],
     multipliers: [

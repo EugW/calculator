@@ -47,3 +47,11 @@ talent_name;traveler_intertwined_winds;Плетение ветров;Intertwined
 talent_descr;traveler_intertwined_winds;Понижает anemo{Анемо сопротивление} противников, получивших урон от навыка skill{burst:Взрывное торнадо}, на %{enemy_res_anemo}.;Targets who take DMG from skill{burst:Gust Surge} have their nameo{Anemo RES} decreased by %{enemy_res_anemo}.
 
 talent_descr;traveler_intertwined_winds_element;Если произошло name{Поглощение стихии}, то также понижает name{сопротивление} к поглощённому элементу на value{20%}.;If an name{Elemental Absorption} occurred, then their name{RES} towards the corresponding Element is also decreased by value{20%}.
+feature_attack;traveler_anemo_whirlwind;Заряженная атака: Вихрь;Charged Attack: Whirlwind
+feature_attack;traveler_anemo_whirlwind_1;Заряженная атака: Вихрь 1;Charged Attack: Whirlwind 1
+feature_attack;traveler_anemo_whirlwind_2;Заряженная атака: Вихрь 2;Charged Attack: Whirlwind 2
+feature_attack;traveler_anemo_blade_wind_pyro;Ветер клинков: Пиро;Blade Wind: Pyro
+feature_attack;traveler_anemo_blade_wind_hydro;Ветер клинков: Гидро;Blade Wind: Hydro
+feature_attack;traveler_anemo_blade_wind_cryo;Ветер клинков: Крио;Blade Wind: Cryo
+feature_attack;traveler_anemo_blade_wind_electro;Ветер клинков: Электро;Blade Wind: Electro
+feature_other;traveler_anemo_whirlwind_cooldown;Откат Вихря;Whirlwind Cooldown

@@ -100,12 +100,13 @@ export function normalizeWeaponScenarioData(params) {
     let savedItem = isObject(params.savedItem) ? params.savedItem : {};
     let savedSettings = isObject(savedItem.settings) ? savedItem.settings : {};
     let rarity = params.rarity || 1;
+    let maxRefinement = params.weapon ? params.weapon.getMaxRefinement() : 5;
     let defaultRefine = {
-        1: rarity == 5,
+        1: rarity == 5 || maxRefinement == 1,
         2: false,
         3: false,
         4: false,
-        5: rarity < 5,
+        5: rarity < 5 && maxRefinement > 1,
     };
     let settings = getWeaponScenarioDefaultSettings(params.weapon, params.suggestItem, params.buildSettings);
     let refine = {};
@@ -118,7 +119,8 @@ export function normalizeWeaponScenarioData(params) {
 
     let savedRefine = isObject(savedItem.refine) ? savedItem.refine : {};
     for (let r = 1; r <= 5; ++r) {
-        refine[r] = savedRefine[r] === undefined ? defaultRefine[r] : !!savedRefine[r];
+        refine[r] = r <= maxRefinement
+            && (savedRefine[r] === undefined ? defaultRefine[r] : !!savedRefine[r]);
     }
 
     return {
@@ -136,7 +138,7 @@ export function getWeaponScenarioContextSettings(weapon, itemSettings, buildSett
     let refine = settings.weapon_refine || 1;
 
     if (itemSettings && isObject(itemSettings.refine)) {
-        for (let r = 1; r <= 5; ++r) {
+        for (let r = 1; r <= (weapon ? weapon.getMaxRefinement() : 5); ++r) {
             if (itemSettings.refine[r]) {
                 refine = r;
                 break;

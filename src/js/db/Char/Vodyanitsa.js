@@ -33,8 +33,8 @@ import { charTalentTables } from "../generated/CharTalentTables";
 const Talents = new DbObjectTalents({
     attack: {
         gameId: charTalentTables.Vodyanitsa.s1_id,
-        title: 'talent_name.vodyanitsa_waltz_of_the_water_imp',
-        description: 'talent_descr.vodyanitsa_waltz_of_the_water_imp',
+        title: 'talent_name.vodyanitsa_psyshkhwe_arietta',
+        description: 'talent_descr.vodyanitsa_psyshkhwe_arietta',
         items: [
             {table: new StatTable('normal_hit_1', charTalentTables.Vodyanitsa.s1.p1)},
             {table: new StatTable('normal_hit_2', charTalentTables.Vodyanitsa.s1.p2)},
@@ -52,32 +52,32 @@ const Talents = new DbObjectTalents({
     },
     skill: {
         gameId: charTalentTables.Vodyanitsa.s2_id,
-        title: 'talent_name.vodyanitsa_overture_of_the_water_imp',
-        description: 'talent_descr.vodyanitsa_overture_of_the_water_imp',
+        title: 'talent_name.vodyanitsa_sonorous_dawn',
+        description: 'talent_descr.vodyanitsa_sonorous_dawn',
         items: [
             {
                 table: new StatTable(
-                    'vodyanitsa_overture_initial_dmg',
+                    'vodyanitsa_sonorous_dawn_initial_dmg',
                     charTalentTables.Vodyanitsa.s2.p1,
                 ),
             },
             {
                 unit: 'sec',
                 table: new StatTable(
-                    'vodyanitsa_microphone_duration',
+                    'vodyanitsa_song_of_ages_past_duration',
                     charTalentTables.Vodyanitsa.s2.p2,
                 ),
             },
             {
                 unit: 'sec',
                 table: new StatTable(
-                    'vodyanitsa_microphone_attack_interval',
+                    'vodyanitsa_horn_of_springs_call_attack_interval',
                     charTalentTables.Vodyanitsa.s2.p3,
                 ),
             },
             {
                 table: new StatTable(
-                    'vodyanitsa_microphone_dmg',
+                    'vodyanitsa_horn_of_springs_call_dmg',
                     charTalentTables.Vodyanitsa.s2.p4,
                 ),
             },
@@ -85,7 +85,7 @@ const Talents = new DbObjectTalents({
                 unit: 'hp',
                 table: [
                     new StatTable(
-                        'vodyanitsa_microphone_heal',
+                        'vodyanitsa_song_of_ages_past_heal',
                         charTalentTables.Vodyanitsa.s2.p6,
                     ),
                     new StatTable('', charTalentTables.Vodyanitsa.s2.p5),
@@ -94,7 +94,7 @@ const Talents = new DbObjectTalents({
             {
                 unit: 'sec',
                 table: new StatTable(
-                    'vodyanitsa_microphone_heal_interval',
+                    'vodyanitsa_song_of_ages_past_heal_interval',
                     charTalentTables.Vodyanitsa.s2.p7,
                 ),
             },
@@ -119,18 +119,18 @@ const Talents = new DbObjectTalents({
     },
     burst: {
         gameId: charTalentTables.Vodyanitsa.s3_id,
-        title: 'talent_name.vodyanitsa_aria_of_the_water_imp',
-        description: 'talent_descr.vodyanitsa_aria_of_the_water_imp',
+        title: 'talent_name.vodyanitsa_sink_with_thee',
+        description: 'talent_descr.vodyanitsa_sink_with_thee',
         items: [
             {
                 table: new StatTable(
-                    'vodyanitsa_aria_dmg',
+                    'vodyanitsa_sink_with_thee_dmg',
                     charTalentTables.Vodyanitsa.s3.p1,
                 ),
             },
             {
                 table: new StatTable(
-                    'vodyanitsa_microphone_resonance_dmg',
+                    'vodyanitsa_song_of_ages_past_dmg_bonus',
                     charTalentTables.Vodyanitsa.s3.p2,
                 ),
             },
@@ -146,22 +146,22 @@ const Talents = new DbObjectTalents({
     },
 });
 
-const A1AnemoResistance = -30;
-const A4SoloStacks = 17;
-const A4ConcertoStacks = 10;
+const A1AnemoResistance = -35;
+const A4LeadVocalStacks = 25;
+const A4ChorusStacks = 10;
 const A4HpThreshold = 40000;
 const A4HydroCryoFlatPerHp = 0.14;
 const A4HydroCryoFlatCap = 3500;
 const A4StellarSwirlFlatPerHp = 0.26;
 const A4StellarSwirlFlatCap = 6500;
-const C1AtkPerHp = 0.007;
+const C1AtkPerHp = 0.008;
 const C2HydroCryoCritDmg = 50;
-const C2StellarSwirlDmg = 60;
-const C4HealingBonus = 50;
+const C2StellarSwirlCritDmg = 60;
+const C4HealingIncrease = 50;
 const C4HpPercent = 20;
 const C4HpStacks = 3;
 const C6StellarSwirlElevation = 25;
-const C6HydroCryoDmg = 50;
+const C6HydroCryoDmg = 60;
 
 const hydroCryoDirectTarget = () => new FeatureMultiplierTarget({
     damageElements: ['hydro', 'cryo'],
@@ -169,19 +169,33 @@ const hydroCryoDirectTarget = () => new FeatureMultiplierTarget({
 });
 
 const stellarSwirlFlatTarget = () => new FeatureMultiplierTarget({
-    tags: ['stellarswirl_immediate'],
+    damageTypes: ['stellarswirl'],
     options: ['stellarswirl_flat'],
 });
 
-const localMutantState = () => new ConditionAnd([
-    new ConditionBoolean({name: 'vodyanitsa_microphone_summons'}),
-    new ConditionBoolean({name: 'vodyanitsa_mutant_anemogranum'}),
-]);
+const localWanderingVortexState = () => new ConditionBoolean({name: 'vodyanitsa_wandering_vortex'});
+const partyWanderingVortexState = () => new ConditionBoolean({name: 'party.vodyanitsa_wandering_vortex'});
 
-const partyMutantState = () => new ConditionAnd([
-    new ConditionBoolean({name: 'party.vodyanitsa_microphone_summons'}),
-    new ConditionBoolean({name: 'party.vodyanitsa_mutant_anemogranum'}),
-]);
+class FeatureMultiplierVodyanitsaBurst extends FeatureMultiplier {
+    getScalingMultiplier(data) {
+        return data.settings.vodyanitsa_song_of_ages_past
+            ? 1 + Talents.get('burst.vodyanitsa_song_of_ages_past_dmg_bonus').getValue(this.getLevel(data)) / 100
+            : 1;
+    }
+}
+
+class ConditionVodyanitsaSkillResistance extends ConditionBooleanLevels {
+    getLevel(settings) {
+        // Character conditions run before constellation settings are applied.
+        return super.getLevel({
+            ...settings,
+            char_skill_elemental_bonus: Math.max(
+                settings.char_skill_elemental_bonus || 0,
+                settings.char_constellation >= 3 ? 3 : 0,
+            ),
+        });
+    }
+}
 
 const skillResistanceStats = () => [
     Talents.getMulti({
@@ -213,7 +227,6 @@ export const Vodyanitsa = new DbObjectChar({
     element: 'hydro',
     weapon: 'catalyst',
     origin: 'snezhnaya',
-    beta: true,
     talents: Talents,
     statTable: charTables.Vodyanitsa,
     features: [
@@ -298,93 +311,94 @@ export const Vodyanitsa = new DbObjectChar({
             ],
         }),
         new FeatureDamageSkill({
-            name: 'vodyanitsa_overture_initial_dmg',
+            name: 'vodyanitsa_sonorous_dawn_initial_dmg',
             element: 'hydro',
             multipliers: [
                 new FeatureMultiplier({
                     scaling: 'hp*',
                     leveling: 'char_skill_elemental',
-                    values: Talents.get('skill.vodyanitsa_overture_initial_dmg'),
+                    values: Talents.get('skill.vodyanitsa_sonorous_dawn_initial_dmg'),
                 }),
             ],
         }),
         new FeatureDamageSkill({
-            name: 'vodyanitsa_microphone_dmg',
+            name: 'vodyanitsa_horn_of_springs_call_dmg',
             element: 'hydro',
             multipliers: [
                 new FeatureMultiplier({
                     scaling: 'hp*',
                     leveling: 'char_skill_elemental',
-                    values: Talents.get('skill.vodyanitsa_microphone_dmg'),
+                    values: Talents.get('skill.vodyanitsa_horn_of_springs_call_dmg'),
                 }),
             ],
         }),
         new FeatureHeal({
             category: 'skill',
-            name: 'vodyanitsa_microphone_heal',
+            name: 'vodyanitsa_song_of_ages_past_heal',
             multipliers: [
                 new FeatureMultiplierList({
                     scaling: 'hp*',
                     leveling: 'char_skill_elemental',
-                    values: Talents.getList('skill.vodyanitsa_microphone_heal'),
+                    values: Talents.getList('skill.vodyanitsa_song_of_ages_past_heal'),
+                    scalingSource: 'constellation4',
+                    scalingMultiplier: 1 + C4HealingIncrease / 100,
+                    scalingMultiplierCondition: new ConditionAnd([
+                        new ConditionConstellation({constellation: 4}),
+                        new ConditionBoolean({name: 'vodyanitsa_c4_target_below_40'}),
+                    ]),
                 }),
             ],
         }),
         new FeatureDamageBurst({
-            name: 'vodyanitsa_aria_dmg',
+            name: 'vodyanitsa_sink_with_thee_dmg',
             element: 'hydro',
             multipliers: [
-                new FeatureMultiplier({
+                new FeatureMultiplierVodyanitsaBurst({
                     scaling: 'hp*',
                     leveling: 'char_skill_burst',
-                    values: Talents.get('burst.vodyanitsa_aria_dmg'),
-                }),
-                new FeatureMultiplier({
-                    scaling: 'hp*',
-                    leveling: 'char_skill_burst',
-                    values: Talents.get('burst.vodyanitsa_microphone_resonance_dmg'),
-                    condition: new ConditionBoolean({name: 'vodyanitsa_microphone_summons'}),
+                    values: Talents.get('burst.vodyanitsa_sink_with_thee_dmg'),
+                    scalingSource: 'vodyanitsa_song_of_ages_past',
                 }),
             ],
         }),
     ],
     conditions: [
-        new ConditionBooleanLevels({
-            name: 'vodyanitsa_microphone_summons',
+        new ConditionBoolean({
+            // Retain the removed control's ID so existing builds still load.
+            name: 'vodyanitsa_off_field',
+            serializeId: 8,
+            isHidden: true,
+        }),
+        new ConditionVodyanitsaSkillResistance({
+            name: 'vodyanitsa_song_of_ages_past',
             serializeId: 1,
-            title: 'talent_name.vodyanitsa_microphone_summons',
-            description: 'talent_descr.vodyanitsa_microphone_summons',
+            title: 'talent_name.vodyanitsa_song_of_ages_past',
+            description: 'talent_descr.vodyanitsa_song_of_ages_past',
             levelSetting: 'char_skill_elemental',
             rotation: 'self',
             stats: skillResistanceStats(),
         }),
         new ConditionBoolean({
-            name: 'vodyanitsa_mutant_anemogranum',
+            name: 'vodyanitsa_wandering_vortex',
             serializeId: 2,
-            title: 'talent_name.vodyanitsa_ascension_talent_1',
-            description: 'talent_descr.vodyanitsa_ascension_talent_1',
+            title: 'talent_name.vodyanitsa_the_last_djeguako_songstress',
+            description: 'talent_descr.vodyanitsa_the_last_djeguako_songstress',
             info: {ascension: 1},
             rotation: 'self',
             stats: {
                 enemy_res_anemo: A1AnemoResistance,
             },
-            condition: new ConditionAnd([
-                new ConditionAscensionChar({ascension: 1}),
-                new ConditionBoolean({name: 'vodyanitsa_microphone_summons'}),
-            ]),
+            condition: new ConditionAscensionChar({ascension: 1}),
         }),
         new ConditionStacks({
-            name: 'vodyanitsa_solo',
+            name: 'vodyanitsa_lead_vocal',
             serializeId: 3,
             title: 'talent_name.n11400001',
             description: 'talent_descr.n11400001',
             info: {ascension: 4},
             rotation: 'self',
-            maxStacks: A4SoloStacks,
-            condition: new ConditionAnd([
-                new ConditionAscensionChar({ascension: 4}),
-                new ConditionBoolean({name: 'vodyanitsa_microphone_summons'}),
-            ]),
+            maxStacks: A4LeadVocalStacks,
+            condition: new ConditionAscensionChar({ascension: 4}),
         }),
     ],
     multipliers: [
@@ -396,9 +410,8 @@ export const Vodyanitsa = new DbObjectChar({
             capValue: new ValueTable([A4HydroCryoFlatCap]),
             condition: new ConditionAnd([
                 new ConditionAscensionChar({ascension: 4}),
-                new ConditionBoolean({name: 'vodyanitsa_microphone_summons'}),
-                new ConditionStacks({name: 'vodyanitsa_solo', maxStacks: A4SoloStacks}),
-                new ConditionNot([localMutantState()]),
+                new ConditionStacks({name: 'vodyanitsa_lead_vocal', maxStacks: A4LeadVocalStacks}),
+                new ConditionNot([localWanderingVortexState()]),
             ]),
             target: hydroCryoDirectTarget(),
         }),
@@ -410,8 +423,8 @@ export const Vodyanitsa = new DbObjectChar({
             capValue: new ValueTable([A4StellarSwirlFlatCap]),
             condition: new ConditionAnd([
                 new ConditionAscensionChar({ascension: 4}),
-                new ConditionStacks({name: 'vodyanitsa_solo', maxStacks: A4SoloStacks}),
-                localMutantState(),
+                new ConditionStacks({name: 'vodyanitsa_lead_vocal', maxStacks: A4LeadVocalStacks}),
+                localWanderingVortexState(),
             ]),
             target: stellarSwirlFlatTarget(),
         }),
@@ -425,8 +438,8 @@ export const Vodyanitsa = new DbObjectChar({
                 new ConditionBoolean({
                     name: 'vodyanitsa_c1_healing',
                     serializeId: 4,
-                    title: 'talent_name.vodyanitsa_c1',
-                    description: 'talent_descr.vodyanitsa_c1',
+                    title: 'talent_name.vodyanitsa_waters_in_full_splendor',
+                    description: 'talent_descr.vodyanitsa_waters_in_full_splendor',
                     rotation: 'self',
                 }),
             ],
@@ -434,12 +447,11 @@ export const Vodyanitsa = new DbObjectChar({
         {
             conditions: [
                 new ConditionBoolean({
-                    name: 'vodyanitsa_c2_microphone_hit',
+                    name: 'vodyanitsa_c2_horn_hit',
                     serializeId: 5,
-                    title: 'talent_name.vodyanitsa_c2',
-                    description: 'talent_descr.vodyanitsa_c2',
+                    title: 'talent_name.vodyanitsa_echoes_that_pierce_the_snow',
+                    description: 'talent_descr.vodyanitsa_echoes_that_pierce_the_snow',
                     rotation: 'self',
-                    condition: new ConditionBoolean({name: 'vodyanitsa_microphone_summons'}),
                 }),
                 new Condition({
                     isHidden: true,
@@ -448,19 +460,18 @@ export const Vodyanitsa = new DbObjectChar({
                         crit_dmg_cryo: C2HydroCryoCritDmg,
                     },
                     condition: new ConditionAnd([
-                        new ConditionBoolean({name: 'vodyanitsa_microphone_summons'}),
-                        new ConditionBoolean({name: 'vodyanitsa_c2_microphone_hit'}),
-                        new ConditionNot([localMutantState()]),
+                        new ConditionBoolean({name: 'vodyanitsa_c2_horn_hit'}),
+                        new ConditionNot([localWanderingVortexState()]),
                     ]),
                 }),
                 new Condition({
                     isHidden: true,
                     stats: {
-                        dmg_stellarswirl: C2StellarSwirlDmg,
+                        crit_dmg_stellarswirl: C2StellarSwirlCritDmg,
                     },
                     condition: new ConditionAnd([
-                        new ConditionBoolean({name: 'vodyanitsa_c2_microphone_hit'}),
-                        localMutantState(),
+                        new ConditionBoolean({name: 'vodyanitsa_c2_horn_hit'}),
+                        localWanderingVortexState(),
                     ]),
                 }),
             ],
@@ -479,18 +490,18 @@ export const Vodyanitsa = new DbObjectChar({
                 new ConditionBoolean({
                     name: 'vodyanitsa_c4_target_below_40',
                     serializeId: 6,
-                    title: 'talent_name.vodyanitsa_c4',
-                    description: 'talent_descr.vodyanitsa_c4_1',
+                    title: 'talent_name.vodyanitsa_melancholic_voice_upon_the_gentle_waters',
+                    description: 'talent_descr.vodyanitsa_melancholic_voice_upon_the_gentle_waters_1',
                     rotation: 'self',
                     stats: {
-                        healing: C4HealingBonus,
+                        text_percent_healing: C4HealingIncrease,
                     },
                 }),
                 new ConditionStacks({
                     name: 'vodyanitsa_c4_hp_stacks',
                     serializeId: 7,
-                    title: 'talent_name.vodyanitsa_c4',
-                    description: 'talent_descr.vodyanitsa_c4_2',
+                    title: 'talent_name.vodyanitsa_melancholic_voice_upon_the_gentle_waters',
+                    description: 'talent_descr.vodyanitsa_melancholic_voice_upon_the_gentle_waters_2',
                     rotation: 'self',
                     maxStacks: C4HpStacks,
                     stats: [
@@ -511,14 +522,14 @@ export const Vodyanitsa = new DbObjectChar({
         {
             conditions: [
                 new ConditionStatic({
-                    title: 'talent_name.vodyanitsa_c6',
-                    description: 'talent_descr.vodyanitsa_c6',
+                    title: 'talent_name.vodyanitsa_neverending_song_of_revelry',
+                    description: 'talent_descr.vodyanitsa_neverending_song_of_revelry',
                     stats: {
                         dmg_stellarswirl_special: C6StellarSwirlElevation,
                         dmg_hydro: C6HydroCryoDmg,
                         dmg_cryo: C6HydroCryoDmg,
                     },
-                    condition: new ConditionBoolean({name: 'vodyanitsa_microphone_summons'}),
+                    condition: new ConditionBoolean({name: 'vodyanitsa_song_of_ages_past'}),
                 }),
             ],
         },
@@ -529,6 +540,12 @@ export const Vodyanitsa = new DbObjectChar({
             settings: ['char_skill_elemental'],
         },
         conditions: [
+            new ConditionBoolean({
+                // Retain the removed control's ID so existing builds still load.
+                name: 'party.vodyanitsa_off_field',
+                serializeId: 10,
+                isHidden: true,
+            }),
             new ConditionNumber({
                 name: 'vodyanitsa_hp_total',
                 serializeId: 1,
@@ -542,53 +559,60 @@ export const Vodyanitsa = new DbObjectChar({
                 title: 'talent_name.stats_level_skill',
                 partySetting: 'char_skill_elemental',
             }),
+            new ConditionBoolean({
+                name: 'party.vodyanitsa_constellation_3',
+                serializeId: 9,
+                title: 'talent_name.vodyanitsa_song_lingering_on_a_spring_morning',
+                description: 'talent_descr.char_constellation_skill',
+                info: {constellation: 3},
+                settings: {
+                    vodyanitsa_char_skill_elemental_bonus: 3,
+                },
+            }),
             new ConditionBooleanLevels({
-                name: 'party.vodyanitsa_microphone_summons',
+                name: 'party.vodyanitsa_song_of_ages_past',
                 serializeId: 3,
-                title: 'talent_name.vodyanitsa_microphone_summons',
-                description: 'talent_descr.vodyanitsa_microphone_summons',
+                title: 'talent_name.vodyanitsa_song_of_ages_past',
+                description: 'talent_descr.vodyanitsa_song_of_ages_past',
                 levelSetting: 'vodyanitsa_char_skill_elemental',
                 rotation: 'party',
                 stats: skillResistanceStats(),
             }),
             new ConditionBoolean({
-                name: 'party.vodyanitsa_mutant_anemogranum',
+                name: 'party.vodyanitsa_wandering_vortex',
                 serializeId: 4,
-                title: 'talent_name.vodyanitsa_ascension_talent_1',
-                description: 'talent_descr.vodyanitsa_ascension_talent_1',
+                title: 'talent_name.vodyanitsa_the_last_djeguako_songstress',
+                description: 'talent_descr.vodyanitsa_the_last_djeguako_songstress',
                 info: {ascension: 1},
                 rotation: 'party',
                 stats: {
                     enemy_res_anemo: A1AnemoResistance,
                 },
-                condition: new ConditionBoolean({name: 'party.vodyanitsa_microphone_summons'}),
             }),
             new ConditionStacks({
-                name: 'party.vodyanitsa_concerto',
+                name: 'party.vodyanitsa_chorus',
                 serializeId: 5,
                 title: 'talent_name.n11400002',
                 description: 'talent_descr.n11400002',
                 info: {ascension: 4},
                 rotation: 'party',
-                maxStacks: A4ConcertoStacks,
-                condition: new ConditionBoolean({name: 'party.vodyanitsa_microphone_summons'}),
+                maxStacks: A4ChorusStacks,
             }),
             new ConditionBoolean({
                 name: 'party.vodyanitsa_c1_healing',
                 serializeId: 6,
-                title: 'talent_name.vodyanitsa_c1',
-                description: 'talent_descr.vodyanitsa_c1',
+                title: 'talent_name.vodyanitsa_waters_in_full_splendor',
+                description: 'talent_descr.vodyanitsa_waters_in_full_splendor',
                 info: {constellation: 1},
                 rotation: 'party',
             }),
             new ConditionBoolean({
-                name: 'party.vodyanitsa_c2_microphone_hit',
+                name: 'party.vodyanitsa_c2_horn_hit',
                 serializeId: 7,
-                title: 'talent_name.vodyanitsa_c2',
-                description: 'talent_descr.vodyanitsa_c2',
+                title: 'talent_name.vodyanitsa_echoes_that_pierce_the_snow',
+                description: 'talent_descr.vodyanitsa_echoes_that_pierce_the_snow',
                 info: {constellation: 2},
                 rotation: 'party',
-                condition: new ConditionBoolean({name: 'party.vodyanitsa_microphone_summons'}),
             }),
             new Condition({
                 isHidden: true,
@@ -597,34 +621,39 @@ export const Vodyanitsa = new DbObjectChar({
                     crit_dmg_cryo: C2HydroCryoCritDmg,
                 },
                 condition: new ConditionAnd([
-                    new ConditionBoolean({name: 'party.vodyanitsa_microphone_summons'}),
-                    new ConditionBoolean({name: 'party.vodyanitsa_c2_microphone_hit'}),
-                    new ConditionNot([partyMutantState()]),
+                    new ConditionBoolean({name: 'party.vodyanitsa_c2_horn_hit'}),
+                    new ConditionNot([partyWanderingVortexState()]),
                 ]),
             }),
             new Condition({
                 isHidden: true,
                 stats: {
-                    dmg_stellarswirl: C2StellarSwirlDmg,
+                    crit_dmg_stellarswirl: C2StellarSwirlCritDmg,
                 },
                 condition: new ConditionAnd([
-                    new ConditionBoolean({name: 'party.vodyanitsa_c2_microphone_hit'}),
-                    partyMutantState(),
+                    new ConditionBoolean({name: 'party.vodyanitsa_c2_horn_hit'}),
+                    partyWanderingVortexState(),
                 ]),
             }),
             new ConditionBoolean({
-                name: 'party.vodyanitsa_c6_microphone_summons',
+                name: 'party.vodyanitsa_c6_song_of_ages_past',
                 serializeId: 8,
-                title: 'talent_name.vodyanitsa_c6',
-                description: 'talent_descr.vodyanitsa_c6',
+                title: 'talent_name.vodyanitsa_neverending_song_of_revelry',
+                description: 'talent_descr.vodyanitsa_neverending_song_of_revelry',
                 info: {constellation: 6},
                 rotation: 'party',
+            }),
+            new Condition({
+                isHidden: true,
                 stats: {
                     dmg_stellarswirl_special: C6StellarSwirlElevation,
                     dmg_hydro: C6HydroCryoDmg,
                     dmg_cryo: C6HydroCryoDmg,
                 },
-                condition: new ConditionBoolean({name: 'party.vodyanitsa_microphone_summons'}),
+                condition: new ConditionAnd([
+                    new ConditionBoolean({name: 'party.vodyanitsa_c6_song_of_ages_past'}),
+                    new ConditionBoolean({name: 'party.vodyanitsa_song_of_ages_past'}),
+                ]),
             }),
         ],
         multipliers: [
@@ -635,12 +664,11 @@ export const Vodyanitsa = new DbObjectChar({
                 exceedStatValue: A4HpThreshold,
                 capValue: new ValueTable([A4HydroCryoFlatCap]),
                 condition: new ConditionAnd([
-                    new ConditionBoolean({name: 'party.vodyanitsa_microphone_summons'}),
                     new ConditionStacks({
-                        name: 'party.vodyanitsa_concerto',
-                        maxStacks: A4ConcertoStacks,
+                        name: 'party.vodyanitsa_chorus',
+                        maxStacks: A4ChorusStacks,
                     }),
-                    new ConditionNot([partyMutantState()]),
+                    new ConditionNot([partyWanderingVortexState()]),
                 ]),
                 target: hydroCryoDirectTarget(),
             }),
@@ -652,10 +680,10 @@ export const Vodyanitsa = new DbObjectChar({
                 capValue: new ValueTable([A4StellarSwirlFlatCap]),
                 condition: new ConditionAnd([
                     new ConditionStacks({
-                        name: 'party.vodyanitsa_concerto',
-                        maxStacks: A4ConcertoStacks,
+                        name: 'party.vodyanitsa_chorus',
+                        maxStacks: A4ChorusStacks,
                     }),
-                    partyMutantState(),
+                    partyWanderingVortexState(),
                 ]),
                 target: stellarSwirlFlatTarget(),
             }),

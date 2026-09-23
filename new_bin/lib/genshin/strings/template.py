@@ -145,7 +145,24 @@ class Template:
     def apply_names(self, string):
         result = string
         for name in self.names:
-            result = re.sub(r'(?:^|([^\{])\b)' + re.escape(name) + r'(?:\b([^\}])|$)', '\\1name{%s}\\2' % name, result)
+            pattern = re.compile(
+                r'(?:^|([^\{])\b)' + re.escape(name) + r'(?:\b([^\}])|$)'
+            )
+            protected = [
+                (match.start(), match.end())
+                for match in re.finditer(r'\{[^{}]*\}', result)
+            ]
+
+            def repl(match, name=name, protected=protected):
+                start = match.start() + (1 if match.group(1) else 0)
+                for span_start, span_end in protected:
+                    if span_start <= start < span_end:
+                        return match.group(0)
+                prefix = match.group(1) or ''
+                suffix = match.group(2) or ''
+                return f'{prefix}name{{{name}}}{suffix}'
+
+            result = pattern.sub(repl, result)
         return result
 
     def apply_keywords(self, string):

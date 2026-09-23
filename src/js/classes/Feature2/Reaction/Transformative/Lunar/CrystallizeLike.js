@@ -7,7 +7,6 @@ import { FeatureReactionLunarCrystallize } from "./Crystallize";
 
 export class FeatureReactionLunarCrystallizeLike extends FeatureReactionLunarCrystallize {
     constructor(params) {
-        params.icon = 'lunarcrystallize';
         params.damageType ||= 'lunardirect';
         params.cannotReact = true;
         params.tags = params.tags || [];

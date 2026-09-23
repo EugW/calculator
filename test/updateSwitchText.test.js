@@ -23,15 +23,14 @@ const weaponKeys = {
         'HereticsMoltenBlade',
         'Emberwell',
         'WhitelakeFrostfeather',
-        'ExaiphanesBlade',
-        'SpikedStake',
-        'Fajian',
-        'Samosvist',
+        'NewBough',
+        'SilverLight',
+        'BeyondTheChrysalis',
     ],
     claymore: ['ForgedByTheGoldenMelody', 'BladeOfAtonement'],
     polearm: ['Frostbreath', 'SongOfTheVigil'],
-    catalyst: ['ClashOfKings', 'EchoesOfTheHeart', 'FrostScepter', 'Bludnye'],
-    bow: ['JadeVista', 'CovenantOfFrostAndSnow', 'Windtalker'],
+    catalyst: ['ClashOfKings', 'EchoesOfTheHeart', 'WintersHeavyHeart', 'HymnofTheMaelstrom'],
+    bow: ['JadeVista', 'CovenantOfFrostAndSnow', 'BreezeborneRefrain'],
 };
 
 function localized(strings, key) {
@@ -129,7 +128,7 @@ test('new and updated artifact switch text is distinct in self and party panels'
 
 test('new party weapon controls do not repeat their source card text', () => {
     const partyConditions = Condition.unwrap(WeaponBuffs.getConditions()).filter(
-        (condition) => /^weapon_other\.(weapon_bludnye|weapon_windtalker)/
+        (condition) => /^weapon_other\.(weapon_hymn_of_the_maelstrom|weapon_breezeborne_refrain)/
             .test(condition.getName() || ''),
     );
     expectPanelTextToBeDistinct('weapons:party', partyConditions);

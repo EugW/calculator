@@ -10,6 +10,7 @@ data_dir = str(get_excel_dir()) + os.sep
 out_dir  = os.path.join(dirname, '../../src/js/db/generated/')
 
 weapon_names = {
+    11101: 'DullBlade',
     11301: 'CoolSteel',
     11302: 'HarbingerofDawn',
     11303: 'TravelersHandySword',
@@ -69,12 +70,13 @@ weapon_names = {
     11434: "MoonweaversDawn",
     11435: "HereticsMoltenBlade",
     11436: "Emberwell",
-    11437: "SpikedStake",
-    11438: "Fajian",
+    11437: "NewBough",
+    11438: "SilverLight",
     11520: "WhitelakeFrostfeather",
     11521: "ExaiphanesBlade",
-    11522: "Samosvist",
+    11522: "BeyondTheChrysalis",
     11509: "MistsplitterReforged",
+    12101: 'WasterGreatsword',
     12301: "FerrousShadow",
     12302: "BloodtaintedGreatsword",
     12303: "WhiteIronGreatsword",
@@ -123,6 +125,7 @@ weapon_names = {
     12433: 'MasterKey',
     12435: 'ForgedByTheGoldenMelody',
     12436: 'BladeOfAtonement',
+    13101: 'BeginnersProtector',
     13301: "WhiteTassel",
     13302: "Halberd",
     13303: "BlackTassel",
@@ -167,6 +170,7 @@ weapon_names = {
     13434: 'SacrificersStaff',
     13435: 'Frostbreath',
     13436: 'SongOfTheVigil',
+    14101: 'ApprenticesNotes',
     14301: "MagicGuide",
     14302: "ThrillingTalesofDragonSlayers",
     14303: "OtherworldlyStory",
@@ -222,8 +226,9 @@ weapon_names = {
     14434: 'DawningFrost',
     14435: 'ClashOfKings',
     14436: 'EchoesOfTheHeart',
-    14437: 'FrostScepter',
-    14524: 'Bludnye',
+    14437: 'WintersHeavyHeart',
+    14524: 'HymnofTheMaelstrom',
+    15101: 'HuntersBow',
     15301: "RavenBow",
     15302: "SharpshootersOath",
     15303: "RecurveBow",
@@ -275,7 +280,7 @@ weapon_names = {
     15434: "RainbowSerpentsRainBow",
     15435: "JadeVista",
     15436: "CovenantOfFrostAndSnow",
-    15437: "Windtalker",
+    15437: "BreezeborneRefrain",
     # 20001: "",
 }
 
@@ -367,9 +372,13 @@ def parse_weapons():
     out.write('import { StatTableAscensionScale } from "../../classes/StatTable/Ascension/Scale";\n')
     out.write('import { weaponStatScales } from "./WeaponScale";\n\n')
 
-    for item in json.load(file):
+    items = sorted(
+        json.load(file),
+        key=lambda item: int(item.get('rankLevel', 0)) == 1,
+    )
+    for item in items:
         rarity = int(item['rankLevel'])
-        if rarity < 3: continue
+        if rarity not in (1, 3, 4, 5): continue
 
         # print('%s: "%s",' % (item['Id'], lang.get(str(item['NameTextMapHash']))))
 

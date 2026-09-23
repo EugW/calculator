@@ -5,6 +5,7 @@ import { ReactSortable } from "react-sortablejs";
 import "../../../../css/Components/Tab/Rotation/List.css"
 
 import { GroupBox } from "../Inputs/GroupBox";
+import { FeatureName } from "../FeatureName";
 import { Lang } from "../../Lang";
 import { MAX_DEPTH, Rotation } from "../../../classes/Rotation";
 import { Stats } from "../../../classes/Stats";
@@ -221,7 +222,9 @@ function RotationListFeature(props) {
                     feature={props.feature}
                 />
                 <div className="feature-line">
-                    <span className="feature-name">{parse(lang.get('feature_' + props.item.feature))}</span>
+                    <span className="feature-name">
+                        <FeatureName text={lang.get('feature_' + props.item.feature)} result={props.feature.result} />
+                    </span>
                     <span className="feature-category">{lang.get('feature_rotation.' + parts[0])}</span>
                 </div>
             </div>
@@ -314,7 +317,7 @@ function RotationListFeatureInvalid(props) {
                     feature={props.feature}
                 />
                 <div className="feature-line">
-                    <span className="feature-name">{lang.get('feature_' + props.item.feature)}</span>
+                    <span className="feature-name"><FeatureName text={lang.get('feature_' + props.item.feature)} /></span>
                     <span className="feature-category">{lang.get('feature_rotation.' + parts[0])}</span>
                 </div>
             </div>

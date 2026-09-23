@@ -57,6 +57,9 @@ test("Stellar-Conduct direct damage follows its direct formula and ignores ordin
     expect(result.normal).toBeCloseTo(expected, 5);
     expect(result.crit).toBeCloseTo(expected * 2.2, 5);
     expect(result.isReacted).toBe(false);
+    expect(result.element).toBe("cryo");
+    expect(result.isDamage).toBe(true);
+    expect(result.nameStyle).toBe("stellar-conduct-cryo");
 });
 
 test("Stellar-Conduct flat direct bonuses are added before elevation", () => {

@@ -31,6 +31,32 @@ export class FeatureDamage extends Feature2 {
         this.allowInfusion = params.allowInfusion;
     }
 
+    isDamage() {
+        return true;
+    }
+
+    getNameStyle(data) {
+        if (this.tags.includes('lunarcharged_reaction')) {
+            return 'lunar-charged';
+        }
+        if (this.tags.includes('lunarbloom_reaction')) {
+            return 'lunar-bloom';
+        }
+        if (this.tags.includes('lunarcrystallize_reaction')) {
+            return 'lunar-crystallize';
+        }
+
+        let element = this.getElement(data);
+        if (this.damageType == 'stellarconduct' && ['cryo', 'electro'].includes(element)) {
+            return 'stellar-conduct-' + element;
+        }
+        if (this.damageType == 'stellarswirl' && ['anemo', 'cryo'].includes(element)) {
+            return 'stellar-swirl-' + element;
+        }
+
+        return 'element-' + element;
+    }
+
     /**
      * @returns {boolean}
      */
@@ -182,8 +208,11 @@ export class FeatureDamage extends Feature2 {
                     ]),
                     new CSubtract([
                         new CConst({value: 1}),
-                        new CSum([
-                            ...this.getStatsDefIgnore(data).map((stat) => { return makeStatItem(stat, data.stats); })
+                        new CMin([
+                            new CSum([
+                                ...this.getStatsDefIgnore(data).map((stat) => { return makeStatItem(stat, data.stats); })
+                            ]),
+                            new CConst({value: 1, comment: 'def_ignore_cap'}),
                         ]),
                     ]),
                 ]),

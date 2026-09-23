@@ -6,6 +6,7 @@ import "../../../css/ui/Tooltip/Artifact.css"
 
 import { Lang } from '../Lang';
 import { Modal } from '../Modal';
+import { FeatureName } from './FeatureName';
 import { waitForCondition } from '../../Utils';
 import { Stats } from '../../classes/Stats';
 
@@ -149,7 +150,9 @@ class ArtifactTooltipWindow extends React.PureComponent {
             featureBlock = (
                 <table className="gi-tooltip-artifact-feature">
                     <tbody>
-                        <tr><th colSpan="4">{lang.get('feature_'+ this.state.feature)}</th></tr>
+                        <tr><th colSpan="4">
+                            <FeatureName text={lang.get('feature_'+ this.state.feature)} result={feat2 || feat1} />
+                        </th></tr>
                         <tr></tr>
                         <tr>
                             <td>{lang.get('stat_view.normal')}</td>

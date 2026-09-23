@@ -1,6 +1,5 @@
 **/node_modules/*
-/dimrepo/
-/dimrepo_rel/
+/dimrepo-rel/
 /dimrepo-beta/
 /dist/*
 /v8-compile-cache*

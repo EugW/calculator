@@ -7,6 +7,7 @@ data_dir = str(get_excel_dir()) + os.sep
 
 # Known weapon names from weapon_stat_scales.py
 weapon_names = {
+    11101: 'DullBlade',
     11301: 'CoolSteel',
     11302: 'HarbingerofDawn',
     11303: 'TravelersHandySword',
@@ -41,8 +42,8 @@ weapon_names = {
     11432: 'CalamityOfEshu',
     11435: 'HereticsMoltenBlade',
     11436: 'Emberwell',
-    11437: 'SpikedStake',
-    11438: 'Fajian',
+    11437: 'NewBough',
+    11438: 'SilverLight',
     11501: "AquilaFavonia",
     11502: "SkywardBlade",
     11503: "FreedomSworn",
@@ -58,8 +59,9 @@ weapon_names = {
     11517: "Azurelight",
     11520: "WhitelakeFrostfeather",
     11521: "ExaiphanesBlade",
-    11522: "Samosvist",
+    11522: "BeyondTheChrysalis",
     11509: "MistsplitterReforged",
+    12101: 'WasterGreatsword',
     12301: "FerrousShadow",
     12302: "BloodtaintedGreatsword",
     12303: "WhiteIronGreatsword",
@@ -102,6 +104,7 @@ weapon_names = {
     12514: 'AThousandBlazingSuns',
     12515: 'GestOfTheMightyWolf',
     12516: 'ATeaspoonOfTranscendence',
+    13101: 'BeginnersProtector',
     13301: "WhiteTassel",
     13302: "Halberd",
     13303: "BlackTassel",
@@ -139,6 +142,7 @@ weapon_names = {
     13513: 'LumidouceElegy',
     13514: 'SymphonistofScents',
     13515: 'FracturedHalo',
+    14101: 'ApprenticesNotes',
     14301: "MagicGuide",
     14302: "ThrillingTalesofDragonSlayers",
     14303: "OtherworldlyStory",
@@ -168,7 +172,7 @@ weapon_names = {
     14431: 'RingOfCeiba',
     14435: 'ClashOfKings',
     14436: 'EchoesOfTheHeart',
-    14437: 'FrostScepter',
+    14437: 'WintersHeavyHeart',
     14501: "SkywardAtlas",
     14502: "LostPrayer",
     14504: "MemoryofDust",
@@ -184,7 +188,8 @@ weapon_names = {
     14517: 'StarcallersWatch',
     14518: 'MorningHibernation',
     14519: 'VividNotions',
-    14524: 'Bludnye',
+    14524: 'HymnofTheMaelstrom',
+    15101: 'HuntersBow',
     15301: "RavenBow",
     15302: "SharpshootersOath",
     15303: "RecurveBow",
@@ -218,7 +223,7 @@ weapon_names = {
     15432: 'SequenceofSolitude',
     15435: 'JadeVista',
     15436: 'CovenantOfFrostAndSnow',
-    15437: 'Windtalker',
+    15437: 'BreezeborneRefrain',
     15501: "SkywardHarp",
     15502: "AmosBow",
     15503: "ElegyfortheEnd",
@@ -250,7 +255,7 @@ def find_missing_weapons():
 
     for item in json.load(file):
         rarity = int(item['rankLevel'])
-        if rarity < 3:
+        if rarity not in (1, 3, 4, 5):
             continue
 
         weapon_id = item['id']

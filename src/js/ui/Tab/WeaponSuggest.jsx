@@ -311,12 +311,12 @@ export class WeaponSuggestView extends React.Component {
                     continue;
                 }
 
-                for (let refine = 1; refine <= 5; ++refine) {
+                for (let refine = 1; refine <= weapon.getMaxRefinement(); ++refine) {
                     if (settings.refine[refine]) {
                         items.push({
                             scenarioId: scenarioId,
-                            level: 90,
-                            ascension: 6,
+                            level: weapon.getMaxLevel(),
+                            ascension: weapon.getMaxAscension(),
                             weaponId: weapon.getId(),
                             suggestName: settings.sourceName,
                             isCustom: !!settings.isCustom,

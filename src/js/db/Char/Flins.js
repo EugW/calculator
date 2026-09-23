@@ -443,15 +443,16 @@ export const Flins = new DbObjectChar({
             },
         }),
         new ConditionCalcMoonsign(),
-        new ConditionBoolean({
+        new ConditionBooleanLevels({
             name: 'flins_symphony_of_winter',
             serializeId: 1,
             title: 'talent_name.flins_symphony_of_winter',
             description: 'talent_descr.flins_symphony_of_winter',
             info: {ascension: 1},
-            stats: {
-                'dmg_reaction_lunarcharged': A1LunarChargedDmg,
-            },
+            levelSetting: 'party_moonsign',
+            stats: [
+                new StatTable('dmg_reaction_lunarcharged', [0, A1LunarChargedDmg]),
+            ],
             condition: new ConditionAscensionChar({ascension: 1}),
         }),
         new ConditionStatic({
@@ -553,6 +554,7 @@ export const Flins = new DbObjectChar({
         },
         conditions: [
             new Condition({settings: {allowed_lunarcharged: 1}}),
+            new ConditionCalcMoonsign(),
             new ConditionNumber({
                 name: 'flins_atk_total',
                 title: 'talent_name.stats_total_atk',
@@ -569,27 +571,23 @@ export const Flins = new DbObjectChar({
                     text_percent_max: PassiveLunarScaleCap,
                 },
             }),
-            new ConditionBoolean({
-                name: 'party.flins_symphony_of_winter',
+            // Legacy placeholder for removed party A1 (self-only passive).
+            // Keeps old serializeId 2 deserializable without applying any buff.
+            new ConditionStatic({
                 serializeId: 2,
-                title: 'talent_name.flins_symphony_of_winter',
-                description: 'talent_descr.flins_symphony_of_winter',
-                info: {ascension: 1},
-                rotation: 'party',
-                stats: {
-                    'dmg_reaction_lunarcharged': A1LunarChargedDmg,
-                },
+                isHidden: true,
             }),
-            new ConditionBoolean({
+            new ConditionBooleanLevels({
                 name: 'party.flins_songs_and_dances_of_death',
                 serializeId: 3,
                 title: 'talent_name.flins_songs_and_dances_of_death',
                 description: 'talent_descr.flins_songs_and_dances_of_death',
                 info: {constellation: 6},
                 rotation: 'party',
-                stats: {
-                    'dmg_lunarcharged_special': C6PartyElevate,
-                },
+                levelSetting: 'party_moonsign',
+                stats: [
+                    new StatTable('dmg_lunarcharged_special', [0, C6PartyElevate]),
+                ],
             }),
         ],
         postEffects: [

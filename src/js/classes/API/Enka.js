@@ -258,9 +258,9 @@ function processChar(data) {
                 }
 
                 set.setWeaponLevels({
-                    level: Math.min(90, Math.max(1, weaponData.weapon.level || 1)),
-                    ascension: Math.min(6, Math.max(0, weaponData.weapon.promoteLevel || 0)),
-                    refine: Math.min(5, Math.max(1, refine)),
+                    level: Math.min(weapon.getMaxLevel(), Math.max(1, weaponData.weapon.level || 1)),
+                    ascension: Math.min(weapon.getMaxAscension(), Math.max(0, weaponData.weapon.promoteLevel || 0)),
+                    refine: Math.min(weapon.getMaxRefinement(), Math.max(1, refine)),
                 });
             }
         }

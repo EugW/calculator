@@ -42,6 +42,7 @@ import { GestOfTheMightyWolf } from "./Claymore/GestOfTheMightyWolf";
 import { ATeaspoonOfTranscendence } from "./Claymore/ATeaspoonOfTranscendence";
 import { ForgedByTheGoldenMelody } from "./Claymore/ForgedByTheGoldenMelody";
 import { BladeOfAtonement } from "./Claymore/BladeOfAtonement";
+import { WasterGreatsword } from "./Claymore/WasterGreatsword";
 
 export const Claymore = new DbObjectListSerializeStats({
     Bell: Bell, // 71
@@ -87,4 +88,5 @@ export const Claymore = new DbObjectListSerializeStats({
     ATeaspoonOfTranscendence: ATeaspoonOfTranscendence, // 245
     ForgedByTheGoldenMelody: ForgedByTheGoldenMelody, // 250
     BladeOfAtonement: BladeOfAtonement, // 251
+    WasterGreatsword: WasterGreatsword, // 265
 });

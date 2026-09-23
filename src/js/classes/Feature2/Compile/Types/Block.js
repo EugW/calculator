@@ -592,7 +592,32 @@ export class CStatSet extends CSum {
 }
 
 export class CValueCap extends CSum {
+    constructor(items, params) {
+        params = Object.assign({}, params);
+        const value = params.value;
+        delete params.value;
+        super(items, params);
+        // Keep the cap expression in a mutable child array so walkReplace can
+        // fold its root and liveness traversal can see all of its stat reads.
+        this.valueItems = [value];
+    }
+
     getType() {return 'value_cap';}
+
+    get value() {
+        return this.valueItems[0];
+    }
+
+    set value(value) {
+        this.valueItems[0] = value;
+    }
+
+    treeBlockFields() {
+        return [
+            ...super.treeBlockFields(),
+            this.valueItems,
+        ];
+    }
 
     /**
      * @param {Object} opts Compilation options

@@ -9,7 +9,7 @@ Select a checkout with command-line options:
 
 ```powershell
 python bin/import/artifact_itemids.py --data-root C:\path\to\genshin-data `
-  --expected-data-revision 535bae69dc326195e90273c5720fa8c1bf3de721 --recent
+  --expected-data-revision 8ba944addd6de9adad88d7dd9cc951d780905b36 --recent
 ```
 
 Or set the equivalent environment variables before invoking a `new_bin`
@@ -17,7 +17,7 @@ script:
 
 ```powershell
 $env:GENSHIN_DATA_ROOT = 'C:\path\to\genshin-data'
-$env:GENSHIN_DATA_REVISION = '535bae69dc326195e90273c5720fa8c1bf3de721'
+$env:GENSHIN_DATA_REVISION = '8ba944addd6de9adad88d7dd9cc951d780905b36'
 python new_bin/import_artifacts.py
 ```
 

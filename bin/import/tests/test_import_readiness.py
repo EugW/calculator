@@ -63,7 +63,14 @@ class TemporaryDataCheckout:
         (self.root / 'ExcelBinOutput').mkdir()
         (self.root / 'TextMap').mkdir()
         self.write_text_map('TextMapEN.json', {'1': 'base', '2': 'same'})
-        self.write_text_map('TextMap_MediumEN.json', {'2': 'same', '3': 'medium'})
+        self.write_text_map(
+            'TextMap_MediumEN.json',
+            {
+                '2': 'same',
+                '3': 'medium',
+                '4': 'before{NON_BREAK_SPACE}- after',
+            },
+        )
         self._git('init', '--quiet')
         self._git('config', 'user.email', 'import-tests@example.invalid')
         self._git('config', 'user.name', 'Importer Tests')
@@ -104,7 +111,12 @@ class SourceConfigTests(unittest.TestCase):
         self.assertEqual(source.revision, self.checkout.revision)
         self.assertEqual(
             source_config.load_text_map('EN', source=source),
-            {'1': 'base', '2': 'same', '3': 'medium'},
+            {
+                '1': 'base',
+                '2': 'same',
+                '3': 'medium',
+                '4': 'before - after',
+            },
         )
 
     def test_wrong_revision_is_rejected(self):
@@ -196,13 +208,18 @@ class PassiveRoutingTests(unittest.TestCase):
 
 class StableGenerationMappingTests(unittest.TestCase):
     EXPECTED_WEAPONS = {
+        11101: 'DullBlade',
+        12101: 'WasterGreatsword',
+        13101: 'BeginnersProtector',
+        14101: 'ApprenticesNotes',
+        15101: 'HuntersBow',
         11435: 'HereticsMoltenBlade',
         11436: 'Emberwell',
-        11437: 'SpikedStake',
-        11438: 'Fajian',
+        11437: 'NewBough',
+        11438: 'SilverLight',
         11520: 'WhitelakeFrostfeather',
         11521: 'ExaiphanesBlade',
-        11522: 'Samosvist',
+        11522: 'BeyondTheChrysalis',
         12435: 'ForgedByTheGoldenMelody',
         12436: 'BladeOfAtonement',
         12516: 'ATeaspoonOfTranscendence',
@@ -210,16 +227,16 @@ class StableGenerationMappingTests(unittest.TestCase):
         13436: 'SongOfTheVigil',
         14435: 'ClashOfKings',
         14436: 'EchoesOfTheHeart',
-        14437: 'FrostScepter',
-        14524: 'Bludnye',
+        14437: 'WintersHeavyHeart',
+        14524: 'HymnofTheMaelstrom',
         15435: 'JadeVista',
         15436: 'CovenantOfFrostAndSnow',
-        15437: 'Windtalker',
+        15437: 'BreezeborneRefrain',
     }
 
     def test_stable_character_mappings(self):
         character_ids = literal_assignment(LEGACY_IMPORT_DIR / 'static.py', 'char_ids')
-        self.assertEqual(character_ids[505], 'TravelerCryo')
+        self.assertNotIn(505, character_ids)
         self.assertEqual(character_ids[705], 'TravelerCryo')
         self.assertEqual(character_ids[10000148], 'Alyosha')
         self.assertEqual(character_ids[10000150], 'Odette')
@@ -250,18 +267,28 @@ class CharacterGenerationTests(unittest.TestCase):
             },
         )
 
-    def test_current_characters_use_canonical_keys_and_keep_missing_link_manual(self):
+    def test_current_characters_use_canonical_keys(self):
         rows = (
             csv_rows(self.GENERATED / 'char_skills.csv')
             + csv_rows(self.GENERATED / 'char_talents.csv')
         )
         keys = {(row['category'], row['name']) for row in rows}
-        self.assertNotIn(('talent_name', 'n11430001'), keys)
-        self.assertNotIn(('talent_descr', 'n11430001'), keys)
+        # The Vesna Armed-for-Action link is published upstream since 7.0.51
+        # and must stay generated rather than manual.
+        self.assertIn(('talent_name', 'n11430001'), keys)
+        self.assertIn(('talent_descr', 'n11430001'), keys)
         self.assertIn(('talent_name', 'n11400001'), keys)
         self.assertIn(('talent_descr', 'n11400002'), keys)
-        self.assertIn(('talent_name', 'vesna_c1'), keys)
-        self.assertIn(('talent_descr', 'vodyanitsa_c6'), keys)
+        self.assertIn(('talent_name', 'vesna_winters_farewell_feast'), keys)
+        self.assertIn(
+            ('talent_descr', 'vodyanitsa_neverending_song_of_revelry'),
+            keys,
+        )
+        versioned = set()
+        for relative in ('7.1/vesna.csv', '7.1/vodyanitsa.csv'):
+            for row in csv_rows(PROJECT_ROOT / 'data' / 'strings' / relative):
+                versioned.add((row['category'], row['name']))
+        self.assertNotIn(('talent_name', 'n11430001'), versioned)
 
     def test_generation_exports_element_specific_traveler_names(self):
         rows = csv_rows(self.GENERATED / 'char_names.csv')

@@ -6,10 +6,14 @@ import { StorageItemChar } from "./StorageItem/Char";
 import { StorageItemRotation } from "./StorageItem/Rotation";
 import { StorageItemSettings } from "./StorageItem/Settings";
 import { Syncronize } from "./StorageItem/Syncronize";
+import { migrateArtifactPersistence } from "./StorageMigration/Artifacts";
 
 export class Storage {
     constructor(app) {
         this.app = app;
+        this.artifactMigration = migrateArtifactPersistence(
+            typeof localStorage == 'undefined' ? null : localStorage,
+        );
         this.char = new StorageItemChar();
         this.rotation = new StorageItemRotation();
         this.artifacts = new StorageItemArtifacts();

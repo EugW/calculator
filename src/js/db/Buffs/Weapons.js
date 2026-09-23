@@ -13,46 +13,8 @@ import { PostEffectStats } from "../../classes/PostEffect/Stats";
 import { PostEffectStatsDef } from "../../classes/PostEffect/Stats/Def";
 import { StatTable } from "../../classes/StatTable";
 import { CHARACTER_MAX_POSSIBLE_HP } from "../Constants";
-
-const bludnyeAtkPerThousand = new StatTable('', [0.25, 0.325, 0.4, 0.475, 0.55]);
-const bludnyeAtkCap = new StatTable('', [5, 6.5, 8, 9.5, 11]);
-
-class ConditionPartyWeaponBludnye extends ConditionPartyWeapon {
-    getStats(settings) {
-        const stats = super.getStats(settings);
-
-        for (let i = 1; i <= this.getMaxNum(); ++i) {
-            const level = Math.min(5, this.getLevel(settings, i));
-            if (!level) continue;
-
-            const mode = settings[this.getModeParamName(i)] || '-';
-            const match = /^(hymn|triumph)_([123])$/.exec(mode);
-            if (!match) continue;
-
-            const hp = this.createStatCond(i).getValue(settings);
-            const thousandsAboveThreshold = Math.floor(Math.max(0, hp - 40000) / 1000);
-            const stacks = parseInt(match[2]);
-            const modeMultiplier = match[1] === 'triumph' ? 1.75 : 1;
-            const atkPerStack = Math.min(
-                bludnyeAtkCap.getValue(level),
-                thousandsAboveThreshold * bludnyeAtkPerThousand.getValue(level),
-            );
-            stats.add('atk_percent', atkPerStack * stacks * modeMultiplier);
-        }
-
-        return stats;
-    }
-}
-
-const bludnyePartyModes = [
-    {title: '-', value: '-', serializeId: 7, conditions: []},
-    {title_str: 'talent_name.weapon_bludnye_hymn_1', value: 'hymn_1', serializeId: 1, conditions: []},
-    {title_str: 'talent_name.weapon_bludnye_hymn_2', value: 'hymn_2', serializeId: 2, conditions: []},
-    {title_str: 'talent_name.weapon_bludnye_hymn_3', value: 'hymn_3', serializeId: 3, conditions: []},
-    {title_str: 'talent_name.weapon_bludnye_triumph_1', value: 'triumph_1', serializeId: 4, conditions: []},
-    {title_str: 'talent_name.weapon_bludnye_triumph_2', value: 'triumph_2', serializeId: 5, conditions: []},
-    {title_str: 'talent_name.weapon_bludnye_triumph_3', value: 'triumph_3', serializeId: 6, conditions: []},
-];
+import { partyDmgBoost as breezebornePartyDmgBoost } from "../Weapon/Bow/BreezeborneRefrain";
+import { HymnofTheMaelstromPartyBuff } from "./Weapons/HymnofTheMaelstrom";
 
 export const Weapons = new DbObjectBuff({
     name: 'weapons',
@@ -450,59 +412,26 @@ export const Weapons = new DbObjectBuff({
                 new ConditionBoolean({name: 'weapon_golden_frostbound_oath'}),
             ]),
         }),
-        new ConditionPartyWeaponBludnye({
-            name: 'weapon_other.weapon_bludnye',
-            serializeIds: [74],
-            statName: 'weapon_bludnye_holder_hp',
-            statSerializeIds: [75],
-            statClass: 'inputs-6digit',
-            partyStat: 'hp',
-            statMax: CHARACTER_MAX_POSSIBLE_HP,
-            modeName: 'weapon_other.weapon_bludnye_mode',
-            modeSerializeIds: [76],
-            modeTitle: 'talent_name.weapon_bludnye_mode',
-            modeClass: 'medium-text',
-            modeHideEmpty: true,
-            modeDefaultValue: '-',
-            modeValues: bludnyePartyModes,
-            title: 'weapon_name.bludnye',
-            statTitle: 'talent_name.weapon_bludnye_holder_hp',
-            description: 'talent_descr.weapon_bludnye_party',
-            icon: {
-                rarity: 5,
-                name: 'sprite-weapon-catalyst weapon-icon-catalyst-bludnye',
-            },
-            stats: [
-                new StatTable('text_atk_per_thousand', [0.25, 0.325, 0.4, 0.475, 0.55]),
-                new StatTable('text_atk_cap', [5, 6.5, 8, 9.5, 11]),
-            ],
-            condition: new ConditionNot([
-                new ConditionBooleanValue({
-                    cond: 'ge',
-                    value: 1,
-                    setting: 'weapon_bludnye_stacks',
-                }),
-            ]),
-        }),
+        HymnofTheMaelstromPartyBuff,
         new ConditionPartyWeapon({
-            name: 'weapon_other.weapon_windtalker',
+            name: 'weapon_other.weapon_breezeborne_refrain',
             serializeIds: [77],
             maxDisplay: 1,
-            title: 'weapon_name.windtalker',
-            description: 'talent_descr.weapon_windtalker_party',
+            title: 'weapon_name.breezeborne_refrain',
+            description: 'talent_descr.weapon_breezeborne_refrain_party',
             icon: {
                 rarity: 4,
-                name: 'sprite-weapon-bow weapon-icon-bow-windtalker',
+                name: 'sprite-weapon-bow weapon-icon-bow-breezeborne-refrain',
             },
             stats: [
-                new StatTable('dmg_stellarconduct', [24, 30, 36, 42, 48]),
-                new StatTable('dmg_stellarswirl', [24, 30, 36, 42, 48]),
+                new StatTable('dmg_stellarconduct', breezebornePartyDmgBoost),
+                new StatTable('dmg_stellarswirl', breezebornePartyDmgBoost),
             ],
             condition: new ConditionNot([
                 new ConditionBooleanValue({
                     cond: 'ge',
                     value: 3,
-                    setting: 'weapon_windtalker_points',
+                    setting: 'weapon_breezeborne_refrain_points',
                 }),
             ]),
         }),

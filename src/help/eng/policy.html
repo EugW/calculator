@@ -1,15 +1,82 @@
 <!doctype html>
-<html>
+<html lang="en">
 <head>
     <meta charset="utf-8">
-    <title>Changelog - Genshin Impact Calculator</title>
+    <meta name="viewport" content="width=device-width, initial-scale=1">
+    <title>Privacy Policy - Genshin Impact Calculator</title>
     <link rel="icon" href="/images/favicon.png">
     <link href="../css/help.css" rel="stylesheet">
 </head>
-<body>
-<div class="help-content">
-    <h2 class="help-version">Privacy Policy</h2>
-    <p>This website does not collect or/and store any personal data.</p>
-</div>
+<body class="privacy-policy">
+<main class="help-content">
+    <h1 class="help-version">Privacy Policy</h1>
+    <p><strong>Effective date:</strong> August 27, 2026</p>
+    <p>This policy explains how Genshin Impact Calculator (the "Calculator") handles data when you use the website and its optional features.</p>
+
+    <h2 class="help-version">Summary</h2>
+    <ul class="help-changes">
+        <li>Most calculator data stays in your browser.</li>
+        <li>Google Drive synchronization is optional and uses only the Calculator's private application-data folder in your Google Drive.</li>
+        <li>The Presets feature uses a separate pseudonymous account for abuse prevention and attributing presets and likes. It does not ask for your real name or email address.</li>
+        <li>Google Analytics is used to understand aggregate website usage.</li>
+        <li>We do not sell personal data or Google user data.</li>
+    </ul>
+
+    <h2 class="help-version">Data stored in your browser</h2>
+    <p>The Calculator uses local browser storage for saved characters, artifacts, rotations, builds, comparison data, settings, language preference, and similar calculator state. This data remains on your device unless you choose to synchronize it with Google Drive, publish a preset, use an import feature, or otherwise send it to the service.</p>
+    <p>If you sign in to Presets, the browser also stores your preset username and a short-lived access token. If you enable Google Drive synchronization, the browser stores the Google access-token response and the identifier of the Calculator's backup file. You can remove local data through the Calculator or your browser settings.</p>
+
+    <h2 class="help-version">Preset accounts and public presets</h2>
+    <p>Creating a preset account is optional and separate from Google authorization. We recommend using a pseudonymous username and a password that you do not use on any other service.</p>
+    <p>The Presets backend stores:</p>
+    <ul class="help-changes">
+        <li>your chosen username, a bcrypt password hash (not the plain-text password), account creation time, and the current refresh-session token;</li>
+        <li>presets you publish, including their title, description, serialized calculator configuration, selected character, weapon and party identifiers, creation time, and like count;</li>
+        <li>which presets your account has liked.</li>
+    </ul>
+    <p>An essential HTTP-only cookie keeps the refresh session for up to 30 days. The access token stored in the browser is valid for about one hour and is renewed from that cookie. These credentials are used only to authenticate preset actions and reduce abuse.</p>
+    <p>Your username and published preset content are public. Do not put personal or confidential information in a username, preset title, description, or configuration. When a preset is published, its username, title, and description are also sent to a private Telegram chat used by the maintainers for moderation and operational notifications.</p>
+
+    <h2 class="help-version">Google Drive synchronization and Google user data</h2>
+    <p>Google Drive synchronization is optional. When you enable it, the Calculator requests the <code>https://www.googleapis.com/auth/drive.appdata</code> scope. This scope lets the Calculator list, create, read, update, and delete only its own files in the hidden <code>appDataFolder</code>; it does not provide access to your other Google Drive files.</p>
+    <ul class="help-changes">
+        <li><strong>Access and use:</strong> the Calculator synchronizes a <code>backup.json</code> file containing your saved characters, artifacts, rotations, and their titles.</li>
+        <li><strong>Storage:</strong> the backup remains in your own Google Drive. The OAuth token and backup-file identifier are stored locally in your browser.</li>
+        <li><strong>Sharing:</strong> the backup and other Google Drive data are not sent to the Presets backend, Telegram, Google Analytics, or other users, and the maintainers do not read them.</li>
+        <li><strong>Deletion and access removal:</strong> the Settings page lets you disable synchronization or disable it and delete the backup file. You can also revoke access from your Google Account permissions.</li>
+    </ul>
+    <p>The Calculator's use and transfer of information received from Google APIs adheres to the <a href="https://developers.google.com/terms/api-services-user-data-policy" target="_blank" rel="noopener noreferrer">Google API Services User Data Policy</a>, including its Limited Use requirements. Google processes authorization and Drive data under the <a href="https://policies.google.com/privacy" target="_blank" rel="noopener noreferrer">Google Privacy Policy</a>.</p>
+
+    <h2 class="help-version">Google Analytics</h2>
+    <p>The website loads Google Analytics to measure usage and improve the Calculator. Its default collection can include a first-party client identifier, session and interaction statistics, approximate location, and browser and device information. Google Analytics may set cookies such as <code>_ga</code> and <code>_ga_*</code>. We do not intentionally send preset passwords, authentication tokens, or Google Drive backup contents to Analytics.</p>
+    <p>You can block or delete Analytics cookies using your browser and can use the <a href="https://tools.google.com/dlpage/gaoptout" target="_blank" rel="noopener noreferrer">Google Analytics opt-out browser add-on</a>. Google explains its processing in the <a href="https://policies.google.com/privacy" target="_blank" rel="noopener noreferrer">Google Privacy Policy</a>.</p>
+
+    <h2 class="help-version">Enka.Network imports</h2>
+    <p>If you use the Enka import feature, the Genshin Impact UID, Enka username, or build identifier you enter is sent through the Calculator's proxy to Enka.Network to retrieve the corresponding public showcase or build data. The returned data is processed in the Calculator and is stored locally only if you save it. Enka.Network handles its service data under its own policies.</p>
+
+    <h2 class="help-version">Technical logs</h2>
+    <p>The web server may record standard request information such as IP address, request time and URL, response status, referrer, and browser user-agent. The backend also records application errors. These records are used to operate the service, diagnose failures, enforce rate limits, and investigate abuse or security incidents.</p>
+
+    <h2 class="help-version">Sharing and disclosure</h2>
+    <p>Data is shared only as described above with service providers needed for the requested feature (including Google, Telegram, Enka.Network, and hosting/database infrastructure), when necessary to protect the service and its users, or when required by law. We do not sell or rent user data, and Google user data is not used for advertising.</p>
+
+    <h2 class="help-version">Retention and deletion</h2>
+    <ul class="help-changes">
+        <li>Local calculator data remains until you remove it or clear browser storage.</li>
+        <li>A Google Drive backup remains until you delete it in the Calculator or through your Google account. OAuth access remains until it expires or is revoked.</li>
+        <li>Logging out invalidates the server-side preset refresh session and removes the browser's preset credentials, but it does not delete the account or its presets.</li>
+        <li>Preset accounts and their records do not currently have an automatic expiration. You can delete your own presets in the Calculator. Contact the maintainers to request deletion of your preset account and associated records.</li>
+        <li>No fixed retention period for operational logs or Analytics data is defined in this codebase; retention is governed by operational needs and the applicable provider settings.</li>
+    </ul>
+
+    <h2 class="help-version">Security</h2>
+    <p>We use HTTPS, hashed passwords, limited OAuth scope, and access controls intended to protect data. No system can guarantee absolute security, so please use a unique password and avoid putting sensitive information in public preset fields.</p>
+
+    <h2 class="help-version">Contact and requests</h2>
+    <p>For privacy questions or requests to access or delete server-side account data, contact the maintainers through <a href="https://telegram.me/+Fwi5zbkW54YxNmVi" target="_blank" rel="noopener noreferrer">Telegram</a> or open an issue in the <a href="https://github.com/EugW/calculator/issues" target="_blank" rel="noopener noreferrer">public source repository</a>. Do not include passwords or authentication tokens in a request.</p>
+
+    <h2 class="help-version">Changes to this policy</h2>
+    <p>We may update this policy when the Calculator's features or data practices change. The effective date at the top identifies the latest revision.</p>
+</main>
 </body>
 </html>

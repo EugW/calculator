@@ -3,7 +3,10 @@ import path from "path";
 import { BuildData } from "../src/js/classes/Build/Data";
 import { CalcObjectCharacter } from "../src/js/classes/CalcObject/Character";
 import { FeatureDamageStellarConduct } from "../src/js/classes/Feature2/Damage/StellarConduct";
+import { FeatureDamageStellarConductMultihit, FeatureDamageStellarSwirlMultihit } from "../src/js/classes/Feature2/Damage/StellarMultihit";
 import { FeatureDamageStellarSwirl } from "../src/js/classes/Feature2/Damage/StellarSwirl";
+import { FeatureDamageCharged } from "../src/js/classes/Feature2/Damage/Charged";
+import { FeatureDamageMultihit } from "../src/js/classes/Feature2/Damage/Multihit";
 import { TravelerCryo } from "../src/js/db/Char/TravelerCryo";
 import { DB } from "../src/js/db/DB";
 import { Rotation } from "../src/js/db/Features/Rotation";
@@ -164,31 +167,93 @@ test("Ever-Keen Frost infuses and adds 80% ATK to ordinary attacks but excludes 
     expect(enhanced.normal - baseline.normal).toBeCloseTo(400, 5);
 });
 
-test("Foreign Permafrost requires 3 Icepoint and swaps the whole charged attack by Radiance mode", () => {
-    const ordinary = getFeature("attack.traveler_cryo_freezing_ice");
-    const conduct = getFeature("attack.traveler_cryo_freezing_ice_stellarconduct");
-    const swirl = getFeature("attack.traveler_cryo_freezing_ice_stellarswirl");
+test("Foreign Permafrost is a two-hit charged attack in each Glimmer mode", () => {
+    const modes = [
+        {
+            parent: "attack.traveler_cryo_freezing_ice",
+            child1: "attack.traveler_cryo_freezing_ice_1",
+            child2: "attack.traveler_cryo_freezing_ice_2",
+            settings: {},
+        },
+        {
+            parent: "attack.traveler_cryo_freezing_ice_stellarconduct",
+            child1: "attack.traveler_cryo_freezing_ice_stellarconduct_1",
+            child2: "attack.traveler_cryo_freezing_ice_stellarconduct_2",
+            settings: {traveler_cryo_radiance_stellarconduct: true},
+        },
+        {
+            parent: "attack.traveler_cryo_freezing_ice_stellarswirl",
+            child1: "attack.traveler_cryo_freezing_ice_stellarswirl_1",
+            child2: "attack.traveler_cryo_freezing_ice_stellarswirl_2",
+            settings: {traveler_cryo_radiance_stellarswirl: true},
+        },
+    ];
 
-    expect(ordinary.isActive(new BuildData({traveler_cryo_icepoint: 2}, {}))).toBe(false);
-    expect(ordinary.isActive(new BuildData({traveler_cryo_icepoint: 3}, {}))).toBe(true);
-    expect(ordinary.multipliers.map(item => item.values.getValue(1))).toEqual([
-        charTalentTables.TravelerCryo.s1.p6[0],
-        charTalentTables.TravelerCryo.s1.p7[0],
-        140,
-    ]);
+    expect(getFeature(modes[0].parent).isActive(new BuildData({traveler_cryo_icepoint: 2}, {}))).toBe(false);
 
+    for (const mode of modes) {
+        const parent = getFeature(mode.parent);
+        const child1 = getFeature(mode.child1);
+        const child2 = getFeature(mode.child2);
+        const settings = {traveler_cryo_icepoint: 3, ...mode.settings};
+        const data = new BuildData(settings, {});
+
+        expect(parent.isActive(data)).toBe(true);
+        expect(parent.items).toHaveLength(2);
+        expect(child1.getIsChild()).toBe(true);
+        expect(child2.getIsChild()).toBe(true);
+        expect(child1.isActive(data)).toBe(true);
+        expect(child2.isActive(data)).toBe(true);
+        expect(parent.items.map(item => item.multipliers.map(multi =>
+            multi.values && multi.values.getValue(1)
+        ))).toEqual([
+            [charTalentTables.TravelerCryo.s1.p6[0], 140],
+            [
+                charTalentTables.TravelerCryo.s1.p7[0],
+                charTalentTables.TravelerCryo.s1_boy.p7[0],
+                140,
+            ],
+        ]);
+
+        const total = damage(mode.parent, settings).normal;
+        const childTotal = damage(mode.child1, settings).normal + damage(mode.child2, settings).normal;
+        expect(total).toBeCloseTo(childTotal, 5);
+    }
+
+    const frostglow = getFeature("other.traveler_cryo_freezing_ice_frostglow");
     const conductData = new BuildData({
         traveler_cryo_icepoint: 3,
         traveler_cryo_radiance_stellarconduct: true,
     }, {});
-    expect(ordinary.isActive(conductData)).toBe(false);
-    expect(conduct.isActive(conductData)).toBe(true);
-    expect(swirl.isActive(conductData)).toBe(false);
-
-    const frostglow = getFeature("other.traveler_cryo_freezing_ice_frostglow");
     expect(frostglow.getResult(conductData)["other.traveler_cryo_freezing_ice_frostglow"].normal).toBe(2);
     const cooldown = getFeature("other.traveler_cryo_freezing_ice_cooldown");
     expect(cooldown.getResult(conductData)["other.traveler_cryo_freezing_ice_cooldown"].normal).toBe(15);
+});
+
+test("Aether twin swaps Charged Attack hit 2 and its Freezing Ice share", () => {
+    const settings = {traveler_cryo_icepoint: 3, char_skill_attack: 5};
+    const lumine = damage("attack.charged_hit_2", settings).normal;
+    const aether = damage("attack.charged_hit_2", {...settings, traveler_aether: true}).normal;
+    const girlP7 = charTalentTables.TravelerCryo.s1.p7[4];
+    const boyP7 = charTalentTables.TravelerCryo.s1_boy.p7[4];
+
+    expect(aether).toBeCloseTo(lumine * boyP7 / girlP7, 5);
+
+    // Freezing Ice hit 2 adds a flat +140% ATK bonus that does not scale
+    // with the gender swap, so only the CA-2 share changes.
+    const freezeSettings = {
+        ...settings,
+        traveler_cryo_radiance_stellarconduct: true,
+    };
+    const lumineFreeze = damage("attack.traveler_cryo_freezing_ice_stellarconduct_2", freezeSettings).normal;
+    const aetherFreeze = damage("attack.traveler_cryo_freezing_ice_stellarconduct_2", {
+        ...freezeSettings,
+        traveler_aether: true,
+    }).normal;
+    expect(aetherFreeze).toBeCloseTo(
+        lumineFreeze * (boyP7 + 140) / (girlP7 + 140),
+        5,
+    );
 });
 
 test("C1/C2/C6 expose energy, active-party EM, and other-party umbrella Glimmer DMG", () => {
@@ -251,6 +316,7 @@ test("Cryo Traveler condition IDs are immutable and unique across self and party
         ["traveler_cryo_resonated_elements", 6],
         ["traveler_swordfighting_techniques", 9],
         ["traveler_special_training", 10],
+        ["traveler_aether", 11],
         ["traveler_cryo_frostfall_reverberation", 8],
     ]);
     expect(new Set(self.map(condition => condition.getId())).size).toBe(self.length);
@@ -312,14 +378,20 @@ test("Cryo Traveler uses only reserved Rotation IDs 800-829", () => {
         ["skill.traveler_cryo_skill_dmg", 800],
         ["skill.traveler_cryo_ice_crystal_dmg", 801],
         ["attack.traveler_cryo_freezing_ice", 802],
-        ["attack.traveler_cryo_freezing_ice_stellarconduct", 803],
-        ["attack.traveler_cryo_freezing_ice_stellarswirl", 804],
+        ["attack.traveler_cryo_freezing_ice_1", 803],
+        ["attack.traveler_cryo_freezing_ice_2", 804],
         ["burst.traveler_cryo_ice_javelin", 805],
         ["burst.traveler_cryo_frostbound_javelin_total", 806],
         ["burst.traveler_cryo_ice_javelin_stellarconduct", 807],
         ["burst.traveler_cryo_frostbound_javelin_stellarconduct_total", 808],
         ["burst.traveler_cryo_ice_javelin_stellarswirl", 809],
         ["burst.traveler_cryo_frostbound_javelin_stellarswirl_total", 810],
+        ["attack.traveler_cryo_freezing_ice_stellarconduct", 811],
+        ["attack.traveler_cryo_freezing_ice_stellarconduct_1", 812],
+        ["attack.traveler_cryo_freezing_ice_stellarconduct_2", 813],
+        ["attack.traveler_cryo_freezing_ice_stellarswirl", 814],
+        ["attack.traveler_cryo_freezing_ice_stellarswirl_1", 815],
+        ["attack.traveler_cryo_freezing_ice_stellarswirl_2", 816],
     ]);
     expect(rows.every(([, id]) => id >= 800 && id <= 829)).toBe(true);
 });
@@ -341,8 +413,15 @@ test("Cryo Traveler imports its name and Foreign Permafrost without manual alias
     for (const key of [
         "feature_skill;traveler_cryo_skill_dmg",
         "feature_skill;traveler_cryo_ice_crystal_dmg",
+        "feature_attack;traveler_cryo_freezing_ice",
+        "feature_attack;traveler_cryo_freezing_ice_1",
+        "feature_attack;traveler_cryo_freezing_ice_2",
         "feature_attack;traveler_cryo_freezing_ice_stellarconduct",
+        "feature_attack;traveler_cryo_freezing_ice_stellarconduct_1",
+        "feature_attack;traveler_cryo_freezing_ice_stellarconduct_2",
         "feature_attack;traveler_cryo_freezing_ice_stellarswirl",
+        "feature_attack;traveler_cryo_freezing_ice_stellarswirl_1",
+        "feature_attack;traveler_cryo_freezing_ice_stellarswirl_2",
         "feature_burst;traveler_cryo_frostbound_javelin_stellarconduct_total",
         "feature_burst;traveler_cryo_frostbound_javelin_stellarswirl_total",
         "feature_other;traveler_cryo_somber_freeze_energy",
@@ -377,15 +456,29 @@ test("Cryo Traveler imports its name and Foreign Permafrost without manual alias
 });
 
 test("direct Burst and Freezing Ice rows use the matching Glimmer damage classes", () => {
+    expect(getFeature("attack.traveler_cryo_freezing_ice"))
+        .toBeInstanceOf(FeatureDamageMultihit);
     for (const name of [
-        "attack.traveler_cryo_freezing_ice_stellarconduct",
+        "attack.traveler_cryo_freezing_ice_1",
+        "attack.traveler_cryo_freezing_ice_2",
+    ]) {
+        expect(getFeature(name)).toBeInstanceOf(FeatureDamageCharged);
+    }
+    expect(getFeature("attack.traveler_cryo_freezing_ice_stellarconduct"))
+        .toBeInstanceOf(FeatureDamageStellarConductMultihit);
+    for (const name of [
+        "attack.traveler_cryo_freezing_ice_stellarconduct_1",
+        "attack.traveler_cryo_freezing_ice_stellarconduct_2",
         "burst.traveler_cryo_ice_javelin_stellarconduct",
         "burst.traveler_cryo_frostbound_javelin_stellarconduct_total",
     ]) {
         expect(getFeature(name)).toBeInstanceOf(FeatureDamageStellarConduct);
     }
+    expect(getFeature("attack.traveler_cryo_freezing_ice_stellarswirl"))
+        .toBeInstanceOf(FeatureDamageStellarSwirlMultihit);
     for (const name of [
-        "attack.traveler_cryo_freezing_ice_stellarswirl",
+        "attack.traveler_cryo_freezing_ice_stellarswirl_1",
+        "attack.traveler_cryo_freezing_ice_stellarswirl_2",
         "burst.traveler_cryo_ice_javelin_stellarswirl",
         "burst.traveler_cryo_frostbound_javelin_stellarswirl_total",
     ]) {

@@ -20,3 +20,9 @@ talent_name;traveler_viridian_transience;Буйство зелени;Viridian Tr
 talent_name;traveler_withering_aggregation;Увядающее скопление;Withering Aggregation
 talent_descr;traveler_withering_aggregation_1;Персонаж с name{Лучезарным лотосом} skill{burst:Лотосового светильника} получает %{dmg_dendro} бонус dendro{Дендро урона}.;The dendro{Dendro DMG Bonus} of the character under the effect of name{Overflowing Lotuslight} as created by the skill{burst:Lea Lotus Lamp} is increased by %{dmg_dendro}.
 talent_descr;traveler_withering_aggregation_2;Если произошло name{Преобращение света} лотоса name{Лотосового светильника}, персонаж получает ещё value{12%} бонуса name{элементального урона} соответствующего элемента.;If the Lamp has experienced a name{Lotuslight Transfiguration} previously, the character will also gain value{12%} name{DMG Bonus} for the corresponding element.
+feature_attack;traveler_dendro_verdessence;Заряженная атака: Милость трав;Charged Attack: Verdessence
+feature_attack;traveler_dendro_verdessence_1;Заряженная атака: Милость трав 1;Charged Attack: Verdessence 1
+feature_attack;traveler_dendro_verdessence_2;Заряженная атака: Милость трав 2;Charged Attack: Verdessence 2
+feature_attack;traveler_dendro_vinecore_1;Ядра лозы 1;Vinecores 1
+feature_attack;traveler_dendro_vinecore_2;Ядра лозы 2;Vinecores 2
+feature_other;traveler_dendro_verdessence_cooldown;Откат Милости трав;Verdessence Cooldown

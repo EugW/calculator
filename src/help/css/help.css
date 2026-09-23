@@ -16,6 +16,25 @@ body {
     margin: auto;
 }
 
+.privacy-policy {
+    overflow: auto;
+    line-height: 1.5;
+}
+
+.privacy-policy .help-content {
+    max-width: 900px;
+    padding: 10px 20px 30px;
+    box-sizing: border-box;
+}
+
+.privacy-policy .help-changes {
+    line-height: 1.5;
+}
+
+.privacy-policy code {
+    overflow-wrap: anywhere;
+}
+
 .help-version {
     font-weight: normal;
     font-size: 20px;

@@ -84,12 +84,12 @@ test('7.0 and 7.1 weapon manifests have unique selectors and valid PNGs', () => 
         'weapon-icon-catalyst-echoes-of-the-heart',
         'weapon-icon-bow-jade-vista',
         'weapon-icon-bow-covenant-of-frost-and-snow',
-        'weapon-icon-sword-spiked-stake',
-        'weapon-icon-sword-fajian',
-        'weapon-icon-sword-samosvist',
-        'weapon-icon-catalyst-frost-scepter',
-        'weapon-icon-catalyst-bludnye',
-        'weapon-icon-bow-windtalker',
+        'weapon-icon-sword-new-bough',
+        'weapon-icon-sword-silver-light',
+        'weapon-icon-sword-beyond-the-chrysalis',
+        'weapon-icon-catalyst-winters-heavy-heart',
+        'weapon-icon-catalyst-hymn-of-the-maelstrom',
+        'weapon-icon-bow-breezeborne-refrain',
     ]) {
         expect(css).toContain(selector);
     }

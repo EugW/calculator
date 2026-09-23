@@ -6,8 +6,9 @@ weapon_name;absolution;Отпущение грехов;Absolution
 weapon_name;akuoumaru;Акуомару;Akuoumaru
 weapon_name;alley_hunter;Охотник во тьме;Alley Hunter
 weapon_name;amenoma_kageuchi;Амэнома Кагэути;Amenoma Kageuchi
-weapon_name;amos_bow;Лук Амоса;Amos' Bow
+weapon_name;amos_bow;Лук Амос;Amos' Bow
 weapon_name;angelos_heptades;Гептада ангела;Angelos' Heptades
+weapon_name;apprentices_notes;Записи ученика;Apprentice's Notes
 weapon_name;aqua_simulacra;Аква симулякрум;Aqua Simulacra
 weapon_name;aquila_favonia;Меч Сокола;Aquila Favonia
 weapon_name;ash_graven_drinking_horn;Пепельный рог;Ash-Graven Drinking Horn
@@ -17,6 +18,8 @@ weapon_name;azurelight;Лазурное сияние;Azurelight
 weapon_name;ballad_of_the_boundless_blue;Песнь необъятной лазури;Ballad of the Boundless Blue
 weapon_name;ballad_of_the_fjords;Баллада фьордов;Ballad of the Fjords
 weapon_name;beacon_of_the_reed_sea;Маяк тростникового моря;Beacon of the Reed Sea
+weapon_name;beginners_protector;Копьё новичка;Beginner's Protector
+weapon_name;beyond_the_chrysalis;За пределами кокона;Beyond the Chrysalis
 weapon_name;black_tassel;Чёрная кисть;Black Tassel
 weapon_name;blackcliff_agate;Черногорский агат;Blackcliff Agate
 weapon_name;blackcliff_longsword;Черногорский длинный меч;Blackcliff Longsword
@@ -27,6 +30,7 @@ weapon_name;blackmarrow_lantern;Фонарь чёрной сердцевины;B
 weapon_name;blade_of_atonement;Клинок искупления;Blade of Atonement
 weapon_name;bloodsoaked_ruins;Окровавленные руины;Bloodsoaked Ruins
 weapon_name;bloodtainted_greatsword;Меч драконьей крови;Bloodtainted Greatsword
+weapon_name;breezeborne_refrain;Напевы нежного ветра;Breezeborne Refrain
 weapon_name;calamity_of_eshu;Бедствие Эшу;Calamity of Eshu
 weapon_name;calamity_queller;Усмиритель бед;Calamity Queller
 weapon_name;cashflow_supervision;Казначейский надзор;Cashflow Supervision
@@ -49,6 +53,7 @@ weapon_name;disaster_and_remorse;Бедствие и раскаяние;Disaster
 weapon_name;dodoco_tales;Истории Додоко;Dodoco Tales
 weapon_name;dragons_bane;Гроза драконов;Dragon's Bane
 weapon_name;dragonspine_spear;Копьё Драконьего хребта;Dragonspine Spear
+weapon_name;dull_blade;Тупой меч;Dull Blade
 weapon_name;earth_shaker;Сотрясающий землю;Earth Shaker
 weapon_name;echoes_of_the_heart;Отголоски сердца;Echoes of the Heart
 weapon_name;elegy_for_the_end;Элегия погибели;Elegy for the End
@@ -93,7 +98,9 @@ weapon_name;hamayumi;Хамаюми;Hamayumi
 weapon_name;haran_geppaku_futsu;Харан гэппаку фуцу;Haran Geppaku Futsu
 weapon_name;harbinger_of_dawn;Предвестник зари;Harbinger of Dawn
 weapon_name;heretics_molten_blade;Расплавленный клинок еретика;Heretic's Molten Blade
+weapon_name;hunters_bow;Лук охотника;Hunter's Bow
 weapon_name;hunters_path;Охотничья тропа;Hunter's Path
+weapon_name;hymn_of_the_maelstrom;Ода водоворота;Hymn of the Maelstrom
 weapon_name;ibis_piercer;Клюв ибиса;Ibis Piercer
 weapon_name;iron_sting;Стальное жало;Iron Sting
 weapon_name;jade_vista;Поникшая артемизия;Jade Vista
@@ -127,6 +134,7 @@ weapon_name;moonweavers_dawn;Рассвет прядильщицы луны;Moon
 weapon_name;morning_hibernation;Сон солнечным утром;Sunny Morning Sleep-In
 weapon_name;mountain_bracing_bolt;Крепящий горы шип;Mountain-Bracing Bolt
 weapon_name;mouuns_moon;Луна Моун;Mouun's Moon
+weapon_name;new_bough;Новая ветвь;New Bough
 weapon_name;nightweavers_looking_glass;Зеркало прядильщицы ночи;Nightweaver's Looking Glass
 weapon_name;nocturnes_curtain_call;Вызов ноктюрна;Nocturne's Curtain Call
 weapon_name;oathsworn_eye;Око клятвы;Oathsworn Eye
@@ -171,6 +179,7 @@ weapon_name;sequence_of_solitude;Каденция одиночества;Sequenc
 weapon_name;serenitys_call;Зов безмятежности;Serenity's Call
 weapon_name;serpent_spine;Меч драконьей кости;Serpent Spine
 weapon_name;sharpshooters_oath;Клятва стрелка;Sharpshooter's Oath
+weapon_name;silver_light;Серебряный свет;Silver Light
 weapon_name;silvershower_heartstrings;Сердечные струны дождя;Silvershower Heartstrings
 weapon_name;skyrider_greatsword;Большой меч небесного всадника;Skyrider Greatsword
 weapon_name;skyrider_sword;Меч небесного всадника;Skyrider Sword
@@ -225,6 +234,7 @@ weapon_name;verdict;Вердикт;Verdict
 weapon_name;vivid_notions;Переливающиеся чаяния;Vivid Notions
 weapon_name;vortex_vanquisher;Покоритель вихря;Vortex Vanquisher
 weapon_name;wandering_evenstar;Скитающаяся звезда;Wandering Evenstar
+weapon_name;waster_greatsword;Двуручный меч богатыря;Waster Greatsword
 weapon_name;wavebreakers_fin;Режущий волны плавник;Wavebreaker's Fin
 weapon_name;waveriding_whirl;Вихрь на волнах;Waveriding Whirl
 weapon_name;white_iron_greatsword;Меч из белого железа;White Iron Greatsword
@@ -233,6 +243,7 @@ weapon_name;whiteblind;Белая тень;Whiteblind
 weapon_name;whitelake_frostfeather;Морозное перо белого озера;Whitelake Frostfeather
 weapon_name;windblume_ode;Ода анемонии;Windblume Ode
 weapon_name;wine_and_song;Вино и песни;Wine and Song
+weapon_name;winters_heavy_heart;Застывшее сердце зимы;Winter's Heavy Heart
 weapon_name;wolf_fang;Волчий клык;Wolf-Fang
 weapon_name;wolfs_gravestone;Волчья погибель;Wolf's Gravestone
 weapon_name;xiphos_moonlight;Лунное сияние ксифоса;Xiphos' Moonlight

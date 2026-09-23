@@ -2,63 +2,50 @@ from ...template import Template, TemplateList
 
 
 char_vesna = TemplateList(
-    unruffled_rus=Template(
-        patterns=[
-            (r'активируетskill', r'активирует skill'),
-            (r'<br>Каждый уровень', r'\nКаждый уровень'),
-        ],
+    rite_of_springs_procession_rus=Template(
         sentences=[
             ['1:ignore'],
             ['20:ignore', '6:ignore'],
+            ['100:ignore', '10:ignore'],
             [],
-            ['10:ignore', '160:ignore'],
         ],
         results=[
-            [0, 1, 3],
-            [2],
+            [0, 1, 2],
+            [3],
         ],
     ),
-    unruffled_eng=Template(
-        patterns=[
-            (r'<br>Each stack', r'\nEach stack'),
-        ],
+    rite_of_springs_procession_eng=Template(
         sentences=[
             ['1:ignore', '20:ignore'],
-            ['6:ignore'],
+            ['6:ignore', '100:ignore', '10:ignore'],
             [],
-            ['10:ignore', '160:ignore'],
         ],
         results=[
-            [0, 1, 3],
+            [0, 1],
             [2],
         ],
     ),
-    c6_rus=Template(
+    unwavering_ardor_rus=Template(
         patterns=[
-            (r'<br><br>Вдобавок', r'\nВдобавок'),
-        ],
-        sentences=[
-            [
-                '5:text_duration',
-                '150:text_percent_dmg_1',
-                '200:text_percent_dmg_2',
-                '1:ignore',
-            ],
-            ['20:text_percent'],
-        ],
-        results=[
-            [0],
-            [1],
-        ],
-    ),
-    c6_eng=Template(
-        patterns=[
-            (r'<br><br>Additionally', r'\nAdditionally'),
-            (r'%。', r'%.'),
+            (r'<br>Кроме того', r'\nКроме того'),
         ],
         sentences=[
             ['5:text_duration', '150:text_percent_dmg_1', '200:text_percent_dmg_2'],
-            ['1:ignore'],
+            [],
+            ['20:text_percent'],
+        ],
+        results=[
+            [0, 1],
+            [2],
+        ],
+    ),
+    unwavering_ardor_eng=Template(
+        patterns=[
+            (r'<br>Additionally', r'\nAdditionally'),
+        ],
+        sentences=[
+            ['5:text_duration', '150:text_percent_dmg_1', '200:text_percent_dmg_2'],
+            [],
             ['20:text_percent'],
         ],
         results=[

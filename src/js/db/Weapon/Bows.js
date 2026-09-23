@@ -46,7 +46,8 @@ import { RainbowSerpentsRainBow } from "./Bow/RainbowSerpentsRainBow";
 import { GoldenFrostboundOath } from "./Bow/GoldenFrostboundOath";
 import { JadeVista } from "./Bow/JadeVista";
 import { CovenantOfFrostAndSnow } from "./Bow/CovenantOfFrostAndSnow";
-import { Windtalker } from "./Bow/Windtalker";
+import { BreezeborneRefrain } from "./Bow/BreezeborneRefrain";
+import { HuntersBow } from "./Bow/HuntersBow";
 
 export const Bows = new DbObjectListSerializeStats({
     AlleyHunter: AlleyHunter,
@@ -96,5 +97,6 @@ export const Bows = new DbObjectListSerializeStats({
     GoldenFrostboundOath: GoldenFrostboundOath, // 242
     JadeVista: JadeVista, // 256
     CovenantOfFrostAndSnow: CovenantOfFrostAndSnow, // 257
-    Windtalker: Windtalker, // 263
+    BreezeborneRefrain: BreezeborneRefrain, // 263
+    HuntersBow: HuntersBow, // 268
 });

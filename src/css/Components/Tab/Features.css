@@ -42,8 +42,8 @@
 .features-table-block .icon > div {
     width: 20px;
     height: 20px;
-    background-size: 120px 60px;
-    background-image: url("../../../images/icons/element_40_v3.png");
+    background-size: 120px 40px;
+    background-image: url("../../../images/icons/element_40_v2.png");
 }
 
 .features-table-block .stat-anemo {
@@ -84,13 +84,4 @@
 }
 .stat-shield {
     background-position: -80px -20px;
-}
-.features-table-block .stat-lunarcharged {
-    background-position: 0 -40px;
-}
-.features-table-block .stat-lunarbloom {
-    background-position: -20px -40px;
-}
-.features-table-block .stat-lunarcrystallize {
-    background-position: -40px -40px;
 }

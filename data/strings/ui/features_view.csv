@@ -81,6 +81,8 @@ features_view;stat_char_level;Ур. персонажа;Char lvl
 features_view;stat_enemy_level;Ур. врага;Enemy lvl
 features_view;stat_enemy_def_reduce;Сниж. защ.;DEF reduce
 features_view;stat_enemy_def_ignore;Игнор. защ.;DEF ignore
+features_view;stat_def_reduce_cap;Лимит сниж. защ.;DEF reduce cap
+features_view;stat_def_ignore_cap;Лимит игнор. защ.;DEF ignore cap
 features_view;stat_stacks;Уровни;Stacks
 features_view;stat_atk_base;Базовая СА;Base ATK
 features_view;stat_base_res;Противник;Enemy

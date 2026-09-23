@@ -115,8 +115,7 @@ export class ArtifactsPoolView extends React.Component {
         let item = this.storage.getByHash(hash);
 
         if (item) {
-            item.setLocked(value);
-            this.storage.updateByHash(hash, item);
+            this.storage.setLocked([hash], value);
             this.sortCompleteCallback(this.lastResults);
             this.props.app.queueUpdate();
         }
@@ -181,7 +180,7 @@ export class ArtifactsPoolView extends React.Component {
                 continue;
             }
 
-            result.push({data: item.hash});
+            result.push({data: item.data.getHash()});
         }
 
         return result;
@@ -204,12 +203,19 @@ export class ArtifactsPoolView extends React.Component {
 
     sortCompleteCallback(items) {
         let result = [];
+        let resolved = [];
 
         for (let hash of items) {
-            result.push(this.storage.getByHash(hash));
+            let artifact = this.storage.getByHash(hash);
+            if (!artifact) {
+                continue;
+            }
+
+            result.push(artifact);
+            resolved.push(artifact.getHash());
         }
 
-        this.lastResults = items;
+        this.lastResults = resolved;
 
         this.pool.setState({
             isLoading: false,

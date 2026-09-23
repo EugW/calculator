@@ -6,7 +6,6 @@ import { FeatureReactionLunarBloom } from "./Bloom";
 
 export class FeatureReactionLunarBloomLike extends FeatureReactionLunarBloom {
     constructor(params) {
-        params.icon = 'lunarbloom';
         params.damageType ||= 'lunardirect';
         params.cannotReact = true;
         params.tags = params.tags || [];

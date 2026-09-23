@@ -40,6 +40,7 @@ import { SacrificersStaff } from "./Polearm/SacrificersStaff";
 import { DisasterAndRemorse } from "./Polearm/DisasterAndRemorse";
 import { Frostbreath } from "./Polearm/Frostbreath";
 import { SongOfTheVigil } from "./Polearm/SongOfTheVigil";
+import { BeginnersProtector } from "./Polearm/BeginnersProtector";
 
 export const Polearm = new DbObjectListSerializeStats({
     BlackcliffPole: BlackcliffPole, // 85
@@ -83,4 +84,5 @@ export const Polearm = new DbObjectListSerializeStats({
     DisasterAndRemorse: DisasterAndRemorse, // 243
     Frostbreath: Frostbreath, // 252
     SongOfTheVigil: SongOfTheVigil, // 253
+    BeginnersProtector: BeginnersProtector, // 266
 });

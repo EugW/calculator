@@ -1,0 +1,93 @@
+.damage-feature-name {
+    --feature-name-top: #FFF7E9;
+    --feature-name-bottom: #FFF7E9;
+
+    color: var(--feature-name-top);
+    font-weight: 600;
+    letter-spacing: 0.01em;
+    background-image: linear-gradient(
+        180deg,
+        var(--feature-name-top) 12%,
+        var(--feature-name-bottom) 88%
+    );
+    background-clip: text;
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    box-decoration-break: clone;
+    -webkit-box-decoration-break: clone;
+}
+
+.damage-feature-name-element-phys {
+    --feature-name-top: #FFFFFF;
+    --feature-name-bottom: #FFFFFF;
+}
+
+.damage-feature-name-element-anemo {
+    --feature-name-top: #A8F7D1;
+    --feature-name-bottom: #A8F7D1;
+}
+
+.damage-feature-name-element-electro {
+    --feature-name-top: #DEBBFD;
+    --feature-name-bottom: #DEBBFD;
+}
+
+.damage-feature-name-element-pyro {
+    --feature-name-top: #FDA76C;
+    --feature-name-bottom: #FDA76C;
+}
+
+.damage-feature-name-element-hydro {
+    --feature-name-top: #06E3FD;
+    --feature-name-bottom: #06E3FD;
+}
+
+.damage-feature-name-element-cryo {
+    --feature-name-top: #CBFFFF;
+    --feature-name-bottom: #CBFFFF;
+}
+
+.damage-feature-name-element-geo {
+    --feature-name-top: #F4D860;
+    --feature-name-bottom: #F4D860;
+}
+
+.damage-feature-name-element-dendro {
+    --feature-name-top: #B2EA2A;
+    --feature-name-bottom: #B2EA2A;
+}
+
+.damage-feature-name-stellar-conduct-cryo {
+    --feature-name-top: #F2FCFD;
+    --feature-name-bottom: #9AF4FC;
+}
+
+.damage-feature-name-stellar-conduct-electro {
+    --feature-name-top: #F6F0FF;
+    --feature-name-bottom: #A4BDFF;
+}
+
+.damage-feature-name-lunar-charged {
+    --feature-name-top: #D0A7FF;
+    --feature-name-bottom: #FDFEFC;
+}
+
+.damage-feature-name-lunar-bloom {
+    --feature-name-top: #B0FFA1;
+    --feature-name-bottom: #FFFFFF;
+}
+
+.damage-feature-name-lunar-crystallize {
+    --feature-name-top: #FFD9A4;
+    --feature-name-bottom: #FBFFFB;
+}
+
+.damage-feature-name-stellar-swirl-anemo {
+    --feature-name-top: #F3FFFE;
+    --feature-name-bottom: #6FFBBA;
+}
+
+.damage-feature-name-stellar-swirl-cryo {
+    --feature-name-top: #F0FCFF;
+    --feature-name-bottom: #99F4FC;
+}

@@ -2,6 +2,10 @@ import { Condition } from "../../classes/Condition";
 import { ConditionAscensionChar } from "../../classes/Condition/Ascension/Char";
 import { ConditionBoolean } from "../../classes/Condition/Boolean";
 import { ConditionBooleanNightSoul } from "../../classes/Condition/Boolean/NightSoul";
+import { ConditionBooleanValue } from "../../classes/Condition/Boolean/Value";
+import { ConditionDropdownTravelerResonated } from "../../classes/Condition/Dropdown/TravelerResonated";
+import { ConditionNot } from "../../classes/Condition/Not";
+import { ConditionStacks } from "../../classes/Condition/Stacks";
 import { ConditionStatic } from "../../classes/Condition/Static";
 import { DbObjectChar } from "../../classes/DbObject/Char";
 import { DbObjectConstellation } from "../../classes/DbObject/Constellation";
@@ -14,8 +18,11 @@ import { FeatureDamagePlungeCollision } from "../../classes/Feature2/Damage/Plun
 import { FeatureDamagePlungeShockWave } from "../../classes/Feature2/Damage/Plunge/ShockWave";
 import { FeatureDamageSkill } from "../../classes/Feature2/Damage/Skill";
 import { FeatureMultiplier } from "../../classes/Feature2/Multiplier";
+import { FeatureMultiplierStatic } from "../../classes/Feature2/Multiplier/Static";
+import { FeatureStatic } from "../../classes/Feature2/Static";
 import { StatTable } from "../../classes/StatTable";
 import { StatTableAscensionScale } from "../../classes/StatTable/Ascension/Scale";
+import { ValueTable } from "../../classes/ValueTable";
 import { charTables } from "../generated/CharTables";
 import { charTalentTables } from "../generated/CharTalentTables";
 
@@ -111,7 +118,36 @@ const C1DmgBonus = 6;
 const C1DmgBonusNightsoul = 9;
 const C4PyroDmg = 20;
 const C6CritDmg = 40;
+const ForeignStarfireBonus = 200;
+const ForeignStarfireCooldown = 15;
 
+
+const condTravelerAether = new ConditionBoolean({name: 'traveler_aether'});
+const condLumineDefault = new ConditionNot([condTravelerAether]);
+
+function makeChargedHit2Multipliers() {
+    return [
+        new FeatureMultiplier({
+            leveling: 'char_skill_attack',
+            values: Talents.get('attack.charged_hit_2'),
+            condition: condLumineDefault,
+        }),
+        new FeatureMultiplier({
+            leveling: 'char_skill_attack',
+            values: new StatTable(
+                'charged_hit_2',
+                charTalentTables.TravelerPyro.s1_boy.p7,
+            ),
+            condition: condTravelerAether,
+        }),
+    ];
+}
+
+const bladeMaxCondition = new ConditionBooleanValue({
+    setting: 'traveler_pyro_blade_sacred_flame',
+    cond: 'ge',
+    value: 2,
+});
 export const TravelerPyro = new DbObjectChar({
     name: 'traveler_pyro',
     serializeId: 100,
@@ -186,12 +222,7 @@ export const TravelerPyro = new DbObjectChar({
                     ],
                 },
                 {
-                    multipliers: [
-                        new FeatureMultiplier({
-                            leveling: 'char_skill_attack',
-                            values: Talents.get('attack.charged_hit_2'),
-                        }),
-                    ],
+                    multipliers: makeChargedHit2Multipliers(),
                 },
             ],
         }),
@@ -206,12 +237,7 @@ export const TravelerPyro = new DbObjectChar({
         }),
         new FeatureDamageCharged({
             isChild: true,
-            multipliers: [
-                new FeatureMultiplier({
-                    leveling: 'char_skill_attack',
-                    values: Talents.get('attack.charged_hit_2'),
-                }),
-            ],
+            multipliers: makeChargedHit2Multipliers(),
         }),
         new FeatureDamagePlungeCollision({
             name: 'plunge',
@@ -276,8 +302,83 @@ export const TravelerPyro = new DbObjectChar({
                 }),
             ],
         }),
+        new FeatureDamageMultihit({
+            category: 'attack',
+            damageType: 'charged',
+            name: 'traveler_pyro_inferno',
+            element: 'pyro',
+            allowInfusion: true,
+            items: [
+                {multipliers: [
+                    new FeatureMultiplier({
+                        leveling: 'char_skill_attack',
+                        values: Talents.get('attack.charged_hit_1'),
+                    }),
+                    new FeatureMultiplier({
+                        source: 'foreign_starfire',
+                        values: new ValueTable([ForeignStarfireBonus]),
+                    }),
+                ]},
+                {multipliers: [
+                    ...makeChargedHit2Multipliers(),
+                    new FeatureMultiplier({
+                        source: 'foreign_starfire',
+                        values: new ValueTable([ForeignStarfireBonus]),
+                    }),
+                ]},
+            ],
+            condition: bladeMaxCondition,
+        }),
+        new FeatureDamageCharged({
+            name: 'traveler_pyro_inferno_1',
+            isChild: true,
+            element: 'pyro',
+            multipliers: [
+                new FeatureMultiplier({
+                    leveling: 'char_skill_attack',
+                    values: Talents.get('attack.charged_hit_1'),
+                }),
+                new FeatureMultiplier({
+                    source: 'foreign_starfire',
+                    values: new ValueTable([ForeignStarfireBonus]),
+                }),
+            ],
+            condition: bladeMaxCondition,
+        }),
+        new FeatureDamageCharged({
+            name: 'traveler_pyro_inferno_2',
+            isChild: true,
+            element: 'pyro',
+            multipliers: [
+                ...makeChargedHit2Multipliers(),
+                new FeatureMultiplier({
+                    source: 'foreign_starfire',
+                    values: new ValueTable([ForeignStarfireBonus]),
+                }),
+            ],
+            condition: bladeMaxCondition,
+        }),
+        new FeatureStatic({
+            category: 'other',
+            name: 'traveler_pyro_inferno_cooldown',
+            format: 'decimal',
+            multipliers: [
+                new FeatureMultiplierStatic({
+                    source: 'foreign_starfire',
+                    values: new ValueTable([ForeignStarfireCooldown]),
+                }),
+            ],
+            condition: bladeMaxCondition,
+        }),
     ],
     conditions: [
+        new ConditionBoolean({
+            name: 'traveler_aether',
+            serializeId: 7,
+            title: 'talent_name.traveler_twin_aether',
+            description: 'talent_descr.traveler_twin_aether',
+            rotation: 'self',
+        }),
         new ConditionBoolean({
             name: 'common.nightsoul_blessing_state',
             serializeId: 1,
@@ -318,6 +419,19 @@ export const TravelerPyro = new DbObjectChar({
                 mastery: 15,
                 hp_base: 50,
             },
+        }),
+        new ConditionDropdownTravelerResonated({
+            name: 'traveler_pyro_resonated_elements',
+            serializeId: 8,
+        }),
+        new ConditionStacks({
+            name: 'traveler_pyro_blade_sacred_flame',
+            serializeId: 9,
+            title: 'talent_name.traveler_foreign_starfire',
+            description: 'talent_descr.traveler_foreign_starfire',
+            maxStacks: 2,
+            noStat: true,
+            rotation: 'self',
         }),
     ],
     constellation: new DbObjectConstellation([
@@ -371,6 +485,7 @@ export const TravelerPyro = new DbObjectChar({
                     description: 'talent_descr.traveler_ravaging_flame',
                     stats: {
                         dmg_pyro: C4PyroDmg,
+                        text_duration: 9,
                     },
                 }),
             ],

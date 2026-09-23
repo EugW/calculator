@@ -50,8 +50,9 @@ import { NocturnesCurtainCall } from "./Catalyst/NocturnesCurtainCall";
 import { AngelosHeptades } from "./Catalyst/AngelosHeptades";
 import { ClashOfKings } from "./Catalyst/ClashOfKings";
 import { EchoesOfTheHeart } from "./Catalyst/EchoesOfTheHeart";
-import { FrostScepter } from "./Catalyst/FrostScepter";
-import { Bludnye } from "./Catalyst/Bludnye";
+import { WintersHeavyHeart } from "./Catalyst/WintersHeavyHeart";
+import { HymnofTheMaelstrom } from "./Catalyst/HymnofTheMaelstrom";
+import { ApprenticesNotes } from "./Catalyst/ApprenticesNotes";
 
 export const Catalyst = new DbObjectListSerializeStats({
     SolarPearl: SolarPearl, // 43
@@ -105,6 +106,7 @@ export const Catalyst = new DbObjectListSerializeStats({
     AngelosHeptades: AngelosHeptades, // 244
     ClashOfKings: ClashOfKings, // 254
     EchoesOfTheHeart: EchoesOfTheHeart, // 255
-    FrostScepter: FrostScepter, // 261
-    Bludnye: Bludnye, // 262
+    WintersHeavyHeart: WintersHeavyHeart, // 261
+    HymnofTheMaelstrom: HymnofTheMaelstrom, // 262
+    ApprenticesNotes: ApprenticesNotes, // 267
 });

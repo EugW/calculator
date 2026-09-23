@@ -7,7 +7,6 @@ import { FeatureReactionLunarCharged } from "./Charged";
 
 export class FeatureReactionLunarChargedLike extends FeatureReactionLunarCharged {
     constructor(params) {
-        params.icon = 'lunarcharged';
         params.damageType ||= 'lunardirect';
         params.cannotReact = true;
         params.tags = params.tags || [];

@@ -7,6 +7,7 @@ import { ControlsBar, ControlsBarDivider } from "../../Components/ControlsBar";
 import { DialogContainer } from "../../Components/Dialog/Container";
 import { Feature2 } from "../../../classes/Feature2";
 import { FullHeight, FullHeightScrollable, FullHeightStatic } from "../../Components/FullHeight";
+import { FeatureName } from "../../Components/FeatureName";
 import { Lang } from "../../Lang";
 import { Modal } from "../../Modal";
 import { TitledButton } from "../../Components/Inputs/Buttons";
@@ -157,7 +158,7 @@ function FeatureList(props) {
             items.push(
                 <Checkbox
                     key={featName}
-                    title={lang.get(str)}
+                    title={<FeatureName text={lang.get(str)} result={feature} />}
                     checked={props.selectedNames.includes(featName)}
                     onChange={() => props.onChange(featName)}
                 />
@@ -171,7 +172,7 @@ function FeatureList(props) {
                     items.push(
                         <Checkbox
                             key={featName}
-                            title={lang.get('feature_'+ featName)}
+                            title={<FeatureName text={lang.get('feature_'+ featName)} />}
                             checked={props.selectedNames.includes(featName)}
                             onChange={() => props.onChange(featName)}
                         />

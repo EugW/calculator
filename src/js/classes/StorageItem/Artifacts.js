@@ -31,10 +31,18 @@ export class StorageItemArtifacts extends StorageItem {
     }
 
     validateItem(item) {
-        let art = this.decodeItem(item.data);
-        if (!art) return null;
+        if (!item || typeof item != 'object' || Array.isArray(item) || typeof item.data != 'string') {
+            return null;
+        }
 
-        return StorageItemArtifacts.getValidData(item);
+        try {
+            let art = this.decodeItem(item.data);
+            if (!art) return null;
+
+            return StorageItemArtifacts.getValidData(item);
+        } catch (error) {
+            return null;
+        }
     }
 
     parseString(string) {
@@ -164,9 +172,9 @@ export class StorageItemArtifacts extends StorageItem {
 
     getLocked() {
         let arts = [];
-        for (let item of this.items) {
+        for (let item of this.listDecoded(1)) {
             if (item.locked) {
-                arts.push(item.data);
+                arts.push(item.data.getHash());
             }
         }
         return arts;
@@ -263,14 +271,19 @@ export class StorageItemArtifacts extends StorageItem {
     }
 
     setLocked(artifacts, value) {
-        let hashes = {};
-        for (let art of artifacts) {
-            hashes[art] = 1;
+        this.requireCache();
+        let canonicalHashes = {};
+
+        for (let hash of artifacts) {
+            let index = this.indexByHash[hash];
+            if (index !== undefined) {
+                canonicalHashes[this.artifactsCache[index].getHash()] = 1;
+            }
         }
 
-        for (let item of this.items) {
-            if (hashes[item.data]) {
-                item.locked = !!value;
+        for (let item of this.listDecoded(1)) {
+            if (canonicalHashes[item.data.getHash()]) {
+                this.items[item.index].locked = !!value;
             }
         }
 
@@ -292,10 +305,10 @@ export class StorageItemArtifacts extends StorageItem {
     }
 
     static getValidData(item) {
-        return {
+        return Object.assign({}, item, {
             data: item.data,
             locked: !!item.locked,
             group: Artifact.trimGroupNames(item.group),
-        };
+        });
     }
 }

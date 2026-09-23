@@ -7,6 +7,7 @@ const enumAscensionTables = {
 	n1: new StatTable('', [19.5, 38.9, 58.4, 77.8, 97.3, 116.7]),
 	n2: new StatTable('', [25.9, 51.9, 77.8, 103.7, 129.7, 155.6]),
 	n3: new StatTable('', [31.1, 62.2, 93.4, 124.5, 155.6, 186.7]),
+	n4: new StatTable('', [11.7, 23.3, 35, 46.7, 0, 0]),
 };
 
 const enumStatTables = {
@@ -387,6 +388,12 @@ const enumStatTables = {
 		base: 11.26,
 		scale: weaponStatScales.crt_2_1,
 	}),
+	n74: new StatTableAscensionScale({
+		stat: 'atk_base',
+		base: 23.245,
+		ascension: enumAscensionTables.n4,
+		scale: weaponStatScales.atk_1_1,
+	}),
 };
 
 export const weaponStatTables = {
@@ -534,11 +541,11 @@ export const weaponStatTables = {
 		enumStatTables.n11,
 		enumStatTables.n15,
 	],
-	SpikedStake: [
+	NewBough: [
 		enumStatTables.n11,
 		enumStatTables.n27,
 	],
-	Fajian: [
+	SilverLight: [
 		enumStatTables.n11,
 		enumStatTables.n12,
 	],
@@ -614,7 +621,7 @@ export const weaponStatTables = {
 		enumStatTables.n30,
 		enumStatTables.n37,
 	],
-	Samosvist: [
+	BeyondTheChrysalis: [
 		enumStatTables.n28,
 		enumStatTables.n36,
 	],
@@ -1082,7 +1089,7 @@ export const weaponStatTables = {
 		enumStatTables.n13,
 		enumStatTables.n25,
 	],
-	FrostScepter: [
+	WintersHeavyHeart: [
 		enumStatTables.n11,
 		enumStatTables.n27,
 	],
@@ -1162,7 +1169,7 @@ export const weaponStatTables = {
 		enumStatTables.n51,
 		enumStatTables.n64,
 	],
-	Bludnye: [
+	HymnofTheMaelstrom: [
 		enumStatTables.n34,
 		enumStatTables.n38,
 	],
@@ -1306,7 +1313,7 @@ export const weaponStatTables = {
 		enumStatTables.n11,
 		enumStatTables.n46,
 	],
-	Windtalker: [
+	BreezeborneRefrain: [
 		enumStatTables.n11,
 		enumStatTables.n17,
 	],
@@ -1357,5 +1364,20 @@ export const weaponStatTables = {
 	GoldenFrostboundOath: [
 		enumStatTables.n34,
 		enumStatTables.n39,
+	],
+	DullBlade: [
+		enumStatTables.n74,
+	],
+	WasterGreatsword: [
+		enumStatTables.n74,
+	],
+	BeginnersProtector: [
+		enumStatTables.n74,
+	],
+	ApprenticesNotes: [
+		enumStatTables.n74,
+	],
+	HuntersBow: [
+		enumStatTables.n74,
 	],
 };

@@ -1,6 +1,6 @@
-const DRIVE_CLIENT_ID = '23514418281-hnsnrvdaiu6loi8rob1ttuned773n7iq.apps.googleusercontent.com'; // prod
+const DRIVE_CLIENT_ID = '103730240642-nbjj87s55g3dhvjjjc0a97hfg0s8d50j.apps.googleusercontent.com'; // prod
 // const DRIVE_CLIENT_ID = '212641732900-mhmqk2643a60b0t2qmpadmu0ermht4cq.apps.googleusercontent.com' // dev
-const DRIVE_API_KEY = 'AIzaSyBiK_Y9LXJMzYxGt_p2qJ2dnMGtxOXHoU8'; // prod
+const DRIVE_API_KEY = 'AIzaSyDpohPk1ReU0adk9kDeqSChbzjatlzYqzY'; // prod
 // const DRIVE_API_KEY = 'AIzaSyCKO7h7FTs4TWfNU41T2YZQEezoumA6D7c' // dev
 const DRIVE_SCOPE = 'https://www.googleapis.com/auth/drive.appdata';
 const DRIVE_DISCOVERY = 'https://www.googleapis.com/discovery/v1/apis/drive/v3/rest';

@@ -12,6 +12,7 @@ import { Stats } from "../../classes/Stats";
 import { FullHeight, FullHeightScrollable, FullHeightStatic } from "./FullHeight";
 import { TabDisclaimer } from "./Tab";
 import { FeatureTableValues } from "./FeatureTable";
+import { FeatureName } from "./FeatureName";
 
 export function SuggestResult(props) {
     let lang = new Lang();
@@ -174,7 +175,9 @@ function SuggesterFeatures(props) {
 
         items.push(
             <div className="value-line sub" key={feat}>
-                <div className="value-name">{lang.get('feature_' + feat)}</div>
+                <div className="value-name">
+                    <FeatureName text={lang.get('feature_' + feat)} result={features[feat]} />
+                </div>
                 <SuggesterFeaturesValues
                     item={features[feat]}
                 />
@@ -185,7 +188,9 @@ function SuggesterFeatures(props) {
     return (
         <div className="values">
             <div className="value-line">
-                <div className="value-name">{lang.get('feature_' + props.mainFeature)}</div>
+                <div className="value-name">
+                    <FeatureName text={lang.get('feature_' + props.mainFeature)} result={features[props.mainFeature]} />
+                </div>
                 <SuggesterFeaturesValues
                     item={features[props.mainFeature]}
                     base={props.maxFeatures[props.mainFeature]}

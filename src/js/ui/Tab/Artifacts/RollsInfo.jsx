@@ -1,6 +1,6 @@
 import React from 'react';
-import parse from 'html-react-parser';
 
+import { FeatureName } from '../../Components/FeatureName';
 import { GroupBox } from '../../Components/Inputs/GroupBox';
 import { Lang } from '../../Lang';
 import { substatCheck } from '../../../classes/SubstatCheck';
@@ -84,6 +84,7 @@ export class RollsInfo extends React.Component {
     render() {
         let items = [];
         let total = 0;
+        let featureResult = this.props.build.getFeatureResultByName(this.props.feature);
 
         for (let item of this.getSubstatRolls()) {
             total += item.count;
@@ -112,7 +113,12 @@ export class RollsInfo extends React.Component {
                     <div className="si-value">{total}</div>
                 </div>
                 {items}
-                <div className="feature-roll-remark">{lang.get('stat_view.for_feature')}: {parse(lang.get('feature_'+ this.props.feature))}</div>
+                <div className="feature-roll-remark">
+                    {lang.get('stat_view.for_feature')}: <FeatureName
+                        text={lang.get('feature_'+ this.props.feature)}
+                        result={featureResult}
+                    />
+                </div>
             </GroupBox>
         );
     }

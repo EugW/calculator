@@ -34,7 +34,7 @@
 .weapon-icon-bow-rainbow-serpents-rain-bow {background-image: url("../../images/weapons/bow/bow_elegguabow.png")}
 .weapon-icon-bow-jade-vista {background-image: url("../../images/weapons/bow/bow_shatteredmirror.png")}
 .weapon-icon-bow-covenant-of-frost-and-snow {background-image: url("../../images/weapons/bow/bow_glintstonebow.png")}
-.weapon-icon-bow-windtalker {background-image: url("../../images/weapons/bow/bow_windtalker.png")}
+.weapon-icon-bow-breezeborne-refrain {background-image: url("../../images/weapons/bow/bow_windtalker.png")}
 .weapon-icon-bow-skyward-harp {background-image: url("../../images/weapons/bow/bow_dvalin.png")}
 .weapon-icon-bow-amos-bow {background-image: url("../../images/weapons/bow/bow_amos.png")}
 .weapon-icon-bow-elegy-for-the-end {background-image: url("../../images/weapons/bow/bow_widsith.png")}
@@ -47,16 +47,17 @@
 .weapon-icon-bow-astral-vultures-crimson-plumage {background-image: url("../../images/weapons/bow/bow_qoyllorsnova.png")}
 .weapon-icon-bow-the-daybreak-chronicles {background-image: url("../../images/weapons/bow/bow_arianna.png")}
 .weapon-icon-bow-golden-frostbound-oath {background-image: url("../../images/weapons/bow/bow_alkonost.png")}
+.weapon-icon-bow-hunters-bow {background-image: url("../../images/weapons/bow/bow_hunters.png")}
 .sprite-weapon-bow.sprite-24 {
-	background-image: url("../../images/sprites/weapon_bow_85413e1f4c1f6574b1acd200eb55c0ff.png");
+	background-image: url("../../images/sprites/weapon_bow_3e3909b59d3e154a330d0c5f06681b30.png");
 	background-size: 120px 264px;
 }
 .sprite-weapon-bow.sprite-40 {
-	background-image: url("../../images/sprites/weapon_bow_151c5fd0f040b1e7b9573879721ad63d.png");
+	background-image: url("../../images/sprites/weapon_bow_e2ecebfad9fb4fbde07b3dc5f0341e21.png");
 	background-size: 200px 440px;
 }
 .sprite-weapon-bow.sprite-60 {
-	background-image: url("../../images/sprites/weapon_bow_3420c30d662b08ed4995815b0d235b32.png");
+	background-image: url("../../images/sprites/weapon_bow_7e6bbb5605181da60425f13f8e519ddd.png");
 	background-size: 300px 660px;
 }
 .sprite.weapon-icon-bow-unknown {background-position: 0 0}
@@ -95,7 +96,7 @@
 .sprite.weapon-icon-bow-rainbow-serpents-rain-bow {background-position: 75% 60%}
 .sprite.weapon-icon-bow-jade-vista {background-position: 100% 60%}
 .sprite.weapon-icon-bow-covenant-of-frost-and-snow {background-position: 0 70%}
-.sprite.weapon-icon-bow-windtalker {background-position: 25% 70%}
+.sprite.weapon-icon-bow-breezeborne-refrain {background-position: 25% 70%}
 .sprite.weapon-icon-bow-skyward-harp {background-position: 50% 70%}
 .sprite.weapon-icon-bow-amos-bow {background-position: 75% 70%}
 .sprite.weapon-icon-bow-elegy-for-the-end {background-position: 100% 70%}
@@ -108,6 +109,7 @@
 .sprite.weapon-icon-bow-astral-vultures-crimson-plumage {background-position: 25% 90%}
 .sprite.weapon-icon-bow-the-daybreak-chronicles {background-position: 50% 90%}
 .sprite.weapon-icon-bow-golden-frostbound-oath {background-position: 75% 90%}
+.sprite.weapon-icon-bow-hunters-bow {background-position: 100% 90%}
 
 @media
 only screen and (-webkit-min-device-pixel-ratio: 2),
@@ -152,7 +154,7 @@ only screen and (                min-resolution: 2dppx) {
 	.weapon-icon-bow-rainbow-serpents-rain-bow {background-image: url("../../images/weapons/bow/bow_elegguabow_2x.png")}
 	.weapon-icon-bow-jade-vista {background-image: url("../../images/weapons/bow/bow_shatteredmirror_2x.png")}
 	.weapon-icon-bow-covenant-of-frost-and-snow {background-image: url("../../images/weapons/bow/bow_glintstonebow_2x.png")}
-	.weapon-icon-bow-windtalker {background-image: url("../../images/weapons/bow/bow_windtalker_2x.png")}
+	.weapon-icon-bow-breezeborne-refrain {background-image: url("../../images/weapons/bow/bow_windtalker_2x.png")}
 	.weapon-icon-bow-skyward-harp {background-image: url("../../images/weapons/bow/bow_dvalin_2x.png")}
 	.weapon-icon-bow-amos-bow {background-image: url("../../images/weapons/bow/bow_amos_2x.png")}
 	.weapon-icon-bow-elegy-for-the-end {background-image: url("../../images/weapons/bow/bow_widsith_2x.png")}
@@ -165,7 +167,8 @@ only screen and (                min-resolution: 2dppx) {
 	.weapon-icon-bow-astral-vultures-crimson-plumage {background-image: url("../../images/weapons/bow/bow_qoyllorsnova_2x.png")}
 	.weapon-icon-bow-the-daybreak-chronicles {background-image: url("../../images/weapons/bow/bow_arianna_2x.png")}
 	.weapon-icon-bow-golden-frostbound-oath {background-image: url("../../images/weapons/bow/bow_alkonost_2x.png")}
-	.sprite-weapon-bow.sprite-24 {background-image: url("../../images/sprites/weapon_bow_76d8c40be2d4de9b9ccfb5b80e54408d.png")}
-	.sprite-weapon-bow.sprite-40 {background-image: url("../../images/sprites/weapon_bow_bc0eae02d1f647076c90d26dc26aa76c.png")}
-	.sprite-weapon-bow.sprite-60 {background-image: url("../../images/sprites/weapon_bow_cc3dc2346fbfb3442a964c3f397b263e.png")}
+	.weapon-icon-bow-hunters-bow {background-image: url("../../images/weapons/bow/bow_hunters_2x.png")}
+	.sprite-weapon-bow.sprite-24 {background-image: url("../../images/sprites/weapon_bow_91cce9e6b5a5ad8b66f2fcf6ed769424.png")}
+	.sprite-weapon-bow.sprite-40 {background-image: url("../../images/sprites/weapon_bow_a4c049718c032c47b834553736da580b.png")}
+	.sprite-weapon-bow.sprite-60 {background-image: url("../../images/sprites/weapon_bow_94b70dd9664c714d75834fed8a92a20b.png")}
 }

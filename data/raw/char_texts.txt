@@ -277,8 +277,8 @@ Suffer the Winter Wheat Will
 Increases the DMG Alyosha deals with his Elemental Skill and Elemental Burst by 0.35% for every 1% of his Energy Recharge. Up to a 70% increase can be obtained in this way.
 
 Спеша в опасные края
-#Находясь в {LINK#N11330003}<color=#FFD780FF>Пределе путеводной звезды</color>{/LINK}, Алёша входит в состояние <color=#FFD780FF>Сияния{NON_BREAK_SPACE}- Звёздный проводник</color>.
-<color=#FFD780FF>Сияние{NON_BREAK_SPACE}- Звёздный проводник</color>: <color=#FFD780FF>Меткость охотника</color>, получаемая при активации {LINK#N11480001}<color=#FFD780FF>Метки охотника</color>{/LINK}, также повышает урон Звёздного проводника персонажа на поле боя на 20%.
+#Находясь в {LINK#N11330003}<color=#FFD780FF>Пределе путеводной звезды</color>{/LINK}, Алёша входит в состояние <color=#FFD780FF>Сияния - Звёздный проводник</color>.
+<color=#FFD780FF>Сияние - Звёздный проводник</color>: <color=#FFD780FF>Меткость охотника</color>, получаемая при активации {LINK#N11480001}<color=#FFD780FF>Метки охотника</color>{/LINK}, также повышает урон Звёздного проводника персонажа на поле боя на 20%.
 
 Into the Fray
 Alyosha will enter the <color=#FFD780FF>Radiance: Stellar-Conduct</color> state when inside a {LINK#N11330003}<color=#FFD780FF>Polestar Field</color>{/LINK}.
@@ -1477,7 +1477,7 @@ All nearby party members' Lunar Reaction DMG is {LINK#N11190007}<color=#FFD780FF
 -= Cyno =-
 
 Суд пера
-Во время действия Поклявшегося прокладывать путь <color=#FFD780FF>Священного обряда: Проворство шакала</color> Сайно периодически входит в состояние Свидетеля истины. Активация <color=#FFD780FF>Тайного обряда: Переправляющий души</color> в этом состоянии вызывает эффект Вынесения приговора, который повышает урон текущего Тайного обряда: Переправляющий души на 35% и выпускает 3 Молнии бедствия, наносящие <color=#FFACFFFF>Электро урон</color> в 100% от силы атаки Сайно.
+Во время действия Поклявшегося прокладывать путь <color=#FFD780FF>Священного обряда: Проворство шакала</color> Сайно периодически входит в состояние Свидетеля истины. Активация <color=#FFD780FF>Тайного обряда: Переправляющий души</color> в этом состоянии вызывает эффект Вынесения приговора, который повышает урон текущего Тайного обряда: Переправляющий души на 35% и выпускает 3 Молнии бедствия, наносящие <color=#FFACFFFF>Электро урон</color> в размере 100% от силы атаки Сайно.
 Урон Молний бедствия считается уроном элементального навыка.
 
 Featherfall Judgment
@@ -1856,7 +1856,7 @@ Maximum upgrade level is 15.
 
 Мы закрываемся!
 Персонажи, находящиеся в области навыка <color=#FFD780FF>Авторский коктейль</color>, получают следующие эффекты, зависящие от их HP:
-· При HP равном или ниже 50% увеличивает бонус получаемого лечения на 30%.
+· При HP, равном или ниже 50%, увеличивает бонус получаемого лечения на 30%.
 · При HP выше 50% увеличивает мастерство стихий на 200 ед.
 
 Cat's Tail Closing Time
@@ -1870,7 +1870,7 @@ Characters within <color=#FFD780FF>Signature Mix</color>'s radius will gain the 
 · При HP выше 50% мастерство стихий увеличивается на 200 ед.
 Кроме того, макс. HP Дионы повышается на 25%.
 <color=#FFD780FF>Сияние - Звёздный блеск</color>: урон соответствующих реакций персонажей в области навыка Авторский коктейль повышается:
-<color=#FFD780FF>Сияние{NON_BREAK_SPACE}- Звёздный проводник</color>: урон Сверхпроводника и Звёздного проводника увеличивается на 40%.
+<color=#FFD780FF>Сияние - Звёздный проводник</color>: урон Сверхпроводника и Звёздного проводника увеличивается на 40%.
 <color=#FFD780FF>Сияние - Звёздное рассеивание</color>: урон Крио рассеивания и Звёздного рассеивания увеличивается на 40%.
 
 Cat's Tail Closing Time
@@ -5539,7 +5539,7 @@ When Qiqi hits opponents with her Normal and Charged Attacks, she has a 50% chan
 Семь истинных сокровищ
 #Откат элементального навыка <color=#FFD780FF>Искусство Адепта: Вестник стужи</color> сокращается до 15 сек.
 <color=#FFD780FF>Сияние - Звёздный блеск</color>: во время действия Вестника стужи урон соответствующих реакций персонажей вашего отряда повышается:
-<color=#FFD780FF>Сияние{NON_BREAK_SPACE}- Звёздный проводник</color>: урон реакций Сверхпроводник и Звёздный проводник персонажей вашего отряда повышается на 50%.
+<color=#FFD780FF>Сияние - Звёздный проводник</color>: урон реакций Сверхпроводник и Звёздный проводник персонажей вашего отряда повышается на 50%.
 <color=#FFD780FF>Сияние: Звёздное рассеивание</color>: урон реакций Крио рассеивание и Звёздное рассеивание персонажей вашего отряда повышается на 50%.
 Кроме того, когда Ци Ци пребывает в {LINK#N11330003}<color=#FFD780FF>Пределе путеводной звезды</color>{/LINK} или на 8 сек. после того как персонаж отряда поблизости активирует Звёздное рассеивание, Ци Ци входит в состояние <color=#FFD780FF>Сияние - Звёздный проводник</color> или <color=#FFD780FF>Сияние - Звёздное рассеивание</color> соответственно.
 
@@ -5843,7 +5843,7 @@ Additionally, for every 10 points of <color=#FFD780FF>Decoding Power</color> Fag
 A Lady's Code of Conduct
 Increases Sandrone's Elemental Mastery based on her ATK. Every 100 ATK will increase her Elemental Mastery by 8. The maximum increase she can gain this way is 160.
 
-Свет рационализма
+Звёздное торжество: Свет рационализма
 Когда Сандроне пребывает в {LINK#N11330003}<color=#FFD780FF>Пределе путеводной звезды</color>{/LINK} или на 8 сек. после того как персонажи отряда поблизости активируют Звёздное рассеивание, она входит в состояние <color=#FFD780FF>Сияние - Звёздный проводник</color> или <color=#FFD780FF>Сияние - Звёздное рассеивание</color> соответственно.
 Когда персонажи отряда активируют реакции Сверхпроводник или Крио рассеивание, они превращаются в Звёздный проводник или Звёздное рассеивание, а базовый урон этих реакций увеличивается на 0,7% за каждые 100 ед. силы атаки Сандроне. Максимальное увеличение урона, которое можно получить таким образом, составляет 14%.
 
@@ -6943,147 +6943,147 @@ Additionally, the DMG Venti deals to these opponents will gain a CRIT DMG Bonus 
 
 -= Vesna =-
 
-Выдержка
-Применив <color=#FFD780FF>{LINK#N11430001}Клинок духа: Выпад{/LINK}</color>, <color=#FFD780FF>{LINK#N11430001}Клинок духа: Падение{/LINK}</color>, <color=#FFD780FF>{LINK#N11430001}Клинок духа: Танец{/LINK}</color> или взрыв стихии <color=#FFD780FF>{LINK#S11435}Клинок духа: Взрыв{/LINK}</color>, Весна получает 1 уровень Выдержки. Эффект длится 20 сек. и складывается до 6 раз. После того как Весна активирует<color=#FFD780FF>{LINK#S11432}Клинок духа: Зарождение{/LINK}</color> или покидает поле боя, все уровни Выдержки снимаются.
-Каждый уровень Выдержки повышает урон всех <color=#FFD780FF>Клинков духа</color> и <color=#FFD780FF>Звёздных клинков духа</color> на 10% от исходного (до 160% от исходного урона).
+Обряд: Весенняя процессия
+Применив особый элементальный навык <color=#FFD780FF>{LINK#N11430003}Меч реющих ветров{/LINK}</color> или взрыв стихии <color=#FFD780FF>{LINK#S11435}За Царицу{/LINK}</color>, Весна также получает 1 уровень <color=#FFD780FF>Дисциплинарных мер</color>. Этот эффект длится 20 сек. и складывается до 6 раз. Длительность каждого уровня рассчитывается отдельно.
+С <color=#FFD780FF>Дисциплинарными мерами</color> в наличии <color=#FFD780FF>{LINK#N11430004}Клинки духа{/LINK}</color>, призываемые Весной, наносят урон, равный (100% + 10% × количество уровней Дисциплинарных мер) от исходного урона. Все уровни <color=#FFD780FF>Дисциплинарных мер</color> Весны снимаются, когда она использует элементальный навык <color=#FFD780FF>Искусство побеждать</color> или покидает поле боя.
 
-Unruffled
-After Vesna unleashes <color=#FFD780FF>{LINK#N11430001}Spirit Blade Pierce{/LINK}</color>, <color=#FFD780FF>{LINK#N11430001}Spirit Blade Plunge{/LINK}</color>, <color=#FFD780FF>{LINK#N11430001}Spirit Blade Dance{/LINK}</color>, or her Elemental Burst <color=#FFD780FF>{LINK#S11435}Spirit Blade Burst{/LINK}</color>, she gains 1 stack of "Unruffled" that lasts 20s. Max 6 stacks. All existing stacks of Unruffled are cleared when Vesna unleashes the Elemental Skill <color=#FFD780FF>{LINK#S11432}Spirit Blade Inception{/LINK}</color> or when she leaves the field.
-Each stack of Unruffled increases all DMG dealt by Vesna with <color=#FFD780FF>spirit blades</color> and <color=#FFD780FF>Stellar spirit blades</color> by 10% of the original, up to 160% of the original.
+Rite of Spring's Procession
+After Vesna uses the special Elemental Skill <color=#FFD780FF>{LINK#N11430003}Windborne Sword{/LINK}</color> or the Elemental Burst <color=#FFD780FF>{LINK#S11435}For the Tsaritsa!{/LINK}</color>, she also gains 1 stack of <color=#FFD780FF>Disciplinary Action</color> which lasts 20s. Max 6 stacks, and the duration of each stack is independent of the others'.
+When she has <color=#FFD780FF>Disciplinary Action</color> stacks active, the <color=#FFD780FF>{LINK#N11430004}Spirit Blades{/LINK}</color> summoned by Vesna will deal DMG equal to (100% + 10% × Disciplinary Action stack count) of the original DMG instead. All active stacks of <color=#FFD780FF>Disciplinary Action</color> are cleared when Vesna uses the Elemental Skill <color=#FFD780FF>The Art of Victory</color> or when she leaves the field.
 
-Мастерство
-<color=#FFD780FF>Сияние - Звёздное рассеивание</color>: в зависимости от типов элементов персонажей отряда (включая Весну) Весна получает усиления:
-· Каждый <color=#99FFFFFF>Крио</color> или <color=#80FFD7FF>Анемо</color> персонаж повышает силу атаки Весны на 6%.
-· Каждый персонаж других типов элементов повышает мастерство стихий Весны на 25 ед.
+Истина восторжествует
+<color=#FFD780FF>Сияние - Звёздное рассеивание</color>: в зависимости от типов элементов персонажей отряда Весна получает соответствующие эффекты:
+· Каждый <color=#99FFFFFF>Крио</color> или <color=#80FFD7FF>Анемо</color> персонаж в отряде повышает силу атаки Весны на 6%.
+· Каждый персонаж других типов элементов в отряде повышает мастерство стихий Весны на 25 ед.
 
-Effortless
-<color=#FFD780FF>Radiance: Stellar Swirl</color>: Based on the Elemental Type of characters in the party (including Vesna herself), Vesna will gain the following buffs:
-· Every <color=#99FFFFFF>Cryo</color> or <color=#80FFD7FF>Anemo</color> character in the party increases Vesna's ATK by 6%; and
-· For every character of other Elemental Types in the party, Vesna gets a 25-point Elemental Mastery boost instead.
+Truth Prevails
+<color=#FFD780FF>Radiance: Stellar Swirl</color>: Vesna will gain the corresponding effect based on the Elemental Type of her party members:
+· For every <color=#99FFFFFF>Cryo</color> or <color=#80FFD7FF>Anemo</color> character in her current party, Vesna's ATK increases by 6%; and
+· For every character of all other Elemental Types in her current party, Vesna's Elemental Mastery increases by 25 instead.
 
-Звёздное торжество: Сияющий альв
-Когда персонажи отряда активируют Крио Рассеивание, оно превращается в Звёздное рассеивание, а базовый урон Звёздного рассеивания увеличивается на 0,7% за каждые 100 ед. силы атаки Весны. Максимальное увеличение урона, которое можно получить таким образом, составляет 14%.
-Кроме того, когда Весна находится рядом с анемогранумом, созданным Звёздным рассеиванием, она входит в состояние <color=#FFD780FF>Сияния: Звёздное рассеивание</color>.
+Звёздное торжество: Восхитительная прелюдия
+Когда персонажи отряда активируют Крио Рассеивание, оно превращается в Звёздное рассеивание, а базовый урон Звёздного рассеивания персонажей отряда увеличивается на 0,7% за каждые 100 ед. силы атаки Весны. Максимальное увеличение урона, которое можно получить таким образом, составляет 14%.
+На 8 сек. после того как персонажи отряда поблизости активируют Звёздное рассеивание, Весна входит в состояние <color=#FFD780FF>Сияния: Звёздное рассеивание</color>.
 
-Stellar Jubilee: Radiant Fae
-When party members trigger Cryo Swirl, it will be changed to a Stellar Swirl reaction, and party members' Base DMG for the Stellar Swirl will be increased based on Vesna's ATK: Every 100 ATK she has increases the Base Stellar Swirl DMG by 0.7%. The maximum increase that can be gained this way is 14%.
-After a nearby party member triggers a Stellar Swirl reaction, Vesna enters the <color=#FFD780FF>Radiance: Stellar Swirl</color> state for 8s.
+Stellar Jubilee: Splendid Prelude
+When party members trigger Cryo Swirl, it will be changed to a Stellar Swirl reaction, and party members' Base DMG for the Stellar Swirl will be increased based on Vesna's ATK. Every 100 ATK she has increases the Base Stellar Swirl DMG by 0.7%. The maximum DMG increase that can be gained this way is 14%.
+After a party member triggers a Stellar Swirl reaction nearby, Vesna enters the <color=#FFD780FF>Radiance: Stellar Swirl</color> state for 8s.
 
-Созвездие 1
-В состоянии <color=#FFD780FF>{LINK#N11430001}Клинка духа{/LINK}</color> количество использований Клинка духа: Танец увеличивается на 1, а первое применение <color=#FFD780FF>{LINK#N11430001}Клинка духа: Танец{/LINK}</color> в этом состоянии не расходует Могущество клинка духа.
-Кроме того, во время действия состояния Клинка духа урон Звёздного рассеивания Весны повышается на 20%.
+Прощальный пир зимы
+Весна, пребывая в режиме <color=#FFD780FF>{LINK#N11430001}Вооружённого караула{/LINK}</color>, может применять <color=#FFD780FF>{LINK#N11430003}Меч реющих ветров{/LINK}</color> высшего уровня не три, но четыре раза. Вдобавок первое применение <color=#FFD780FF>Меча реющих ветров</color> высшего уровня после каждого перехода в режим <color=#FFD780FF>Вооружённого караула</color> не расходует <color=#FFD780FF>{LINK#N11430002}Храбрость воина{/LINK}</color>.
+Кроме того, в режиме <color=#FFD780FF>Вооружённого караула</color> урон реакции Звёздного рассеивания Весны повышается на 20%.
 
-C1
-Vesna gains 1 Spirit Blade Dance usage in the <color=#FFD780FF>{LINK#N11430001}Spirit Blade{/LINK}</color> state, and the first use of <color=#FFD780FF>{LINK#N11430001}Spirit Blade Dance{/LINK}</color> while in this state will not consume any Spirit Blade Force.
-Additionally, Vesna deals 20% more Stellar Swirl reaction DMG while in the Spirit Blade state.
+Winter's Farewell Feast
+When in the <color=#FFD780FF>{LINK#N11430001}Armed for Action{/LINK}</color> mode, Vesna can unleash <color=#FFD780FF>{LINK#N11430003}Windborne Sword{/LINK}</color> at the highest level 4 times instead of 3. Also, each time she enters the <color=#FFD780FF>Armed for Action</color> mode, she will not consume <color=#FFD780FF>{LINK#N11430002}Sword Essence{/LINK}</color> the first time she uses <color=#FFD780FF>Windborne Sword</color> at the highest level.
+Additionally, Vesna deals 20% increased Stellar Swirl reaction DMG when in the <color=#FFD780FF>Armed for Action</color> mode.
 
-Созвездие 2
-Эффект таланта возвышения <color=#FFD780FF>{LINK#P1432101}Выдержка{/LINK}</color> получает усиление: когда Весна входит в состояние <color=#FFD780FF>{LINK#N11430001}Клинка духа{/LINK}</color>, она сразу получает максимум уровней Выдержки.
-Кроме того, когда у Весны максимум уровней Выдержки, её сила атаки увеличивается на 60%.
+Хоровод прихода весны
+Талант возвышения <color=#FFD780FF>{LINK#P1432101}Обряд: Весенняя процессия{/LINK}</color> получает усиление: когда Весна входит в режим <color=#FFD780FF>{LINK#N11430001}Вооружённого караула{/LINK}</color>, она получает максимальное количество уровней <color=#FFD780FF>Дисциплинарных мер</color>. С максимальным количеством уровней <color=#FFD780FF>Дисциплинарных мер</color> сила атаки Весны повышается на 40%.
+Для эффекта выше требуется разблокировать талант возвышения Обряд: Весенняя процессия.
 
-C2
-Enhances the effects of the Ascension Talent <color=#FFD780FF>{LINK#P1432101}Unruffled{/LINK}</color> as follows: Vesna gains the max number of Unruffled stacks as soon as she enters the <color=#FFD780FF>{LINK#N11430001}Spirit Blade{/LINK}</color> state.
-Additionally, when Vesna is at max Unruffled stacks, her ATK is increased by 60%.
+Kolo of Spring's Arrival
+The Ascension Talent <color=#FFD780FF>{LINK#P1432101}Rite of Spring's Procession{/LINK}</color> is enhanced: Vesna gains the maximum number of <color=#FFD780FF>Disciplinary Action</color> stacks when she enters <color=#FFD780FF>{LINK#N11430001}Armed for Action{/LINK}</color> mode. Vesna's ATK is increased by 40% when she has maximum <color=#FFD780FF>Disciplinary Action</color> stacks.
+You must unlock the Ascension Talent "Rite of Spring's Procession" to gain access to the above effects.
 
-Созвездие 3
-Увеличивает уровень навыка <color=#FFD780FF>{LINK#S11432}Клинок духа: Зарождение{/LINK}</color> на 3.
+Последнее подношение зимы
+Увеличивает уровень навыка <color=#FFD780FF>{LINK#S11432}Искусство побеждать{/LINK}</color> на 3.
 Макс. уровень: 15
 
-C3
-Increases the Level of the Elemental Skill <color=#FFD780FF>{LINK#S11432}Spirit Blade Inception{/LINK}</color> by 3.
+Winter's Last Offering
+Increases the Level of the Elemental Skill <color=#FFD780FF>{LINK#S11432}The Art of Victory{/LINK}</color> by 3.
 Maximum upgrade level is 15.
 
-Созвездие 4
-Усиливает эффекты таланта возвышения Весны <color=#FFD780FF>{LINK#P1432201}Мастерство{/LINK}</color> на 200%.
+Слава предков
+Талант возвышения <color=#FFD780FF>{LINK#P1432201}Истина восторжествует{/LINK}</color> получает усиление: эффекты повышения силы атаки и мастерства стихий увеличиваются в 3 раза по сравнению с исходным значением.
 
-C4
-Increases the effects of Vesna's Ascension Talent <color=#FFD780FF>{LINK#P1432201}Effortless{/LINK}</color> by 200%.
+Glory to Our Forebears
+The Ascension Talent <color=#FFD780FF>{LINK#P1432201}Truth Prevails{/LINK}</color> is enhanced: Its ATK and Elemental Mastery bonuses increase to 3 times their original values.
 
-Созвездие 5
-Увеличивает уровень навыка <color=#FFD780FF>{LINK#S11435}Клинок духа: Взрыв{/LINK}</color> на 3.
+Долг дворянина
+Увеличивает уровень навыка <color=#FFD780FF>{LINK#S11435}За Царицу{/LINK}</color> на 3.
 Макс. уровень: 15
 
-C5
-Increases the Level of the Elemental Burst <color=#FFD780FF>{LINK#S11435}Spirit Blade Burst{/LINK}</color> by 3.
+The Nobleborn's Charge
+Increases the Level of the Elemental Burst <color=#FFD780FF>{LINK#S11435}For the Tsaritsa!{/LINK}</color> by 3.
 Maximum upgrade level is 15.
 
-Созвездие 6
-В течение 5 сек. после использования <color=#FFD780FF>{LINK#N11430001}Клинка духа: Танец{/LINK}</color> Весна может быстрым нажатием элементального навыка или обычной атаки применять <color=#FFD780FF>Клинок духа: Поступь</color>:
-· Наносит 150% <color=#80FFD7FF>Анемо урона</color> от силы атаки и высвобождает <color=#FFD780FF>Звёздный клинок духа</color>, который наносит 200% <color=#80FFD7FF>Анемо урона</color> от силы атаки, считающегося уроном Звёздного рассеивания.
-· Если Весна находится в состоянии Клинка духа, то данная атака также призывает <color=#FFD780FF>Перо духа</color>.
-Звёздные клинки духа, создаваемые Клинком духа: Поступь, также получают усиление таланта возвышения 1.
-Вдобавок урон Звёздного рассеивания Весны {LINK#N11190007}<color=#FFD780FF>возвышается</color>{/LINK} на 20%.
+Непоколебимое рвение
+Активация обычной атаки или элементального навыка Весны быстрым нажатием в течение 5 сек. после использования <color=#FFD780FF>{LINK#N11430003}Меча реющих ветров{/LINK}</color> высшего уровня активирует секретный навык вил <color=#FFD780FF>Меч реющих ветров: Перемены</color>: он наносит 150% <color=#80FFD7FF>Анемо урона</color> от силы атаки Весны и призывает <color=#FFD780FF>{LINK#N11430004}Клинок духа{/LINK}</color>, который дополнительно наносит 200% <color=#80FFD7FF>Анемо урона</color> от силы атаки Весны. Если Весна находится в режиме <color=#FFD780FF>{LINK#N11430001}Вооружённого караула{/LINK}</color>, то она также призывает Ветряное перо, которое выполняет совместные атаки против врагов.
+Кроме того, урон реакции Звёздного рассеивания Весны {LINK#N11190007}<color=#FFD780FF>возвышается</color>{/LINK} на 20%.
 
-C6
-Tapping Elemental Skill or Normal Attack in the 5s after using <color=#FFD780FF>{LINK#N11430001}Spirit Blade Dance{/LINK}</color> allows Vesna to go on to unleash <color=#FFD780FF>Spirit Blade Tread</color>:
-· Deals <color=#80FFD7FF>Anemo DMG</color> at 150% ATK, while also unleashing the <color=#FFD780FF>Stellar spirit blade</color> which deals <color=#80FFD7FF>Anemo DMG</color> at 200% ATK. The latter DMG is also considered Stellar Swirl reaction DMG.
-· If Vesna is in the Spirit Blade state at the time of the attack, she will also summon the <color=#FFD780FF>Spirit Feather</color>.
-Stellar spirit blades generated by Spirit Blade Tread are also enhanced by Ascension Talent 1.
-Additionally, Vesna's Stellar Swirl reaction DMG is {LINK#N11190007}<color=#FFD780FF>elevated</color>{/LINK} by 20%。
+Unwavering Ardor
+Tapping on Normal Attack or Elemental Skill in the 5s after Vesna uses <color=#FFD780FF>{LINK#N11430003}Windborne Sword{/LINK}</color> at its highest level will unleash the secret Vila ability <color=#FFD780FF>Windborne Sword: Transpose</color>, dealing <color=#80FFD7FF>Anemo DMG</color> at 150% of Vesna's ATK as well as summoning <color=#FFD780FF>{LINK#N11430004}Spirit Blades{/LINK}</color> which deal an additional instance of <color=#80FFD7FF>Anemo DMG</color> at 200% of Vesna's ATK. If Vesna is in the <color=#FFD780FF>{LINK#N11430001}Armed for Action{/LINK}</color> mode, she will also summon a wind pinion to perform Coordinated Attacks against opponents.
+Additionally, Vesna's Stellar Swirl reaction DMG dealt is {LINK#N11190007}<color=#FFD780FF>elevated</color>{/LINK} by 20%.
 
 -= Vodyanitsa =-
 
-Талант возвышения 1
-Во время действия элементального навыка анемогранумы, создаваемые персонажами отряда, превращаются в <color=#FFD780FF>аномальные анемогранумы</color>. При создании и взрыве аномальные анемогранумы снижают <color=#80FFD7FF>Анемо сопротивление</color> врагов поблизости на 30% на 6 сек.
+Последний джегуако
+Во время применения элементального навыка <color=#FFD780FF>Речитатив: Звучный рассвет</color> звёздный Анемо вихрь на поле становится блуждающим вихрем, и если персонажи отряда поблизости активируют Звёздное рассеивание во время действия <color=#FFD780FF>{LINK#S11402}Песни былых веков{/LINK}</color>, то вместо звёздного Анемо вихря будет создан блуждающий вихрь.
+При создании или взрыве блуждающего вихря <color=#80FFD7FF>Анемо сопротивление</color> врагов поблизости снижается на 35% на 6 сек.
+Кроме того, если во время действия <color=#FFD780FF>Песни былых веков</color> персонажи отряда поблизости входят в состояние <color=#FFD780FF>Сияния - Звёздное рассеивание</color>, то состояние <color=#FFD780FF>Сияния - Звёздное рассеивание</color> продлевается на 4 сек.
 
-Ascension Talent 1
-During the Elemental Skill, any Anemograna generated by the party is turned into a <color=#FFD780FF>Mutant Anemograna</color>, which reduces the <color=#80FFD7FF>Anemo RES</color> of nearby opponents by 30% for 6s when it is formed and when it explodes.
+The Last Djeguako Songstress
+When the Elemental Skill <color=#FFD780FF>Rechitativ: Sonorous Dawn</color> is used, any Stellar Vortex on the field will turn into a Wandering Vortex instead. While the <color=#FFD780FF>{LINK#S11402}Song of Ages Past{/LINK}</color> effect is active, nearby party members' Stellar Swirl reactions will generate Wandering Vortex instead.
+Generating or detonating a Wandering Vortex will also reduce nearby opponents' <color=#80FFD7FF>Anemo RES</color> by 35% for 6s.
+Additionally, nearby party members who enter the <color=#FFD780FF>Radiance: Stellar Swirl</color> state while <color=#FFD780FF>Song of Ages Past</color> is in effect will have the <color=#FFD780FF>Radiance: Stellar Swirl</color> state extended by 4s.
 
-Талант возвышения 2
-Входя в состояние <color=#FFD780FF>Воззваний микрофона</color>, Водяница получает 17 уровней {LINK#N11400001}<color=#FFD780FF>Соло</color>{/LINK} и 10 уровней {LINK#N11400002}<color=#FFD780FF>Унисона</color>{/LINK}.
+Скорбная песнь фандыра
+При использовании элементального навыка <color=#FFD780FF>Речитатив: Звучный рассвет</color> Водяница также получает 25 уровней {LINK#N11400001}<color=#FFD780FF>Ведущего вокала</color>{/LINK} и 10 уровней {LINK#N11400002}<color=#FFD780FF>Хора</color>{/LINK}.
+Каждый из этих эффектов действует 30 сек. Применение элементального навыка обновляет их количество.
 
-Ascension Talent 2
-When entering the <color=#FFD780FF>Microphone Summons</color> state, Vodyanitsa gains 17 {LINK#N11400001}<color=#FFD780FF>Solo</color>{/LINK} stacks and 10 {LINK#N11400002}<color=#FFD780FF>Concerto</color>{/LINK} stacks.
+Dirge of the Fandyr
+When the Elemental Skill <color=#FFD780FF>Rechitativ: Sonorous Dawn</color> is used, Vodyanitsa will also gain 25 stacks of {LINK#N11400001}<color=#FFD780FF>Lead Vocal</color>{/LINK} as well as 10 stacks of {LINK#N11400002}<color=#FFD780FF>Chorus</color>{/LINK}.
+The two effects above last 30s each, and the stack count is refreshed when the Elemental Skill is used.
 
-Созвездие 1
-Каждый раз, когда Водяница исцеляет персонажей, сила атаки персонажей отряда поблизости увеличивается на 0,7% от её макс. HP на 3 сек.
+Воды во всём великолепии
+Когда Водяница активирует эффект лечения навыка <color=#FFD780FF>{LINK#S11402}Песня былых веков{/LINK}</color>, сила атаки всех членов отряда поблизости также увеличивается на 0,8% от её макс. HP на 5 сек.
 
-C1
-Each time Vodyanitsa performs healing, the ATK of nearby party members is increased by 0.7% of her Max HP for 3s.
+Waters in Full Splendor
+Each time Vodyanitsa triggers the healing effect of <color=#FFD780FF>{LINK#S11402}Song of Ages Past{/LINK}</color>, it also increases the ATK of all nearby party members by 0.8% of her Max HP for 5s.
 
-Созвездие 2
-Каждая атака микрофона наделяет Водяницу эффектом <color=#FFD780FF>Ансамбля</color>: <color=#80C0FFFF>Гидро</color> и <color=#99FFFFFF>Крио</color> крит. урон активного персонажа повышается на 50% на 5 сек.
-Если на поле есть или недавно были <color=#FFD780FF>аномальные анемогранумы</color>, то <color=#FFD780FF>Ансамбль</color> превращается в <color=#FFD780FF>Вариацию</color>: крит. урон Звёздного рассеивания активного персонажа повышается на 60% на 5 сек.
-Кроме того, длительность элементального навыка <color=#FFD780FF>Воззвания микрофона</color> увеличивается на 9 сек.
+Пронзающее снег эхо
+Когда <color=#FFD780FF>Рог глашатая весны</color> элементального навыка <color=#FFD780FF>Речитатив: Звучный рассвет</color> атакует врага, Водяница получает эффект Чёрный и белый голоса, который повышает <color=#80C0FFFF>Гидро</color> и <color=#99FFFFFF>Крио</color> крит. урон активного персонажа на 50% на 5 сек.
+Когда на поле есть блуждающий вихрь либо в течение 5 сек. после взрыва блуждающего вихря, крит. урон Звёздного рассеивания активного персонажа отряда вместо этого повышается на 60% на 5 сек.
+Кроме того, элементальный навык <color=#FFD780FF>Речитатив: Звучный рассвет</color> получает усиление: длительность эффекта <color=#FFD780FF>{LINK#S11402}Песня былых веков{/LINK}</color> увеличивается на 9 сек.
 
-C2
-Every microphone attack, Vodyanitsa also gains the <color=#FFD780FF>Ensemble</color> effect, which increases the CRIT DMG of <color=#80C0FFFF>Hydro DMG</color> and <color=#99FFFFFF>Cryo DMG</color> dealt by the active character by 50% for 5s.
-If there are any, or have been any, <color=#FFD780FF>Mutant Anemograna</color> on the field, <color=#FFD780FF>Ensemble</color> will become the <color=#FFD780FF>Variation</color> effect instead, increasing Stellar Swirl reaction DMG dealt by the currently active character by 60% for 5s.
-Additionally, the duration of the Elemental Skill's <color=#FFD780FF>Microphone Summons</color> is extended by 9s.
+Echoes That Pierce the Snow
+When the <color=#FFD780FF>Horn of Spring's Call</color> from the Elemental Skill <color=#FFD780FF>Rechitativ: Sonorous Dawn</color> attacks the opponent, Vodyanitsa gains the "Two Voices in Black and White" effect which increases the CRIT DMG from <color=#80C0FFFF>Hydro DMG</color> and <color=#99FFFFFF>Cryo DMG</color> dealt by the currently active party member by 50% for 5s.
+If there is a Wandering Vortex present on the field or in the 5s after a Wandering Vortex explodes, the effect changes to: increases the CRIT DMG from Stellar Swirl reaction DMG caused by the currently active party member by 60% for 5s.
+Additionally, the Elemental Skill <color=#FFD780FF>Rechitativ: Sonorous Dawn</color> is enhanced as follows: the duration of the <color=#FFD780FF>{LINK#S11402}Song of Ages Past{/LINK}</color> effect is extended by 9s.
 
-Созвездие 3
-Увеличивает уровень <color=#FFD780FF>{LINK#S11402}элементального навыка{/LINK} </color> на 3.
+Звуки музыки весенним утром
+Увеличивает уровень навыка <color=#FFD780FF>{LINK#S11402}Речитатив: Звучный рассвет{/LINK}</color> на 3.
 Макс. уровень: 15
 
-C3
-Increases the Level of the <color=#FFD780FF>{LINK#S11402}Elemental Skill{/LINK}</color> by 3.
+Song Lingering on a Spring Morning
+Increases the Level of the Elemental Skill <color=#FFD780FF>{LINK#S11402}Rechitativ: Sonorous Dawn{/LINK}</color> by 3.
 Maximum upgrade level is 15.
 
-Созвездие 4
-Каждый раз, когда Водяница исцеляет персонажей, в зависимости от HP исцеляемого персонажа активируются разные эффекты:
+Тихий голос на нежных волнах
+Когда Водяница активирует эффект лечения навыка <color=#FFD780FF>{LINK#S11402}Песня былых веков{/LINK}</color>, в зависимости от уровня HP исцеляемого персонажа она активирует разные эффекты.
 · Если HP исцеляемого персонажа ниже 40%, то объём данного лечения повышается на 50%.
-· Если HP исцеляемого персонажа выше 40%, то HP Водяницы увеличивается на 20% на 6 сек. Эффект складывается до 3 раз, а отсчёт времени каждого уровня происходит отдельно.
+· Если HP исцеляемого персонажа 40% или выше, то макс. HP Водяницы увеличивается на 20% на 6 сек. Эффект складывается до 3 раз, а отсчёт времени каждого уровня происходит отдельно.
 
-C4
-Each time Vodyanitsa performs healing, different effects are granted depending on the healed character's HP:
-· When the healed character's HP is below 40%, the current instance of healing is boosted by 50%;
-· When the healed character's HP is higher than 40%, Vodyanitsa's HP is increased by 20% for 6s. Max 3 stacks, and each stack's duration is independent of the others'.
+Melancholic Voice Upon the Gentle Waters
+When Vodyanitsa triggers the healing effect of <color=#FFD780FF>{LINK#S11402}Song of Ages Past{/LINK}</color>, an additional effect will be triggered based on the healed character's HP.
+· If the character's HP is below 40%: The healing is increased by 50%; and
+· If the character's HP is 40% or above: Vodyanitsa's Max HP is increased by 20% for 6s. Max 3 stacks, and each stack's duration is counted independently.
 
-Созвездие 5
-Увеличивает уровень <color=#FFD780FF>{LINK#S11405}взрыва стихии{/LINK}</color> на 3.
+Вместе уйдём в глубины
+Увеличивает уровень навыка <color=#FFD780FF>{LINK#S11405}Кода: Вместе в пучину{/LINK}</color> на 3.
 Макс. уровень: 15
 
-C5
-Increases the Level of the <color=#FFD780FF>{LINK#S11405}Elemental Burst{/LINK}</color> by 3.
+Together, Down Into the Deep
+Increases the Level of the Elemental Burst <color=#FFD780FF>{LINK#S11405}Koda: Sink With Thee{/LINK}</color> by 3.
 Maximum upgrade level is 15.
 
-Созвездие 6
-<color=#FFD780FF>Ансамбль</color> или <color=#FFD780FF>Вариация</color> созвездия 2 теперь применяются ко всем персонажам отряда поблизости.
-Кроме того, во время действия <color=#FFD780FF>Воззваний микрофона</color> элементального навыка урон Звёздного рассеивания персонажей отряда поблизости возвышается на 25%, а <color=#80C0FFFF>Гидро</color> и <color=#99FFFFFF>Крио</color> урон повышается на 50%.
+Нескончаемая песнь веселья
+Эффект созвездия <color=#FFD780FF>Пронзающее снег эхо</color> получает усиление: эффект Чёрный и белый голоса теперь применяется ко всем персонажам отряда поблизости.
+Кроме того, во время действия <color=#FFD780FF>{LINK#S11402}Песни былых веков{/LINK}</color> урон реакции Звёздного рассеивания персонажей отряда поблизости {LINK#N11190007}<color=#FFD780FF>возвышается</color>{/LINK} на 25%, а <color=#80C0FFFF>Гидро</color> и <color=#99FFFFFF>Крио</color> урон повышается на 60%.
 
-C6
-At C2, the <color=#FFD780FF>Ensemble</color> and <color=#FFD780FF>Variation</color> effects will apply to all nearby party members.
-Additionally, when the Elemental Skill's <color=#FFD780FF>Microphone Summons</color> is active, Stellar Swirl DMG dealt by nearby party members is elevated by 25% while <color=#80C0FFFF>Hydro DMG</color> and <color=#99FFFFFF>Cryo DMG</color> are increased by 50%.
+Neverending Song of Revelry
+The Constellation <color=#FFD780FF>Echoes That Pierce the Snow</color> is enhanced: "Two Voices in Black and White" now applies to all nearby party members.
+Additionally, while the <color=#FFD780FF>{LINK#S11402}Song of Ages Past{/LINK}</color> effect is active, Stellar Swirl reaction DMG dealt by nearby party members is {LINK#N11190007}<color=#FFD780FF>elevated</color>{/LINK} by 25% while <color=#80C0FFFF>Hydro DMG</color> and <color=#99FFFFFF>Cryo DMG</color> dealt are increased by 60%.
 
 -= Wanderer =-
 
@@ -7262,7 +7262,7 @@ Increases the Level of <color=#FFD780FF>Normal Attack: Forceful Fists of Frost</
 Maximum upgrade level is 15.
 
 Принести спасение страждущим
-HP, восстанавливаемое Ризли Взысканием: Морозный кулак в прыжке увеличивается до 50% от его макс. HP. Требуется разблокировать талант возвышения Да восторжествует справедливость.
+HP, восстанавливаемое Ризли Взысканием: Морозный кулак в прыжке, увеличивается до 50% от его макс. HP. Требуется разблокировать талант возвышения Да восторжествует справедливость.
 Кроме того, когда Ризли получает лечение с избытком, активируются разные эффекты в зависимости от того, на поле боя Ризли или нет. Если он на поле боя, его скорость атаки увеличивается на 20% на 4 сек. Если он не на поле, скорость атаки всех ваших персонажей увеличивается на 10% на 6 сек. Эти два эффекта увеличения скорости атаки не суммируются.
 
 Redemption for the Suffering
@@ -8049,7 +8049,7 @@ Vast Be the Dream
 When Yumemizuki Mizuki triggers a Swirl or Stellar Swirl reaction while in the Dreamdrifter state, the next instance of periodic <color=#80FFD7FF>AoE Anemo DMG</color> she deals to nearby enemies during that same state will be increased by 1,000% of her Elemental Mastery. The aforementioned effect can trigger once every 2.5s.
 <color=#FFD780FF>Radiance: Stellar Swirl</color>: When Yumemizuki Mizuki deals to an opponent the above enhanced <color=#80FFD7FF>AoE Anemo DMG</color>, she will also deal an additional instance of <color=#80FFD7FF>Anemo DMG</color> at 1,000% of her Elemental Mastery. This DMG is considered Stellar Swirl reaction DMG.
 Additionally, while Yumemizuki Mizuki is in the Dreamdrifter state, the Elemental Mastery of nearby party characters is also increased by 10% of her Elemental Mastery.
-Yumemizuki Mizuki will also enter the <<color=#FFD780FF>Radiance: Stellar Swirl</color> state for 8s when a nearby party member triggers a Stellar Swirl reaction.
+Yumemizuki Mizuki will also enter the <color=#FFD780FF>Radiance: Stellar Swirl</color> state for 8s when a nearby party member triggers a Stellar Swirl reaction.
 
 В туманных водах
 Когда Юмэмидзуки Мидзуки пребывает в состоянии Парящей по сновидениям, на 3 сек. она каждые 3,5 сек. накладывает на врагов поблизости эффект Двадцать три ночи ожидания. Когда враг под воздействием эффекта Двадцать три ночи ожидания получает Анемо урон, который активирует Рассеивание или Звёздное рассеивание, эффект снимается, а урон данного Рассеивания или Звёздного рассеивания по этому противнику повышается на 1100%/550% от мастерства стихий Мидзуки соответственно.

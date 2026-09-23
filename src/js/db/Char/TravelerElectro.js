@@ -1,9 +1,12 @@
 import { Condition } from "../../classes/Condition";
 import { ConditionAscensionChar } from "../../classes/Condition/Ascension/Char";
 import { ConditionBoolean } from "../../classes/Condition/Boolean";
+import { ConditionBooleanValue } from "../../classes/Condition/Boolean/Value";
 import { ConditionConstellation } from "../../classes/Condition/Constellation";
+import { ConditionDropdownTravelerResonated } from "../../classes/Condition/Dropdown/TravelerResonated";
 import { ConditionNot } from "../../classes/Condition/Not";
 import { ConditionNumber } from "../../classes/Condition/Number";
+import { ConditionStacks } from "../../classes/Condition/Stacks";
 import { ConditionStatic } from "../../classes/Condition/Static";
 import { DbObjectChar } from "../../classes/DbObject/Char";
 import { DbObjectConstellation } from "../../classes/DbObject/Constellation";
@@ -16,7 +19,9 @@ import { FeatureDamagePlungeCollision } from "../../classes/Feature2/Damage/Plun
 import { FeatureDamagePlungeShockWave } from "../../classes/Feature2/Damage/Plunge/ShockWave";
 import { FeatureDamageSkill } from "../../classes/Feature2/Damage/Skill";
 import { FeatureMultiplier } from "../../classes/Feature2/Multiplier";
+import { FeatureMultiplierStatic } from "../../classes/Feature2/Multiplier/Static";
 import { FeaturePostEffectValue } from "../../classes/Feature2/PostEffectValue";
+import { FeatureStatic } from "../../classes/Feature2/Static";
 import { PostEffectStats } from "../../classes/PostEffect/Stats";
 import { PostEffectStatsRecharge } from "../../classes/PostEffect/Stats/Recharge";
 import { PostEffectStatsStatic } from "../../classes/PostEffect/Stats/Static";
@@ -149,6 +154,37 @@ const rechargePostA4Post = new PostEffectStatsRecharge({
     ],
 });
 
+
+const condTravelerAether = new ConditionBoolean({name: 'traveler_aether'});
+const condLumineDefault = new ConditionNot([condTravelerAether]);
+
+const ForeignDetonateBonus = 100;
+const ForeignDetonateDelayed = 200;
+const ForeignDetonateCooldown = 15;
+
+const bladeReadyCondition = new ConditionBooleanValue({
+    setting: 'traveler_electro_blade_thunder',
+    cond: 'ge',
+    value: 3,
+});
+
+function makeChargedHit2Multipliers() {
+    return [
+        new FeatureMultiplier({
+            leveling: 'char_skill_attack',
+            values: Talents.get('attack.charged_hit_2'),
+            condition: condLumineDefault,
+        }),
+        new FeatureMultiplier({
+            leveling: 'char_skill_attack',
+            values: new StatTable(
+                'charged_hit_2',
+                charTalentTables.TravelerElectro.s1_boy.p7,
+            ),
+            condition: condTravelerAether,
+        }),
+    ];
+}
 export const TravelerElectro = new DbObjectChar({
     name: 'traveler_electro',
     serializeId: 39,
@@ -223,12 +259,7 @@ export const TravelerElectro = new DbObjectChar({
                     ],
                 },
                 {
-                    multipliers: [
-                        new FeatureMultiplier({
-                            leveling: 'char_skill_attack',
-                            values: Talents.get('attack.charged_hit_2'),
-                        }),
-                    ],
+                    multipliers: makeChargedHit2Multipliers(),
                 },
             ],
         }),
@@ -243,12 +274,7 @@ export const TravelerElectro = new DbObjectChar({
         }),
         new FeatureDamageCharged({
             isChild: true,
-            multipliers: [
-                new FeatureMultiplier({
-                    leveling: 'char_skill_attack',
-                    values: Talents.get('attack.charged_hit_2'),
-                }),
-            ],
+            multipliers: makeChargedHit2Multipliers(),
         }),
         new FeatureDamagePlungeCollision({
             name: 'plunge',
@@ -317,6 +343,85 @@ export const TravelerElectro = new DbObjectChar({
             ],
             condition: new ConditionConstellation({constellation: 6}),
         }),
+        new FeatureDamageMultihit({
+            category: 'attack',
+            damageType: 'charged',
+            name: 'traveler_electro_detonate',
+            element: 'electro',
+            allowInfusion: true,
+            items: [
+                {multipliers: [
+                    new FeatureMultiplier({
+                        leveling: 'char_skill_attack',
+                        values: Talents.get('attack.charged_hit_1'),
+                    }),
+                    new FeatureMultiplier({
+                        source: 'foreign_thundertrail',
+                        values: new ValueTable([ForeignDetonateBonus]),
+                    }),
+                ]},
+                {multipliers: [
+                    ...makeChargedHit2Multipliers(),
+                    new FeatureMultiplier({
+                        source: 'foreign_thundertrail',
+                        values: new ValueTable([ForeignDetonateBonus]),
+                    }),
+                ]},
+            ],
+            condition: bladeReadyCondition,
+        }),
+        new FeatureDamageCharged({
+            name: 'traveler_electro_detonate_1',
+            isChild: true,
+            element: 'electro',
+            multipliers: [
+                new FeatureMultiplier({
+                    leveling: 'char_skill_attack',
+                    values: Talents.get('attack.charged_hit_1'),
+                }),
+                new FeatureMultiplier({
+                    source: 'foreign_thundertrail',
+                    values: new ValueTable([ForeignDetonateBonus]),
+                }),
+            ],
+            condition: bladeReadyCondition,
+        }),
+        new FeatureDamageCharged({
+            name: 'traveler_electro_detonate_2',
+            isChild: true,
+            element: 'electro',
+            multipliers: [
+                ...makeChargedHit2Multipliers(),
+                new FeatureMultiplier({
+                    source: 'foreign_thundertrail',
+                    values: new ValueTable([ForeignDetonateBonus]),
+                }),
+            ],
+            condition: bladeReadyCondition,
+        }),
+        new FeatureDamageCharged({
+            name: 'traveler_electro_detonate_delayed',
+            element: 'electro',
+            multipliers: [
+                new FeatureMultiplier({
+                    source: 'foreign_thundertrail_delayed',
+                    values: new ValueTable([ForeignDetonateDelayed]),
+                }),
+            ],
+            condition: bladeReadyCondition,
+        }),
+        new FeatureStatic({
+            category: 'other',
+            name: 'traveler_electro_detonate_cooldown',
+            format: 'decimal',
+            multipliers: [
+                new FeatureMultiplierStatic({
+                    source: 'foreign_thundertrail',
+                    values: new ValueTable([ForeignDetonateCooldown]),
+                }),
+            ],
+            condition: bladeReadyCondition,
+        }),
         new FeaturePostEffectValue({
             category: 'skill',
             name: 'traveler_electro_recharge_bonus',
@@ -335,6 +440,13 @@ export const TravelerElectro = new DbObjectChar({
         }),
     ],
     conditions: [
+        new ConditionBoolean({
+            name: 'traveler_aether',
+            serializeId: 5,
+            title: 'talent_name.traveler_twin_aether',
+            description: 'talent_descr.traveler_twin_aether',
+            rotation: 'self',
+        }),
         new ConditionBoolean({
             name: 'traveler_abundance_amulet',
             serializeId: 3,
@@ -380,6 +492,19 @@ export const TravelerElectro = new DbObjectChar({
                 hp_base: 50,
             },
         }),
+        new ConditionDropdownTravelerResonated({
+            name: 'traveler_electro_resonated_elements',
+            serializeId: 6,
+        }),
+        new ConditionStacks({
+            name: 'traveler_electro_blade_thunder',
+            serializeId: 7,
+            title: 'talent_name.traveler_foreign_thundertrail',
+            description: 'talent_descr.traveler_foreign_thundertrail',
+            maxStacks: 3,
+            noStat: true,
+            rotation: 'self',
+        }),
     ],
     postEffects: [
         rechargePreA4Post,
@@ -403,6 +528,7 @@ export const TravelerElectro = new DbObjectChar({
                     description: 'talent_descr.traveler_violet_vehemence',
                     stats: {
                         enemy_res_electro: -15,
+                        text_duration: 8,
                     },
                 }),
             ],
@@ -488,6 +614,16 @@ export const TravelerElectro = new DbObjectChar({
                 info: {constellation: 2},
                 stats: {
                     enemy_res_electro: -15,
+                    text_duration: 8,
+                },
+            }),
+            new ConditionStatic({
+                title: 'talent_name.traveler_fickle_cloudstrike',
+                description: 'talent_descr.traveler_fickle_cloudstrike',
+                info: {constellation: 4},
+                stats: {
+                    text_percent1: 35,
+                    text_percent2: 100,
                 },
             }),
         ],

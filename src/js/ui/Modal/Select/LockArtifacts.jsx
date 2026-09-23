@@ -58,7 +58,7 @@ class LockArtifactComponent extends ModalSelectBase {
 
         let allArtHash = [];
         for (let item of this.props.artifactStorage.listDecoded(1)) {
-            allArtHash.push(item.hash);
+            allArtHash.push(item.data.getHash());
         }
 
         let index = 0;

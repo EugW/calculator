@@ -53,7 +53,10 @@ class WeaponSelectComponent extends ModalSelectBase {
                 if (statName != 'atk_base') {
                     statName = statName.replace('_base', '');
                 }
-                stats.add(statName, stat.getValue(90, 6));
+                stats.add(statName, stat.getValue(
+                    weapon.getMaxLevel(),
+                    weapon.getMaxAscension(),
+                ));
             }
 
             this.items.push({
@@ -246,7 +249,10 @@ class WeaponSelectItem extends React.PureComponent {
                     <div className="value">
                         {Stats.format(name, stat.getValue(1, 0))}
                         &nbsp;-&nbsp;
-                        {Stats.format(name, stat.getValue(90, 6))}
+                        {Stats.format(name, stat.getValue(
+                            weapon.getMaxLevel(),
+                            weapon.getMaxAscension(),
+                        ))}
                     </div>
                 </div>
             );

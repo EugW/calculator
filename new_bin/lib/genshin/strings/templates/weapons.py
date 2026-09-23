@@ -7,7 +7,8 @@ from ..template import Template
 description_names = {
     'exaiphanes_blade': ['hit', 'resonated_elements'],
     'jade_vista': ['static', 'same', 'other'],
-    'windtalker': ['base', 'party'],
+    'hymn_of_the_maelstrom': ['base', 'party'],
+    'breezeborne_refrain': ['base', 'party'],
 }
 
 # The calculator predates the final English release name for this weapon.
@@ -340,135 +341,147 @@ jade_vista_rus = Template(
 )
 
 
-# These templates use the calculator identifiers assigned to source rows whose
-# localized names or passive titles are still generic or missing. The localized
-# descriptions remain the authoritative prose.
-spiked_stake_eng = Template(
-    patterns=[
-        (r'Stellar anemo\{Swirl\}', 'Stellar Swirl'),
-        (r'8%Stellar', '8% Stellar'),
-    ],
+# Per-weapon localization fitting for the imported affix prose. Tokens mirror
+# the calculator stat names consumed by each weapon module.
+new_bough_eng = Template(
     sentences=[
         [
             '12:ignore', '4:text_percent_normal_atk',
-            '20:text_number_normal_mastery', '6:ignore',
+            '20:text_number_normal_mastery',
         ],
+        ['6:ignore'],
         ['3:ignore'],
         ['6:text_percent_radiance_atk', '8:text_percent_radiance_dmg'],
     ],
 )
 
-spiked_stake_rus = Template(
+new_bough_rus = Template(
     sentences=[
-        ['12:ignore', '4:text_percent_normal_atk', '20:text_number_normal_mastery'],
-        ['6:ignore', '1:ignore', '1:ignore', '3:ignore'],
-        ['6:text_percent_radiance_atk', '8:text_percent_radiance_dmg'],
+        [
+            '12:ignore', '4:text_percent_normal_atk',
+            '20:text_number_normal_mastery',
+        ],
+        [
+            '6:ignore', '3:ignore', '1:ignore', '1:ignore',
+            '6:text_percent_radiance_atk', '8:text_percent_radiance_dmg',
+        ],
     ],
 )
 
-fajian_eng = Template(
+silver_light_eng = Template(
     sentences=[['52:mastery', '12:ignore'], ['2:ignore']],
 )
 
-fajian_rus = Template(
-    sentences=[['52:mastery', '12:ignore'], ['2:ignore'], []],
+silver_light_rus = Template(
+    sentences=[['12:ignore', '52:mastery'], ['2:ignore'], []],
 )
 
-samosvist_eng = Template(
+beyond_the_chrysalis_eng = Template(
     patterns=[(r'Stellar anemo\{Swirl\}', 'Stellar Swirl')],
-    sentences=[[
-        '48:text_percent_blazing', '10:ignore',
-        '28:text_percent_dazzling', '10:ignore',
-        '3:text_number_radiant',
-    ]],
+    sentences=[
+        [
+            '56:text_percent_blazing', '10:ignore',
+            '36:text_percent_dazzling', '10:ignore',
+            '5:text_number_radiant',
+        ],
+        ['5:ignore', '4:ignore'],
+    ],
 )
 
-samosvist_rus = Template(
-    sentences=[[
-        '10:ignore', '48:text_percent_blazing',
-        '10:ignore', '28:text_percent_dazzling',
-        '3:text_number_radiant',
-    ]],
+beyond_the_chrysalis_rus = Template(
+    sentences=[
+        [
+            '56:text_percent_blazing', '10:ignore',
+            '36:text_percent_dazzling', '10:ignore',
+            '5:text_number_radiant',
+        ],
+        ['5:ignore', '4:ignore'],
+    ],
 )
 
-frost_scepter_eng = Template(
-    patterns=[(r'Stellar anemo\{Swirl\}', 'Stellar Swirl')],
+winters_heavy_heart_eng = Template(
     sentences=[
         ['24:text_mastery_cryo'],
         ['4.8:text_atk_electro'],
-        ['20:text_mastery_radiance', '6:text_dmg_radiance'],
-        ['4:ignore'],
-    ],
-)
-
-frost_scepter_rus = Template(
-    # The RU TextMap has a stale 4.2% ATK clause here. EN and the affix
-    # parameters agree that Radiance grants 20 Elemental Mastery instead.
-    patterns=[(
-        r'увеличивает name\{силу атаки\} на 4,2%',
-        'увеличивает name{мастерство стихий} на 20 ед.',
-    )],
-    sentences=[
-        ['24:text_mastery_cryo'],
-        ['4.8:text_atk_electro'],
-        [],
-        ['20:text_mastery_radiance', '6:text_dmg_radiance'],
-        ['4:ignore'],
-    ],
-)
-
-bludnye_eng = Template(
-    patterns=[(r'Stellar anemo\{Swirl\}', 'Stellar Swirl')],
-    sentences=[
-        ['8:healing', '1:ignore', '5:text_hp_hymn'],
         [
-            '1000:ignore', '40000:ignore',
-            '0.25:text_atk_per_thousand', '5:text_atk_cap',
-            '8:ignore', '3:ignore',
+            '4:ignore', '20:text_mastery_radiance',
+            '6:text_dmg_radiance',
         ],
-        ['5:ignore', '75:ignore'],
     ],
 )
 
-bludnye_rus = Template(
+winters_heavy_heart_rus = Template(
     sentences=[
-        ['8:healing', '1:ignore'],
+        ['24:text_mastery_cryo', '4.8:text_atk_electro'],
         [
-            '5:text_hp_hymn', '0.25:text_atk_per_thousand',
-            '5:text_atk_cap', '1000:ignore', '40:ignore', '000:ignore',
+            '4:ignore', '20:text_mastery_radiance',
+            '6:text_dmg_radiance',
         ],
-        ['8:ignore', '3:ignore'],
-        ['5:ignore'],
-        [],
-        ['75:ignore'],
     ],
 )
 
-windtalker_eng = Template(
+hymn_of_the_maelstrom_eng = Template(
     patterns=[
         (r'Stellar anemo\{Swirl\}', 'Stellar Swirl'),
-        (r', and when the character reaches', '. When the character reaches'),
+        (r'<br>', '<br>\n'),
     ],
     sentences=[
-        ['20:recharge', '1:ignore'],
-        ['0.03:ignore'],
-        ['3:ignore', '24:dmg_stellarswirl', '12:ignore'],
-        ['12:ignore'],
+        ['4:healing|4'],
+        [
+            '4:text_percent_hp_hymn|4',
+            '0.4:text_percent_atk_per_thousand|0.4',
+            '1000:ignore', '40000:ignore',
+        ],
+        ['8:text_percent_atk_cap|8'],
+        ['10:ignore', '3:ignore'],
+        ['75:ignore', '5:ignore'],
         [],
     ],
-    results=[[0, 1, 4], [2, 3, 4]],
+    results=[[0, 1, 2, 3, 4, 5], [1, 2, 3, 4, 5]],
 )
 
-windtalker_rus = Template(
+hymn_of_the_maelstrom_rus = Template(
+    patterns=[(r'<br>', '<br>\n')],
+    sentences=[
+        ['4:healing|4'],
+        [],
+        [
+            '4:text_percent_hp_hymn|4',
+            '0.4:text_percent_atk_per_thousand|0.4',
+            '8:text_percent_atk_cap|8',
+            '1000:ignore', '40:ignore', '000:ignore',
+        ],
+        [],
+        ['10:ignore', '3:ignore'],
+        ['5:ignore'],
+        ['75:ignore'],
+        [],
+    ],
+    results=[[0, 1, 2, 3, 4, 5, 6, 7], [1, 2, 3, 4, 5, 6, 7]],
+)
+
+breezeborne_refrain_eng = Template(
+    patterns=[(r', and at 3 stacks,', '.\nAt 3 stacks,')],
+    sentences=[
+        ['20:recharge'],
+        ['0.03:ignore', '3:ignore'],
+        ['3:ignore'],
+        ['24:dmg_stellarswirl|24', '12:ignore'],
+        [],
+    ],
+    results=[[0, 1], [2, 3, 4]],
+)
+
+breezeborne_refrain_rus = Template(
     sentences=[
         ['20:recharge'],
         ['1:ignore'],
-        ['0.03:ignore'],
-        ['3:ignore', '24:dmg_stellarswirl', '12:ignore'],
-        ['12:ignore'],
+        ['3:ignore', '0.03:ignore'],
+        ['3:ignore', '24:dmg_stellarswirl|24', '12:ignore'],
+        [],
         [],
     ],
-    results=[[0, 1, 2, 5], [3, 4, 5]],
+    results=[[0, 1, 2], [3, 4, 5]],
 )
 
 mountain_bracing_bolt = Template(

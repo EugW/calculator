@@ -6,6 +6,7 @@ import {
     CStatIncrease,
     CStatSet,
     CSum,
+    CValueCap,
 } from "../src/js/classes/Feature2/Compile/Types/Block";
 import { CStat } from "../src/js/classes/Feature2/Compile/Types/Item";
 import { CBlock } from "../src/js/classes/Feature2/Compile/Types";
@@ -106,6 +107,19 @@ test('renamed stat increases retain their implicit source read and destination w
         'delta',
         'rotation_destination',
         'rotation_source',
+    ]);
+});
+
+test('dynamic value-cap expressions participate in stat liveness', () => {
+    const compiler = prepareCompiler(new CValueCap([
+        new CStat({stat: 'uncapped_value'}),
+    ], {
+        value: new CStat({stat: 'dynamic_cap'}),
+    }));
+
+    expectStats(compiler.usedStats, [
+        'dynamic_cap',
+        'uncapped_value',
     ]);
 });
 

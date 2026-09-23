@@ -2,7 +2,12 @@ import argparse
 from collections import OrderedDict
 
 from lib.genshin.datafiles.lang import LangData
-from lib.genshin.datafiles.weapons import IGNORED_WEAPONS, WeaponData, WeaponSkillData
+from lib.genshin.datafiles.weapons import (
+    IGNORED_WEAPONS,
+    SUPPORTED_WEAPON_RARITIES,
+    WeaponData,
+    WeaponSkillData,
+)
 from lib.genshin.utils import convert_id
 from lib.genshin.strings.templates import weapons as weapons_tpl
 from lib.genshin.strings.templates.talents import templates as common_tpl
@@ -16,18 +21,7 @@ from lib.genshin.strings.templates.names import (
 from lib.genshin.strings.csv import CsvDumper
 
 
-# These source rows do not yet expose usable localized identities. Keep the
-# mapping exact and fail when the source gaps change so the manual name/title
-# fallbacks can be removed. Their localized descriptions still use the normal
-# generated output.
-SOURCE_IDENTITY_OVERRIDES = {
-    11437: ('spiked_stake', 'Weapon: Sword', None),
-    11438: ('fajian', 'Weapon: Sword', None),
-    11522: ('samosvist', 'Weapon: Sword', 'Weapon Affix'),
-    14437: ('frost_scepter', 'Weapon: Catalyst', None),
-    14524: ('bludnye', 'Weapon: Catalyst', '7.1 Promo Weapon'),
-    15437: ('windtalker', 'Weapon: Bow', None),
-}
+
 
 
 def language_data():
@@ -129,42 +123,32 @@ def collect_weapon_strings():
     for weapon in weapon_data.get_list():
         if weapon['id'] in IGNORED_WEAPONS:
             continue
-        if weapon.get('rankLevel', 0) < 3:
+        if weapon.get('rankLevel', 0) not in SUPPORTED_WEAPON_RARITIES:
             continue
 
         source_name = lang_eng.get(weapon['nameTextMapHash'])
-        identity_override = SOURCE_IDENTITY_OVERRIDES.get(weapon['id'])
-        if identity_override is None:
-            weapon_id = convert_id(source_name)
-        else:
-            weapon_id, expected_name, _ = identity_override
-            if source_name != expected_name:
-                raise ValueError(
-                    f'Weapon {weapon["id"]} source name changed from the '
-                    f'expected placeholder {expected_name!r} to {source_name!r}'
-                )
+        weapon_id = convert_id(source_name)
         weapons[weapon_id] = {
             'game_id': weapon['id'],
             'nameTextMapHash': weapon['nameTextMapHash'],
             'skillAffix': weapon['skillAffix'],
-            'identity_override': identity_override,
         }
 
     for weapon_id, weapon in sorted(weapons.items()):
-        identity_override = weapon['identity_override']
-        if identity_override is None:
-            item = OrderedDict(category='weapon_name', name=weapon_id)
-            for lang_name, lang_config in languages.items():
-                item[lang_name] = lang_config['lang'].get(weapon['nameTextMapHash'])
-            result_names.append(item)
-            for alias in weapons_tpl.weapon_name_aliases.get(weapon_id, []):
-                alias_item = item.copy()
-                alias_item['name'] = alias
-                result_names.append(alias_item)
+        item = OrderedDict(category='weapon_name', name=weapon_id)
+        for lang_name, lang_config in languages.items():
+            item[lang_name] = lang_config['lang'].get(weapon['nameTextMapHash'])
+        result_names.append(item)
+        for alias in weapons_tpl.weapon_name_aliases.get(weapon_id, []):
+            alias_item = item.copy()
+            alias_item['name'] = alias
+            result_names.append(alias_item)
         texts[weapon_id] = []
 
         affix_ids = [affix_id for affix_id in weapon['skillAffix'] if affix_id]
-        if identity_override is not None and len(affix_ids) != 1:
+        if not affix_ids:
+            continue
+        if len(affix_ids) != 1:
             raise ValueError(
                 f'Weapon {weapon["game_id"]} has unexpected affixes {affix_ids}'
             )
@@ -172,17 +156,7 @@ def collect_weapon_strings():
         for affix_id in affix_ids:
             skill = source_affix_row(weapon_skill_data, affix_id)
             source_skill_name = lang_eng.get(skill['nameTextMapHash'])
-            if identity_override is None:
-                skill_id = convert_id(source_skill_name)
-            else:
-                _, _, expected_title = identity_override
-                if source_skill_name != expected_title:
-                    raise ValueError(
-                        f'Weapon {weapon["game_id"]} source title changed from '
-                        f'the expected placeholder {expected_title!r} to '
-                        f'{source_skill_name!r}'
-                    )
-                skill_id = f'source_gap_{weapon_id}'
+            skill_id = convert_id(source_skill_name)
             if skill_id in existed_talents:
                 continue
             existed_talents.add(skill_id)
@@ -244,8 +218,7 @@ def collect_weapon_strings():
                         template,
                     ))
 
-            if identity_override is None:
-                result_talents.append(item_name)
+            result_talents.append(item_name)
             append_descriptions(
                 result_talents,
                 talent_name,

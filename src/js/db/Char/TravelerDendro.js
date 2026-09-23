@@ -1,8 +1,11 @@
 import { Condition } from "../../classes/Condition";
 import { ConditionAscensionChar } from "../../classes/Condition/Ascension/Char";
 import { ConditionBoolean } from "../../classes/Condition/Boolean";
+import { ConditionBooleanValue } from "../../classes/Condition/Boolean/Value";
 import { ConditionDropdownElement } from "../../classes/Condition/Dropdown/Element";
+import { ConditionDropdownTravelerResonated } from "../../classes/Condition/Dropdown/TravelerResonated";
 import { ConditionStacks } from "../../classes/Condition/Stacks";
+import { ConditionNot } from "../../classes/Condition/Not";
 import { ConditionStatic } from "../../classes/Condition/Static";
 import { DbObjectChar } from "../../classes/DbObject/Char";
 import { DbObjectConstellation } from "../../classes/DbObject/Constellation";
@@ -15,10 +18,13 @@ import { FeatureDamagePlungeCollision } from "../../classes/Feature2/Damage/Plun
 import { FeatureDamagePlungeShockWave } from "../../classes/Feature2/Damage/Plunge/ShockWave";
 import { FeatureDamageSkill } from "../../classes/Feature2/Damage/Skill";
 import { FeatureMultiplier } from "../../classes/Feature2/Multiplier";
+import { FeatureMultiplierStatic } from "../../classes/Feature2/Multiplier/Static";
 import { FeaturePostEffectValue } from "../../classes/Feature2/PostEffectValue";
+import { FeatureStatic } from "../../classes/Feature2/Static";
 import { PostEffectStatsMastery } from "../../classes/PostEffect/Stats/Mastery";
 import { StatTable } from "../../classes/StatTable";
 import { StatTableAscensionScale } from "../../classes/StatTable/Ascension/Scale";
+import { ValueTable } from "../../classes/ValueTable";
 import { charTables } from "../generated/CharTables";
 import { charTalentTables } from "../generated/CharTalentTables";
 
@@ -123,12 +129,43 @@ const burstDmgPost = new PostEffectStatsMastery({
     ],
 });
 
+
+const condTravelerAether = new ConditionBoolean({name: 'traveler_aether'});
+const condLumineDefault = new ConditionNot([condTravelerAether]);
+
+const ForeignVerdessenceBonus = 80;
+const ForeignVinecoreDmg = 120;
+const ForeignVerdessenceCooldown = 15;
+
+const bladeReadyCondition = new ConditionBooleanValue({
+    setting: 'traveler_dendro_blade_viridis',
+    cond: 'ge',
+    value: 3,
+});
+
+function makeChargedHit2Multipliers() {
+    return [
+        new FeatureMultiplier({
+            leveling: 'char_skill_attack',
+            values: Talents.get('attack.charged_hit_2'),
+            condition: condLumineDefault,
+        }),
+        new FeatureMultiplier({
+            leveling: 'char_skill_attack',
+            values: new StatTable(
+                'charged_hit_2',
+                charTalentTables.TravelerDendro.s1_boy.p7,
+            ),
+            condition: condTravelerAether,
+        }),
+    ];
+}
 export const TravelerDendro = new DbObjectChar({
     name: 'traveler_dendro',
     serializeId: 57,
     gameId: [10000005, 10000007],
     depotIds: [508, 708],
-    iconClass: "char-icon-traveler-boy",
+    iconClass: "char-icon-traveler-girl",
     rarity: 5,
     element: 'dendro',
     weapon: 'sword',
@@ -197,12 +234,7 @@ export const TravelerDendro = new DbObjectChar({
                     ],
                 },
                 {
-                    multipliers: [
-                        new FeatureMultiplier({
-                            leveling: 'char_skill_attack',
-                            values: Talents.get('attack.charged_hit_2'),
-                        }),
-                    ],
+                    multipliers: makeChargedHit2Multipliers(),
                 },
             ],
         }),
@@ -217,12 +249,7 @@ export const TravelerDendro = new DbObjectChar({
         }),
         new FeatureDamageCharged({
             isChild: true,
-            multipliers: [
-                new FeatureMultiplier({
-                    leveling: 'char_skill_attack',
-                    values: Talents.get('attack.charged_hit_2'),
-                }),
-            ],
+            multipliers: makeChargedHit2Multipliers(),
         }),
         new FeatureDamagePlungeCollision({
             name: 'plunge',
@@ -293,8 +320,105 @@ export const TravelerDendro = new DbObjectChar({
             postEffect: burstDmgPost,
             format: 'percent',
         }),
+        new FeatureDamageMultihit({
+            category: 'attack',
+            damageType: 'charged',
+            name: 'traveler_dendro_verdessence',
+            element: 'dendro',
+            allowInfusion: true,
+            items: [
+                {multipliers: [
+                    new FeatureMultiplier({
+                        leveling: 'char_skill_attack',
+                        values: Talents.get('attack.charged_hit_1'),
+                    }),
+                    new FeatureMultiplier({
+                        source: 'foreign_verdalume',
+                        values: new ValueTable([ForeignVerdessenceBonus]),
+                    }),
+                ]},
+                {multipliers: [
+                    ...makeChargedHit2Multipliers(),
+                    new FeatureMultiplier({
+                        source: 'foreign_verdalume',
+                        values: new ValueTable([ForeignVerdessenceBonus]),
+                    }),
+                ]},
+            ],
+            condition: bladeReadyCondition,
+        }),
+        new FeatureDamageCharged({
+            name: 'traveler_dendro_verdessence_1',
+            isChild: true,
+            element: 'dendro',
+            multipliers: [
+                new FeatureMultiplier({
+                    leveling: 'char_skill_attack',
+                    values: Talents.get('attack.charged_hit_1'),
+                }),
+                new FeatureMultiplier({
+                    source: 'foreign_verdalume',
+                    values: new ValueTable([ForeignVerdessenceBonus]),
+                }),
+            ],
+            condition: bladeReadyCondition,
+        }),
+        new FeatureDamageCharged({
+            name: 'traveler_dendro_verdessence_2',
+            isChild: true,
+            element: 'dendro',
+            multipliers: [
+                ...makeChargedHit2Multipliers(),
+                new FeatureMultiplier({
+                    source: 'foreign_verdalume',
+                    values: new ValueTable([ForeignVerdessenceBonus]),
+                }),
+            ],
+            condition: bladeReadyCondition,
+        }),
+        new FeatureDamageCharged({
+            name: 'traveler_dendro_vinecore_1',
+            element: 'dendro',
+            multipliers: [
+                new FeatureMultiplier({
+                    source: 'foreign_verdalume_vinecore',
+                    values: new ValueTable([ForeignVinecoreDmg]),
+                }),
+            ],
+            condition: bladeReadyCondition,
+        }),
+        new FeatureDamageCharged({
+            name: 'traveler_dendro_vinecore_2',
+            element: 'dendro',
+            multipliers: [
+                new FeatureMultiplier({
+                    source: 'foreign_verdalume_vinecore',
+                    values: new ValueTable([ForeignVinecoreDmg]),
+                }),
+            ],
+            condition: bladeReadyCondition,
+        }),
+        new FeatureStatic({
+            category: 'other',
+            name: 'traveler_dendro_verdessence_cooldown',
+            format: 'decimal',
+            multipliers: [
+                new FeatureMultiplierStatic({
+                    source: 'foreign_verdalume',
+                    values: new ValueTable([ForeignVerdessenceCooldown]),
+                }),
+            ],
+            condition: bladeReadyCondition,
+        }),
     ],
     conditions: [
+        new ConditionBoolean({
+            name: 'traveler_aether',
+            serializeId: 6,
+            title: 'talent_name.traveler_twin_aether',
+            description: 'talent_descr.traveler_twin_aether',
+            rotation: 'self',
+        }),
         new ConditionStacks({
             name: 'traveler_verdant_overgrowth',
             serializeId: 1,
@@ -338,6 +462,19 @@ export const TravelerDendro = new DbObjectChar({
                 hp_base: 50,
             },
         }),
+        new ConditionDropdownTravelerResonated({
+            name: 'traveler_dendro_resonated_elements',
+            serializeId: 7,
+        }),
+        new ConditionStacks({
+            name: 'traveler_dendro_blade_viridis',
+            serializeId: 8,
+            title: 'talent_name.traveler_foreign_verdalume',
+            description: 'talent_descr.traveler_foreign_verdalume',
+            maxStacks: 3,
+            noStat: true,
+            rotation: 'self',
+        }),
     ],
     postEffects: [
         skillDmgPost,
@@ -349,6 +486,9 @@ export const TravelerDendro = new DbObjectChar({
                 new ConditionStatic({
                     title: 'talent_name.traveler_symbiotic_creeper',
                     description: 'talent_descr.traveler_symbiotic_creeper',
+                    stats: {
+                        text_value: 3.5,
+                    },
                 }),
             ],
         },
@@ -357,6 +497,9 @@ export const TravelerDendro = new DbObjectChar({
                 new ConditionStatic({
                     title: 'talent_name.traveler_green_resilience',
                     description: 'talent_descr.traveler_green_resilience',
+                    stats: {
+                        text_duration: 3,
+                    },
                 }),
             ],
         },
@@ -374,6 +517,9 @@ export const TravelerDendro = new DbObjectChar({
                 new ConditionStatic({
                     title: 'talent_name.traveler_treacle_grass',
                     description: 'talent_descr.traveler_treacle_grass',
+                    stats: {
+                        text_value: 5,
+                    },
                 }),
             ],
         },
@@ -398,10 +544,11 @@ export const TravelerDendro = new DbObjectChar({
                     },
                 }),
                 new ConditionDropdownElement({
-                    name: 'party.traveler_withering_aggregation_2',
+                    name: 'traveler_withering_aggregation_2',
                     serializeId: 3,
                     title: 'talent_name.traveler_withering_aggregation',
                     description: 'talent_descr.traveler_withering_aggregation_2',
+                    valueAliases: ['party.traveler_withering_aggregation_2'],
                     values: [
                         {
                             value: 'pyro',
@@ -457,7 +604,7 @@ export const TravelerDendro = new DbObjectChar({
                 dropdownClass: 'two-digits',
                 maxStacks: 10,
                 info: {
-                    ascension: 4,
+                    ascension: 1,
                 },
                 stats: [
                     new StatTable('mastery', [6]),
@@ -480,7 +627,7 @@ export const TravelerDendro = new DbObjectChar({
                 },
             }),
             new ConditionDropdownElement({
-                name: 'party.party.traveler_withering_aggregation_2',
+                name: 'party.traveler_withering_aggregation_2',
                 serializeId: 3,
                 rotation: 'party',
                 title: 'talent_name.traveler_withering_aggregation',

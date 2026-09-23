@@ -6,6 +6,7 @@ import { ControlsBar, ControlsBarDivider } from '../Components/ControlsBar';
 import { Dropdown } from '../Components/Inputs/Dropdown';
 import { Feature } from '../../classes/Feature';
 import { FeatureTableHeader, FeatureTableValues } from '../Components/FeatureTable';
+import { FeatureName } from '../Components/FeatureName';
 import { FeatureViewTree } from './Features/Tree';
 import { FullHeight, FullHeightStatic, FullHeightFloatTitle, FloatTitleBlock, FullHeightScrollable } from '../Components/FullHeight';
 import { Lang } from '../Lang';
@@ -318,7 +319,7 @@ function FeaturesTableBlock(props) {
         items.push(
             <div className={classes.join(' ')} key={item.subItemId || item.name}>
                 <div className="title">
-                    <span className="flex-spacer">{parse(title)}</span>
+                    <span className="flex-spacer"><FeatureName text={title} result={item.feature} /></span>
                     {item.portion ? <span>{item.portion.toFixed(1)}%</span> : ''}
                 </div>
                 <div className="icon"><div className={'stat-'+ (item.icon || item.feature.icon)} /></div>

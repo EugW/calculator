@@ -186,7 +186,11 @@ def _text_map_paths(source: DataSource, language: str) -> list[Path]:
 
 
 def load_text_map(language: str = 'EN', *, source: DataSource | None = None) -> dict[str, str]:
-    """Merge base and Medium TextMaps, rejecting conflicting duplicate hashes."""
+    """Merge base and Medium TextMaps, rejecting conflicting duplicate hashes.
+
+    TextMaps may contain layout tokens that the game replaces while rendering.
+    They are not calculator markup and must not leak into generated strings.
+    """
 
     selected_source = source or get_data_source()
     paths = _text_map_paths(selected_source, language)
@@ -212,7 +216,10 @@ def load_text_map(language: str = 'EN', *, source: DataSource | None = None) -> 
                 )
             result[key] = value
             origins[key] = path
-    return result
+    return {
+        key: value.replace('{NON_BREAK_SPACE}', ' ')
+        for key, value in result.items()
+    }
 
 
 def required_alias(

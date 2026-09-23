@@ -3,8 +3,14 @@ feature_skill;traveler_cryo_skill_dmg;Урон навыка;Skill DMG
 feature_skill;traveler_cryo_ice_crystal_dmg;Урон ледяного кристалла;Ice Crystal DMG
 feature_skill;traveler_cryo_frostpierce_star_duration;Длительность Леденящей звезды;Frostpierce Star Duration
 feature_attack;traveler_cryo_freezing_ice;Заряженная атака: Застывающий лёд;Charged Attack: Freezing Ice
-feature_attack;traveler_cryo_freezing_ice_stellarconduct;Застывающий лёд: Звёздный проводник;Freezing Ice: Stellar-Conduct
-feature_attack;traveler_cryo_freezing_ice_stellarswirl;Застывающий лёд: Звёздное рассеивание;Freezing Ice: Stellar Swirl
+feature_attack;traveler_cryo_freezing_ice_1;Заряженная атака: Застывающий лёд 1;Charged Attack: Freezing Ice 1
+feature_attack;traveler_cryo_freezing_ice_2;Заряженная атака: Застывающий лёд 2;Charged Attack: Freezing Ice 2
+feature_attack;traveler_cryo_freezing_ice_stellarconduct;Заряженная атака: Застывающий лёд;Charged Attack: Freezing Ice
+feature_attack;traveler_cryo_freezing_ice_stellarconduct_1;Заряженная атака: Застывающий лёд 1;Charged Attack: Freezing Ice 1
+feature_attack;traveler_cryo_freezing_ice_stellarconduct_2;Заряженная атака: Застывающий лёд 2;Charged Attack: Freezing Ice 2
+feature_attack;traveler_cryo_freezing_ice_stellarswirl;Заряженная атака: Застывающий лёд;Charged Attack: Freezing Ice
+feature_attack;traveler_cryo_freezing_ice_stellarswirl_1;Заряженная атака: Застывающий лёд 1;Charged Attack: Freezing Ice 1
+feature_attack;traveler_cryo_freezing_ice_stellarswirl_2;Заряженная атака: Застывающий лёд 2;Charged Attack: Freezing Ice 2
 feature_burst;traveler_cryo_ice_javelin;Урон одного ледяного копья;Single Ice Javelin DMG
 feature_burst;traveler_cryo_frostglow_dmg_bonus;Бонус урона Морозного сияния;Frostglow DMG Bonus
 feature_burst;traveler_cryo_frostbound_javelin_total;Общий урон Морозного копья;Frostbound Javelin Total DMG

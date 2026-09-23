@@ -34,8 +34,8 @@ import { charTalentTables } from "../generated/CharTalentTables";
 const Talents = new DbObjectTalents({
     attack: {
         gameId: charTalentTables.Vesna.s1_id,
-        title: 'talent_name.vesna_light_step',
-        description: 'talent_descr.vesna_light_step',
+        title: 'talent_name.vesna_vila_blade_dance',
+        description: 'talent_descr.vesna_vila_blade_dance',
         items: [
             {table: new StatTable('normal_hit_1', charTalentTables.Vesna.s1.p1)},
             {table: new StatTable('normal_hit_2', charTalentTables.Vesna.s1.p2)},
@@ -58,28 +58,28 @@ const Talents = new DbObjectTalents({
     },
     skill: {
         gameId: charTalentTables.Vesna.s2_id,
-        title: 'talent_name.vesna_spirit_blade_inception',
-        description: 'talent_descr.vesna_spirit_blade_inception',
+        title: 'talent_name.vesna_the_art_of_victory',
+        description: 'talent_descr.vesna_the_art_of_victory',
         items: [
-            {table: new StatTable('vesna_spirit_blade_inception', charTalentTables.Vesna.s2.p1)},
-            {table: new StatTable('vesna_spirit_blade_pierce', charTalentTables.Vesna.s2.p2)},
-            {table: new StatTable('vesna_spirit_blade_plunge', charTalentTables.Vesna.s2.p3)},
-            {table: new StatTable('vesna_spirit_blade_plunge_blade', charTalentTables.Vesna.s2.p4)},
-            {table: new StatTable('vesna_stellar_spirit_blade_plunge', charTalentTables.Vesna.s2.p5)},
+            {table: new StatTable('vesna_the_art_of_victory', charTalentTables.Vesna.s2.p1)},
+            {table: new StatTable('vesna_windborne_sword_lv1', charTalentTables.Vesna.s2.p2)},
+            {table: new StatTable('vesna_windborne_sword_lv2', charTalentTables.Vesna.s2.p3)},
+            {table: new StatTable('vesna_windborne_sword_lv2_spirit_blade', charTalentTables.Vesna.s2.p4)},
+            {table: new StatTable('vesna_windborne_sword_lv2_spirit_blade_stellar', charTalentTables.Vesna.s2.p5)},
             {
-                table: new StatTable('vesna_spirit_blade_dance', charTalentTables.Vesna.s2.p6),
+                table: new StatTable('vesna_windborne_sword_lv3', charTalentTables.Vesna.s2.p6),
                 hits: 4,
             },
             {
-                table: new StatTable('vesna_stellar_spirit_blade_dance', charTalentTables.Vesna.s2.p7),
+                table: new StatTable('vesna_windborne_sword_lv3_stellar', charTalentTables.Vesna.s2.p7),
                 hits: 4,
             },
-            {table: new StatTable('vesna_spirit_blade_dance_final', charTalentTables.Vesna.s2.p8)},
-            {table: new StatTable('vesna_stellar_spirit_blade_dance_final', charTalentTables.Vesna.s2.p9)},
-            {table: new StatTable('vesna_spirit_feather', charTalentTables.Vesna.s2.p10)},
+            {table: new StatTable('vesna_windborne_sword_lv3_final', charTalentTables.Vesna.s2.p8)},
+            {table: new StatTable('vesna_windborne_sword_lv3_final_stellar', charTalentTables.Vesna.s2.p9)},
+            {table: new StatTable('vesna_wind_pinion', charTalentTables.Vesna.s2.p10)},
             {
                 unit: 'sec',
-                table: new StatTable('vesna_spirit_blade_duration', charTalentTables.Vesna.s2.p12),
+                table: new StatTable('vesna_armed_for_action_duration', charTalentTables.Vesna.s2.p12),
             },
             {
                 unit: 'sec',
@@ -89,11 +89,11 @@ const Talents = new DbObjectTalents({
     },
     burst: {
         gameId: charTalentTables.Vesna.s3_id,
-        title: 'talent_name.vesna_spirit_blade_burst',
-        description: 'talent_descr.vesna_spirit_blade_burst',
+        title: 'talent_name.vesna_for_the_tsaritsa',
+        description: 'talent_descr.vesna_for_the_tsaritsa',
         items: [
-            {table: new StatTable('vesna_spirit_blade_burst', charTalentTables.Vesna.s3.p1)},
-            {table: new StatTable('vesna_stellar_spirit_blade_burst', charTalentTables.Vesna.s3.p2)},
+            {table: new StatTable('vesna_for_the_tsaritsa', charTalentTables.Vesna.s3.p1)},
+            {table: new StatTable('vesna_for_the_tsaritsa_stellar', charTalentTables.Vesna.s3.p2)},
             {
                 unit: 'sec',
                 table: new StatTable('cd', charTalentTables.Vesna.s3.p3),
@@ -107,80 +107,49 @@ const Talents = new DbObjectTalents({
     links: [11430001],
 });
 
-const SpiritBladeDuration = 15;
-const SpiritBladeInitialForce = 2;
-const SpiritBladeDanceUses = 3;
-const C1SpiritBladeDanceUses = 4;
-const UnruffledMaxStacks = 6;
-const UnruffledOriginalDmgPerStack = 10;
+const ArmedForActionDuration = 15;
+const SwordEnergyInitial = 2;
+const WindborneSwordMaxUses = 3;
+const C1WindborneSwordMaxUses = 4;
+const DisciplinaryActionMaxStacks = 6;
+const DisciplinaryActionDmgPerStack = 10;
 const A4AtkPerCryoAnemo = 6;
 const A4MasteryPerOther = 25;
 const C1StellarSwirlDmg = 20;
-const C2Atk = 60;
+const C2Atk = 40;
 const C4A4TotalMultiplier = 3;
-const C6TreadDuration = 5;
-const C6TreadAnemoDmg = 150;
-const C6TreadStellarSwirlDmg = 200;
+const C6TransposeDuration = 5;
+const C6TransposeAnemoDmg = 150;
+const C6TransposeSpiritBladeDmg = 200;
 const C6StellarSwirlElevation = 20;
 const JubileeBaseScalePer100Atk = 0.7;
 const JubileeBaseScaleCap = 14;
 const RadianceDuration = 8;
 
-const spiritBladeName = 'vesna_spirit_blade';
-const spiritBladeForceName = 'vesna_spirit_blade_force';
-const unruffledName = 'vesna_unruffled';
+const armedForActionName = 'vesna_armed_for_action';
+const swordEnergyName = 'vesna_sword_energy';
+const disciplinaryActionName = 'vesna_disciplinary_action';
 const radianceName = 'vesna_radiance_stellarswirl';
-const c6TreadName = 'vesna_c6_spirit_blade_tread';
+const c6TransposeName = 'vesna_c6_transpose';
 
-const spiritBladeCondition = new ConditionBoolean({name: spiritBladeName});
+const armedForActionCondition = new ConditionBoolean({name: armedForActionName});
 const radianceCondition = new ConditionRadianceStellarGlimmer({
     conductName: 'polestar_field',
     swirlName: radianceName,
     mode: RADIANCE_STELLARSWIRL,
 });
 const noRadianceCondition = new ConditionNot([radianceCondition]);
-const spiritBladeNoRadianceCondition = new ConditionAnd([
-    spiritBladeCondition,
+const armedForActionNoRadianceCondition = new ConditionAnd([
+    armedForActionCondition,
     noRadianceCondition,
 ]);
-const spiritBladeRadianceCondition = new ConditionAnd([
-    spiritBladeCondition,
+const armedForActionRadianceCondition = new ConditionAnd([
+    armedForActionCondition,
     radianceCondition,
 ]);
 
-/** C2 grants maximum A1 stacks on entry; the explicit clear event wins later. */
-class ConditionStacksVesnaUnruffled extends ConditionStacks {
-    isC2Entry(settings) {
-        return (settings.char_ascension || 0) >= 1
-            && (settings.char_constellation || 0) >= 2
-            && !!settings[spiritBladeName]
-            && !settings.vesna_unruffled_cleared;
-    }
-
-    getStacksCnt(settings) {
-        if (settings.vesna_unruffled_cleared) {
-            return 0;
-        }
-        if (this.isC2Entry(settings)) {
-            return UnruffledMaxStacks;
-        }
-        return super.getStacksCnt(settings);
-    }
-
-    getData(settings) {
-        const result = super.getData(settings);
-        result.settings ||= {};
-        if (settings.vesna_unruffled_cleared) {
-            result.settings[unruffledName] = 0;
-        } else if (this.isC2Entry(settings)) {
-            result.settings[unruffledName] = UnruffledMaxStacks;
-        }
-        return result;
-    }
-}
-
 /** Count Vesna plus the three selected party slots for A4 and its C4 tripling. */
-class ConditionVesnaEffortless extends Condition {
+class ConditionVesnaTruthPrevails extends Condition {
     getData(settings) {
         const result = {
             settings: {},
@@ -211,8 +180,8 @@ class ConditionVesnaEffortless extends Condition {
             : 1;
 
         result.settings = {
-            vesna_effortless_cryo_anemo_count: cryoAnemo,
-            vesna_effortless_other_count: other,
+            vesna_truth_prevails_cryo_anemo_count: cryoAnemo,
+            vesna_truth_prevails_other_count: other,
         };
         result.stats.add('atk_percent', cryoAnemo * A4AtkPerCryoAnemo * multiplier);
         result.stats.add('mastery', other * A4MasteryPerOther * multiplier);
@@ -244,8 +213,8 @@ function attackMultiplier(name) {
 function skillMultiplier(name, blade = false) {
     return new FeatureMultiplier({
         leveling: 'char_skill_elemental',
-        scalingSource: blade ? unruffledName : '',
-        scalingMultiplier: blade ? 'vesna_blade_original_multi' : 1,
+        scalingSource: blade ? disciplinaryActionName : '',
+        scalingMultiplier: blade ? 'vesna_disciplinary_action_multi' : 1,
         values: Talents.get('skill.' + name),
     });
 }
@@ -253,8 +222,8 @@ function skillMultiplier(name, blade = false) {
 function burstMultiplier(name) {
     return new FeatureMultiplier({
         leveling: 'char_skill_burst',
-        scalingSource: unruffledName,
-        scalingMultiplier: 'vesna_blade_original_multi',
+        scalingSource: disciplinaryActionName,
+        scalingMultiplier: 'vesna_disciplinary_action_multi',
         values: Talents.get('burst.' + name),
     });
 }
@@ -268,7 +237,6 @@ export const Vesna = new DbObjectChar({
     element: 'anemo',
     weapon: 'sword',
     origin: 'snezhnaya',
-    beta: true,
     talents: Talents,
     statTable: charTables.Vesna,
     features: [
@@ -314,123 +282,141 @@ export const Vesna = new DbObjectChar({
             multipliers: [attackMultiplier('plunge_high')],
         }),
         new FeatureDamageSkill({
-            name: 'vesna_spirit_blade_inception',
+            name: 'vesna_the_art_of_victory',
             element: 'anemo',
-            multipliers: [skillMultiplier('vesna_spirit_blade_inception')],
+            multipliers: [skillMultiplier('vesna_the_art_of_victory')],
         }),
-        // Pierce and Vesna's Plunge portion are ordinary attacks; only the
+        // Lv. 1 and the Vesna-side Lv. 2 portion are ordinary attacks; only the
         // separately tagged blade portions have Stellar rows.
         new FeatureDamageSkill({
-            name: 'vesna_spirit_blade_pierce',
+            name: 'vesna_windborne_sword_lv1',
             element: 'anemo',
-            multipliers: [skillMultiplier('vesna_spirit_blade_pierce')],
-            condition: spiritBladeCondition,
+            multipliers: [skillMultiplier('vesna_windborne_sword_lv1')],
+            condition: armedForActionCondition,
         }),
         new FeatureDamageSkill({
-            name: 'vesna_spirit_blade_plunge',
+            name: 'vesna_windborne_sword_lv2',
             element: 'anemo',
-            multipliers: [skillMultiplier('vesna_spirit_blade_plunge')],
-            condition: spiritBladeCondition,
+            multipliers: [skillMultiplier('vesna_windborne_sword_lv2')],
+            condition: armedForActionCondition,
         }),
         new FeatureDamageSkill({
-            name: 'vesna_spirit_blade_plunge_blade',
+            name: 'vesna_windborne_sword_lv2_spirit_blade',
             element: 'anemo',
-            multipliers: [skillMultiplier('vesna_spirit_blade_plunge_blade', true)],
-            condition: spiritBladeNoRadianceCondition,
+            multipliers: [skillMultiplier('vesna_windborne_sword_lv2_spirit_blade', true)],
+            condition: armedForActionNoRadianceCondition,
         }),
         new FeatureDamageStellarSwirl({
             category: 'skill',
-            name: 'vesna_stellar_spirit_blade_plunge',
+            name: 'vesna_windborne_sword_lv2_spirit_blade_stellar',
             element: 'anemo',
-            multipliers: [skillMultiplier('vesna_stellar_spirit_blade_plunge', true)],
-            condition: spiritBladeRadianceCondition,
+            multipliers: [skillMultiplier('vesna_windborne_sword_lv2_spirit_blade_stellar', true)],
+            condition: armedForActionRadianceCondition,
         }),
         new FeatureDamageSkill({
-            name: 'vesna_spirit_blade_dance',
+            name: 'vesna_windborne_sword_lv3',
             element: 'anemo',
             hits: 4,
-            multipliers: [skillMultiplier('vesna_spirit_blade_dance', true)],
-            condition: spiritBladeNoRadianceCondition,
+            multipliers: [skillMultiplier('vesna_windborne_sword_lv3', true)],
+            condition: armedForActionNoRadianceCondition,
         }),
         new FeatureDamageStellarSwirl({
             category: 'skill',
-            name: 'vesna_stellar_spirit_blade_dance',
+            name: 'vesna_windborne_sword_lv3_stellar',
             element: 'anemo',
             hits: 4,
-            multipliers: [skillMultiplier('vesna_stellar_spirit_blade_dance', true)],
-            condition: spiritBladeRadianceCondition,
+            multipliers: [skillMultiplier('vesna_windborne_sword_lv3_stellar', true)],
+            condition: armedForActionRadianceCondition,
         }),
         new FeatureDamageSkill({
-            name: 'vesna_spirit_blade_dance_final',
+            name: 'vesna_windborne_sword_lv3_final',
             element: 'anemo',
-            multipliers: [skillMultiplier('vesna_spirit_blade_dance_final', true)],
-            condition: spiritBladeNoRadianceCondition,
+            multipliers: [skillMultiplier('vesna_windborne_sword_lv3_final', true)],
+            condition: armedForActionNoRadianceCondition,
         }),
         new FeatureDamageStellarSwirl({
             category: 'skill',
-            name: 'vesna_stellar_spirit_blade_dance_final',
+            name: 'vesna_windborne_sword_lv3_final_stellar',
             element: 'anemo',
-            multipliers: [skillMultiplier('vesna_stellar_spirit_blade_dance_final', true)],
-            condition: spiritBladeRadianceCondition,
+            multipliers: [skillMultiplier('vesna_windborne_sword_lv3_final_stellar', true)],
+            condition: armedForActionRadianceCondition,
         }),
         new FeatureDamageSkill({
-            name: 'vesna_spirit_feather',
+            name: 'vesna_wind_pinion',
             element: 'anemo',
-            multipliers: [skillMultiplier('vesna_spirit_feather', true)],
-            condition: spiritBladeCondition,
+            multipliers: [skillMultiplier('vesna_wind_pinion')],
+            condition: armedForActionCondition,
         }),
         new FeatureDamageBurst({
-            name: 'vesna_spirit_blade_burst',
+            name: 'vesna_for_the_tsaritsa',
             element: 'anemo',
-            multipliers: [burstMultiplier('vesna_spirit_blade_burst')],
+            multipliers: [burstMultiplier('vesna_for_the_tsaritsa')],
             condition: noRadianceCondition,
         }),
         new FeatureDamageStellarSwirl({
             category: 'burst',
-            name: 'vesna_stellar_spirit_blade_burst',
+            name: 'vesna_for_the_tsaritsa_stellar',
             element: 'anemo',
-            multipliers: [burstMultiplier('vesna_stellar_spirit_blade_burst')],
+            multipliers: [burstMultiplier('vesna_for_the_tsaritsa_stellar')],
             condition: radianceCondition,
         }),
         new FeatureDamageSkill({
-            name: 'vesna_c6_spirit_blade_tread',
+            name: 'vesna_c6_transpose',
             element: 'anemo',
             multipliers: [
                 new FeatureMultiplier({
                     source: 'constellation6',
-                    values: new ValueTable([C6TreadAnemoDmg]),
+                    values: new ValueTable([C6TransposeAnemoDmg]),
                 }),
             ],
             condition: new ConditionAnd([
                 new ConditionConstellation({constellation: 6}),
-                new ConditionBoolean({name: c6TreadName}),
+                new ConditionBoolean({name: c6TransposeName}),
+            ]),
+        }),
+        new FeatureDamageSkill({
+            name: 'vesna_c6_transpose_spirit_blade',
+            element: 'anemo',
+            multipliers: [
+                new FeatureMultiplier({
+                    source: 'constellation6',
+                    scalingSource: disciplinaryActionName,
+                    scalingMultiplier: 'vesna_disciplinary_action_multi',
+                    values: new ValueTable([C6TransposeSpiritBladeDmg]),
+                }),
+            ],
+            condition: new ConditionAnd([
+                new ConditionConstellation({constellation: 6}),
+                new ConditionBoolean({name: c6TransposeName}),
+                noRadianceCondition,
             ]),
         }),
         new FeatureDamageStellarSwirl({
             category: 'skill',
-            name: 'vesna_c6_stellar_spirit_blade_tread',
+            name: 'vesna_c6_transpose_stellar',
             element: 'anemo',
             multipliers: [
                 new FeatureMultiplier({
                     source: 'constellation6',
-                    scalingSource: unruffledName,
-                    scalingMultiplier: 'vesna_blade_original_multi',
-                    values: new ValueTable([C6TreadStellarSwirlDmg]),
+                    scalingSource: disciplinaryActionName,
+                    scalingMultiplier: 'vesna_disciplinary_action_multi',
+                    values: new ValueTable([C6TransposeSpiritBladeDmg]),
                 }),
             ],
             condition: new ConditionAnd([
                 new ConditionConstellation({constellation: 6}),
-                new ConditionBoolean({name: c6TreadName}),
+                new ConditionBoolean({name: c6TransposeName}),
+                radianceCondition,
             ]),
         }),
         new FeatureDamageSkill({
-            name: 'vesna_c6_tread_spirit_feather',
+            name: 'vesna_c6_transpose_wind_pinion',
             element: 'anemo',
-            multipliers: [skillMultiplier('vesna_spirit_feather', true)],
+            multipliers: [skillMultiplier('vesna_wind_pinion')],
             condition: new ConditionAnd([
                 new ConditionConstellation({constellation: 6}),
-                new ConditionBoolean({name: c6TreadName}),
-                spiritBladeCondition,
+                new ConditionBoolean({name: c6TransposeName}),
+                armedForActionCondition,
             ]),
         }),
     ],
@@ -441,69 +427,64 @@ export const Vesna = new DbObjectChar({
             },
         }),
         new ConditionBoolean({
-            name: spiritBladeName,
+            name: armedForActionName,
             serializeId: 1,
             title: 'talent_name.n11430001',
             description: 'talent_descr.n11430001',
             rotation: 'self',
             stats: {
-                text_duration: SpiritBladeDuration,
-                text_value: SpiritBladeInitialForce,
+                text_duration: ArmedForActionDuration,
+                text_value: SwordEnergyInitial,
             },
             settings: {
                 attack_infusion: 'anemo',
             },
         }),
         new ConditionStacks({
-            name: spiritBladeForceName,
+            name: swordEnergyName,
             serializeId: 2,
-            title: 'talent_name.vesna_spirit_blade_force',
-            description: 'talent_descr.vesna_spirit_blade_force',
+            title: 'talent_name.vesna_sword_energy',
+            description: 'talent_descr.vesna_sword_energy',
             rotation: 'self',
-            maxStacks: SpiritBladeInitialForce,
+            maxStacks: SwordEnergyInitial,
             stats: [],
-            condition: spiritBladeCondition,
+            condition: armedForActionCondition,
         }),
         new ConditionNumber({
-            name: 'vesna_spirit_blade_dance_uses',
+            name: 'vesna_windborne_sword_uses',
             serializeId: 3,
-            title: 'talent_name.vesna_spirit_blade_sequence',
-            description: 'talent_descr.vesna_spirit_blade_sequence',
+            title: 'talent_name.vesna_windborne_sword_level',
+            description: 'talent_descr.vesna_windborne_sword_level',
             rotation: 'self',
             min: 0,
             max: (settings) => (settings.char_constellation || 0) >= 1
-                ? C1SpiritBladeDanceUses
-                : SpiritBladeDanceUses,
+                ? C1WindborneSwordMaxUses
+                : WindborneSwordMaxUses,
             allowMinZero: true,
             forceSettings: true,
             noStat: true,
-            condition: spiritBladeCondition,
+            condition: armedForActionCondition,
         }),
-        new ConditionStacksVesnaUnruffled({
-            name: unruffledName,
+        new ConditionStacks({
+            name: disciplinaryActionName,
             serializeId: 4,
-            title: 'talent_name.vesna_unruffled',
-            description: 'talent_descr.vesna_unruffled_1',
+            title: 'talent_name.vesna_rite_of_springs_procession',
+            description: 'talent_descr.vesna_rite_of_springs_procession_1',
             info: {ascension: 1},
             rotation: 'self',
-            maxStacks: UnruffledMaxStacks,
+            maxStacks: DisciplinaryActionMaxStacks,
             // This dedicated multiplier stat keeps the original-DMG increase
             // dynamic in compiled feature trees instead of treating it as DMG Bonus.
             stats: [
-                new StatTable('vesna_blade_original_multi', [UnruffledOriginalDmgPerStack]),
+                new StatTable('vesna_disciplinary_action_multi', [DisciplinaryActionDmgPerStack]),
             ],
             condition: new ConditionAscensionChar({ascension: 1}),
         }),
         new ConditionBoolean({
-            name: 'vesna_unruffled_cleared',
+            // Retain the removed control's ID so existing builds still load.
+            name: 'vesna_disciplinary_action_cleared',
             serializeId: 5,
-            title: 'talent_name.vesna_unruffled_clear',
-            description: 'talent_descr.vesna_unruffled_2',
-            info: {ascension: 1},
-            rotation: 'self',
-            settings: {
-                vesna_unruffled: 0,
-            },
+            isHidden: true,
         }),
         new ConditionBoolean({
             name: radianceName,
@@ -520,8 +501,8 @@ export const Vesna = new DbObjectChar({
             ]),
         }),
         new ConditionStatic({
-            title: 'talent_name.vesna_effortless',
-            description: 'talent_descr.vesna_effortless',
+            title: 'talent_name.vesna_truth_prevails',
+            description: 'talent_descr.vesna_truth_prevails',
             info: {ascension: 4},
             stats: {
                 text_percent_atk: A4AtkPerCryoAnemo,
@@ -529,7 +510,7 @@ export const Vesna = new DbObjectChar({
             },
             condition: new ConditionAscensionChar({ascension: 4}),
         }),
-        new ConditionVesnaEffortless({
+        new ConditionVesnaTruthPrevails({
             isHidden: true,
             condition: new ConditionAnd([
                 new ConditionAscensionChar({ascension: 4}),
@@ -537,8 +518,8 @@ export const Vesna = new DbObjectChar({
             ]),
         }),
         new ConditionStatic({
-            title: 'talent_name.vesna_radiant_fae',
-            description: 'talent_descr.vesna_radiant_fae',
+            title: 'talent_name.vesna_splendid_prelude',
+            description: 'talent_descr.vesna_splendid_prelude',
             stats: {
                 text_percent: JubileeBaseScalePer100Atk,
                 text_percent_max: JubileeBaseScaleCap,
@@ -553,10 +534,10 @@ export const Vesna = new DbObjectChar({
         {
             conditions: [
                 new ConditionStatic({
-                    title: 'talent_name.vesna_c1',
-                    description: 'talent_descr.vesna_c1',
+                    title: 'talent_name.vesna_winters_farewell_feast',
+                    description: 'talent_descr.vesna_winters_farewell_feast',
                     stats: {
-                        text_value: C1SpiritBladeDanceUses - SpiritBladeDanceUses,
+                        text_value: C1WindborneSwordMaxUses - WindborneSwordMaxUses,
                         text_percent: C1StellarSwirlDmg,
                     },
                 }),
@@ -565,15 +546,15 @@ export const Vesna = new DbObjectChar({
                     stats: {
                         dmg_stellarswirl: C1StellarSwirlDmg,
                     },
-                    condition: spiritBladeCondition,
+                    condition: armedForActionCondition,
                 }),
             ],
         },
         {
             conditions: [
                 new ConditionStatic({
-                    title: 'talent_name.vesna_c2',
-                    description: 'talent_descr.vesna_c2',
+                    title: 'talent_name.vesna_kolo_of_springs_arrival',
+                    description: 'talent_descr.vesna_kolo_of_springs_arrival',
                     stats: {
                         text_percent_atk: C2Atk,
                     },
@@ -586,9 +567,9 @@ export const Vesna = new DbObjectChar({
                     condition: new ConditionAnd([
                         new ConditionAscensionChar({ascension: 1}),
                         new ConditionBooleanValue({
-                            setting: unruffledName,
+                            setting: disciplinaryActionName,
                             cond: 'ge',
-                            value: UnruffledMaxStacks,
+                            value: DisciplinaryActionMaxStacks,
                         }),
                     ]),
                 }),
@@ -606,8 +587,8 @@ export const Vesna = new DbObjectChar({
         {
             conditions: [
                 new ConditionStatic({
-                    title: 'talent_name.vesna_c4',
-                    description: 'talent_descr.vesna_c4',
+                    title: 'talent_name.vesna_glory_to_our_forebears',
+                    description: 'talent_descr.vesna_glory_to_our_forebears',
                     stats: {
                         text_percent: (C4A4TotalMultiplier - 1) * 100,
                     },
@@ -626,20 +607,20 @@ export const Vesna = new DbObjectChar({
         {
             conditions: [
                 new ConditionBoolean({
-                    name: c6TreadName,
+                    name: c6TransposeName,
                     serializeId: 8,
-                    title: 'talent_name.vesna_c6',
-                    description: 'talent_descr.vesna_c6_1',
+                    title: 'talent_name.vesna_unwavering_ardor',
+                    description: 'talent_descr.vesna_unwavering_ardor_1',
                     rotation: 'self',
                     stats: {
-                        text_duration: C6TreadDuration,
-                        text_percent_dmg_1: C6TreadAnemoDmg,
-                        text_percent_dmg_2: C6TreadStellarSwirlDmg,
+                        text_duration: C6TransposeDuration,
+                        text_percent_dmg_1: C6TransposeAnemoDmg,
+                        text_percent_dmg_2: C6TransposeSpiritBladeDmg,
                     },
                 }),
                 new ConditionStatic({
-                    title: 'talent_name.vesna_c6',
-                    description: 'talent_descr.vesna_c6_2',
+                    title: 'talent_name.vesna_unwavering_ardor',
+                    description: 'talent_descr.vesna_unwavering_ardor_2',
                     stats: {
                         dmg_stellarswirl_special: C6StellarSwirlElevation,
                         text_percent: C6StellarSwirlElevation,
@@ -663,8 +644,8 @@ export const Vesna = new DbObjectChar({
             new ConditionBoolean({
                 name: 'party.vesna_stellar_jubilee',
                 serializeId: 2,
-                title: 'talent_name.vesna_radiant_fae',
-                description: 'talent_descr.vesna_radiant_fae',
+                title: 'talent_name.vesna_splendid_prelude',
+                description: 'talent_descr.vesna_splendid_prelude',
                 rotation: 'party',
                 settings: {
                     allowed_stellarswirl: 1,

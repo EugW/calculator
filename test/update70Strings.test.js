@@ -125,58 +125,36 @@ const manualExceptions = {
         'talent_descr.weapon_forged_by_the_golden_melody_copied',
     ],
     '7.1/vesna.csv': [
-        'talent_name.n11430001',
-        'talent_descr.n11430001',
-        'talent_name.vesna_spirit_blade_force',
-        'talent_descr.vesna_spirit_blade_force',
-        'talent_name.vesna_spirit_blade_sequence',
-        'talent_descr.vesna_spirit_blade_sequence',
-        'talent_name.vesna_unruffled_clear',
+        'talent_name.vesna_sword_energy',
+        'talent_descr.vesna_sword_energy',
+        'talent_name.vesna_windborne_sword_level',
+        'talent_descr.vesna_windborne_sword_level',
     ],
     '7.1/vodyanitsa.csv': [
-        'talent_name.vodyanitsa_microphone_summons',
-        'talent_descr.vodyanitsa_microphone_summons',
+        'talent_name.vodyanitsa_song_of_ages_past',
+        'talent_descr.vodyanitsa_song_of_ages_past',
     ],
     '7.1/weapons.csv': [
-        'weapon_name.spiked_stake',
-        'talent_name.weapon_spiked_stake',
-        'talent_name.weapon_spiked_stake_mode',
-        'talent_name.weapon_spiked_stake_normal',
-        'talent_name.weapon_spiked_stake_radiance',
-        'talent_name.weapon_spiked_stake_stacks',
-        'talent_descr.weapon_spiked_stake_stacks',
-        'weapon_name.fajian',
-        'talent_name.weapon_fajian',
-        'weapon_name.samosvist',
-        'talent_name.weapon_samosvist',
-        'talent_name.weapon_samosvist_attention',
-        'talent_descr.weapon_samosvist_attention',
-        'talent_name.weapon_samosvist_blazing',
-        'talent_name.weapon_samosvist_dazzling',
-        'talent_name.weapon_samosvist_radiant',
-        'weapon_name.frost_scepter',
-        'talent_name.weapon_frost_scepter',
-        'talent_name.weapon_frost_scepter_radiance',
-        'weapon_name.bludnye',
-        'talent_name.weapon_bludnye',
-        'talent_name.weapon_bludnye_mode',
-        'talent_name.weapon_bludnye_hymn',
-        'talent_name.weapon_bludnye_triumph',
-        'talent_name.weapon_bludnye_stacks',
-        'talent_descr.weapon_bludnye_stacks',
-        'talent_name.weapon_bludnye_holder_hp',
-        'talent_name.weapon_bludnye_hymn_1',
-        'talent_name.weapon_bludnye_hymn_2',
-        'talent_name.weapon_bludnye_hymn_3',
-        'talent_name.weapon_bludnye_triumph_1',
-        'talent_name.weapon_bludnye_triumph_2',
-        'talent_name.weapon_bludnye_triumph_3',
-        'talent_descr.weapon_bludnye_party',
-        'weapon_name.windtalker',
-        'talent_name.weapon_windtalker',
-        'talent_name.weapon_windtalker_points',
-        'talent_descr.weapon_windtalker_points',
-        'talent_name.weapon_windtalker_party',
+        'talent_name.weapon_new_bough_mode',
+        'talent_name.weapon_new_bough_normal',
+        'talent_name.weapon_new_bough_stacks',
+        'talent_descr.weapon_new_bough_stacks',
+        'talent_name.weapon_beyond_the_chrysalis_winds_of_devotion',
+        'talent_name.weapon_beyond_the_chrysalis_winds_of_defiance',
+        'talent_name.weapon_hymn_of_the_maelstrom_mode',
+        'talent_name.weapon_hymn_of_the_maelstrom_hymn',
+        'talent_name.weapon_hymn_of_the_maelstrom_triumph',
+        'talent_name.weapon_hymn_of_the_maelstrom_stacks',
+        'talent_descr.weapon_hymn_of_the_maelstrom_stacks',
+        'talent_name.weapon_hymn_of_the_maelstrom_holder_hp',
+        'talent_name.weapon_hymn_of_the_maelstrom_hymn_1',
+        'talent_name.weapon_hymn_of_the_maelstrom_hymn_2',
+        'talent_name.weapon_hymn_of_the_maelstrom_hymn_3',
+        'talent_name.weapon_hymn_of_the_maelstrom_triumph_1',
+        'talent_name.weapon_hymn_of_the_maelstrom_triumph_2',
+        'talent_name.weapon_hymn_of_the_maelstrom_triumph_3',
+        'talent_name.weapon_breezeborne_refrain_points',
+        'talent_descr.weapon_breezeborne_refrain_points',
     ],
 };
 
@@ -304,8 +282,8 @@ test('7.1 character names and source prose are in the ordinary generated files',
     }
 
     const fallback = occurrences.get('talent_descr.n11430001') || [];
-    expect(fallback.map(({file}) => relativeStringPath(file))).toEqual(['7.1/vesna.csv']);
-    expect(characterGeneratedText).not.toContain(';n11430001;');
+    expect(fallback.map(({file}) => relativeStringPath(file))).toEqual(['generated/char_skills.csv']);
+    expect(characterGeneratedText).toContain(';n11430001;');
 });
 
 test('7.x inputs never rely on last-writer-wins string overrides', () => {
@@ -351,6 +329,7 @@ test('release-owned rows contain no unresolved or malformed markup', () => {
 
             const text = `${row[2]}\n${row[3]}`;
             expect(text).not.toMatch(/talent\{|\{param|\{LINK#|skill\{skill\{|skill\{n\d+:(?:name|skill)\{|skill\{n\d+:\}/i);
+            expect(text).not.toMatch(/\{NON_BREAK_SPACE\}/);
             expect((text.match(/\{/g) || [])).toHaveLength((text.match(/\}/g) || []).length);
         }
     }

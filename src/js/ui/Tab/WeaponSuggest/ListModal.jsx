@@ -292,7 +292,7 @@ function WeaponListItemSettings(props) {
         let isCustomized = !idSettings.isCustom && isWeaponScenarioCustomized(props.weapon, suggestItem, idSettings.settings);
         let refine = [];
 
-        for (let r = 1; r <= 5; ++r) {
+        for (let r = 1; r <= props.weapon.getMaxRefinement(); ++r) {
             refine.push(
                 <div key={'refine' + r} className="refine">
                     <ToggleRoundButton

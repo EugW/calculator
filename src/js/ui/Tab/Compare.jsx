@@ -6,6 +6,7 @@ import { ControlsBar, ControlsBarDivider } from '../Components/ControlsBar';
 import { Dropdown } from '../Components/Inputs/Dropdown';
 import { Feature2 } from '../../classes/Feature2';
 import { FeatureTableHeader, FeatureTableValues } from '../Components/FeatureTable';
+import { FeatureName } from '../Components/FeatureName';
 import { FullHeight, FullHeightScrollable, FullHeightStatic } from '../Components/FullHeight';
 import { Lang } from '../Lang';
 import { Radio } from '../Components/Inputs/Input';
@@ -98,19 +99,26 @@ export class CompareView extends React.Component {
 
         if (Array.isArray(result)) {
             for (let item of result) {
-                let input = Serializer.unpack(item.data);
-                if (!input) {
+                if (!item || typeof item != 'object' || typeof item.data != 'string') {
                     continue;
                 }
 
-                let build = CalcSet.deserialize(input);
+                let build;
+                try {
+                    let input = Serializer.unpack(item.data);
+                    build = input ? CalcSet.deserialize(input) : null;
+                } catch (error) {
+                    build = null;
+                }
+
                 if (!build) {
                     continue;
                 }
 
                 let isBeta = build.hasBetaContent();
                 if (showBetaContent || !isBeta) {
-                    this.addFromBuild(build, item.title, true);
+                    let title = typeof item.title == 'string' ? item.title : '';
+                    this.addFromBuild(build, title, true);
                 }
             }
         }
@@ -426,7 +434,10 @@ export class CompareItem extends React.Component {
                     className={'line' + (this.props.odd ? ' odd': '')}
                 >
                     <div className="more-info">
-                        {lang.get('feature_' + feature)}
+                        <FeatureName
+                            text={lang.get('feature_' + feature)}
+                            result={this.props.itemFeatures[feature]}
+                        />
                     </div>
                     <FeatureTableValues
                         result={this.props.itemFeatures[feature]}

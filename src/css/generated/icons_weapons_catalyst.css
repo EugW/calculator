@@ -31,7 +31,7 @@
 .weapon-icon-catalyst-dawning-frost {background-image: url("../../images/weapons/catalyst/catalyst_ziedas.png")}
 .weapon-icon-catalyst-clash-of-kings {background-image: url("../../images/weapons/catalyst/catalyst_sandmemoria.png")}
 .weapon-icon-catalyst-echoes-of-the-heart {background-image: url("../../images/weapons/catalyst/catalyst_glintstonecatalyst.png")}
-.weapon-icon-catalyst-frost-scepter {background-image: url("../../images/weapons/catalyst/catalyst_frostscepter.png")}
+.weapon-icon-catalyst-winters-heavy-heart {background-image: url("../../images/weapons/catalyst/catalyst_frostscepter.png")}
 .weapon-icon-catalyst-skyward-atlas {background-image: url("../../images/weapons/catalyst/catalyst_dvalin.png")}
 .weapon-icon-catalyst-lost-prayer-to-the-sacred-winds {background-image: url("../../images/weapons/catalyst/catalyst_fourwinds.png")}
 .weapon-icon-catalyst-memory-of-dust {background-image: url("../../images/weapons/catalyst/catalyst_kunwu.png")}
@@ -51,17 +51,18 @@
 .weapon-icon-catalyst-reliquary-of-truth {background-image: url("../../images/weapons/catalyst/catalyst_sistrum.png")}
 .weapon-icon-catalyst-nocturnes-curtain-call {background-image: url("../../images/weapons/catalyst/catalyst_brisingamen.png")}
 .weapon-icon-catalyst-angelos-heptades {background-image: url("../../images/weapons/catalyst/catalyst_fairygarden.png")}
-.weapon-icon-catalyst-bludnye {background-image: url("../../images/weapons/catalyst/catalyst_bludnye.png")}
+.weapon-icon-catalyst-hymn-of-the-maelstrom {background-image: url("../../images/weapons/catalyst/catalyst_bludnye.png")}
+.weapon-icon-catalyst-apprentices-notes {background-image: url("../../images/weapons/catalyst/catalyst_apprentice.png")}
 .sprite-weapon-catalyst.sprite-24 {
-	background-image: url("../../images/sprites/weapon_catalyst_8077b8fdffb824ccb035eec13ab0d32e.png");
+	background-image: url("../../images/sprites/weapon_catalyst_aad856ebce33c05789b696243bf7dc98.png");
 	background-size: 120px 264px;
 }
 .sprite-weapon-catalyst.sprite-40 {
-	background-image: url("../../images/sprites/weapon_catalyst_b4923a869f659bf2029818ce6e570106.png");
+	background-image: url("../../images/sprites/weapon_catalyst_da2ce888bab40759d52dc70c2dd78036.png");
 	background-size: 200px 440px;
 }
 .sprite-weapon-catalyst.sprite-60 {
-	background-image: url("../../images/sprites/weapon_catalyst_777eb1dfdecb13872b783b4df54ba35e.png");
+	background-image: url("../../images/sprites/weapon_catalyst_c822a536cf97285a424bd7ab957070d2.png");
 	background-size: 300px 660px;
 }
 .sprite.weapon-icon-catalyst-unknown {background-position: 0 0}
@@ -97,7 +98,7 @@
 .sprite.weapon-icon-catalyst-dawning-frost {background-position: 0 60%}
 .sprite.weapon-icon-catalyst-clash-of-kings {background-position: 25% 60%}
 .sprite.weapon-icon-catalyst-echoes-of-the-heart {background-position: 50% 60%}
-.sprite.weapon-icon-catalyst-frost-scepter {background-position: 75% 60%}
+.sprite.weapon-icon-catalyst-winters-heavy-heart {background-position: 75% 60%}
 .sprite.weapon-icon-catalyst-skyward-atlas {background-position: 100% 60%}
 .sprite.weapon-icon-catalyst-lost-prayer-to-the-sacred-winds {background-position: 0 70%}
 .sprite.weapon-icon-catalyst-memory-of-dust {background-position: 25% 70%}
@@ -117,7 +118,8 @@
 .sprite.weapon-icon-catalyst-reliquary-of-truth {background-position: 0 100%}
 .sprite.weapon-icon-catalyst-nocturnes-curtain-call {background-position: 25% 100%}
 .sprite.weapon-icon-catalyst-angelos-heptades {background-position: 50% 100%}
-.sprite.weapon-icon-catalyst-bludnye {background-position: 75% 100%}
+.sprite.weapon-icon-catalyst-hymn-of-the-maelstrom {background-position: 75% 100%}
+.sprite.weapon-icon-catalyst-apprentices-notes {background-position: 100% 100%}
 
 @media
 only screen and (-webkit-min-device-pixel-ratio: 2),
@@ -159,7 +161,7 @@ only screen and (                min-resolution: 2dppx) {
 	.weapon-icon-catalyst-dawning-frost {background-image: url("../../images/weapons/catalyst/catalyst_ziedas_2x.png")}
 	.weapon-icon-catalyst-clash-of-kings {background-image: url("../../images/weapons/catalyst/catalyst_sandmemoria_2x.png")}
 	.weapon-icon-catalyst-echoes-of-the-heart {background-image: url("../../images/weapons/catalyst/catalyst_glintstonecatalyst_2x.png")}
-	.weapon-icon-catalyst-frost-scepter {background-image: url("../../images/weapons/catalyst/catalyst_frostscepter_2x.png")}
+	.weapon-icon-catalyst-winters-heavy-heart {background-image: url("../../images/weapons/catalyst/catalyst_frostscepter_2x.png")}
 	.weapon-icon-catalyst-skyward-atlas {background-image: url("../../images/weapons/catalyst/catalyst_dvalin_2x.png")}
 	.weapon-icon-catalyst-lost-prayer-to-the-sacred-winds {background-image: url("../../images/weapons/catalyst/catalyst_fourwinds_2x.png")}
 	.weapon-icon-catalyst-memory-of-dust {background-image: url("../../images/weapons/catalyst/catalyst_kunwu_2x.png")}
@@ -179,8 +181,9 @@ only screen and (                min-resolution: 2dppx) {
 	.weapon-icon-catalyst-reliquary-of-truth {background-image: url("../../images/weapons/catalyst/catalyst_sistrum_2x.png")}
 	.weapon-icon-catalyst-nocturnes-curtain-call {background-image: url("../../images/weapons/catalyst/catalyst_brisingamen_2x.png")}
 	.weapon-icon-catalyst-angelos-heptades {background-image: url("../../images/weapons/catalyst/catalyst_fairygarden_2x.png")}
-	.weapon-icon-catalyst-bludnye {background-image: url("../../images/weapons/catalyst/catalyst_bludnye_2x.png")}
-	.sprite-weapon-catalyst.sprite-24 {background-image: url("../../images/sprites/weapon_catalyst_0be8160f14d5010627c8fc729ecae832.png")}
-	.sprite-weapon-catalyst.sprite-40 {background-image: url("../../images/sprites/weapon_catalyst_9c9acf8e66fb001a95e6dac76f509c2f.png")}
-	.sprite-weapon-catalyst.sprite-60 {background-image: url("../../images/sprites/weapon_catalyst_bf972c6af7cba5d5b6c24c4f2bbe4f26.png")}
+	.weapon-icon-catalyst-hymn-of-the-maelstrom {background-image: url("../../images/weapons/catalyst/catalyst_bludnye_2x.png")}
+	.weapon-icon-catalyst-apprentices-notes {background-image: url("../../images/weapons/catalyst/catalyst_apprentice_2x.png")}
+	.sprite-weapon-catalyst.sprite-24 {background-image: url("../../images/sprites/weapon_catalyst_9a90804b2c614b526b28878e69592602.png")}
+	.sprite-weapon-catalyst.sprite-40 {background-image: url("../../images/sprites/weapon_catalyst_b6bbdce6bd61cf89d1a6e9aeca124a2e.png")}
+	.sprite-weapon-catalyst.sprite-60 {background-image: url("../../images/sprites/weapon_catalyst_e55dda3dbe21889413960798cf560c1c.png")}
 }

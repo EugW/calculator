@@ -21,7 +21,13 @@
     min-width: 50px;
 }
 
+.condition-list-item .control .checkbox-wrapper {
+    align-items: center;
+}
 
+.condition-list-item .control .checkbox-switcher {
+    margin-top: 0;
+}
 
 .condition-list-item .title {
     flex-grow: 1;

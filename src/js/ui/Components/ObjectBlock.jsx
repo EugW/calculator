@@ -135,7 +135,8 @@ export class WeaponObjectBlock extends React.Component {
                     <ObjectAscended
                         title={this.lang.get(this.props.weapon.getName())}
                         level={level}
-                        maxLevel={90}
+                        maxLevel={this.props.weapon.getMaxLevel()}
+                        maxAscension={this.props.weapon.getMaxAscension()}
                         ascension={ascension}
                         onLevelChange={this.props.onLevelChange}
                     />
@@ -146,7 +147,7 @@ export class WeaponObjectBlock extends React.Component {
                     value={this.props.settings.weapon_refine}
                     onChange={(value) => this.props.onLevelChange({refine: value})}
                     minValue={1}
-                    maxValue={5}
+                    maxValue={this.props.weapon.getMaxRefinement()}
                 />
                 <table>
                     <tbody>{stats}</tbody>
@@ -250,7 +251,7 @@ class ObjectAscended extends React.Component {
 
     render() {
         let stars = [];
-        for (let i = 1; i <= 6; ++i) {
+        for (let i = 1; i <= (this.props.maxAscension || 6); ++i) {
             stars.push(<div key={'star'+ i} className={'star'+ (this.props.ascension >= i ? ' active' : '')}/>);
         }
 

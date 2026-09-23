@@ -3,7 +3,11 @@ import io
 import requests
 from PIL import Image
 
-from lib.genshin.datafiles.weapons import IGNORED_WEAPONS, WeaponData
+from lib.genshin.datafiles.weapons import (
+    IGNORED_WEAPONS,
+    SUPPORTED_WEAPON_RARITIES,
+    WeaponData,
+)
 from lib.genshin.datafiles.lang import LangData
 from lib.genshin.utils import convert_id
 from lib.genshin.sprite import ImageGenerator
@@ -28,16 +32,6 @@ weapon_types = {
     'WEAPON_BOW': 'bow',
 }
 
-# These source rows expose only generic weapon-type labels. Keep their CSS
-# identifiers aligned with the calculator object names.
-WEAPON_ID_OVERRIDES = {
-    11437: 'spiked-stake',
-    11438: 'fajian',
-    11522: 'samosvist',
-    14437: 'frost-scepter',
-    14524: 'bludnye',
-    15437: 'windtalker',
-}
 
 weapons = {
     'sword': ['weapon-icon-sword-unknown'],
@@ -113,17 +107,20 @@ def ensure_weapon_image(image_path, image_name, sources):
     return unknown_image_path
 
 
-for weapon in weapon_data.get_list():
+weapon_items = sorted(
+    weapon_data.get_list(),
+    key=lambda item: item.get('rankLevel', 0) == 1,
+)
+
+for weapon in weapon_items:
     if weapon['id'] in IGNORED_WEAPONS:
         continue
 
     rank = weapon.get('rankLevel', 0)
-    if rank < 3:
+    if rank not in SUPPORTED_WEAPON_RARITIES:
         continue
 
-    weapon_id = WEAPON_ID_OVERRIDES.get(weapon['id'])
-    if weapon_id is None:
-        weapon_id = convert_id(lang.get(weapon['nameTextMapHash'])).replace('_', '-')
+    weapon_id = convert_id(lang.get(weapon['nameTextMapHash'])).replace('_', '-')
     wtype = weapon_types.get(weapon['weaponType'])
     if wtype not in weapons:
         weapons[wtype] = []

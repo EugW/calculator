@@ -416,8 +416,7 @@ class BestArtifact extends React.Component {
         let item = this.storage.getByHash(hash);
 
         if (item) {
-            item.setLocked(value);
-            this.storage.updateByHash(hash, item);
+            this.storage.setLocked([hash], value);
             this.props.app.queueUpdate();
 
             for (let result of this.state.result.items) {

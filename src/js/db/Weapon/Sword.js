@@ -53,9 +53,10 @@ import { HereticsMoltenBlade } from "./Sword/HereticsMoltenBlade";
 import { Emberwell } from "./Sword/Emberwell";
 import { WhitelakeFrostfeather } from "./Sword/WhitelakeFrostfeather";
 import { ExaiphanesBlade } from "./Sword/ExaiphanesBlade";
-import { SpikedStake } from "./Sword/SpikedStake";
-import { Fajian } from "./Sword/Fajian";
-import { Samosvist } from "./Sword/Samosvist";
+import { NewBough } from "./Sword/NewBough";
+import { SilverLight } from "./Sword/SilverLight";
+import { BeyondTheChrysalis } from "./Sword/BeyondTheChrysalis";
+import { DullBlade } from "./Sword/DullBlade";
 
 export const Swords = new DbObjectListSerializeStats({
     AlleyFlash: AlleyFlash,
@@ -112,7 +113,8 @@ export const Swords = new DbObjectListSerializeStats({
     Emberwell: Emberwell, // 247
     WhitelakeFrostfeather: WhitelakeFrostfeather, // 248
     ExaiphanesBlade: ExaiphanesBlade, // 249
-    SpikedStake: SpikedStake, // 258
-    Fajian: Fajian, // 259
-    Samosvist: Samosvist, // 260
+    NewBough: NewBough, // 258
+    SilverLight: SilverLight, // 259
+    BeyondTheChrysalis: BeyondTheChrysalis, // 260
+    DullBlade: DullBlade, // 264
 });

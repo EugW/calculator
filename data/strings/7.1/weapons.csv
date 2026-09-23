@@ -1,40 +1,21 @@
 category;name;rus;eng
-weapon_name;spiked_stake;SpikedStake;SpikedStake
-talent_name;weapon_spiked_stake;SpikedStake;SpikedStake
-talent_name;weapon_spiked_stake_mode;Режим стаков SpikedStake;SpikedStake stack mode
-talent_name;weapon_spiked_stake_normal;Обычные стаки;Normal stacks
-talent_name;weapon_spiked_stake_radiance;Стаки во время Сияния;Radiance stacks
-talent_name;weapon_spiked_stake_stacks;Стаки SpikedStake;SpikedStake stacks
-talent_descr;weapon_spiked_stake_stacks;Выберите число активных независимо отсчитываемых 6-секундных стаков. Во время Сияния обычные бонусы заменяются усиленными.;Select the number of active independently timed 6s stacks. During Radiance, the normal bonuses are replaced by the enhanced bonuses.
-weapon_name;fajian;Fajian;Fajian
-talent_name;weapon_fajian;Fajian;Fajian
-weapon_name;samosvist;Samosvist;Samosvist
-talent_name;weapon_samosvist;Samosvist;Samosvist
-talent_name;weapon_samosvist_attention;Текущий этап цикла Samosvist;Current Samosvist cycle step
-talent_descr;weapon_samosvist_attention;Выберите эффект текущего этапа повторяющегося трёхступенчатого цикла.;Select the effect from the current step of the repeating three-step cycle.
-talent_name;weapon_samosvist_blazing;Этап 1 — крит. урон;Step 1 — CRIT DMG
-talent_name;weapon_samosvist_dazzling;Этап 2 — урон Звёздного рассеивания;Step 2 — Stellar Swirl DMG
-talent_name;weapon_samosvist_radiant;Этап 3 — энергия;Step 3 — Energy
-weapon_name;frost_scepter;FrostScepter;FrostScepter
-talent_name;weapon_frost_scepter;FrostScepter;FrostScepter
-talent_name;weapon_frost_scepter_radiance;Активно Сияние;Radiance active
-weapon_name;bludnye;Bludnye;Bludnye
-talent_name;weapon_bludnye;Bludnye;Bludnye
-talent_name;weapon_bludnye_mode;Режим стаков Bludnye;Bludnye stack mode
-talent_name;weapon_bludnye_hymn;Гимн;Hymn
-talent_name;weapon_bludnye_triumph;Триумф;Triumph
-talent_name;weapon_bludnye_stacks;Стаки Bludnye;Bludnye stacks
-talent_descr;weapon_bludnye_stacks;Выберите число активных независимо отсчитываемых 8-секундных стаков и их текущий режим. Бонус силы атаки владельца вычисляется после его бонуса HP без обратной зависимости.;Select the number of active independently timed 8s stacks and their current mode. The holder's own ATK bonus is calculated after their HP bonus without feeding back into HP.
-talent_name;weapon_bludnye_holder_hp;Макс. HP владельца Bludnye;Bludnye holder Max HP
-talent_name;weapon_bludnye_hymn_1;Гимн ×1;Hymn ×1
-talent_name;weapon_bludnye_hymn_2;Гимн ×2;Hymn ×2
-talent_name;weapon_bludnye_hymn_3;Гимн ×3;Hymn ×3
-talent_name;weapon_bludnye_triumph_1;Триумф ×1;Triumph ×1
-talent_name;weapon_bludnye_triumph_2;Триумф ×2;Triumph ×2
-talent_name;weapon_bludnye_triumph_3;Триумф ×3;Triumph ×3
-talent_descr;weapon_bludnye_party;Введите макс. HP владельца оружия и выберите активные стаки. За каждую полную 1000 HP сверх 40 000 каждый Гимн даёт активному персонажу %{text_atk_per_thousand} силы атаки, но не более %{text_atk_cap}. Триумф умножает результат на 1,75. Введённое значение HP принадлежит владельцу оружия, а не рассчитываемому активному персонажу.;Enter the weapon holder's Max HP and select the active stacks. For each full 1,000 HP above 40,000, each Hymn grants the active character %{text_atk_per_thousand} ATK, capped at %{text_atk_cap}. Triumph multiplies the result by 1.75. The HP input belongs to the weapon holder, not the active character being calculated.
-weapon_name;windtalker;Windtalker;Windtalker
-talent_name;weapon_windtalker;Windtalker;Windtalker
-talent_name;weapon_windtalker_points;Очки Windtalker / активный заблокированный эффект;Windtalker points / active locked effect
-talent_descr;weapon_windtalker_points;0–2 означает накопление очков. 3 означает, что групповой бонус активен и новый набор очков заблокирован на 12 сек.;0–2 represents building points. 3 represents the active party bonus and the 12s point-gain lockout.
-talent_name;weapon_windtalker_party;Групповой бонус Windtalker;Windtalker party bonus
+talent_name;weapon_new_bough_mode;Режим Зарослей;Verdant mode
+talent_name;weapon_new_bough_normal;Заросли;Verdant
+talent_name;weapon_new_bough_stacks;Уровни Зарослей;Verdant stacks
+talent_descr;weapon_new_bough_stacks;Выберите число активных, независимо отсчитываемых 6-секундных уровней Зарослей. В состоянии Сияния - Звёздный блеск обычные бонусы заменяются усиленными.;Select the number of active, independently timed 6s Verdant stacks. During Radiance: Stellar Glimmer, the normal bonuses are replaced by the enhanced bonuses.
+talent_name;weapon_beyond_the_chrysalis_winds_of_devotion;Ветер искренности;Winds of Devotion
+talent_name;weapon_beyond_the_chrysalis_winds_of_defiance;Ветер мятежа;Winds of Defiance
+talent_name;weapon_hymn_of_the_maelstrom_mode;Эффект Вещего мёда Уацамонги;Vatsamonga's Vatic Vintage effect
+talent_name;weapon_hymn_of_the_maelstrom_hymn;Вещий мёд Уацамонги;Vatsamonga's Vatic Vintage
+talent_name;weapon_hymn_of_the_maelstrom_triumph;Вещий мёд Уацамонги (+75%);Vatsamonga's Vatic Vintage (+75%)
+talent_name;weapon_hymn_of_the_maelstrom_stacks;Уровни Вещего мёда Уацамонги;Vatsamonga's Vatic Vintage stacks
+talent_descr;weapon_hymn_of_the_maelstrom_stacks;Выберите число активных, независимо отсчитываемых 10-секундных уровней Вещего мёда Уацамонги и укажите, увеличены ли их бонусы на 75%. Бонус силы атаки владельца вычисляется после применения бонуса HP без обратной зависимости.;Select the number of active, independently timed 10s Vatsamonga's Vatic Vintage stacks and whether their boosts are further increased by 75%. The holder's own ATK bonus is calculated after applying the HP bonus, without feeding back into HP.
+talent_name;weapon_hymn_of_the_maelstrom_holder_hp;Макс. HP экипированного персонажа;Equipping character's Max HP
+talent_name;weapon_hymn_of_the_maelstrom_hymn_1;Вещий мёд Уацамонги ×1;Vatsamonga's Vatic Vintage ×1
+talent_name;weapon_hymn_of_the_maelstrom_hymn_2;Вещий мёд Уацамонги ×2;Vatsamonga's Vatic Vintage ×2
+talent_name;weapon_hymn_of_the_maelstrom_hymn_3;Вещий мёд Уацамонги ×3;Vatsamonga's Vatic Vintage ×3
+talent_name;weapon_hymn_of_the_maelstrom_triumph_1;Вещий мёд Уацамонги ×1 (+75%);Vatsamonga's Vatic Vintage ×1 (+75%)
+talent_name;weapon_hymn_of_the_maelstrom_triumph_2;Вещий мёд Уацамонги ×2 (+75%);Vatsamonga's Vatic Vintage ×2 (+75%)
+talent_name;weapon_hymn_of_the_maelstrom_triumph_3;Вещий мёд Уацамонги ×3 (+75%);Vatsamonga's Vatic Vintage ×3 (+75%)
+talent_name;weapon_breezeborne_refrain_points;Уровни Гимна непорочных / Смертельный яд змеи;Hymn of the Pure stacks / Thus Lied the Viper
+talent_descr;weapon_breezeborne_refrain_points;0–2 означает количество уровней Гимна непорочных. 3 означает, что Смертельный яд змеи активен в течение 12 сек., во время которых нельзя получать Гимн непорочных.;0–2 represents Hymn of the Pure stacks. 3 represents Thus Lied the Viper active for 12s, during which no Hymn of the Pure stacks can be obtained.

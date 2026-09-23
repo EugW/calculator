@@ -3,6 +3,7 @@ import React from 'react';
 import parse from 'html-react-parser';
 
 import "../../../../css/Components/Inputs/Dropdown.css"
+import { FeatureName } from '../FeatureName';
 
 const MAX_HEIGHT = 350;
 
@@ -11,6 +12,9 @@ export class Dropdown extends React.Component {
         super(props);
 
         this.optionsRef = null;
+        this.currentRef = null;
+        this.rootRef = null;
+        this.resizeObserver = null;
         this.ignoreEvent = false;
         this.state = {
             clickY: 0,
@@ -36,14 +40,27 @@ export class Dropdown extends React.Component {
 
     toggleOpened(e) {
         let newState = !this.state.opened;
+        let clickY = e && Number.isFinite(e.clientY)
+            ? e.clientY
+            : this.currentRef.getBoundingClientRect().bottom;
         this.ignoreEvent = true;
         document.dispatchEvent(new Event('dropdown_open'));
 
         this.setState({
             maxHeight: 0,
-            clickY: e.clientY,
+            clickY: clickY,
             opened: newState,
         });
+    }
+
+    handleCurrentKeyDown(e) {
+        if (e.key == 'Enter' || e.key == ' ') {
+            e.preventDefault();
+            this.toggleOpened(e);
+        } else if (e.key == 'Escape' && this.state.opened) {
+            e.preventDefault();
+            this.setState({opened: false});
+        }
     }
 
     selectItem(item) {
@@ -89,12 +106,81 @@ export class Dropdown extends React.Component {
         observer.observe(this.optionsRef);
     }
 
-    componentDidUpdate() {
-        if (this.optionsRef && this.state.opened) {
-            let itemsHeight = this.props.items.length * 26 + 10;
-            let height = Math.min(itemsHeight, MAX_HEIGHT) + 30;
+    isFeatureDropdown() {
+        return this.props.items.some((item) => item.isFeature);
+    }
 
-            this.optionsRef.classList.toggle('scroll', itemsHeight > MAX_HEIGHT);
+    setupResizeObserver() {
+        if (!this.isFeatureDropdown() || typeof ResizeObserver === 'undefined') {
+            return;
+        }
+
+        if (!this.resizeObserver) {
+            this.resizeObserver = new ResizeObserver(() => this.updateMarqueeText(false));
+        }
+
+        this.resizeObserver.disconnect();
+        this.resizeObserver.observe(this.rootRef);
+        for (let content of this.currentRef.querySelectorAll('.dropdown-text-content')) {
+            this.resizeObserver.observe(content);
+        }
+    }
+
+    updateMarqueeText(animate) {
+        if (!this.currentRef || !this.isFeatureDropdown()) {
+            return;
+        }
+
+        for (let textBlock of this.currentRef.querySelectorAll('.dropdown-text.marquee-enabled')) {
+            let content = textBlock.querySelector('.dropdown-text-content');
+            let overflow = Math.ceil(content.scrollWidth - textBlock.clientWidth);
+            let isOverflowing = overflow > 1;
+
+            textBlock.classList.toggle('overflowing', isOverflowing);
+
+            if (isOverflowing) {
+                textBlock.style.setProperty('--dropdown-marquee-distance', -overflow + 'px');
+                textBlock.style.setProperty('--dropdown-marquee-duration', Math.min(12, Math.max(5, overflow / 35 + 4)) + 's');
+                if (animate) {
+                    restartMarquee(textBlock);
+                }
+            } else {
+                content.classList.remove('marquee-active');
+                textBlock.style.removeProperty('--dropdown-marquee-distance');
+                textBlock.style.removeProperty('--dropdown-marquee-duration');
+            }
+        }
+    }
+
+    getItemsHeight() {
+        if (this.isFeatureDropdown() && this.bar && this.bar.getContentElement()) {
+            let optionsStyle = window.getComputedStyle(this.optionsRef);
+            let optionsPadding = parseFloat(optionsStyle.paddingTop) + parseFloat(optionsStyle.paddingBottom);
+            return Math.ceil(this.bar.getContentElement().scrollHeight + optionsPadding);
+        }
+        return this.props.items.length * 26 + 10;
+    }
+
+    componentDidMount() {
+        this.setupResizeObserver();
+        this.updateMarqueeText(true);
+    }
+
+    componentDidUpdate(prevProps) {
+        this.setupResizeObserver();
+        this.updateMarqueeText(prevProps.selected !== this.props.selected);
+        if (this.state.opened && this.currentRef) {
+            for (let content of this.currentRef.querySelectorAll('.marquee-active')) {
+                content.classList.remove('marquee-active');
+            }
+        }
+
+        if (this.optionsRef && this.state.opened) {
+            let itemsHeight = this.getItemsHeight();
+            let maxHeight = this.state.maxHeight || this.props.height || MAX_HEIGHT;
+            let height = Math.min(itemsHeight, maxHeight) + 30;
+
+            this.optionsRef.classList.toggle('scroll', itemsHeight > maxHeight);
 
             if (this.state.clickY > height && this.state.clickY + height > window.innerHeight) {
                 this.optionsRef.classList.add('up');
@@ -108,10 +194,14 @@ export class Dropdown extends React.Component {
 
     componentWillUnmount() {
         document.removeEventListener('dropdown_open', this.openEvent);
+        if (this.resizeObserver) {
+            this.resizeObserver.disconnect();
+        }
     }
 
     render() {
         const options = [];
+        let isFeatureDropdown = this.isFeatureDropdown();
         let selectedValues = Array.isArray(this.props.selected) ? this.props.selected : [this.props.selected];
         this.selectedItems = [];
 
@@ -155,14 +245,26 @@ export class Dropdown extends React.Component {
             currentItems.push(
                 <div key={selectedItem.value} className="dropdown-option">
                     {icons}
-                    <div className="text">{parseText(selectedItem.text)}</div>
+                    <DropdownText item={selectedItem} marquee={isFeatureDropdown} />
                 </div>
             );
         }
 
         return (
-            <DropdownWrapper addClass={this.props.addClass}>
-                <div className={'dropdown-current' + (this.state.opened ? ' opened' : '')} onClick={(e) => this.toggleOpened(e)}>
+            <DropdownWrapper
+                rootRef={(obj) => {this.rootRef = obj;}}
+                addClass={(this.props.addClass || '') + (isFeatureDropdown ? ' feature-dropdown' : '')}
+            >
+                <div
+                    ref={(obj) => {this.currentRef = obj;}}
+                    className={'dropdown-current' + (this.state.opened ? ' opened' : '')}
+                    role={isFeatureDropdown ? 'button' : undefined}
+                    tabIndex={isFeatureDropdown ? 0 : undefined}
+                    aria-expanded={isFeatureDropdown ? this.state.opened : undefined}
+                    onFocus={() => restartMarquee(this.currentRef && this.currentRef.querySelector('.dropdown-text.marquee-enabled'))}
+                    onKeyDown={(e) => this.handleCurrentKeyDown(e)}
+                    onClick={(e) => this.toggleOpened(e)}
+                >
                     {currentItems}
                 </div>
                 <div ref={obj => {this.optionsRef = obj;}} className="dropdown-options">
@@ -181,7 +283,7 @@ export class Dropdown extends React.Component {
 
 function DropdownWrapper(props) {
     return (
-        <div className={'dropdown-wrapper '+ (props.addClass || '')}>
+        <div ref={props.rootRef} className={'dropdown-wrapper '+ (props.addClass || '')}>
             {props.children}
         </div>
     );
@@ -230,7 +332,7 @@ function DropdownOption(props) {
     return (
         <div className={className} onClick={() => props.onClick(props.item)}>
             {icons}
-            <div className="text">{parseText(props.item.text)}</div>
+            <DropdownText item={props.item} />
             {props.item.number ? <div className="number">{props.item.number}</div> : ''}
         </div>
     );
@@ -251,4 +353,43 @@ function parseText(value) {
         return parse(value);
     }
     return value;
+}
+
+function renderItemText(item) {
+    if (item.nameStyle) {
+        return <FeatureName text={item.text} nameStyle={item.nameStyle} />;
+    }
+    return parseText(item.text);
+}
+
+function DropdownText(props) {
+    let className = 'text dropdown-text';
+    if (props.marquee) {
+        className += ' marquee-enabled';
+    }
+
+    return (
+        <div
+            className={className}
+            onPointerEnter={props.marquee ? (e) => restartMarquee(e.currentTarget) : undefined}
+        >
+            <span
+                className="dropdown-text-content"
+                onAnimationEnd={(e) => e.currentTarget.classList.remove('marquee-active')}
+            >
+                {renderItemText(props.item)}
+            </span>
+        </div>
+    );
+}
+
+function restartMarquee(textBlock) {
+    if (!textBlock || !textBlock.classList.contains('overflowing')) {
+        return;
+    }
+
+    let content = textBlock.querySelector('.dropdown-text-content');
+    content.classList.remove('marquee-active');
+    void content.offsetWidth;
+    content.classList.add('marquee-active');
 }

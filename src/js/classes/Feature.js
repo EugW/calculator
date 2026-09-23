@@ -95,7 +95,7 @@ export class Feature {
     }
 
     getDefIgnore(allStats, settings) {
-        return allStats.get('enemy_def_ignore') / 100;
+        return Math.min(1, allStats.get('enemy_def_ignore') / 100);
     }
 
     getDefMultiplier(allStats, settings) {

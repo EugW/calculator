@@ -17,7 +17,16 @@ export class StorageItem {
 
         for (let i in this.items) {
             let item = this.items[i];
-            let data = this.decodeItem(item.data);
+            if (!item || typeof item != 'object' || typeof item.data != 'string') {
+                continue;
+            }
+
+            let data;
+            try {
+                data = this.decodeItem(item.data);
+            } catch (error) {
+                continue;
+            }
 
             if (data) {
                 if (!show_beta && data.hasBetaContent && data.hasBetaContent()) {

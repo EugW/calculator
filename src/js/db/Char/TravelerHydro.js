@@ -1,8 +1,15 @@
 import { Condition } from "../../classes/Condition";
+import { ConditionAnd } from "../../classes/Condition/And";
 import { ConditionAscensionChar } from "../../classes/Condition/Ascension/Char";
 import { ConditionBoolean } from "../../classes/Condition/Boolean";
+import { ConditionBooleanDropdownValue } from "../../classes/Condition/Boolean/DropdownValue";
+import { ConditionBooleanValue } from "../../classes/Condition/Boolean/Value";
 import { ConditionConstellation } from "../../classes/Condition/Constellation";
+import { ConditionDropdown } from "../../classes/Condition/Dropdown";
+import { ConditionDropdownTravelerResonated } from "../../classes/Condition/Dropdown/TravelerResonated";
 import { ConditionNumber } from "../../classes/Condition/Number";
+import { ConditionNot } from "../../classes/Condition/Not";
+import { ConditionStacks } from "../../classes/Condition/Stacks";
 import { ConditionStatic } from "../../classes/Condition/Static";
 import { DbObjectChar } from "../../classes/DbObject/Char";
 import { DbObjectConstellation } from "../../classes/DbObject/Constellation";
@@ -16,8 +23,10 @@ import { FeatureDamagePlungeShockWave } from "../../classes/Feature2/Damage/Plun
 import { FeatureDamageSkill } from "../../classes/Feature2/Damage/Skill";
 import { FeatureHeal } from "../../classes/Feature2/Heal";
 import { FeatureMultiplier } from "../../classes/Feature2/Multiplier";
+import { FeatureMultiplierStatic } from "../../classes/Feature2/Multiplier/Static";
 import { FeatureMultiplierTravelerHydro } from "../../classes/Feature2/Multiplier/TravelerHydro";
 import { FeatureShield } from "../../classes/Feature2/Shield";
+import { FeatureStatic } from "../../classes/Feature2/Static";
 import { StatTable } from "../../classes/StatTable";
 import { StatTableAscensionScale } from "../../classes/StatTable/Ascension/Scale";
 import { ValueTable } from "../../classes/ValueTable";
@@ -133,13 +142,53 @@ const shield_hp_scale = 10;
 const dew_heal = 7;
 const skill_bonus_ratio = 45;
 const skill_bonus_max = 5000;
+const ForeignTideboundBonus = 150;
+const ForeignTideboundHpBonus = 100;
+const ForeignTideboundHeal = 25;
+const ForeignTideboundCooldown = 15;
 
+const condTravelerAether = new ConditionBoolean({name: 'traveler_aether'});
+const condLumineDefault = new ConditionNot([condTravelerAether]);
+
+const bladeReadyCondition = new ConditionBooleanValue({
+    setting: 'traveler_hydro_blade_many_waters',
+    cond: 'ge',
+    value: 3,
+});
+
+const hpHighCondition = new ConditionBooleanDropdownValue({
+    name: 'traveler_hydro_tidebound_hp',
+    value: 'high',
+});
+
+const hpLowCondition = new ConditionBooleanDropdownValue({
+    name: 'traveler_hydro_tidebound_hp',
+    value: 'low',
+});
+
+function makeChargedHit2Multipliers() {
+    return [
+        new FeatureMultiplier({
+            leveling: 'char_skill_attack',
+            values: Talents.get('attack.charged_hit_2'),
+            condition: condLumineDefault,
+        }),
+        new FeatureMultiplier({
+            leveling: 'char_skill_attack',
+            values: new StatTable(
+                'charged_hit_2',
+                charTalentTables.TravelerHydro.s1_boy.p7,
+            ),
+            condition: condTravelerAether,
+        }),
+    ];
+}
 export const TravelerHydro = new DbObjectChar({
     name: 'traveler_hydro',
     serializeId: 75,
     gameId: [10000005, 10000007],
     depotIds: [503, 703],
-    iconClass: "char-icon-traveler-boy",
+    iconClass: "char-icon-traveler-girl",
     rarity: 5,
     element: 'hydro',
     weapon: 'sword',
@@ -208,12 +257,7 @@ export const TravelerHydro = new DbObjectChar({
                     ],
                 },
                 {
-                    multipliers: [
-                        new FeatureMultiplier({
-                            leveling: 'char_skill_attack',
-                            values: Talents.get('attack.charged_hit_2'),
-                        }),
-                    ],
+                    multipliers: makeChargedHit2Multipliers(),
                 },
             ],
         }),
@@ -228,12 +272,7 @@ export const TravelerHydro = new DbObjectChar({
         }),
         new FeatureDamageCharged({
             isChild: true,
-            multipliers: [
-                new FeatureMultiplier({
-                    leveling: 'char_skill_attack',
-                    values: Talents.get('attack.charged_hit_2'),
-                }),
-            ],
+            multipliers: makeChargedHit2Multipliers(),
         }),
         new FeatureDamagePlungeCollision({
             name: 'plunge',
@@ -327,7 +366,7 @@ export const TravelerHydro = new DbObjectChar({
             multipliers: [
                 new FeatureMultiplier({
                     scaling: 'hp*',
-                    source: 'ascension4',
+                    source: 'constellation4',
                     values: new StatTable('traveler_pouring_descent_shield', [shield_hp_scale]),
                 }),
             ],
@@ -342,8 +381,118 @@ export const TravelerHydro = new DbObjectChar({
                 }),
             ],
         }),
+        new FeatureDamageMultihit({
+            category: 'attack',
+            damageType: 'charged',
+            name: 'traveler_hydro_tidebound',
+            element: 'hydro',
+            allowInfusion: true,
+            items: [
+                {multipliers: [
+                    new FeatureMultiplier({
+                        leveling: 'char_skill_attack',
+                        values: Talents.get('attack.charged_hit_1'),
+                    }),
+                    new FeatureMultiplier({
+                        source: 'foreign_aqualis',
+                        values: new ValueTable([ForeignTideboundBonus]),
+                    }),
+                    new FeatureMultiplier({
+                        source: 'foreign_aqualis_hp',
+                        values: new ValueTable([ForeignTideboundHpBonus]),
+                        condition: hpHighCondition,
+                    }),
+                ]},
+                {multipliers: [
+                    ...makeChargedHit2Multipliers(),
+                    new FeatureMultiplier({
+                        source: 'foreign_aqualis',
+                        values: new ValueTable([ForeignTideboundBonus]),
+                    }),
+                    new FeatureMultiplier({
+                        source: 'foreign_aqualis_hp',
+                        values: new ValueTable([ForeignTideboundHpBonus]),
+                        condition: hpHighCondition,
+                    }),
+                ]},
+            ],
+            condition: bladeReadyCondition,
+        }),
+        new FeatureDamageCharged({
+            name: 'traveler_hydro_tidebound_1',
+            isChild: true,
+            element: 'hydro',
+            multipliers: [
+                new FeatureMultiplier({
+                    leveling: 'char_skill_attack',
+                    values: Talents.get('attack.charged_hit_1'),
+                }),
+                new FeatureMultiplier({
+                    source: 'foreign_aqualis',
+                    values: new ValueTable([ForeignTideboundBonus]),
+                }),
+                new FeatureMultiplier({
+                    source: 'foreign_aqualis_hp',
+                    values: new ValueTable([ForeignTideboundHpBonus]),
+                    condition: hpHighCondition,
+                }),
+            ],
+            condition: bladeReadyCondition,
+        }),
+        new FeatureDamageCharged({
+            name: 'traveler_hydro_tidebound_2',
+            isChild: true,
+            element: 'hydro',
+            multipliers: [
+                ...makeChargedHit2Multipliers(),
+                new FeatureMultiplier({
+                    source: 'foreign_aqualis',
+                    values: new ValueTable([ForeignTideboundBonus]),
+                }),
+                new FeatureMultiplier({
+                    source: 'foreign_aqualis_hp',
+                    values: new ValueTable([ForeignTideboundHpBonus]),
+                    condition: hpHighCondition,
+                }),
+            ],
+            condition: bladeReadyCondition,
+        }),
+        new FeatureHeal({
+            category: 'attack',
+            name: 'traveler_hydro_tidebound_heal',
+            multipliers: [
+                new FeatureMultiplier({
+                    scaling: 'hp*',
+                    source: 'foreign_aqualis',
+                    values: new StatTable('traveler_hydro_tidebound_heal', [ForeignTideboundHeal]),
+                }),
+            ],
+            condition: new ConditionAnd([
+                bladeReadyCondition,
+                hpLowCondition,
+            ]),
+        }),
+        new FeatureStatic({
+            category: 'other',
+            name: 'traveler_hydro_tidebound_cooldown',
+            format: 'decimal',
+            multipliers: [
+                new FeatureMultiplierStatic({
+                    source: 'foreign_aqualis',
+                    values: new ValueTable([ForeignTideboundCooldown]),
+                }),
+            ],
+            condition: bladeReadyCondition,
+        }),
     ],
     conditions: [
+        new ConditionBoolean({
+            name: 'traveler_aether',
+            serializeId: 5,
+            title: 'talent_name.traveler_twin_aether',
+            description: 'talent_descr.traveler_twin_aether',
+            rotation: 'self',
+        }),
         new ConditionBoolean({
             name: 'traveler_suffusion',
             serializeId: 3,
@@ -396,6 +545,30 @@ export const TravelerHydro = new DbObjectChar({
                 hp_base: 50,
             },
         }),
+        new ConditionDropdownTravelerResonated({
+            name: 'traveler_hydro_resonated_elements',
+            serializeId: 6,
+        }),
+        new ConditionStacks({
+            name: 'traveler_hydro_blade_many_waters',
+            serializeId: 7,
+            title: 'talent_name.traveler_foreign_aqualis',
+            description: 'talent_descr.traveler_foreign_aqualis',
+            maxStacks: 3,
+            noStat: true,
+            rotation: 'self',
+        }),
+        new ConditionDropdown({
+            name: 'traveler_hydro_tidebound_hp',
+            serializeId: 8,
+            title: 'talent_name.traveler_foreign_aqualis',
+            description: 'talent_descr.traveler_foreign_aqualis',
+            defaultValue: 'high',
+            values: [
+                {value: 'high', serializeId: 1, conditions: []},
+                {value: 'low', serializeId: 2, conditions: []},
+            ],
+        }),
     ],
     constellation: new DbObjectConstellation([
         {
@@ -403,6 +576,9 @@ export const TravelerHydro = new DbObjectChar({
                 new ConditionStatic({
                     title: 'talent_name.traveler_hydro_swelling_lake',
                     description: 'talent_descr.traveler_hydro_swelling_lake',
+                    stats: {
+                        text_value: 2,
+                    },
                 }),
             ],
         },
@@ -411,6 +587,10 @@ export const TravelerHydro = new DbObjectChar({
                 new ConditionStatic({
                     title: 'talent_name.traveler_hydro_trickling_purity',
                     description: 'talent_descr.traveler_hydro_trickling_purity',
+                    stats: {
+                        text_percent_reduce: 30,
+                        text_duration: 3,
+                    },
                 }),
             ],
         },
@@ -456,4 +636,16 @@ export const TravelerHydro = new DbObjectChar({
             ],
         },
     ]),
+    partyData: {
+        conditions: [
+            new ConditionStatic({
+                title: 'talent_name.traveler_hydro_tides_of_justice',
+                description: 'talent_descr.traveler_hydro_tides_of_justice',
+                info: {constellation: 6},
+                stats: {
+                    text_percent_hp: 6,
+                },
+            }),
+        ],
+    },
 });
