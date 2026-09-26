@@ -1,7 +1,8 @@
 import { Serializer } from './Serializer';
 import { Stats, isPercent } from './Stats';
 import { substatCheck } from './SubstatCheck';
-import { normalizeArtifactMetadata, serializeArtifactMetadata, deserializeArtifactMetadata, mergeArtifactMetadata, displaySubstatValue, correctHalfwayValue } from './ArtifactMetadata';
+import { normalizeArtifactMetadata, serializeArtifactMetadata, deserializeArtifactMetadata, mergeArtifactMetadata, displaySubstatValue, correctHalfwayValue, goodRollIdValues } from './ArtifactMetadata';
+import { artifactPreciseSubstatValues } from './ArtifactPreciseValues';
 
 export class Artifact {
     constructor(rarity, level, slot, set, mainStat, subStats, unactivatedSubstats) {
@@ -71,6 +72,18 @@ export class Artifact {
         this.calculated = null;
     }
 
+    // Exact line totals where the roll history allows, aligned with getSubStats().
+    // Recomputed whenever the lines, level or metadata change.
+    getPreciseSubStatValues() {
+        const key = this.rarity + '/' + this.level + '/' + this.subStats.map(item => item.stat + ':' + item.value).join('/');
+        const cache = this.preciseValues;
+        if (!cache || cache.key !== key || cache.metadata !== this.metadata || cache.base !== this.basePreciseValues) {
+            this.preciseValues = {key, metadata: this.metadata, base: this.basePreciseValues,
+                values: artifactPreciseSubstatValues(this)};
+        }
+        return this.preciseValues.values;
+    }
+
     calcStats() {
         const result = new Stats();
 
@@ -80,11 +93,9 @@ export class Artifact {
             result.add(this.mainStat, statTable.getValue(this.level));
         }
 
+        const precise = this.getPreciseSubStatValues();
         for (let i = 0; i < this.subStats.length; ++i) {
-            let item = this.subStats[i];
-            let substatData = DB.Artifacts.Substats.get(item.stat);
-
-            result.add(item.stat, substatData.getPreciseValue(item.value, this.rarity));
+            result.add(this.subStats[i].stat, precise[i]);
         }
 
         result.add('crit_value', result.get('crit_rate') * 2 + result.get('crit_dmg'));
@@ -110,20 +121,6 @@ export class Artifact {
         const used = new Set(usedStats);
         const percent = new Map();
         const mains = new Map();
-        // getPreciseValue indexes an object by the value's string form;
-        // numeric Map keys avoid that conversion for repeated values.
-        const precise = new Map();
-        const preciseValue = (stat, value, rarity) => {
-            const key = stat + '/' + rarity;
-            let cache = precise.get(key);
-            if (!cache) precise.set(key, cache = new Map());
-            let result = cache.get(value);
-            if (result === undefined) {
-                result = DB.Artifacts.Substats.get(stat).getPreciseValue(value, rarity);
-                cache.set(value, result);
-            }
-            return result;
-        };
         const keys = [];
         const values = [];
         const result = {keys, values, length: 0};
@@ -153,8 +150,9 @@ export class Artifact {
                 mains.set(mainKey, main);
             }
             if (main !== null) add(artifact.mainStat, main);
-            for (const item of artifact.subStats) {
-                add(item.stat, preciseValue(item.stat, item.value, artifact.rarity));
+            const precise = artifact.getPreciseSubStatValues();
+            for (let i = 0; i < artifact.subStats.length; ++i) {
+                add(artifact.subStats[i].stat, precise[i]);
             }
             add('crit_value', get('crit_rate') * 2 + get('crit_dmg'));
             // truncate(usedStats) keeps order; processPercent rescales.
@@ -489,13 +487,17 @@ export class Artifact {
             }
         }
 
+        // Not part of GOOD: the roll IDs, as Irminsul's roll-ID export writes them.
+        if (metadata.appendPropIdList) result.appendPropIdList = [...metadata.appendPropIdList];
+
         return result;
     }
 
     serialize() {
         const metadata = this.getMetadata();
         const hasMetadata = Object.keys(metadata).length > 0;
-        let result = [hasMetadata ? 3 : 2];
+        // v4 is v3 plus the roll IDs, only for artifacts that have them.
+        let result = [metadata.appendPropIdList ? 4 : hasMetadata ? 3 : 2];
         // Metadata stores the defined pair explicitly, so v3 active rows can
         // have a canonical order across importers. Legacy v2 stays byte-stable.
         // Inactive row order still determines reveal order and is not sorted.
@@ -548,6 +550,7 @@ export class Artifact {
         if (result) {
             result.setLocked(this.isLocked());
             result.setGroups([...this.getGroups()]);
+            if (this.basePreciseValues) result.basePreciseValues = this.basePreciseValues;
         }
         return result;
     }
@@ -556,7 +559,7 @@ export class Artifact {
         let version = input.shift();
         let result = null;
 
-        if (version == 1 || version == 2 || version == 3) {
+        if (version == 1 || version == 2 || version == 3 || version == 4) {
             let set = DB.Artifacts.Sets.getKeyId(input.shift());
             if (!set) return null;
 
@@ -599,10 +602,11 @@ export class Artifact {
             const legacy = version < 3 ? Artifact.legacyMetadata(result) : null;
             result.activateUnlockedSubstats();
             if (legacy) result.setMetadata(legacy);
-            if (version === 3) {
+            if (version >= 3) {
+                // v3 metadata is at most 14 numbers; v4 adds a count and up to 9 roll IDs.
                 const length = input.shift();
-                if (!Number.isInteger(length) || length < 4 || length > 14 || input.length < length) return null;
-                const metadata = deserializeArtifactMetadata(input.splice(0, length));
+                if (!Number.isInteger(length) || length < 4 || length > (version === 4 ? 24 : 14) || input.length < length) return null;
+                const metadata = deserializeArtifactMetadata(input.splice(0, length), version === 4);
                 if (!metadata) return null;
                 result.setMetadata(metadata);
                 if (JSON.stringify(serializeArtifactMetadata(result.getMetadata())) !== JSON.stringify(serializeArtifactMetadata(metadata))) return null;
@@ -693,14 +697,24 @@ export class Artifact {
         result.activateUnlockedSubstats();
         if (new Set(result.getAllSubStats().map(item => item.stat)).size !== result.getAllSubStats().length) return null;
         const crafted = typeof data.elixirCrafted === 'boolean' ? data.elixirCrafted : data.elixerCrafted;
+        // Irminsul's roll-ID export lists every roll; its totals are the game's values.
+        const rolled = goodRollIdValues(result, data.appendPropIdList, initialValues);
+        if (rolled) {
+            for (const item of result.getSubStats()) {
+                item.value = rolled.values[item.stat];
+                initialValues[item.stat] ??= rolled.initials[item.stat];
+            }
+        }
         // Below +4 the active lines are the start, whether or not the source says so.
         const totalRolls = Number.isInteger(data.totalRolls) ? data.totalRolls
+            : rolled ? data.appendPropIdList.length
             : data.level < 4 ? result.getSubStats().length : undefined;
         result.setMetadata({
             initialValues, totalRolls, elixirCrafted: crafted,
             definedSubstats: Object.prototype.hasOwnProperty.call(data, 'definedSubstats')
                 ? (Array.isArray(data.definedSubstats) ? data.definedSubstats.map(key => DB.Artifacts.Substats.getKeyIdGood(key)) : [])
                 : crafted === true ? result.getAllSubStats().slice(0, 2).map(item => item.stat) : undefined,
+            ...(rolled ? {appendPropIdList: data.appendPropIdList} : {}),
         });
         result.setLocked(data.lock === true);
 

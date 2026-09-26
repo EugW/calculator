@@ -303,6 +303,7 @@ export class ArtifactWindow extends Window{
             pair: this.marked === true ? this.substats.slice(0, 2).map(row => row.stat)
                 : this.marked === false ? [] : source.definedSubstats,
             initials,
+            appendPropIdList: source.appendPropIdList,
         };
     }
 

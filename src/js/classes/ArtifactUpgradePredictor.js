@@ -161,9 +161,13 @@ export function visitMaxUpgradeVariants(artifact, callback, acceptSubstats) {
         item.paths += paths;
     });
 
+    // Lines the upgrades leave unchanged keep the source's exact values, so a
+    // variant never differs from its source on a line it did not roll.
+    const precise = artifact.getPreciseSubStatValues();
+    const base = new Map(artifact.getSubStats().map((item, i) => [item.stat, {value: item.value, precise: precise[i]}]));
     for (let item of variantMap.values()) {
         callback({
-            artifact: makeVariantArtifact(artifact, finalLevel, item.subStats),
+            artifact: makeVariantArtifact(artifact, finalLevel, item.subStats, base),
             probability: item.probability,
             paths: item.paths,
         });
@@ -190,7 +194,7 @@ function getProcessedArtifactStats(artifact) {
     return stats;
 }
 
-function makeVariantArtifact(artifact, level, subStats) {
+function makeVariantArtifact(artifact, level, subStats, basePreciseValues) {
     let variant = artifact.clone();
     const metadata = artifact.getMetadata();
     if (metadata.totalRolls !== undefined) {
@@ -201,6 +205,7 @@ function makeVariantArtifact(artifact, level, subStats) {
     variant.subStats = cloneSubStats(subStats);
     variant.unactivatedSubstats = [];
     variant.calculated = null;
+    variant.basePreciseValues = basePreciseValues;
     variant.setMetadata(metadata);
 
     return variant;

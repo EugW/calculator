@@ -2,8 +2,9 @@ import { Artifact } from "../Artifact";
 import { CalcSet } from "../CalcSet";
 import { Serializer } from "../Serializer";
 
-// v2 remains byte-stable for artifacts without provenance; known metadata uses v3.
-const TARGET_ARTIFACT_VERSIONS = [2, 3];
+// v2 remains byte-stable for artifacts without provenance; known metadata uses v3,
+// and v4 adds roll IDs.
+const TARGET_ARTIFACT_VERSIONS = [2, 3, 4];
 
 const STORAGE_TARGETS = [
     {

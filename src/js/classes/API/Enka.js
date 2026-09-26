@@ -1,7 +1,7 @@
 import { Artifact } from "../Artifact";
 import { CalcSet } from "../CalcSet";
 import { prepareUid } from "./Uid";
-import { ENKA_AFFIXES } from "./EnkaAffixes";
+import { artifactRollsFromIds, artifactRollTotals, displaySubstatValue } from "../ArtifactMetadata";
 
 // Numeric UID -> current showcase (no trailing slash!)
 const API_UID = '/back/proxy/enka/uid/<uid>';
@@ -309,27 +309,17 @@ export function importEnkaArtifact(item) {
 }
 
 function enkaRollMetadata(artifact, ids) {
-    if (!Array.isArray(ids) || ids.length > 9) return {};
-    const byStat = {};
-    for (const id of ids) {
-        const affix = ENKA_AFFIXES[id];
-        if (!affix || Math.floor(Number(id) / 100000) !== artifact.rarity) return {};
-        const [stat, value] = affix;
-        (byStat[stat] ||= []).push(value);
-    }
-    if (Object.keys(byStat).length !== artifact.subStats.length) return {};
+    const list = Array.isArray(ids) && ids.length <= 9 ? ids.map(Number) : null;
+    const rolls = list && artifactRollsFromIds(list, artifact.rarity);
+    if (!rolls || !artifactRollTotals(artifact, rolls)) return {};
+    // Enka passes the game's roll list through in game order (all 60 showcased
+    // artifacts matched an Irminsul export roll for roll), so a line's first ID is
+    // its first roll.
     const initialValues = {};
-    for (const {stat, value} of artifact.subStats) {
-        const rolls = byStat[stat];
-        if (!rolls) return {};
-        const scale = DB.Artifacts.Substats.get(stat).type === 'percent' ? 10 : 1;
-        const sum = rolls.reduce((a, b) => a + b, 0);
-        if (Math.round((sum + 0.00001) * scale) !== Math.round(value * scale)) return {};
-        // Enka documents the roll IDs, not their chronological order. A single
-        // roll quality is unambiguous regardless of ordering; mixed tiers are not.
-        if (new Set(rolls).size === 1) initialValues[stat] = Math.round(rolls[0] * scale) / scale;
+    for (const {stat} of artifact.subStats) {
+        initialValues[stat] = displaySubstatValue(stat, rolls.find(roll => roll.stat === stat).units / 100);
     }
-    return {totalRolls: ids.length, initialValues};
+    return {totalRolls: list.length, initialValues, appendPropIdList: list};
 }
 
 function shuffleArray(array) {

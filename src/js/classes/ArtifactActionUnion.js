@@ -12,7 +12,8 @@ export function artifactActionOutcomeKey(artifact, usedStats) {
     const builder = createArtifactActionOutcomeKey(usedStats, {
         rarity: artifact.rarity, level: artifact.level,
     });
-    return builder.key(artifact, artifact.subStats.map(sub => sub.stat), artifact.subStats.map(sub => sub.value));
+    return builder.key(artifact, artifact.subStats.map(sub => sub.stat), artifact.subStats.map(sub => sub.value),
+        artifact.getPreciseSubStatValues());
 }
 
 /** Fast exact key builder for projected outcomes. Replicates
@@ -62,7 +63,9 @@ export function createArtifactActionOutcomeKey(usedStats, options = {}) {
     };
     return {
         stats,
-        key(action, outcomeStats, outcomeValues) {
+        // preciseValues: the outcome artifact's own line totals when it has one
+        // (Artifact#getPreciseSubStatValues); otherwise the displayed-value table.
+        key(action, outcomeStats, outcomeValues, preciseValues) {
             values.fill(0);
             const main = mainPlan(action.mainStat);
             let rate = main.rate;
@@ -72,7 +75,8 @@ export function createArtifactActionOutcomeKey(usedStats, options = {}) {
             for (let at = 0; at < plan.length; ++at) {
                 const stat = outcomeStats[at];
                 const data = DB.Artifacts.Substats.get(stat);
-                const value = data ? data.getPreciseValue(outcomeValues[at], rarity) : outcomeValues[at];
+                const value = preciseValues ? preciseValues[at]
+                    : data ? data.getPreciseValue(outcomeValues[at], rarity) : outcomeValues[at];
                 if (plan[at] >= 0) values[plan[at]] += value;
                 if (stat === 'crit_rate') rate += value;
                 else if (stat === 'crit_dmg') dmg += value;
@@ -241,7 +245,8 @@ export function createArtifactUpgradeUnion(usedStats, options = {}) {
             ++states;
             if (!probability) continue;
             const key = keyBuilder.key(action,
-                variant.subStats.map(sub => sub.stat), variant.subStats.map(sub => sub.value));
+                variant.subStats.map(sub => sub.stat), variant.subStats.map(sub => sub.value),
+                variant.getPreciseSubStatValues());
             let entryIndex = byKey.get(key);
             if (entryIndex === undefined) {
                 if (entries.length >= maxEntries) {

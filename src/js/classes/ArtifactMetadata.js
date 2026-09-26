@@ -1,4 +1,5 @@
 import { artifactRollSums } from './ArtifactActionProbability';
+import { ENKA_AFFIXES } from './API/EnkaAffixes';
 
 // Display-aware tier equality shared by validation, import merging and the
 // manual editor. Game values are often rounded for display (flat ATK 13.62
@@ -12,6 +13,69 @@ export function initialTierMatches(roll, value, scale) {
 export function displaySubstatValue(stat, value) {
     const scale = DB.Artifacts.Substats.get(stat)?.type === 'percent' ? 10 : 1;
     return Math.round(value * scale + 1e-8) / scale;
+}
+
+// A roll total in hundredths of a displayed unit, as the game shows it:
+// 0.1% steps or whole points, half-way totals rounded up.
+export function shownRollUnits(stat, units) {
+    const step = DB.Artifacts.Substats.get(stat).type === 'percent' ? 10 : 100;
+    return Math.floor((units + step / 2) / step) * step / 100;
+}
+
+// The game's roll IDs (appendPropIdList, in game order) as {stat, units}, with
+// units in hundredths of a displayed unit. Null unless every ID is a known roll
+// of this rarity.
+export function artifactRollsFromIds(ids, rarity) {
+    if (!Array.isArray(ids) || !ids.length) return null;
+    const rolls = [];
+    for (const id of ids) {
+        const affix = Number.isSafeInteger(id) ? ENKA_AFFIXES[id] : undefined;
+        if (!affix || Math.floor(id / 100000) !== rarity) return null;
+        rolls.push({stat: affix[0], units: Math.round(affix[1] * 100)});
+    }
+    return rolls;
+}
+
+// Roll totals per stat, only when the rolls cover exactly the active lines and
+// each total shows as its line's stored value.
+export function artifactRollTotals(artifact, rolls) {
+    const totals = {};
+    for (const {stat, units} of rolls) totals[stat] = (totals[stat] || 0) + units;
+    const active = artifact.getSubStats();
+    if (Object.keys(totals).length !== active.length) return null;
+    for (const {stat, value} of active) {
+        if (totals[stat] === undefined || Math.abs(shownRollUnits(stat, totals[stat]) - value) > 0.00001) return null;
+    }
+    return totals;
+}
+
+// Roll IDs from a GOOD record (Irminsul's roll-ID export): each active line's
+// displayed value and first roll, taken from its rolls. Irminsul adds rolls in
+// float32, so a total exactly half-way between two displayed values can arrive
+// one step low. Any other disagreement with the record's values or first rolls
+// rejects the IDs (null).
+export function goodRollIdValues(artifact, ids, initialValues = {}) {
+    const rolls = artifactRollsFromIds(ids, artifact.rarity);
+    if (!rolls) return null;
+    const totals = {};
+    for (const {stat, units} of rolls) totals[stat] = (totals[stat] || 0) + units;
+    const active = artifact.getSubStats();
+    if (Object.keys(totals).length !== active.length) return null;
+    const values = {}, initials = {};
+    for (const {stat, value} of active) {
+        const units = totals[stat];
+        if (units === undefined) return null;
+        const step = DB.Artifacts.Substats.get(stat).type === 'percent' ? 10 : 100;
+        const shown = shownRollUnits(stat, units);
+        const roundedDown = units % step === step / 2 ? Math.floor(units / step) * step / 100 : shown;
+        if (Math.abs(value - shown) > 0.00001 && Math.abs(value - roundedDown) > 0.00001) return null;
+        const first = rolls.find(roll => roll.stat === stat).units / 100;
+        const initial = initialValues[stat];
+        if (initial !== undefined && !initialTierMatches(first, initial, step === 10 ? 10 : 1)) return null;
+        values[stat] = shown;
+        initials[stat] = displaySubstatValue(stat, first);
+    }
+    return {values, initials};
 }
 
 const halfwayTables = new Map();
@@ -75,22 +139,31 @@ export function normalizeArtifactMetadata(artifact, input = {}) {
         pair[0] !== pair[1] && pair.every(stat => stats.some(item => item.stat === stat))) {
         result.definedSubstats = [...pair].sort();
     }
+    // Every active roll, so it must match the stated count and the current lines
+    // exactly. An edited value or level no longer matches and drops the list.
+    const rolls = artifactRollsFromIds(input.appendPropIdList, artifact.rarity);
+    if (rolls && rolls.length === result.totalRolls && artifactRollTotals(artifact, rolls)) {
+        result.appendPropIdList = [...input.appendPropIdList];
+    }
     return result;
 }
 
-// The length-framed v3 suffix is independent of displayed substat order.
+// The length-framed v3 suffix is independent of displayed substat order. v4 appends
+// the roll IDs in game order: [count, id…].
 export function serializeArtifactMetadata(metadata) {
     const pair = metadata.definedSubstats || [];
     const initials = Object.entries(metadata.initialValues || {}).sort(([a], [b]) => a.localeCompare(b));
+    const rolls = metadata.appendPropIdList || [];
     return [
         metadata.totalRolls === undefined ? 0 : metadata.totalRolls + 1,
         booleanCode(metadata.elixirCrafted),
         pair.length, ...pair.map(stat => DB.Artifacts.Substats.getId(stat)),
         initials.length, ...initials.flatMap(([stat, value]) => [DB.Artifacts.Substats.getId(stat), Math.round(value * 10000)]),
+        ...(rolls.length ? [rolls.length, ...rolls] : []),
     ];
 }
 
-export function deserializeArtifactMetadata(input) {
+export function deserializeArtifactMetadata(input, withRolls = false) {
     if (input.length < 4 || !input.every(value => Number.isSafeInteger(value) && value >= 0)) return null;
     const [total, crafted] = input.splice(0, 2);
     if (total > 10 || crafted > 2) return null;
@@ -104,12 +177,19 @@ export function deserializeArtifactMetadata(input) {
         if (result.definedSubstats.some(stat => !stat)) return null;
     }
     const count = input.shift();
-    if (!Number.isInteger(count) || count > 4 || input.length !== count * 2) return null;
+    if (!Number.isInteger(count) || count > 4 || input.length < count * 2) return null;
+    const initials = input.splice(0, count * 2);
+    if (withRolls) {
+        const rolls = input.shift();
+        if (!Number.isInteger(rolls) || rolls < 1 || rolls > 9 || input.length !== rolls) return null;
+        result.appendPropIdList = input.splice(0, rolls);
+    }
+    if (input.length) return null;
     if (count) result.initialValues = {};
-    while (input.length) {
-        const stat = DB.Artifacts.Substats.getKeyId(input.shift());
+    while (initials.length) {
+        const stat = DB.Artifacts.Substats.getKeyId(initials.shift());
         if (!stat || result.initialValues[stat] !== undefined) return null;
-        result.initialValues[stat] = input.shift() / 10000;
+        result.initialValues[stat] = initials.shift() / 10000;
     }
     return result;
 }
@@ -120,7 +200,8 @@ function booleanCode(value) {
 
 // Manual-editor provenance draft. `form` mirrors the editor's v3 block:
 // {lines: int|null, crafted: bool|undefined, pair: [stat|null, stat|null],
-//  initials: {stat: value}}.
+//  initials: {stat: value}}, plus the loaded artifact's appendPropIdList, which
+// survives only while the edited artifact still matches it.
 // totalRolls is derived as lines + floor(level/4), so the editor never stores
 // a level-dependent value directly. Returns {input, errors}: `input` is
 // exactly what the normalizer keeps (editor preview and stored payload cannot
@@ -138,6 +219,7 @@ export function describeManualProvenance(artifact, form = {}) {
         if (Number.isFinite(value)) initials[stat] = value;
     }
     if (Object.keys(initials).length) candidate.initialValues = initials;
+    if (Array.isArray(form.appendPropIdList)) candidate.appendPropIdList = form.appendPropIdList;
     const input = normalizeArtifactMetadata(artifact, candidate);
     const errors = [];
     if (input.totalRolls === undefined) errors.push('provenance_lines');

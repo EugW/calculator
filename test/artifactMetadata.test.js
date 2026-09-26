@@ -283,21 +283,26 @@ function enkaItem(ids = [501204, 501224, 501054, 501234]) {
     };
 }
 
-test('Enka imports validated roll counts and only order-independent initial values', () => {
+test('Enka imports validated roll counts and first rolls from the game order', () => {
     const item = enkaItem();
     const art = importEnkaArtifact(item);
     expect(art.getInitialLineCount()).toBe(4);
     expect(art.getMetadata().initialValues).toEqual({crit_rate: 3.9, crit_dmg: 7.8, atk: 19, recharge: 6.5});
     expect(art.getMetadata().elixirCrafted).toBeUndefined();
+    expect(art.getMetadata().appendPropIdList).toEqual([501204, 501224, 501054, 501234]);
     item.reliquary.level = 5;
     item.reliquary.appendPropIdList.push(501201);
     item.flat.reliquarySubstats[0].statValue = 6.6;
     const upgraded = importEnkaArtifact(item);
     expect(upgraded.getInitialLineCount()).toBe(4);
-    expect(upgraded.getMetadata().initialValues.crit_rate).toBeUndefined();
-    expect(upgraded.getMetadata().initialValues.crit_dmg).toBe(7.8);
+    // CRIT Rate rolled 3.89 first, then 2.72.
+    expect(upgraded.getMetadata().initialValues).toEqual({crit_rate: 3.9, crit_dmg: 7.8, atk: 19, recharge: 6.5});
     item.reliquary.appendPropIdList.reverse();
-    expect(importEnkaArtifact(item).getMetadata()).toEqual(upgraded.getMetadata());
+    // The list is kept in Enka's order, which is the game's, and first rolls follow it.
+    const reversed = importEnkaArtifact(item).getMetadata();
+    expect(reversed.appendPropIdList).toEqual(item.reliquary.appendPropIdList);
+    expect(reversed.initialValues.crit_rate).toBe(2.7);
+    expect(reversed.totalRolls).toBe(upgraded.getMetadata().totalRolls);
 });
 
 test.each([undefined, [999999], [401201, 501224, 501054, 501234], [501201, 501224, 501054, 501234]])(
