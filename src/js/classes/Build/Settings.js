@@ -79,6 +79,22 @@ export function normalizeRadianceStellarGlimmer(settings) {
     return settings;
 }
 
+export function migrateViridescentVenererSettings(settings) {
+    for (const prefix of ['set', 'set_other']) {
+        const name = prefix + '.viridescent_venerer_4';
+        const legacyName = name + '_stellarswirl';
+        if (settings[legacyName]) {
+            const elements = (settings[name] || '').split(';').filter(Boolean);
+            if (!elements.includes('cryo')) {
+                elements.push('cryo');
+            }
+            settings[name] = elements.join(';');
+        }
+        delete settings[legacyName];
+    }
+    return settings;
+}
+
 export function getSkillLevelByName(name, settings) {
     let result = settings[name] || 1;
 

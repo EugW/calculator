@@ -40,11 +40,16 @@
     justify-content: space-between;
     gap: 8px;
     margin: auto 4px 0;
-    padding-top: 10px;
+    padding: 10px 0 0;
+    border: 0;
+    background: none;
+    font-family: inherit;
     font-size: 12px;
+    text-align: left;
+    cursor: pointer;
     color: #D3BC8E;
 }
 .upgrade-artifact-selectable { cursor: pointer; }
 .upgrade-artifact-selectable:hover .artifact-list-box { box-shadow: 0 0 0 1px #D3BC8E; }
 .upgrade-artifact-selectable:hover .upgrade-artifact-outcomes { color: #FFF7E9; }
-.upgrade-artifact-selectable:focus-visible { outline: 2px solid #D3BC8E; outline-offset: 5px; }
+.upgrade-artifact-outcomes:focus-visible { outline: 2px solid #D3BC8E; outline-offset: 5px; }

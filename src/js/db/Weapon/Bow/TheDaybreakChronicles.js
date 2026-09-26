@@ -1,5 +1,5 @@
-import { ConditionBooleanRefine } from "../../../classes/Condition/Boolean/Refine";
 import { ConditionStacks } from "../../../classes/Condition/Stacks";
+import { ConditionStatic } from "../../../classes/Condition/Static";
 import { DbObjectWeapon } from "../../../classes/DbObject/Weapon";
 import { StatTable } from "../../../classes/StatTable";
 import { weaponStatTables } from "../../generated/WeaponStatTables";
@@ -36,18 +36,10 @@ export const TheDaybreakChronicles = new DbObjectWeapon({
                 new StatTable('dmg_burst', [10, 12.5, 15, 17.5, 20]),
             ],
         }),
-        // Hexerei: Additional DMG bonus when allies have Hexerei effects
-        new ConditionBooleanRefine({
-            name: 'weapon_the_daybreak_chronicles_hexerei',
+        // Consume the removed Hexerei checkbox (ID only) when loading old builds.
+        new ConditionStatic({
             serializeId: 2,
-            title: 'talent_name.weapon_the_daybreak_chronicles_hexerei',
-            description: 'talent_descr.weapon_the_daybreak_chronicles_hexerei',
-            stats: [
-                new StatTable('dmg_normal', [20, 25, 30, 35, 40]),
-                new StatTable('dmg_skill', [20, 25, 30, 35, 40]),
-                new StatTable('dmg_burst', [20, 25, 30, 35, 40]),
-            ],
-            info: {hexerei: true},
+            isHidden: true,
         }),
     ],
 });

@@ -118,15 +118,10 @@ export const Artifacts = new DbObjectBuff({
             ],
         }),
         new ConditionBoolean({
+            // Read the old checkbox so saved builds can migrate it to Cryo.
             name: 'set_other.viridescent_venerer_4_stellarswirl',
             serializeId: 72,
-            rotation: 'buffs',
-            title: 'set_bonus.viridescent_venerer_4',
-            description: 'set_descr.viridescent_venerer_4_3',
-            icon: {
-                rarity: 5,
-                name: 'sprite-artifact artifact-icon-viridescent-venerer flower',
-            },
+            isHidden: true,
         }),
         ...['pyro', 'hydro', 'electro', 'cryo'].map((elem) => {
             return new Condition({
@@ -143,17 +138,6 @@ export const Artifacts = new DbObjectBuff({
                         }),
                     ]),
                     new ConditionBooleanDropdownValue({name: 'set_other.viridescent_venerer_4', value: elem}),
-                    ...(elem == 'cryo' ? [
-                        new ConditionAnd([
-                            new ConditionBoolean({name: 'set.viridescent_venerer_4_stellarswirl'}),
-                            new ConditionBooleanCharElement({element: ['anemo']}),
-                            new ConditionBooleanPiecesCount({
-                                setName: 'ViridescentVenerer',
-                                count: 4,
-                            }),
-                        ]),
-                        new ConditionBoolean({name: 'set_other.viridescent_venerer_4_stellarswirl'}),
-                    ] : []),
                 ]),
             });
         }),

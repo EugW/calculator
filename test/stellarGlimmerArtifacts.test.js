@@ -1,3 +1,6 @@
+import { Artifact } from "../src/js/classes/Artifact";
+import { CalcObjectArtifacts } from "../src/js/classes/CalcObject/Artifacts";
+import { CalcObjectBuffs } from "../src/js/classes/CalcObject/Buffs";
 import { Artifacts } from "../src/js/db/Buffs/Artifacts";
 import { DB } from "../src/js/db/DB";
 
@@ -97,41 +100,97 @@ test("Heart of the Furnace party bonus works off-field and cannot stack with the
 test("Viridescent Venerer buffs Stellar Swirl and its Cryo shred does not double-stack", () => {
     const fourPieceConditions = DB.Artifacts.Sets.get("ViridescentVenerer").getConditionsByPieces()[4];
     const damageBonus = fourPieceConditions.find((condition) => condition.getType() === "static");
-    const stellarTrigger = getSetCondition(
+    const selfTrigger = getSetCondition(
         "ViridescentVenerer",
         4,
-        "set.viridescent_venerer_4_stellarswirl",
+        "set.viridescent_venerer_4",
     );
-    const partyTrigger = getBuffCondition("set_other.viridescent_venerer_4_stellarswirl");
+    const partyTrigger = getBuffCondition("set_other.viridescent_venerer_4");
     const cryoShred = getResistanceCondition("enemy_res_cryo");
 
     expect(damageBonus.getStats({}).get("dmg_reaction_swirl")).toBe(60);
     expect(damageBonus.getStats({}).get("dmg_stellarswirl")).toBe(20);
-    expect(stellarTrigger.getId()).toBe(55);
-    expect(partyTrigger.getId()).toBe(72);
+    expect(selfTrigger.getId()).toBe(17);
+    expect(partyTrigger.getId()).toBe(8);
+    expect(fourPieceConditions.filter((condition) => !condition.isHidden({}) && condition.getType() !== 'static'))
+        .toEqual([selfTrigger]);
+    expect(Artifacts.getConditions().filter((condition) =>
+        !condition.isHidden({}) && condition.params.title === 'set_bonus.viridescent_venerer_4'
+    )).toEqual([partyTrigger]);
 
     const selfSettings = {
         char_element: "anemo",
         "set_pieces.viridescentvenerer": 4,
-        "set.viridescent_venerer_4_stellarswirl": true,
+        "set.viridescent_venerer_4": "cryo",
     };
     expect(cryoShred.getData(selfSettings).stats.get("enemy_res_cryo")).toBe(-40);
 
-    const selfNormalAndStellar = {
+    const selfAndParty = {
         ...selfSettings,
-        "set.viridescent_venerer_4": "cryo",
-    };
-    expect(cryoShred.getData(selfNormalAndStellar).stats.get("enemy_res_cryo")).toBe(-40);
-
-    const partyNormalAndStellar = {
         "set_other.viridescent_venerer_4": "cryo",
-        "set_other.viridescent_venerer_4_stellarswirl": true,
     };
-    expect(cryoShred.getData(partyNormalAndStellar).stats.get("enemy_res_cryo")).toBe(-40);
+    expect(cryoShred.getData(selfAndParty).stats.get("enemy_res_cryo")).toBe(-40);
+
+    const partySettings = {
+        "set_other.viridescent_venerer_4": "cryo",
+    };
+    expect(cryoShred.getData(partySettings).stats.get("enemy_res_cryo")).toBe(-40);
 
     expect(cryoShred.getData({}).stats.get("enemy_res_cryo")).toBe(0);
     expect(cryoShred.getData({
         ...selfSettings,
         char_element: "hydro",
     }).stats.get("enemy_res_cryo")).toBe(0);
+});
+
+test.each([
+    ['self', CalcObjectArtifacts, 'set', 17, 55],
+    ['party', CalcObjectBuffs, 'set_other', 8, 72],
+])('old %s VV checkbox migrates to the existing Cryo selection', (scope, CalcClass, prefix, selectorId, legacyId) => {
+    const name = prefix + '.viridescent_venerer_4';
+    const legacyName = name + '_stellarswirl';
+    const cryoShred = getResistanceCondition('enemy_res_cryo');
+    const saved = new CalcClass();
+    if (scope === 'self') {
+        for (const [slot, mainStat] of [['flower', 'hp'], ['plume', 'atk'], ['sands', 'atk_percent'], ['goblet', 'dmg_anemo']]) {
+            saved.set(new Artifact(5, 20, slot, 'ViridescentVenerer', mainStat));
+        }
+    }
+    const serializedArtifacts = scope === 'self' ? saved.serialize({}).slice(0, -1) : [];
+
+    for (const [conditions, expectedMask] of [
+        [[1, legacyId], 1],
+        [[2, selectorId, 8, legacyId], 9],
+        [[2, legacyId, selectorId, 8], 9],
+        [[2, selectorId, 9, legacyId], 9],
+    ]) {
+        const input = [...serializedArtifacts, ...conditions, 999];
+        const loaded = CalcClass.deserialize(input);
+        expect(loaded).not.toBeNull();
+        expect(input).toEqual([999]);
+        const settings = loaded.getSettings();
+        const elements = settings[name].split(';');
+        expect(elements.filter((element) => element === 'cryo')).toHaveLength(1);
+        expect(elements.includes('pyro')).toBe(expectedMask === 9);
+        expect(settings[legacyName]).toBeUndefined();
+
+        const context = {char_element: 'anemo', 'set_pieces.viridescentvenerer': 4};
+        expect(cryoShred.getData({...settings, ...context}).stats.get('enemy_res_cryo')).toBe(-40);
+        const vvConditions = loaded.getConditions().filter((condition) => [name, legacyName].includes(condition.getName()));
+        expect(loaded.serializeConditions({...settings, ...context}, vvConditions))
+            .toEqual([1, selectorId, expectedMask]);
+        const roundTrip = CalcClass.deserialize(loaded.serialize({...settings, ...context}));
+        expect(roundTrip.getSettings()[name].split(';').sort()).toEqual(elements.sort());
+        expect(roundTrip.getSettings()[legacyName]).toBeUndefined();
+
+        loaded.modifySettings({[name]: 'pyro'});
+        expect(cryoShred.getData({...loaded.getSettings(), ...context}).stats.get('enemy_res_cryo')).toBe(0);
+    }
+
+    const savedSettings = {[name]: 'hydro', [legacyName]: true};
+    const loaded = new CalcClass();
+    loaded.setSettings(savedSettings);
+    expect(loaded.getSettings()[name]).toBe('hydro;cryo');
+    expect(loaded.getSettings()[legacyName]).toBeUndefined();
+    expect(savedSettings).toEqual({[name]: 'hydro', [legacyName]: true});
 });

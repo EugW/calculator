@@ -31,7 +31,6 @@ export const ViridescentVenerer = new ArtifactSet({
         {
             suggesterSettings: {
                 "set.viridescent_venerer_4": 'cryo;electro;hydro;pyro',
-                "set.viridescent_venerer_4_stellarswirl": true,
             },
             conditions: [
                 new ConditionStatic({
@@ -74,13 +73,10 @@ export const ViridescentVenerer = new ArtifactSet({
                     ],
                 }),
                 new ConditionBoolean({
+                    // Read the old checkbox so saved builds can migrate it to Cryo.
                     name: 'set.viridescent_venerer_4_stellarswirl',
                     serializeId: 55,
-                    title: 'set_bonus.viridescent_venerer_4',
-                    description: 'set_descr.viridescent_venerer_4_3',
-                    subConditions: [
-                        new ConditionBooleanCharElement({element: ['anemo']}),
-                    ],
+                    isHidden: true,
                 }),
             ],
         },

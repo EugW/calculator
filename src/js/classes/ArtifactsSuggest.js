@@ -900,8 +900,7 @@ ${Object.keys(base).map(stat => `    stats[${JSON.stringify(stat)}] = base[${JSO
                 raw: opts.debug ? outcomeArtifacts.map(() => ({v: 'NEG_INF', c: 0xFFFFFFFF})) : null,
                 complementCount: 0, regions: []};
         }
-        // Dense region experiment (md/dense_region_experiment.md): one segment
-        // plan, one optimizer run, one readback. No per-region dispatches.
+        // One segment plan, one optimizer run, one readback. No per-region dispatches.
         // Callers may pass a prebuilt plan (same slots/outcomes/topology) to
         // avoid enumerating twice; it is used as-is.
         const plan = opts.densePlan || buildFusedOutcomeSegments(this.slots, targetSlot, outcomeArtifacts, opts.topology);
@@ -1255,7 +1254,7 @@ function buildFusedOutcomeRegionsForSpec(slots, axes, outcomeArtifacts, topology
 }
 
 /**
- * Dense region experiment (md/dense_region_experiment.md): pack the logical
+ * Pack the logical
  * regions of buildFusedOutcomeRegions into one segment plan for a single
  * optimizer run. Each complement axis is interned by pool identity, so pools
  * shared across regions upload once; pools that differ (multi-spec) get

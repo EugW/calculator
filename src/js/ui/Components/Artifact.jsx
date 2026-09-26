@@ -71,6 +71,7 @@ export class ArtifactListItem extends React.Component {
             || this.props.equipped != nextProps.equipped
             || this.props.charIcons != nextProps.charIcons
             || this.props.highlightStat != nextProps.highlightStat
+            || !!this.props.onEdit != !!nextProps.onEdit
         ;
     }
 
@@ -191,9 +192,11 @@ function ArtifactListItemButtons(props) {
             e.preventDefault();
             e.stopPropagation();
         }}>
-            {props.onEdit ? <div
+            {props.onEdit ? <button
+                type="button"
                 className="button edit"
-                data-tooltop={lang.get('tooltip.artifact_edit')}
+                title={lang.get('tooltip.artifact_edit')}
+                aria-label={lang.get('tooltip.artifact_edit')}
                 onClick={() => props.onEdit(props.art)}
             /> : ''}
             {props.onDelete ? <div

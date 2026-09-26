@@ -107,6 +107,11 @@
 
 .artifact-list-box .button.edit {
     background-position: 0 0;
+    padding: 0;
+}
+.artifact-list-box .button.edit:focus-visible {
+    outline: 2px solid #D3BC8E;
+    outline-offset: 2px;
 }
 .artifact-list-box .button.delete {
     background-position: -20px 0;

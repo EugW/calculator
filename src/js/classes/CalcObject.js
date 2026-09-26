@@ -1,6 +1,6 @@
 import { Stats } from "./Stats";
 import { Condition } from "./Condition";
-import { normalizeRadianceStellarGlimmer } from "./Build/Settings";
+import { migrateViridescentVenererSettings, normalizeRadianceStellarGlimmer } from "./Build/Settings";
 
 export class CalcObject {
     constructor() {
@@ -73,6 +73,7 @@ export class CalcObject {
 
     setSettings(data) {
         this.settings = normalizeRadianceStellarGlimmer(Object.assign({}, data));
+        migrateViridescentVenererSettings(this.settings);
     }
 
     modifySettings(data) {

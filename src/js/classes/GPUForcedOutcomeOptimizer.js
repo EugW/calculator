@@ -209,7 +209,7 @@ export function packForcedOutcomeInputs(prepared, opts) {
     if (!slots || slots[targetSlot]?.length !== 1) {
         throw new RangeError('Fused outcome search needs one target placeholder row (prepared topology)');
     }
-    // Dense region experiment (md/dense_region_experiment.md): one global
+    // One global
     // index space over concatenated regions. Without an explicit plan,
     // run the full space as a single region (no topology).
     const compAxes = GPU_SLOT_NAMES.filter((slot) => slot !== targetSlot);

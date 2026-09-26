@@ -21,8 +21,6 @@ talent_descr;weapon_moonweavers_dawn;Урон от name{взрыва стихи�
 weapon_name;the_daybreak_chronicles;Хроники рассвета;The Daybreak Chronicles
 talent_name;weapon_the_daybreak_chronicles;Ода вне времени;Ode Beyond Time
 talent_descr;weapon_the_daybreak_chronicles;Урон от name{обычных атак}, name{элементального навыка} и name{взрыва стихии} +%{dmg_normal}.;name{Normal Attack}, name{Elemental Skill}, and name{Elemental Burst} DMG +%{dmg_normal}.
-talent_name;weapon_the_daybreak_chronicles_hexerei;Бонус Hexerei;Hexerei Bonus
-talent_descr;weapon_the_daybreak_chronicles_hexerei;Когда в отряде действует эффект Ведьмовство: Тайный обряд, попадания обычными атаками, элементальными навыками или взрывами стихии экипированного персонажа повышают бонус урона всех этих типов на %{dmg_normal}.;When the party possesses Hexerei: Secret Rite effects, when the equipping character's Normal Attacks, Elemental Skills, or Elemental Bursts hit an opponent, the DMG Bonus for all these DMG types is increased by %{dmg_normal} instead.
 
 weapon_name;snare_hook;Капкан-крюк;Snare Hook
 talent_name;weapon_snare_hook;Фантомная вспышка;Phantom Flash

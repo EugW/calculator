@@ -247,8 +247,7 @@ viridescent_venerer_4 = Template(
     ],
     results=[
         [0],
-        [1],
-        [2, 3],
+        [1, 2, 3],
     ]
 )
 

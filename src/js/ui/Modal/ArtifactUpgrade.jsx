@@ -111,11 +111,42 @@ export class ArtifactUpgradeModal extends React.Component {
         this.setState({isVisible: false, stage: 'parameters', result: null, historyEntry: null, progress: {}});
     }
     invalidate() {
-        if (this.state.historyEntry) return;
-        if (this.state.isVisible && (this.state.stage === 'progress' || this.state.result)) {
-            this.factory.dispose();
-            this.setState({stage: 'parameters', result: null, progress: {}, error: t('stale'), feature: this.props.app.getFeature()});
-        }
+        if (!this.state.isVisible || this.state.historyEntry) return;
+        const scan = this.scanCandidates();
+        const candidates = scan.candidates || [];
+        this.factory.dispose();
+        this.setState(state => {
+            const known = new Set(state.candidates.map(candidateKey));
+            const selected = new Set(state.selected);
+            return {stage: 'parameters', result: null, outcomeRow: null, progress: {},
+                ...scan, candidates,
+                selected: candidates.map(candidateKey).filter(key => selected.has(key) || !known.has(key)),
+                page: Math.min(state.page, Math.max(0, Math.ceil(candidates.length / UPGRADE_PAGE_SIZE) - 1)),
+                error: scan.error || (state.stage === 'progress' || state.result ? t('stale') : ''),
+                feature: this.props.app.getFeature()};
+        });
+    }
+    getEditableArtifact(hash) {
+        return this.props.app.storage.artifacts.getByHash(hash)
+            || Object.values(this.props.app.getArtifacts()).find(artifact => artifact?.getHash() === hash);
+    }
+    editArtifact(hash) {
+        const artifact = this.getEditableArtifact(hash);
+        if (!artifact) return;
+        const {app} = this.props;
+        const storage = app.storage.artifacts;
+        UI.ArtifactWindow.show(result => {
+            const current = this.getEditableArtifact(hash);
+            if (!current) return;
+            const stored = storage.getByHash(hash);
+            const equipped = app.getArtifacts()[current.getSlot()];
+            result.setLocked(current.isLocked());
+            if (stored) storage.updateByHash(stored.getHash(), result);
+            if (equipped && (equipped.getHash() === hash || equipped.getHash() === current.getHash())) {
+                app.setArtifact(result, true);
+            }
+            app.refresh({objects: stored ? ['storage.artifacts'] : ['build']});
+        }, artifact, undefined, {groups: storage.listGroups()});
     }
     change(values) { this.setState({...values, error: '', result: null}); }
     selectedArtifacts() {
@@ -266,13 +297,9 @@ export class ArtifactUpgradeModal extends React.Component {
             <div className="upgrade-artifact-grid">
                 {result.rows.map((row, index) => <div className={'upgrade-artifact-entry'
                     + (row.outcomeDetails ? ' upgrade-artifact-selectable' : '')} key={row.targetId} data-slot={row.slot}
-                    role={row.outcomeDetails ? 'button' : undefined} tabIndex={row.outcomeDetails ? 0 : undefined}
-                    onClick={row.outcomeDetails ? () => this.setState({outcomeRow: row.targetId}) : undefined}
-                    aria-label={row.outcomeDetails ? '#' + (index + 1) + ' · ' + slotName(row.slot) + ' · ' + t('outcomes_title') : undefined}
-                    onKeyDown={row.outcomeDetails ? event => {
-                        if (event.key === 'Enter' || event.key === ' ') { event.preventDefault(); this.setState({outcomeRow: row.targetId}); }
-                    } : undefined}>
-                    <UpgradeArtifactCard hash={row.targetId} rank={index + 1} />
+                    onClick={row.outcomeDetails ? () => this.setState({outcomeRow: row.targetId}) : undefined}>
+                    <UpgradeArtifactCard hash={row.targetId} rank={index + 1}
+                        onEdit={this.getEditableArtifact(row.targetId) ? () => this.editArtifact(row.targetId) : undefined} />
                     <div className="upgrade-artifact-result">
                         {row.error ? <p className="craft-error">{errorText(row.error)}</p> : <>
                         <div className="upgrade-artifact-gain"><span>{t('expected_gain')}</span><strong className="action-expected-gain">+{formatExpectedGainPercent(row.score)}</strong></div>
@@ -280,7 +307,11 @@ export class ArtifactUpgradeModal extends React.Component {
                         <div className="craft-result-metric action-expected-gain"><span>{t('expected_gain')}</span><span>+{formatExpectedGain(row.absoluteGain)}</span></div>
                         </>}
                     </div>
-                    {row.outcomeDetails && <div className="upgrade-artifact-outcomes">{t('outcomes_title')} <span aria-hidden="true">→</span></div>}
+                    {row.outcomeDetails && <button type="button" className="upgrade-artifact-outcomes"
+                        aria-label={'#' + (index + 1) + ' · ' + slotName(row.slot) + ' · ' + t('outcomes_title')}
+                        onClick={event => { event.stopPropagation(); this.setState({outcomeRow: row.targetId}); }}>
+                        {t('outcomes_title')} <span aria-hidden="true">→</span>
+                    </button>}
                 </div>)}
             </div>
             <Accordion defaultOpenedId="">
@@ -316,7 +347,7 @@ export class ArtifactUpgradeModal extends React.Component {
                 <FullHeightStatic><ControlsBar>
                     {stage === 'results' && <TitledButton icon="icon-settings"
                         title={t('craft_parameters')}
-                        onClick={() => this.setState({stage: 'parameters', result: null, historyEntry: null})} />}
+                        onClick={() => this.show()} />}
                     <ControlsBarDivider />
                     <TitledButton icon="icon-cancel" title={lang.get('modal_buttons.close')} onClick={() => this.close()} />
                     {stage === 'parameters' && <TitledButton icon="icon-ok" title={lang.get('modal_buttons.confirm')}
@@ -331,7 +362,7 @@ export class ArtifactUpgradeModal extends React.Component {
     }
 }
 
-function UpgradeArtifactCard({artifact, hash, rank, bare}) {
+function UpgradeArtifactCard({artifact, hash, rank, bare, onEdit}) {
     if (!artifact && hash) {
         // targetId is the complete source snapshot, including in saved runs;
         // do not resolve it against the user's possibly changed inventory.
@@ -343,6 +374,6 @@ function UpgradeArtifactCard({artifact, hash, rank, bare}) {
             <span>{rank && <span className="upgrade-artifact-rank">#{rank}</span>}{slotName(artifact.getSlot())}</span>
             <span className="upgrade-artifact-level" title={t('upgrade_max_level')}>+{artifact.getLevel()} → +{getArtifactMaxLevel(artifact)}</span>
         </div>}
-        <ArtifactListItem art={artifact} hash={hash || artifact.getHash()} locked={artifact.isLocked()} />
+        <ArtifactListItem art={artifact} hash={hash || artifact.getHash()} locked={artifact.isLocked()} onEdit={onEdit} />
     </div>;
 }
