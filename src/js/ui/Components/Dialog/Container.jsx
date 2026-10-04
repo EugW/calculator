@@ -13,6 +13,9 @@ export class DialogContainer extends React.Component {
                 centered={this.props.centered}
                 isVisible={this.props.isVisible}
                 addClass={this.props.addClass}
+                role={this.props.role}
+                ariaLabel={this.props.ariaLabel}
+                ariaModal={this.props.ariaModal}
             >
                 <div className="dialog-border">
                     <div className="dialog-corner top-left"></div>
@@ -108,7 +111,8 @@ class Modal extends React.Component {
             + (this.props.centered ? ' dialog-centered' : '');
         return (
             <>
-                <div ref={el => this.el = el} className={'dialog' + classPart}>
+                <div ref={el => this.el = el} className={'dialog' + classPart}
+                    role={this.props.role} aria-label={this.props.ariaLabel} aria-modal={this.props.ariaModal}>
                     {this.props.children}
                 </div>
                 <div className={'dialog-back' + classPart}/>

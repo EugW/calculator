@@ -46,6 +46,7 @@ import { CharTab } from './ui/Tab/Char';
 import { CharTalentModal } from './ui/Modal/CharTalent.jsx';
 import { CompareTab } from './ui/Tab/Compare';
 import { ConfirmModal } from './ui/Modal/Confirm.jsx';
+import { ContactsModal } from './ui/Modal/Contacts.jsx';
 import { EnemyTab } from './ui/Tab/Enemy';
 import { EnkaImportModal } from './ui/Modal/EnkaImport';
 import { FeaturesTab } from './ui/Tab/Features';
@@ -101,6 +102,7 @@ window.UI = {
     ConfirmWindow: new ConfirmModal(),
     PromptWindow: new PromptModal(),
     WindowMessage: new MessageModal(),
+    WindowContacts: new ContactsModal(),
     WindowHelp: new HelpModal(),
     // WindowGood: new WindowGood(), // jq
     WindowGood: new GoodImportModal(),

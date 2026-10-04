@@ -327,6 +327,11 @@ export class Layout {
             return false;
         });
 
+        $(document).on('click', '.link-contacts', function() {
+            UI.WindowContacts.show(this);
+            return false;
+        });
+
         $(document).on('tab_active',  function() {
             $('.tooltip-wrapper').hide();
         });

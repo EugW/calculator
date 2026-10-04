@@ -16,6 +16,7 @@ modal_window;setting_weapon;Настройки подбора оружия;Weapo
 modal_window;select_enemy;Выбор противника;Enemy select
 modal_window;enemy_custom;Настроить вручную;Custom Enemy
 modal_window;changelog;Список изменений;Changelog
+modal_window;contacts;Контакты;Contacts
 modal_window;artifact_set_info;Информация о комплекте;Artifact set info
 modal;edit_char_name;Название сохранения;Saved character name
 modal;edit_compare_name;Название сравнения;Comparison item name

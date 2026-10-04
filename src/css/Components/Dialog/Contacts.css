@@ -1,0 +1,30 @@
+.contacts-modal {
+    box-sizing: border-box;
+}
+
+.contacts-links {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 12px;
+    margin-bottom: 20px;
+}
+
+.contacts-modal .contacts-link {
+    padding: 16px 8px;
+    border: 1px solid #6C6D76;
+    border-radius: 12px;
+    background-color: #313744;
+    color: #ECE5D8;
+    font-size: 18px;
+    text-align: center;
+    text-decoration: none;
+}
+
+.contacts-modal .contacts-link:hover {
+    background-color: #4B5368;
+}
+
+.contacts-modal .contacts-link:focus-visible {
+    outline: 2px solid #D3BC8E;
+    outline-offset: 3px;
+}
