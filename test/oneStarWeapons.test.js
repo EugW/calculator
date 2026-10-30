@@ -104,10 +104,10 @@ test('Enka imports every equipped 1-star weapon and respects its source cap', ()
         },
         equipList: [{
             itemId: weaponGameId,
+            // Enka omits affixMap for weapons without refinement
             weapon: {
                 level: 90,
                 promoteLevel: 6,
-                affixMap: {},
             },
         }],
         talentIdList: [],

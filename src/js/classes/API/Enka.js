@@ -256,7 +256,8 @@ function processChar(data) {
             if (weapon) {
                 set.setWeapon(weapon);
                 let refine = 1;
-                for (let affixId of Object.keys(weaponData.weapon.affixMap)) {
+                // 1-star weapons have no refinement, so Enka omits affixMap
+                for (let affixId of Object.keys(weaponData.weapon.affixMap || {})) {
                     refine = weaponData.weapon.affixMap[affixId] + 1;
                     break;
                 }
