@@ -1,5 +1,6 @@
 import csv
 from pathlib import Path
+import re
 import unittest
 
 
@@ -339,6 +340,89 @@ class WeaponStringProvenanceTests(unittest.TestCase):
                 ('talent_descr', 'weapon_forged_by_the_golden_melody_copied'),
             },
         )
+
+
+    def test_reliquary_of_truth_passive_is_generated_from_source(self):
+        rows = csv_rows(STRINGS / 'generated' / 'weapon_talents.csv')
+        by_key = {(row['category'], row['name']): row for row in rows}
+        title = by_key[('talent_name', 'weapon_reliquary_of_truth')]
+        self.assertEqual(
+            (title['rus'], title['eng']),
+            ('Подлинный смысл лжи', 'Essence of Falsity'),
+        )
+        descriptions = [
+            by_key[('talent_descr', f'weapon_reliquary_of_truth_{index}')]
+            for index in range(1, 5)
+        ]
+        tokens = ('%{crit_rate}', '%{mastery}', '%{crit_dmg}', '50%')
+        for row, token in zip(descriptions, tokens):
+            for language in ('rus', 'eng'):
+                self.assertIn(token, row[language])
+        self.assertIn('Лунной бутонизации', descriptions[2]['rus'])
+        self.assertIn('Lunar-Bloom', descriptions[2]['eng'])
+
+        self.assertFalse((STRINGS / '6.0' / 'weapons.csv').exists())
+
+    VERSION_60_PASSIVES = {
+        'athame_artis': ("Day King's Splendor Solis", ['1', '2']),
+        'serenitys_call': ('Solemn Silence', ['1', '2']),
+        'moonweavers_dawn': ("Secret Silver's Testament", ['1', '2']),
+        'the_daybreak_chronicles': ('Ode Beyond Time', []),
+        'snare_hook': ('Phantom Flash', ['1', '2']),
+        'rainbow_serpents_rain_bow': ('Astral Whispers Beyond the Sacred Throne', []),
+        'master_key': ('Fall Into Place', ['1', '2']),
+        'nightweavers_looking_glass': ('Millennial Hymn', ['1', '2', '3']),
+        'reliquary_of_truth': ('Essence of Falsity', ['1', '2', '3', '4']),
+        'etherlight_spindlelute': ('Last Singer', []),
+        'blackmarrow_lantern': ('Token of Covenant', ['1', '2']),
+        'dawning_frost': ('Nocturnal Dreams', ['1', '2']),
+        'bloodsoaked_ruins': ('Mournful Tribute', ['1', '2']),
+        'prospectors_shovel': ('Swift and Sure', ['1', '2']),
+        'sacrificers_staff': ('Untainted Desire', []),
+    }
+
+    def test_60_weapon_passives_are_generated_from_source(self):
+        # The 6.0 beta translations were hand-written; release text is imported.
+        self.assertFalse((STRINGS / '6.0' / 'weapons.csv').exists())
+        rows = csv_rows(STRINGS / 'generated' / 'weapon_talents.csv')
+        by_key = {(row['category'], row['name']): row for row in rows}
+        for weapon_id, (title, suffixes) in self.VERSION_60_PASSIVES.items():
+            talent = f'weapon_{weapon_id}'
+            self.assertEqual(by_key[('talent_name', talent)]['eng'], title)
+            names = [f'{talent}_{suffix}' for suffix in suffixes] or [talent]
+            for name in names:
+                row = by_key[('talent_descr', name)]
+                for language in ('rus', 'eng'):
+                    self.assertTrue(row[language].strip())
+                    self.assertNotIn('<color=', row[language])
+
+        # Moonsign: Ascendant Gleam bonuses are separate descriptions.
+        for weapon_id in ('serenitys_call', 'snare_hook', 'master_key',
+                          'blackmarrow_lantern', 'prospectors_shovel'):
+            gleam = by_key[('talent_descr', f'weapon_{weapon_id}_2')]
+            self.assertTrue(gleam['eng'].startswith('Moonsign: Ascendant Gleam:'))
+            self.assertTrue(gleam['rus'].startswith('Лунное знамение - Высшее сияние:'))
+        self.assertEqual(
+            by_key[('talent_name', 'weapon_athame_artis')]['rus'],
+            'Пылающая слава Короля Дня',
+        )
+        self.assertIn(
+            '%{text_percent_energy_60}/%{text_percent_energy_40}',
+            by_key[('talent_descr', 'weapon_moonweavers_dawn_2')]['eng'],
+        )
+
+    def test_lunar_bloom_uses_the_official_russian_term(self):
+        # Official RU text calls Lunar-Bloom "Лунная бутонизация";
+        # "Цветение" is Burgeon (Pyro on a Dendro Core).
+        wrong_term = re.compile(r'лунн\w*\s+(?:цветени|расцвет)', re.IGNORECASE)
+        offenders = []
+        for path in sorted(STRINGS.rglob('*.csv')):
+            for row in csv_rows(path):
+                if wrong_term.search(row.get('rus') or ''):
+                    offenders.append(
+                        f"{path.relative_to(STRINGS)}: {row['category']};{row['name']}"
+                    )
+        self.assertEqual(offenders, [])
 
 
 if __name__ == '__main__':

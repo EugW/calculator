@@ -52,7 +52,7 @@ export const NightweaversLookingGlass = new DbObjectWeapon({
             name: 'weapon_nightweavers_looking_glass_party',
             serializeId: 1,
             title: 'weapon_name.nightweavers_looking_glass',
-            description: 'talent_descr.weapon_nightweavers_looking_glass_party',
+            description: 'talent_descr.weapon_nightweavers_looking_glass_3',
             stats: [
                 new StatTable('dmg_reaction_bloom', [120, 150, 180, 210, 240]),
                 new StatTable('dmg_reaction_hyperbloom', [80, 100, 120, 140, 160]),

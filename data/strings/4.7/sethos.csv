@@ -1,6 +1,4 @@
 category;name;rus;eng
-char_name;sethos;Сетос;Sethos
-
 stat;crit_rate_sethos;Пронзающий тени выстрел;Shadowpiercing Shot
 feature_attack;sethos_shadowpiercing_shot_dmg;Урон Пронзающего тени выстрела;Shadowpiercing Shot DMG
 feature_skill;sethos_recharge;Восстановление энергии;Energy Regeneration

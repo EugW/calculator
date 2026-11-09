@@ -45,6 +45,8 @@ export const ReliquaryOfTruth = new DbObjectWeapon({
         }),
         // Combined bonus: +50% to both effects when both are active
         new ConditionStaticRefine({
+            title: 'talent_name.weapon_reliquary_of_truth',
+            description: 'talent_descr.weapon_reliquary_of_truth_4',
             stats: [
                 new StatTable('mastery', [40, 50, 60, 70, 80]),
                 new StatTable('crit_dmg', [12, 15, 18, 21, 24]),

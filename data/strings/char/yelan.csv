@@ -1,5 +1,4 @@
 category;name;rus;eng
-char_name;yelan;Е Лань;Yelan
 feature_attack;yelan_breakthrough_barb_dmg;Урон прорывной стрелы;Breakthrough Barb DMG
 feature_attack;yelan_breakthrough_barb_c6_dmg;Урон усиленной прорывной стрелы;Special Breakthrough Barb DMG
 feature_burst;yelan_exquisite_throw_dmg;Урон Изысканного броска;Exquisite Throw DMG

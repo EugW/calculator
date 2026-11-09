@@ -1,8 +1,4 @@
 category;name;rus;eng
-weapon_name;absolution;Отпущение грехов;Absolution
-weapon_name;cloudforged;Выкованный из облаков;Cloudforged
-weapon_name;silvershower_heartstrings;Сердечные струны дождя;Silvershower Heartstrings
-
 talent_name;weapon_absolution;Пакт смерти;Deathly Pact
 talent_descr;weapon_absolution_1;Крит. урон увеличивается на %{crit_dmg}.;name{CRIT DMG} increased by %{crit_dmg}.
 talent_descr;weapon_absolution_2;Когда name{Долг жизни} возрастает, наносимый экипированным персонажем урон увеличивается на %{dmg_all} на 6 сек. Этот эффект может складываться до 3 раз.;Increasing the value of a name{Bond of Life} increases the name{DMG} the equipping character deals by %{dmg_all} for 6s. Max 3 stacks.

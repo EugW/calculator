@@ -1,12 +1,8 @@
 category;name;rus;eng
-weapon_name;sword_of_descension;Меч нисхождения;Sword of Descension
-weapon_name;predator;Хищник;Predator
-
 feature_weapon;sword_of_descension_dmg;Урон Меча нисхождения;Sword of Descension DMG
 
 talent_name;ps_network;Эксклюзив PS;PS Exclusive
 talent_descr;ps_network;Действует только для игроков "PlayStation Network".;Effective for players on "PlayStation Network" only.
-
 
 talent_name;sword_of_descension;Пришествие;Descension
 talent_descr;sword_of_descension_1;Eсли name{Путешественник} экипирован name{Мечом нисхождения}, его name{сила атаки} увеличивается на %{atk} единиц.;If the name{Traveler} equips the name{Sword of Descension}, their name{ATK} is increased by %{atk}.

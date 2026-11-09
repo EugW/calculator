@@ -1,6 +1,4 @@
 category;name;rus;eng
-char_name;arlecchino;Арлекино;Arlecchino
-
 feature_attack;arlecchino_masque;Усиление Маски Красной Смерти;Masque of the Red Death Increase
 feature_attack;arlecchino_stamina_cost;Потребление выносливости на стремительное перемещение;High-Speed Movement Stamina Cost
 feature_skill;arlecchino_spike_dmg;Урон шипов;Spike DMG

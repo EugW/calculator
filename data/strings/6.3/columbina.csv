@@ -1,6 +1,4 @@
 category;name;rus;eng
-char_name;columbina;Коломбина;Columbina
-
 feature_attack;columbina_moondew_cleanse_dmg;Урон Очищения лунной росой;Moondew Cleanse DMG
 feature_skill;columbina_skill_dmg;Урон навыка;Skill DMG
 feature_skill;columbina_gravity_ripple_dmg;Зыбь тяготения: периодический урон;Gravity Ripple: Continuous DMG

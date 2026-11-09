@@ -1,6 +1,4 @@
 category;name;rus;eng
-char_name;emilie;Эмилия;Emilie
-
 feature_skill;emilie_lumidouce_case_1_dmg;Урон Шкатулки Люмидус ур. 1;Level 1 Lumidouce Case Attack DMG
 feature_skill;emilie_lumidouce_case_2_dmg;Урон Шкатулки Люмидус ур. 2;Level 2 Lumidouce Case Attack DMG
 feature_skill;emilie_lumidouce_case_duration;Длительность Шкатулки Люмидус;Lumidouce Case Duration

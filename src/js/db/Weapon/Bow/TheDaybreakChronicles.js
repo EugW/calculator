@@ -34,6 +34,9 @@ export const TheDaybreakChronicles = new DbObjectWeapon({
                 new StatTable('dmg_normal', [10, 12.5, 15, 17.5, 20]),
                 new StatTable('dmg_skill', [10, 12.5, 15, 17.5, 20]),
                 new StatTable('dmg_burst', [10, 12.5, 15, 17.5, 20]),
+                new StatTable('text_percent_max', [60, 75, 90, 105, 120]),
+                new StatTable('text_percent_decay', [10, 12.5, 15, 17.5, 20]),
+                new StatTable('text_percent_hexerei', [20, 25, 30, 35, 40]),
             ],
         }),
         // Consume the removed Hexerei checkbox (ID only) when loading old builds.

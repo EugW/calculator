@@ -380,7 +380,7 @@ export const Weapons = new DbObjectBuff({
             name: 'weapon_other.weapon_nightweavers_looking_glass',
             serializeIds: [61],
             title: 'weapon_name.nightweavers_looking_glass',
-            description: 'talent_descr.weapon_nightweavers_looking_glass_party',
+            description: 'talent_descr.weapon_nightweavers_looking_glass_3',
             icon: {
                 rarity: 5,
                 name: 'sprite-weapon-catalyst weapon-icon-catalyst-nightweavers-looking-glass',
@@ -441,7 +441,7 @@ export const Weapons = new DbObjectBuff({
             serializeId: 62,
             rotation: 'buffs',
             title: 'weapon_name.athame_artis',
-            description: 'talent_descr.weapon_athame_artis_party_full',
+            description: 'talent_descr.weapon_athame_artis_2',
             maxStacks: 5,
             icon: {
                 rarity: 5,
@@ -449,8 +449,8 @@ export const Weapons = new DbObjectBuff({
             },
             stats: [
                 new StatTable('atk_percent', [16, 20, 24, 28, 32]),
-                new StatTable('text_percent', [16, 20, 24, 28, 32]),
-                new StatTable('text_percent_2', [12, 15, 18, 21, 24]),
+                new StatTable('text_percent_atk', [20, 25, 30, 35, 40]),
+                new StatTable('text_percent_atk_party', [16, 20, 24, 28, 32]),
             ],
             subConditions: [
                 new ConditionNot([

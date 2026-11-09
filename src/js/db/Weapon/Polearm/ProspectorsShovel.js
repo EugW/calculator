@@ -1,3 +1,5 @@
+import { ConditionBooleanValue } from "../../../classes/Condition/Boolean/Value";
+import { ConditionCalcMoonsign } from "../../../classes/Condition/CalcMoonsign";
 import { ConditionStaticRefine } from "../../../classes/Condition/Static/Refine";
 import { DbObjectWeapon } from "../../../classes/DbObject/Weapon";
 import { StatTable } from "../../../classes/StatTable";
@@ -12,13 +14,23 @@ export const ProspectorsShovel = new DbObjectWeapon({
     weapon: 'polearm',
     statTable: weaponStatTables.ProspectorsShovel,
     conditions: [
+        new ConditionCalcMoonsign({}),
         new ConditionStaticRefine({
             title: 'talent_name.weapon_prospectors_shovel',
-            description: 'talent_descr.weapon_prospectors_shovel',
+            description: 'talent_descr.weapon_prospectors_shovel_1',
             stats: [
                 new StatTable('dmg_reaction_electrocharged', [48, 60, 72, 84, 96]),
                 new StatTable('dmg_reaction_lunarcharged', [12, 15, 18, 21, 24]),
             ],
+        }),
+        // Moonsign: Ascendant Gleam: additional Lunar-Charged DMG.
+        new ConditionStaticRefine({
+            title: 'talent_name.weapon_prospectors_shovel',
+            description: 'talent_descr.weapon_prospectors_shovel_2',
+            stats: [
+                new StatTable('dmg_reaction_lunarcharged', [12, 15, 18, 21, 24]),
+            ],
+            condition: new ConditionBooleanValue({setting: 'party_moonsign', cond: 'ge', value: 2}),
         }),
     ],
 });

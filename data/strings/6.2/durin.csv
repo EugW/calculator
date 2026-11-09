@@ -1,6 +1,4 @@
 category;name;rus;eng
-char_name;durin;Дурин;Durin
-
 feature_attack;durin_charged_dmg;Урон заряженной атаки;Charged Attack DMG
 feature_skill;durin_confirmation_dmg;Урон Утверждения чистоты;Confirmation of Purity DMG
 feature_skill;durin_denial_dmg_1;Урон Отрицания тьмы (1);Denial of Darkness DMG (1)
@@ -19,4 +17,3 @@ feature_burst;durin_dragon_duration;Длительность дракона;Drag
 feature_other;durin_c1_cycle_dmg;Урон Цикла просветления C1;C1 Cycle of Enlightenment DMG
 
 talent_name;durin_darkness_mode;Принцип тьмы;Principle of Darkness
-

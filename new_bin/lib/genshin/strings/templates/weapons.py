@@ -584,3 +584,247 @@ starsealed_edict_rus = Template(
         [4, 5],
     ],
 )
+
+# Reliquary of Truth: permanent CRIT Rate, Secret of Lies (Skill EM), Moon of
+# Truth (Lunar-Bloom CRIT DMG) and the 50% boost while both are active are
+# separate calculator conditions. Both languages split into the same sentences.
+reliquary_of_truth = Template(
+    sentences=[
+        ['8:crit_rate'],
+        ['80:mastery', '12:ignore'],
+        ['24:crit_dmg', '4:ignore'],
+        ['50:ignore'],
+    ],
+    results=[
+        [0],
+        [1],
+        [2],
+        [3],
+    ],
+)
+
+# 6.0 weapons. Every source line becomes the description of the calculator
+# condition that models it. "Moonsign: Ascendant Gleam" bonuses get their own
+# description because they need two Moonsign characters in the party.
+# Descriptions shown by party weapon buffs (Athame Artis, Nightweaver's Looking
+# Glass) carry R1 fallbacks: those panels render before a refinement is picked.
+athame_artis_eng = Template(
+    sentences=[
+        ['16:crit_dmg_burst'],
+        ['20:text_percent_atk|20'],
+        ['16:text_percent_atk_party|16', '3:ignore', '75:ignore'],
+        [],
+    ],
+    results=[
+        [0],
+        [1, 2, 3],
+    ],
+)
+
+athame_artis_rus = Template(
+    sentences=[
+        ['16:crit_dmg_burst'],
+        ['20:text_percent_atk|20', '16:text_percent_atk_party|16', '3:ignore', '75:ignore'],
+        [],
+    ],
+    results=[
+        [0],
+        [1, 2],
+    ],
+)
+
+serenitys_call_eng = Template(
+    sentences=[
+        ['16:hp_percent', '12:ignore'],
+        ['16:hp_percent'],
+        [],
+    ],
+    results=[
+        [0, 2],
+        [1],
+    ],
+)
+
+# "макс. HP" splits the Russian sentences in two; results glue them back.
+serenitys_call_rus = Template(
+    sentences=[
+        ['12:ignore'],
+        ['16:hp_percent'],
+        [],
+        ['16:hp_percent'],
+        [],
+    ],
+    results=[
+        [0, 1, 4],
+        [2, 3],
+    ],
+)
+
+moonweavers_dawn = Template(
+    sentences=[
+        ['20:dmg_burst'],
+        ['60:ignore', '40:ignore', '16:text_percent_energy_60', '28:text_percent_energy_40'],
+    ],
+    results=[
+        [0],
+        [1],
+    ],
+)
+
+the_daybreak_chronicles_eng = Template(
+    sentences=[
+        ['3:ignore', '60:text_percent_max'],
+        ['10:text_percent_decay', '0:ignore'],
+        ['10:dmg_normal', '60:text_percent_max'],
+        ['0.1:ignore'],
+        ['20:text_percent_hexerei'],
+    ],
+)
+
+the_daybreak_chronicles_rus = Template(
+    sentences=[
+        ['3:ignore', '60:text_percent_max'],
+        ['10:text_percent_decay', '0:ignore'],
+        ['10:dmg_normal', '60:text_percent_max'],
+        ['0.1:ignore', '20:text_percent_hexerei'],
+    ],
+)
+
+snare_hook_eng = Template(
+    sentences=[
+        ['60:mastery', '12:ignore'],
+        ['60:mastery'],
+        [],
+    ],
+    results=[
+        [0, 2],
+        [1],
+    ],
+)
+
+snare_hook_rus = Template(
+    sentences=[
+        ['12:ignore', '60:mastery'],
+        ['60:mastery'],
+        [],
+    ],
+    results=[
+        [0, 2],
+        [1],
+    ],
+)
+
+# Master Key shares Snare Hook's passive text.
+master_key_eng = snare_hook_eng
+master_key_rus = snare_hook_rus
+
+rainbow_serpents_rain_bow_eng = Template(
+    sentences=[
+        ['28:atk_percent', '8:ignore'],
+    ],
+)
+
+rainbow_serpents_rain_bow_rus = Template(
+    sentences=[
+        ['8:ignore', '28:atk_percent'],
+    ],
+)
+
+nightweavers_looking_glass = Template(
+    sentences=[
+        ['60:mastery', '4.5:ignore'],
+        ['60:mastery', '10:ignore'],
+        ['120:dmg_reaction_bloom|120', '80:dmg_reaction_hyperbloom|80', '40:dmg_reaction_lunarbloom|40'],
+        [],
+        [],
+    ],
+    results=[
+        [0],
+        [1],
+        [2, 3, 4],
+    ],
+)
+
+etherlight_spindlelute_eng = Template(
+    sentences=[
+        ['20:ignore', '100:mastery'],
+    ],
+)
+
+etherlight_spindlelute_rus = Template(
+    sentences=[
+        ['100:mastery', '20:ignore'],
+    ],
+)
+
+blackmarrow_lantern = Template(
+    sentences=[
+        ['48:dmg_reaction_bloom', '12:dmg_reaction_lunarbloom'],
+        ['12:dmg_reaction_lunarbloom'],
+    ],
+    results=[
+        [0],
+        [1],
+    ],
+)
+
+dawning_frost = Template(
+    sentences=[
+        ['10:ignore', '72:mastery'],
+        ['10:ignore', '48:mastery'],
+    ],
+    results=[
+        [0],
+        [1],
+    ],
+)
+
+bloodsoaked_ruins_eng = Template(
+    sentences=[
+        ['3.5:ignore', '36:dmg_reaction_lunarcharged'],
+        ['28:crit_dmg', '6:ignore'],
+        ['12:text_energy', '14:ignore'],
+    ],
+    results=[
+        [0],
+        [1, 2],
+    ],
+)
+
+bloodsoaked_ruins_rus = Template(
+    sentences=[
+        ['36:dmg_reaction_lunarcharged', '3.5:ignore'],
+        ['28:crit_dmg', '6:ignore', '12:text_energy'],
+        ['14:ignore'],
+    ],
+    results=[
+        [0],
+        [1, 2],
+    ],
+)
+
+prospectors_shovel = Template(
+    sentences=[
+        ['48:dmg_reaction_electrocharged', '12:dmg_reaction_lunarcharged'],
+        ['12:dmg_reaction_lunarcharged'],
+    ],
+    results=[
+        [0],
+        [1],
+    ],
+)
+
+sacrificers_staff_eng = Template(
+    sentences=[
+        ['6:ignore', '8:atk_percent', '6:recharge'],
+        ['3:ignore'],
+        [],
+    ],
+)
+
+sacrificers_staff_rus = Template(
+    sentences=[
+        ['6:ignore', '8:atk_percent', '6:recharge'],
+        ['3:ignore'],
+    ],
+)

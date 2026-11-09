@@ -57,7 +57,7 @@ features_view;stat_dmg_reaction_spread;Разрастание;Spread
 features_view;stat_dmg_reaction_aggravate;Обострение;Aggravate
 features_view;stat_dmg_reaction_bloom;Бутонизация;Bloom
 features_view;stat_dmg_reaction_lunarcharged;Лунный заряд;Lunar-Charged
-features_view;stat_dmg_reaction_lunarbloom;Лунный расцвет;Lunar-Bloom
+features_view;stat_dmg_reaction_lunarbloom;Лунная бутонизация;Lunar-Bloom
 features_view;stat_dmg_reaction_lunarcrystallize;Лунная кристаллизация;Lunar-Crystallize
 features_view;stat_dmg_reaction_lunar;Лунные реакции;Lunar Reactions
 features_view;stat_lunarcharged;Лунный заряд;Lunar-Charged
@@ -87,7 +87,7 @@ features_view;stat_stacks;Уровни;Stacks
 features_view;stat_atk_base;Базовая СА;Base ATK
 features_view;stat_base_res;Противник;Enemy
 features_view;stat_lunarcharged_special;Лунный заряд;Lunar-Charged
-features_view;stat_lunarbloom_special;Лунный расцвет;Lunar-Bloom
+features_view;stat_lunarbloom_special;Лунная бутонизация;Lunar-Bloom
 features_view;stat_lunarcrystallize_special;Лунная кристаллизация;Lunar-Crystallize
 features_view;stat_dmg_lunar_special;Лунные реакции;Lunar Reactions
 features_view;stat_stellarconduct_base;Базовый множитель Звёздного проводника;Stellar-Conduct Base Multiplier

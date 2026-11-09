@@ -76,6 +76,31 @@ test.each([
     expect(stacksOnly.get('crit_dmg_stellarconduct')).toBe(0);
 });
 
+test('Starsealed Edict Radiance is the Dawnstar\'s Flowing Trail toggle itself', () => {
+    const conditions = getWeapon().getConditions();
+    expect(conditions.filter((condition) => condition.getName())
+        .map((condition) => [condition.getName(), condition.params.serializeId, condition.getType()])).toEqual([
+        ['weapon_starsealed_edict', 1, 'checkbox'],
+        ['weapon_starsealed_edict_law_of_combustion', 2, 'stacks'],
+        ['weapon_starsealed_edict_radiance', 3, 'checkbox'],
+    ]);
+    expect(conditions.some((condition) => condition.params.title === 'talent_name.radiance_stellarconduct')).toBe(false);
+
+    const radiance = conditions.find((condition) => condition.getName() === 'weapon_starsealed_edict_radiance');
+    expect(radiance.params.title).toBe('talent_name.weapon_starsealed_edict');
+    expect(radiance.params.description).toBe('talent_descr.weapon_starsealed_edict_4');
+    // Law of Combustion stacks only exist during Crystal Compounding, so the toggle waits for it.
+    expect(radiance.checkSubconditions({weapon_refine: 1})).toBe(false);
+    expect(radiance.checkSubconditions({weapon_refine: 1, weapon_starsealed_edict: true})).toBe(true);
+
+    const noStacks = applyWeapon({
+        weapon_refine: 1,
+        weapon_starsealed_edict: true,
+        weapon_starsealed_edict_radiance: true,
+    });
+    expect(noStacks.get('crit_dmg_stellarconduct')).toBe(0);
+});
+
 test('Starsealed Edict descriptions come from the generated passive with refinement values', () => {
     const settings = {weapon_refine: 1};
     const descriptions = getWeapon().getConditions()

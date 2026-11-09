@@ -112,7 +112,7 @@ feature_reaction;burgeon;Цветение;Burgeon
 feature_reaction;bloom;Бутонизация;Bloom
 feature_reaction;hyperbloom;Вегетация;Hyperbloom
 feature_reaction;lunarcharged;Лунный заряд;Lunar-Charged
-feature_reaction;lunarbloom;Лунное цветение;Lunar-Bloom
+feature_reaction;lunarbloom;Лунная бутонизация;Lunar-Bloom
 feature_reaction;lunarcrystallize;Лунная кристаллизация;Lunar-Crystallize
 feature_reaction;lunarcrystallize_contrubution;Вклад в Лунную кристаллизацию 60%;Lunar-Crystallize Contribution 60%
 feature_reaction;lunarcrystallize_contrubution_2;Вклад в Лунную кристаллизацию 30%;Lunar-Crystallize Contribution 30%

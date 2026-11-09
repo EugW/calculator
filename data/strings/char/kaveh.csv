@@ -1,6 +1,4 @@
 category;name;rus;eng
-char_name;kaveh;Кавех;Kaveh
-
 feature_burst;kaveh_bloom_dmg_bonus;Бонус урона взрыва Дендро ядер;Dendro Core Burst DMG Bonus
 feature_attack;kaveh_pairidaezas_light_dmg;Урон Света Пайридаэзы;Pairidaeza's Light DMG
 feature_other;kaveh_bloom_heal;Ответственность строителя;An Architect's Undertaking

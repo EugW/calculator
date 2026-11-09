@@ -1,7 +1,4 @@
 category;name;rus;eng
-
-char_name;traveler_hydro;Путешественник;Traveler
-
 talent_name;traveler_hydro_foreign_stream;Чужеземный поток;Foreign Stream
 talent_descr;traveler_hydro_foreign_stream;<p>name{Обычная атака:}<br>До пяти быстрых ударов.</p><p>name{Заряженная атака:}<br>Два быстрых взмаха мечом, на которые тратится определённое количество выносливости.</p><p>name{Атака в падении:}<br>Стремительно падает на землю, атакуя всех врагов на пути. Приземлившись, наносит урон по площади.</p>;<p>name{Normal Attack}<br>Performs up to 5 rapid strikes.</p><p>name{Charged Attack}<br>Consumes a certain amount of Stamina to unleash 2 rapid sword strikes.</p><p>name{Plunging Attack}<br>Plunges from mid-air to strike the ground below, damaging opponents along the path and dealing AoE DMG upon impact.</p>
 talent_name;traveler_hydro_aquacrest_saber;Клинок водной эмблемы;Aquacrest Saber

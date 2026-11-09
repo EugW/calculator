@@ -1,6 +1,4 @@
 category;name;rus;eng
-char_name;xilonen;Шилонен;Xilonen
-
 feature_attack;xilonen_roller_1_dmg;Урон Клинков-роликов 1;Blade Roller 1-Hit DMG
 feature_attack;xilonen_roller_2_dmg;Урон Клинков-роликов 2;Blade Roller 2-Hit DMG
 feature_attack;xilonen_roller_3_dmg;Урон Клинков-роликов 3;Blade Roller 3-Hit DMG

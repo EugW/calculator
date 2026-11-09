@@ -12,23 +12,19 @@ const radianceName = 'weapon_starsealed_edict_radiance';
 const LawOfCombustionMaxStacks = 3;
 
 const stellarConductCritDmgPerStack = [12, 15, 18, 21, 24];
+const stellarConductCritDmg = new StatTable('crit_dmg_stellarconduct', stellarConductCritDmgPerStack);
 
 /**
- * Radiance: Stellar-Conduct turns every Law of Combustion stack into
- * Stellar-Conduct CRIT DMG for the holder. The text stat keeps the per-stack
- * value visible in the description at every refinement.
+ * The toggle is the Radiance: Stellar-Conduct state: while it is on, every
+ * Law of Combustion stack also grants Stellar-Conduct CRIT DMG. The text stat
+ * keeps the per-stack value visible in the description at every refinement.
  */
-class ConditionStarsealedEdictRadiance extends ConditionStaticRefine {
+class ConditionStarsealedEdictRadiance extends ConditionBooleanRefine {
     getStats(settings) {
         const stats = super.getStats(settings);
-        if (!settings[radianceName] || !settings[crystalCompoundingName]) {
-            return stats;
-        }
-
         const stacks = Math.min(LawOfCombustionMaxStacks, settings[lawOfCombustionName] || 0);
         if (stacks > 0) {
-            const perStack = new StatTable('crit_dmg_stellarconduct', stellarConductCritDmgPerStack);
-            stats.add('crit_dmg_stellarconduct', perStack.getValue(settings.weapon_refine) * stacks);
+            stats.add('crit_dmg_stellarconduct', stellarConductCritDmg.getValue(settings.weapon_refine) * stacks);
         }
         return stats;
     }
@@ -71,17 +67,15 @@ export const StarsealedEdict = new DbObjectWeapon({
             ],
             condition: new ConditionBoolean({name: crystalCompoundingName}),
         }),
-        new ConditionBoolean({
+        new ConditionStarsealedEdictRadiance({
             name: radianceName,
             serializeId: 3,
-            title: 'talent_name.radiance_stellarconduct',
-        }),
-        new ConditionStarsealedEdictRadiance({
             title: 'talent_name.weapon_starsealed_edict',
             description: 'talent_descr.weapon_starsealed_edict_4',
             stats: [
                 new StatTable('text_percent_stellarconduct_crit_dmg', stellarConductCritDmgPerStack),
             ],
+            condition: new ConditionBoolean({name: crystalCompoundingName}),
         }),
     ],
 });

@@ -1,6 +1,4 @@
 category;name;rus;eng
-char_name;clorinde;Клоринда;Clorinde
-
 feature_skill;clorinde_wild_hunt_dmg;Урон Неистовой охоты;Wild Hunt DMG
 feature_skill;clorinde_wild_hunt_1_dmg;Урон Неистовой охоты-1;Wild Hunt DMG-1
 feature_skill;clorinde_wild_hunt_2_dmg;Урон Неистовой охоты-2;Wild Hunt DMG-2

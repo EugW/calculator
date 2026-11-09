@@ -1,7 +1,4 @@
 category;name;rus;eng
-
-weapon_name;uraku_misugiri;Ураку мисугири;Uraku Misugiri
-
 talent_name;weapon_uraku_misugiri;Парчовый цветок и меч святилища;Brocade Bloom, Shrine Sword
 talent_descr;weapon_uraku_misugiri_1;Урон name{обычной атаки} увеличивается на %{dmg_normal}, name{элементального навыка} - на %{dmg_skill}.;name{Normal Attack} DMG is increased by %{dmg_normal} and name{Elemental Skill} DMG is increased by %{dmg_skill}.
 talent_descr;weapon_uraku_misugiri_2;После того как активный персонаж поблизости наносит geo{Гео урон}, эти эффекты дополнительно увеличиваются на 100% на 15 сек.;After a nearby active character deals geo{Geo DMG}, the aforementioned effects increase by 100% for 15s.

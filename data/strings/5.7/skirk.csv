@@ -1,6 +1,4 @@
 category;name;rus;eng
-char_name;skirk;Скирк;Skirk
-
 stat;dmg_normal_skirk;Режим Семифазной вспышки;Seven-Phase Flash mode
 
 feature_skill;skirk_duration;Длительность Семифазной вспышки;Seven-Phase Flash Mode Duration

@@ -139,6 +139,8 @@ function coreDropdown(name, serializeId, rotation) {
         title: 'talent_name.n11360002',
         description: 'talent_descr.n11360002',
         rotation: rotation,
+        dropdownClass: 'medium-text',
+        separateControlLine: true,
         values: [
             {
                 title_str: 'talent_name.mitya_detection_core_steady',

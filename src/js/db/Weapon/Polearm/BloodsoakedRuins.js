@@ -25,7 +25,7 @@ export const BloodsoakedRuins = new DbObjectWeapon({
         new ConditionBooleanRefine({
             name: 'weapon_bloodsoaked_ruins_2',
             serializeId: 2,
-            title: 'talent_name.weapon_bloodsoaked_ruins_2',
+            title: 'talent_name.weapon_bloodsoaked_ruins',
             description: 'talent_descr.weapon_bloodsoaked_ruins_2',
             stats: [
                 new StatTable('crit_dmg', [28, 35, 42, 49, 56]),

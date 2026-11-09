@@ -1,6 +1,4 @@
 category;name;rus;eng
-char_name;ineffa;Инеффа;Ineffa
-
 feature_skill;ineffa_base_shield_dmg_absorption;Поглощение щита;Shield DMG Absorption
 feature_skill;ineffa_shield_duration;Длительность щита;Shield Duration
 feature_skill;ineffa_birgitta_dmg;Урон разряда Биргитты;Birgitta Discharge DMG

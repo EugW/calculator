@@ -1,5 +1,4 @@
 category;name;rus;eng
-
 stat;dmg_skill_shenhe;Призыв духа;Spring Spirit Summoning
 
 feature_skill;shenhe_dmg_bonus;Повышение урона;DMG Bonus
@@ -16,6 +15,3 @@ talent_name;shenhe_spirit_seal_press;Печать духовного едине�
 talent_name;shenhe_spirit_seal_hold;Печать духовного единения (Долгое нажатие);Spirit Communion Seal (Hold)
 talent_name;shenhe_talisman_spirit;Дух талисмана;The Talisman Spirit
 talent_descr;shenhe_talisman_spirit;skill{burst:Дух талисмана} создаёт поле, внутри которого снижается cryo{Крио сопротивление} и name{физ. сопротивление} противников.;skill{burst:The Talisman Spirit} creates a field that decreases the cryo{Cryo RES} and name{Physical RES} of opponents within it.
-
-talent_name;shenhe_centered_spirit;Духовная концентрация;Centered Spirit
-talent_descr;shenhe_centered_spirit;Длительность эффекта навыка skill{burst:Таинство освобождения} увеличивается на 6 сек. Активные члены отряда, находящиеся в области навыка, наносят на %{crit_dmg_cryo} больше cryo{крит. Крио урона}.;skill{burst:Divine Maiden's Deliverance} lasts for 6 seconds longer. Active characters within the skill's field deals %{crit_dmg_cryo} increased cryo{Cryo CRIT DMG}.

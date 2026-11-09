@@ -60,6 +60,22 @@ test("Mitya is character 129 and is available by default", () => {
     expect(new Set(ids).size).toBe(ids.length);
 });
 
+test("Detection Core dropdowns get their own full-width control line", () => {
+    const dropdowns = [
+        Mitya.getConditions().find((condition) => condition.getName() === "mitya_detection_core"),
+        Mitya.getPartyConditions().find((condition) => condition.getName() === "party.mitya_detection_core"),
+    ];
+    for (const dropdown of dropdowns) {
+        expect(dropdown.getType()).toBe("dropdown");
+        expect(dropdown.params.dropdownClass).toBe("medium-text");
+        expect(dropdown.params.separateControlLine).toBe(true);
+        expect(dropdown.getDropdownItems({}).map((item) => [item.value, item.title_str])).toEqual([
+            ["steady", "talent_name.mitya_detection_core_steady"],
+            ["overloaded", "talent_name.mitya_detection_core_overloaded"],
+        ]);
+    }
+});
+
 test("generated tables keep the 7.2 Chain Reaction, Variable Detection and Gradient Theory rows", () => {
     expect(charTalentTables.Mitya.s1_id).toBe(11361);
     expect(charTalentTables.Mitya.s2_id).toBe(11362);

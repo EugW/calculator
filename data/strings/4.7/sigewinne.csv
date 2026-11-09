@@ -1,6 +1,4 @@
 category;name;rus;eng
-char_name;sigewinne;Сиджвин;Sigewinne
-
 feature_attack;sigewinnne_mini_stration_bubble_dmg;Урон Пузырька сострадания;Mini-Stration Bubble DMG
 feature_skill;sigewinne_bolstering_bubblebalm_dmg;Урон Бодрящего бальзам-пузыря;Bolstering Bubblebalm DMG
 feature_skill;sigewinne_bolstering_bubblebalm_heal;Лечение Бодрящего бальзам-пузыря;Bolstering Bubblebalm Healing

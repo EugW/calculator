@@ -26,11 +26,11 @@ export const AthameArtis = new DbObjectWeapon({
             name: 'weapon_athame_artis',
             serializeId: 1,
             title: 'talent_name.weapon_athame_artis',
-            description: 'talent_descr.weapon_athame_artis_2_full',
+            description: 'talent_descr.weapon_athame_artis_2',
             stats: [
                 new StatTable('atk_percent', [20, 25, 30, 35, 40]),
-                new StatTable('text_percent', [20, 25, 30, 35, 40]),
-                new StatTable('text_percent_2', [15, 18.75, 22.5, 26.25, 30]),
+                new StatTable('text_percent_atk', [20, 25, 30, 35, 40]),
+                new StatTable('text_percent_atk_party', [16, 20, 24, 28, 32]),
             ],
         }),
         // Hexerei: 75% amplification to ATK buffs - hidden, auto-applies with Hexerei resonance
@@ -51,11 +51,11 @@ export const AthameArtis = new DbObjectWeapon({
             name: 'weapon_athame_artis_party',
             serializeId: 1,
             title: 'weapon_name.athame_artis',
-            description: 'talent_descr.weapon_athame_artis_party_full',
+            description: 'talent_descr.weapon_athame_artis_2',
             stats: [
                 new StatTable('atk_percent', [16, 20, 24, 28, 32]),
-                new StatTable('text_percent', [16, 20, 24, 28, 32]),
-                new StatTable('text_percent_2', [12, 15, 18, 21, 24]),
+                new StatTable('text_percent_atk', [20, 25, 30, 35, 40]),
+                new StatTable('text_percent_atk_party', [16, 20, 24, 28, 32]),
             ],
         }),
         // Party Hexerei: 75% amplification - hidden, auto-applies with Hexerei resonance

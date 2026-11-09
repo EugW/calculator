@@ -157,11 +157,11 @@ stat;crit_dmg_plunge;Атака в падении;Plunge attack
 stat;crit_dmg_skill;Элементальный навык;Elemental Skill
 stat;crit_dmg_burst;Взрыв стихий;Elemental Burst
 stat;crit_rate_lunar;Лунная реакция;Lunar Reaction
-stat;crit_rate_lunarbloom;Лунное цветение;Lunar-Bloom
+stat;crit_rate_lunarbloom;Лунная бутонизация;Lunar-Bloom
 stat;crit_rate_lunarcharged;Лунный заряд;Lunar-Charged
 stat;crit_rate_lunarcrystallize;Лунная кристаллизация;Lunar-Crystallize
 stat;crit_dmg_lunar;Лунная реакция;Lunar Reaction
-stat;crit_dmg_lunarbloom;Лунное цветение;Lunar-Bloom
+stat;crit_dmg_lunarbloom;Лунная бутонизация;Lunar-Bloom
 stat;crit_dmg_lunarcharged;Лунный заряд;Lunar-Charged
 stat;crit_dmg_lunarcrystallize;Лунная кристаллизация;Lunar-Crystallize
 stat;crit_rate_stellarconduct;Шанс крит. попадания Звёздного проводника;Stellar-Conduct CRIT Rate
