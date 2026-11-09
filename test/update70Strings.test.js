@@ -61,6 +61,7 @@ function relativeStringPath(file) {
 const versionFiles = [
     ...csvFiles(path.join(stringsRoot, '7.0')),
     ...csvFiles(path.join(stringsRoot, '7.1')),
+    ...csvFiles(path.join(stringsRoot, '7.2')),
 ];
 const generatedFiles = [
     'artifact_set_bonuses.csv',
@@ -156,6 +157,11 @@ const manualExceptions = {
         'talent_name.weapon_breezeborne_refrain_points',
         'talent_descr.weapon_breezeborne_refrain_points',
     ],
+    // The source only names the core states inside the Detection Core prose.
+    '7.2/mitya.csv': [
+        'talent_name.mitya_detection_core_steady',
+        'talent_name.mitya_detection_core_overloaded',
+    ],
 };
 
 const sourceOwned70Descriptions = [
@@ -246,7 +252,7 @@ test('changed stable character prose is generated under canonical keys', () => {
         const key = `talent_descr.${name}`;
         const entries = occurrences.get(key) || [];
         expect(entries.some(({file}) => /generated[\\/]char_(skills|talents)\.csv$/.test(file))).toBe(true);
-        expect(entries.some(({file}) => /[\\/]7\.[01][\\/]/.test(file))).toBe(false);
+        expect(entries.some(({file}) => /[\\/]7\.[0-2][\\/]/.test(file))).toBe(false);
         expect(modules).toContain(`description: '${key}'`);
     }
 
@@ -291,7 +297,7 @@ test('7.x inputs never rely on last-writer-wins string overrides', () => {
     const conflicts = [];
     for (const [key, entries] of occurrences) {
         if (entries.length < 2) continue;
-        if (!entries.some(({file}) => /[\\/]7\.[01][\\/]/.test(file))) continue;
+        if (!entries.some(({file}) => /[\\/]7\.[0-2][\\/]/.test(file))) continue;
         const values = new Set(entries.map(({values}) => JSON.stringify(values)));
         if (values.size > 1) conflicts.push(key);
     }
@@ -301,11 +307,13 @@ test('7.x inputs never rely on last-writer-wins string overrides', () => {
 test('release-owned rows contain no unresolved or malformed markup', () => {
     const releaseNames = new Set([
         'zibai', 'alyosha', 'odette', 'traveler_cryo', 'vesna', 'vodyanitsa',
+        'mitya', 'valeriy',
     ]);
     const releaseIds = new Set([
         'n10050002', 'n11260001', 'n11480001', 'n11480002',
         'n11500001', 'n11500002', 'n11500003', 'n11500004',
         'n11400001', 'n11400002',
+        'n11360001', 'n11360002', 'n11370001', 'n11370002', 'n11370003',
     ]);
     const releaseKeys = new Set(sourceOwned70Descriptions);
     const files = [
@@ -324,7 +332,7 @@ test('release-owned rows contain no unresolved or malformed markup', () => {
                 && !releaseNames.has(row[1])
                 && !releaseIds.has(row[1])
                 && !releaseKeys.has(row[1])
-                && !/^(alyosha|odette|vesna|vodyanitsa|traveler_(?:ever_keen_frost|lucent_ice|illusory_frostmirror|foreign_permafrost|somber_freeze|frostfall_reverberation|glacial_shard|enduring_ice|bittercold_fog|brumal_grimfrost|frostbound_javelin|foreign_frostglint|ice_fog_piercer))/.test(row[1])
+                && !/^(alyosha|odette|vesna|vodyanitsa|mitya|valeriy|traveler_(?:ever_keen_frost|lucent_ice|illusory_frostmirror|foreign_permafrost|somber_freeze|frostfall_reverberation|glacial_shard|enduring_ice|bittercold_fog|brumal_grimfrost|frostbound_javelin|foreign_frostglint|ice_fog_piercer))/.test(row[1])
             ) continue;
 
             const text = `${row[2]}\n${row[3]}`;

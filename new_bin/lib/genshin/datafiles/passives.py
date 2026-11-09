@@ -10,6 +10,8 @@ COMBAT_INHERENT_PROUD_SKILL_GROUP_IDS = frozenset({
     11423,  # Skirk: party Elemental Skill level
     11623,  # Ineffa: Moonsign/Lunar-Charged conversion
     13323,  # Sandrone: Stellar Jubilee
+    13623,  # Mitya: Stellar Jubilee
+    13723,  # Valeriy: Radiance: Stellar-Conduct in Polestar Field
     14323,  # Vesna: Stellar Jubilee
     14823,  # Alyosha: Radiance/Mark combat effect
     15023,  # Odette: Stellar Jubilee

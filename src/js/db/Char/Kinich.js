@@ -367,4 +367,19 @@ export const Kinich = new DbObjectChar({
             ],
         },
     ]),
+    partyData: {
+        conditions: [
+            new ConditionBoolean({
+                name: 'party.kinich_tiger_beetles_palm_1',
+                serializeId: 1,
+                rotation: 'party',
+                title: 'talent_name.kinich_tiger_beetles_palm',
+                description: 'talent_descr.kinich_tiger_beetles_palm_1',
+                info: {constellation: 2},
+                stats: {
+                    enemy_res_dendro: TalentValues.C2DendroRes,
+                },
+            }),
+        ],
+    },
 });

@@ -1173,6 +1173,10 @@ export const weaponStatTables = {
 		enumStatTables.n34,
 		enumStatTables.n38,
 	],
+	StarsealedEdict: [
+		enumStatTables.n34,
+		enumStatTables.n39,
+	],
 	RavenBow: [
 		enumStatTables.n4,
 		enumStatTables.n66,

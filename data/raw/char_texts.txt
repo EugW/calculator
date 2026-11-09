@@ -4586,6 +4586,88 @@ Companion's Counsel
 The maximum number of Detector stacks that <color=#FFD780FF>Starfrost Swirl</color>'s Soulwind can gain is increased by 1. You must first unlock the Ascension Talent "Suppressive Barrage.".
 Additionally, active characters affected by Soulwind will deal 60% more Physical CRIT DMG.
 
+-= Mitya =-
+
+Базовое испытание на прочность
+<color=#FFD780FF>{LINK#N11360002}Детекторное ядро{/LINK}</color>, созданное элементальным навыком <color=#FFD780FF>Принцип: Обнаружение переменных</color> получает улучшение. Если созданное <color=#FFD780FF>Детекторное ядро</color>:
+· В стабильном режиме: каждый <color=#FFD780FF>{LINK#N11360001}Маячок превращения{/LINK}</color> в наличии повышает мастерство стихий всех персонажей отряда поблизости на 30 ед.
+· В режиме перегрузки: после того как персонажи отряда поблизости активируют Звёздный проводник, повышается количество получаемых <color=#FFD780FF>Маячков превращения</color>: теперь в течение 6 сек. каждые 1,5 сек. даётся один <color=#FFD780FF>Маячок превращения</color>.
+
+Baseline Stress Test
+The <color=#FFD780FF>{LINK#N11360002}Detection Core{/LINK}</color> created by the Elemental Skill <color=#FFD780FF>Principle: Variable Detection</color> is enhanced. Depending on the state of the <color=#FFD780FF>Detection Core</color> created:
+·Steady State: All nearby party members gain 30 Elemental Mastery for each <color=#FFD780FF>{LINK#N11360001}Gradient Beacon{/LINK}</color> Mitya has;
+·Overloaded: After nearby party members trigger Stellar-Conduct reactions, instead obtain 1 <color=#FFD780FF>Gradient Beacon</color> every 1.5s for 6s.
+
+Запредельно взрывоопасный реагент
+Длительность действия <color=#FFD780FF>{LINK#N11360001}Маячков превращения{/LINK}</color> увеличивается до 10 сек. Кроме того, на 15 сек. после создания <color=#FFD780FF>Маячка превращения</color> шанс крит. попадания Мити увеличивается на 5%. Эффект складывается до 4 раз.
+
+Explosive Reagent: Safe Limits Exceeded
+The duration of <color=#FFD780FF>{LINK#N11360001}Gradient Beacons{/LINK}</color> is increased to 10s. Additionally, Mitya's CRIT Rate increases by 5% for 15s after creating a <color=#FFD780FF>Gradient Beacon</color>. This effect can stack up to 4 times.
+
+Звёздное торжество: Сверхсекретный протокол
+Когда персонажи отряда активируют Сверхпроводник, он становится Звёздным проводником. Активация Звёздного проводника больше не создаёт <color=#FFD780FF>Призмы звёздного света</color>. Теперь каждые 1,5 сек. в течение 3 сек. после активации Звёздного проводника поблизости создаётся 1 <color=#FFD780FF>{LINK#N11360001}Маячок превращения{/LINK}</color>, который Митя может носить с собой. Маячок превращает ещё большую область поблизости в <color=#FFD780FF>Предел путеводной звезды</color>. Повторная активация Звёздного проводника обновляет длительность данных эффектов.
+Кроме того, базовый урон реакции Звёздный проводник всех персонажей отряда поблизости увеличивается на 0,028% за каждую единицу мастерства стихий Мити. Максимальное увеличение базового урона, которое можно получить таким образом, составляет 14%. Когда Митя пребывает в <color=#FFD780FF>Пределе путеводной звезды</color>, он также входит в состояние <color=#FFD780FF>Сияния - Звёздный проводник</color>.
+
+Stellar Jubilee: Top-Secret Protocol
+When party members trigger Superconduct, it will be changed to Stellar-Conduct. Stellar-Conduct reactions will no longer create <color=#FFD780FF>Starlight Prisms</color>, and will instead create 1 <color=#FFD780FF>{LINK#N11360001}Gradient Beacon{/LINK}</color> nearby every 1.5s for 3s. These Beacons can be carried by Mitya and transform the area around them into an even larger <color=#FFD780FF>Polestar Field</color>. Triggering another Stellar-Conduct reaction will refresh the duration of the aforementioned effects.
+Additionally, the Base Stellar-Conduct DMG dealt by all nearby party members will be increased based on Mitya's Elemental Mastery: Every point of Elemental Mastery he has increases Base Stellar-Conduct DMG by 0.028%. The maximum Base DMG increase that can be gained this way is 14%. While within a <color=#FFD780FF>Polestar Field</color>, Mitya will also enter the <color=#FFD780FF>Radiance: Stellar-Conduct</color> state.
+
+Наблюдатель в поисках недостающего
+Максимум переносимых <color=#FFD780FF>{LINK#N11360001}Маячков превращения{/LINK}</color> увеличивается до 5. При использовании элементального навыка <color=#FFD780FF>Принцип: Обнаружение переменных</color> дополнительно создаётся 1 <color=#FFD780FF>Маячок превращения</color>.
+Во время существования <color=#FFD780FF>{LINK#N11360002}Детекторного ядра{/LINK}</color> крит. урон активного персонажа вашего отряда повышается на 40%.
+Кроме того, при создании <color=#FFD780FF>Маячков превращения</color> Митя восстанавливает 10 ед. энергии. Этот эффект может возникнуть один раз в 8 сек.
+
+The Observer Seeking What Is Missing
+The maximum number of <color=#FFD780FF>{LINK#N11360001}Gradient Beacons{/LINK}</color> Mitya can carry is increased to 5. Using the Elemental Skill <color=#FFD780FF>Principle: Variable Detection</color> additionally creates 1 <color=#FFD780FF>Gradient Beacon</color>.
+While the <color=#FFD780FF>{LINK#N11360002}Detection Core{/LINK}</color> is present, your own active character's CRIT DMG is increased by 40%.
+Additionally, Mitya regenerates 10 Elemental Energy when a <color=#FFD780FF>Gradient Beacon</color> is created. This effect can be triggered once every 8s.
+
+Безмолвная материя вне инертности
+Во время существования <color=#FFD780FF>{LINK#N11360002}Детекторного ядра{/LINK}</color> <color=#99FFFFFF>Крио</color> и <color=#FFACFFFF>Электро</color> сопротивление всех врагов в <color=#FFD780FF>Пределе путеводной звезды</color> снижается на 20%.
+Кроме того, если созданное <color=#FFD780FF>Детекторное ядро</color>:
+· В стабильном режиме: мастерство стихий всех персонажей отряда поблизости повышается на 123 ед.
+· В режиме перегрузки: мастерство стихий активного персонажа вашего отряда повышается на 234 ед.
+
+The Matter That Slumbers Beyond Inertness
+While the <color=#FFD780FF>{LINK#N11360002}Detection Core{/LINK}</color> is present, all opponents within the <color=#FFD780FF>Polestar Field</color> have their <color=#99FFFFFF>Cryo RES</color> and <color=#FFACFFFF>Electro RES</color> decreased by 20%.
+Additionally, if the <color=#FFD780FF>Detection Core</color> created is:
+·Steady State: All nearby party members gain 123 Elemental Mastery;
+·Overloaded: Your own active character gains 234 Elemental Mastery.
+
+Сплетённая струна топологического инварианта
+Увеличивает уровень навыка {LINK#S11362}<color=#FFD780FF>Принцип: Обнаружение переменных</color>{/LINK} на 3.
+Макс. уровень: 15
+
+The Knotted String of Invariant Topology
+Increases the Level of the Elemental Skill {LINK#S11362}<color=#FFD780FF>Principle: Variable Detection</color>{/LINK} by 3.
+Maximum upgrade level is 15.
+
+Изотопы взаимного распада
+Если на поле существует <color=#FFD780FF>{LINK#N11360002}Детекторное ядро{/LINK}</color>, созданное самим Митей, то за каждые 5 израсходованных <color=#FFD780FF>{LINK#N11360001}Маячков превращения{/LINK}</color> <color=#FFD780FF>Детекторное ядро</color> наносит врагам поблизости однократный <color=#FFACFFFF>Электро урон по площади</color>, равный 300% от мастерства стихий Мити и считающийся уроном реакции Звёздный проводник.
+
+The Isotopes Born of Decay
+<color=#FFD780FF>{LINK#N11360002}Detection Cores{/LINK}</color> created by Mitya himself deals 1 instance of <color=#FFACFFFF>AoE Electro DMG</color> equal to 300% of Mitya's Elemental Mastery to nearby opponents for every 5 <color=#FFD780FF>{LINK#N11360001}Gradient Beacons{/LINK}</color> consumed while it is on the field. This DMG is considered Stellar-Conduct reaction DMG.
+
+Периодический закон мироздания
+Увеличивает уровень навыка {LINK#S11361}<color=#FFD780FF>Цепная реакция</color>{/LINK} на 3.
+Макс. уровень: 15
+
+The Periodic Law That Orders All
+Increases the Level of Normal Attack: {LINK#S11361}<color=#FFD780FF>Chain Reaction</color>{/LINK} by 3.
+Maximum upgrade level is 15.
+
+Элементальный скачок у врат разума
+<color=#FFD780FF>{LINK#N11360002}Детекторное ядро{/LINK}</color> получает усиление. Если созданное <color=#FFD780FF>Детекторное ядро</color>:
+· В стабильном режиме: <color=#FFD780FF>Детекторное ядро</color> наносит 115% от исходного урона.
+· В режиме перегрузки: при расходовании <color=#FFD780FF>{LINK#N11360001}Маячков превращения{/LINK}</color> с шансом 34% создаётся 1 новый <color=#FFD780FF>Маячок превращения</color>.
+Кроме того, урон Звёздного проводника всех персонажей отряда поблизости <color=#FFD780FF>{LINK#N11190007}возвышается{/LINK}</color> на 20%.
+
+Elemental Transition at the Gate of Reason
+<color=#FFD780FF>{LINK#N11360002}Detection Core{/LINK}</color> is enhanced. If the <color=#FFD780FF>Detection Core</color>:
+ · Is in the Steady State: <color=#FFD780FF>Detection Core</color> deals 115% of its original DMG.
+· Is Overloaded: There is a 34% chance to create 1 new <color=#FFD780FF>{LINK#N11360001}Gradient Beacon{/LINK}</color> whenever Mitya consumes a <color=#FFD780FF>Gradient Beacon</color> with the <color=#FFD780FF>{LINK#N11360002}Detection Core{/LINK}</color>.
+Additionally, Stellar-Conduct reaction DMG dealt by all nearby party members is <color=#FFD780FF>{LINK#N11190007}Elevated{/LINK}</color> by 20%.
+
 -= Mona =-
 
 «Старуха, тебе меня не найти!»
@@ -6683,6 +6765,76 @@ Maximum upgrade level is 15.
 The Sacred Flame Imperishable
 While in the Nightsoul's Blessing state, the Traveler's Normal, Charged, and Plunging Attacks will be converted to Nightsoul-aligned <color=#FF9999FF>Pyro DMG</color> that cannot be overridden, and the CRIT DMG of these attacks is increased by 40%.
 
+-= Valeriy =-
+
+В сопровождении заградительного огня
+Если во время падения <color=#FFD780FF>Громового снаряда</color> взрыва стихии <color=#FFD780FF>{LINK#S30605}Сконцентрированный огонь: Залп молний{/LINK}</color> другие активные персонажи отряда поблизости поражают врага <color=#FFACFFFF>Электро</color> атакой, Валерий получает 5 ед. <color=#FFD780FF>{LINK#N11370003}Импульсной энергии{/LINK}</color>. После каждого применения взрыва стихии таким образом можно получить до 80 ед. <color=#FFD780FF>Импульсной энергии</color>.
+
+Advance With the Creeping Barrage
+Valeriy gains 5 <color=#FFD780FF>{LINK#N11370003}Impact Momentum{/LINK}</color> whenever another nearby active character in the party hits an opponent with an <color=#FFACFFFF>Electro</color> attack while the <color=#FFD780FF>Thunderburst Shells</color> from his Elemental Burst <color=#FFD780FF>{LINK#S30605}Focused Fire: Lightning Salvo{/LINK}</color> are falling. He can gain up to 80 <color=#FFD780FF>Impact Momentum</color> in this way after each use of his Elemental Burst.
+
+Штурм бреши в обороне
+<color=#FFD780FF>{LINK#N11370002}Приказ о штурме{/LINK}</color> получает усиление согласно количеству <color=#FFD780FF>{LINK#N11370003}Импульсной энергии{/LINK}</color>, израсходованной во время применения особой заряженной атаки <color=#FFD780FF>{LINK#N11370001}Огонь из мортиры: Прямой наводкой{/LINK}</color>: за каждую израсходованную единицу <color=#FFD780FF>Импульсной энергии</color> эффект бонуса урона <color=#FFD780FF>Приказа о штурме</color> дополнительно увеличивается. Если Валерий:
+· Находится в состоянии <color=#FFD780FF>Сияния - Звёздный проводник</color>: каждая израсходованная единица <color=#FFD780FF>Импульсной энергии</color> повышает эффект бонуса урона <color=#FFD780FF>Приказа о штурме</color> на 0,9% от силы атаки Валерия.
+· Не находится в состоянии <color=#FFD780FF>Сияния - Звёздный проводник</color>: каждая израсходованная единица <color=#FFD780FF>Импульсной энергии</color> повышает эффект бонуса урона <color=#FFD780FF>Приказа о штурме</color> на 0,3% от силы атаки Валерия.
+
+Into the Breach
+<color=#FFD780FF>{LINK#N11370002}Offensive Directive{/LINK}</color> is enhanced based on the amount of <color=#FFD780FF>{LINK#N11370003}Impact Momentum{/LINK}</color> consumed when performing his special Charged Attack <color=#FFD780FF>{LINK#N11370001}Direct-Fire Mortar: Point-Blank Bombardment{/LINK}</color>. Each point consumed further increases the DMG Bonus granted by <color=#FFD780FF>Offensive Directive</color>. If Valeriy is:
+·In the <color=#FFD780FF>Radiance: Stellar-Conduct</color> state: Each point of <color=#FFD780FF>Impact Momentum</color> consumed increases this DMG Bonus by an amount equal to 0.9% of Valeriy's ATK;
+·Not in the <color=#FFD780FF>Radiance: Stellar-Conduct</color> state: Each point of <color=#FFD780FF>Impact Momentum</color> consumed increases this DMG Bonus by an amount equal to 0.3% of Valeriy's ATK.
+
+Адаптация к экстремальному холоду
+Валерий, находясь в {LINK#N11330003}<color=#FFD780FF>Пределе путеводной звезды</color>{/LINK}, входит в состояние <color=#FFD780FF>Сияние - Звёздный проводник</color>.
+
+Subzero Conditioning
+Valeriy enters the <color=#FFD780FF>Radiance: Stellar-Conduct</color> state while within a {LINK#N11330003}<color=#FFD780FF>Polestar Field</color>{/LINK}.
+
+Ритм подавляющего огня
+После выполнения особой заряженной атаки <color=#FFD780FF>{LINK#N11370001}Огонь из мортиры: Прямой наводкой{/LINK}</color> Валерий восстанавливает 6 ед. энергии. За каждые 10 единиц <color=#FFD780FF>{LINK#N11370003}Импульсной энергии{/LINK}</color> свыше 40, израсходованных при выполнении особой заряженной атаки, он дополнительно восстанавливает 1,5 ед. энергии. За каждое применение особой заряженной атаки <color=#FFD780FF>Огонь из мортиры: Прямой наводкой</color> Валерий таким способом может восстановить до 15 ед. энергии. Эффект может возникнуть раз в 15 сек.
+Кроме того, каждый раз, когда Валерий вступает в бой, при первом применении элементального навыка <color=#FFD780FF>{LINK#S30602}Активная оборона: Натиск крепости{/LINK}</color> он дополнительно получает <color=#FFD780FF>Импульсную энергию</color> в размере 150% от исходного количества.
+
+The Cadence of Suppressive Fire
+Valeriy regenerates 6 Elemental Energy after performing the special Charged Attack <color=#FFD780FF>{LINK#N11370001}Direct-Fire Mortar: Point-Blank Bombardment{/LINK}</color>. For every 10 <color=#FFD780FF>{LINK#N11370003}Impact Momentum{/LINK}</color> consumed beyond 40 when performing this special Charged Attack, he regenerates an additional 1.5 Elemental Energy. Each time he performs <color=#FFD780FF>Direct-Fire Mortar: Point-Blank Bombardment</color>, he can regenerate up to 15 Elemental Energy in this way. This effect can trigger once every 15s.
+Additionally, each time Valeriy enters combat, the first time he uses his Elemental Skill <color=#FFD780FF>{LINK#S30602}Active Defense: Bastion Charge{/LINK}</color>, he gains an additional amount of <color=#FFD780FF>Impact Momentum</color> equal to 150% of the amount normally gained.
+
+Сопровождающие штурм формации
+На 18 сек. после применения элементального навыка <color=#FFD780FF>{LINK#S30602}Активная оборона: Натиск крепости{/LINK}</color> мастерство стихий всех персонажей отряда поблизости повышается на 100 ед.
+Кроме того, если Валерий находится под защитой электрического энергощита, а его <color=#FFD780FF>{LINK#N11370003}Импульсная энергия{/LINK}</color> достигла максимума, то получаемая <color=#FFD780FF>Импульсная энергия</color> будет преобразовываться в поглощение урона электрического энергощита: 1 ед. избыточной <color=#FFD780FF>Импульсной энергии</color> повышает поглощение щитом урона на 8% от силы атаки Валерия. Таким образом может преобразоваться до 20 ед. <color=#FFD780FF>Импульсной энергии</color>.
+
+Ranks That Charge as One
+All nearby party members gain 100 Elemental Mastery for 18s after Valeriy uses his Elemental Skill <color=#FFD780FF>{LINK#S30602}Active Defense: Bastion Charge{/LINK}</color>.
+Additionally, while protected by a Supercharged Shield, if Valeriy is already at maximum <color=#FFD780FF>{LINK#N11370003}Impact Momentum{/LINK}</color>, any further <color=#FFD780FF>Impact Momentum</color> he would gain is instead converted into increased DMG Absorption for the shield. Each point of excess <color=#FFD780FF>Impact Momentum</color> increases the Supercharged Shield's DMG Absorption by an amount equal to 8% of Valeriy's ATK. Up to 20 excess <color=#FFD780FF>Impact Momentum</color> can be converted in this way.
+
+Бдительность в ближнем бою
+Увеличивает уровень навыка <color=#FFD780FF>{LINK#S30601}Тактика гвардейца: Щит и меч{/LINK}</color> на 3.
+Макс. уровень: 15
+
+Vigilance at Close Quarters
+Increases the Level of Normal Attack <color=#FFD780FF>{LINK#S30601}Guard Tactics: Sword and Shield{/LINK}</color> by 3.
+Maximum upgrade level is 15.
+
+Не поколебленная потерями стойкость
+Максимум <color=#FFD780FF>{LINK#N11370003}Импульсной энергии{/LINK}</color> повышается на 30 ед., а эффективность её получения возрастает на 30%.
+Кроме того, эффект таланта возвышения <color=#FFD780FF>{LINK#P1372101}В сопровождении заградительного огня{/LINK}</color> получает усиление: после каждого применения взрыва стихии с помощью этого таланта можно получить до 104 ед. <color=#FFD780FF>Импульсной энергии</color>. Требуется разблокировать талант возвышения <color=#FFD780FF>В сопровождении заградительного огня</color>.
+
+Fortitude Unshaken by Attrition
+<color=#FFD780FF>{LINK#N11370003}Impact Momentum{/LINK}</color>'s limit is increased by 30, and its charging efficiency is increased by 30%.
+Additionally, the Ascension Talent <color=#FFD780FF>{LINK#P1372101}Advance With the Creeping Barrage{/LINK}</color> is enhanced: The maximum amount of <color=#FFD780FF>Impact Momentum</color> that can be gained from this Talent after using the Elemental Burst is 104. You must unlock the Ascension Talent <color=#FFD780FF>Advance With the Creeping Barrage</color> to gain access to this effect.
+
+Решимость разделить и уничтожить
+Увеличивает уровень навыка <color=#FFD780FF>{LINK#S30602}Активная оборона: Натиск крепости{/LINK}</color> на 3.
+Макс. уровень: 15
+
+Resolve to Divide and Destroy
+Increases the Level of the Elemental Skill <color=#FFD780FF>{LINK#S30602}Active Defense: Bastion Charge{/LINK}</color> by 3.
+Maximum upgrade level is 15.
+
+Пронзающая вражеские ряды мощь
+Особая заряженная атака <color=#FFD780FF>{LINK#N11370001}Огонь из мортиры: Прямой наводкой{/LINK}</color> и <color=#FFD780FF>Громовой снаряд</color> взрыва стихии <color=#FFD780FF>{LINK#S30605}Сконцентрированный огонь: Залп молний{/LINK}</color> получают усиление: наносимый урон повышается на 100%, а шанс крит. попадания <color=#FFACFFFF>Электро урона</color>, получаемого поражёнными врагами, на 7 сек. повышается на 10%. Если получаемый урон является <color=#FFACFFFF>Электро уроном</color> реакции Звёздный проводник, то его крит. урон также повышается на 40%.
+
+The Strength to Breach Enemy Lines
+The special Charged Attack <color=#FFD780FF>{LINK#N11370001}Direct-Fire Mortar: Point-Blank Bombardment{/LINK}</color> and <color=#FFD780FF>Thunderburst Shells</color> from Elemental Burst <color=#FFD780FF>{LINK#S30605}Focused Fire: Lightning Salvo{/LINK}</color> are enhanced: Their DMG is increased by 100%, and opponents they hit have the CRIT Rate of <color=#FFACFFFF>Electro DMG</color> they take increased by 10% for 7s. If the <color=#FFACFFFF>Electro DMG</color> taken is Stellar-Conduct reaction DMG, that DMG instance's CRIT DMG is also increased by 40%.
+
 -= Varesa =-
 
 Трёхкратный командный прыжок!
@@ -7042,13 +7194,13 @@ Waters in Full Splendor
 Each time Vodyanitsa triggers the healing effect of <color=#FFD780FF>{LINK#S11402}Song of Ages Past{/LINK}</color>, it also increases the ATK of all nearby party members by 0.8% of her Max HP for 5s.
 
 Пронзающее снег эхо
-Когда <color=#FFD780FF>Рог глашатая весны</color> элементального навыка <color=#FFD780FF>Речитатив: Звучный рассвет</color> атакует врага, Водяница получает эффект Чёрный и белый голоса, который повышает <color=#80C0FFFF>Гидро</color> и <color=#99FFFFFF>Крио</color> крит. урон активного персонажа на 50% на 5 сек.
-Когда на поле есть блуждающий вихрь либо в течение 5 сек. после взрыва блуждающего вихря, крит. урон Звёздного рассеивания активного персонажа отряда вместо этого повышается на 60% на 5 сек.
+Когда <color=#FFD780FF>Рог глашатая весны</color> элементального навыка <color=#FFD780FF>Речитатив: Звучный рассвет</color> атакует врага, Водяница получает эффект Чёрный и белый голоса, который повышает <color=#80C0FFFF>Гидро</color> и <color=#99FFFFFF>Крио</color> крит. урон собственного активного персонажа на 50% на 5 сек.
+Когда на поле есть блуждающий вихрь либо в течение 5 сек. после взрыва блуждающего вихря, крит. урон Звёздного рассеивания собственного активного персонажа вместо этого повышается на 60% на 5 сек.
 Кроме того, элементальный навык <color=#FFD780FF>Речитатив: Звучный рассвет</color> получает усиление: длительность эффекта <color=#FFD780FF>{LINK#S11402}Песня былых веков{/LINK}</color> увеличивается на 9 сек.
 
 Echoes That Pierce the Snow
-When the <color=#FFD780FF>Horn of Spring's Call</color> from the Elemental Skill <color=#FFD780FF>Rechitativ: Sonorous Dawn</color> attacks the opponent, Vodyanitsa gains the "Two Voices in Black and White" effect which increases the CRIT DMG from <color=#80C0FFFF>Hydro DMG</color> and <color=#99FFFFFF>Cryo DMG</color> dealt by the currently active party member by 50% for 5s.
-If there is a Wandering Vortex present on the field or in the 5s after a Wandering Vortex explodes, the effect changes to: increases the CRIT DMG from Stellar Swirl reaction DMG caused by the currently active party member by 60% for 5s.
+When the <color=#FFD780FF>Horn of Spring's Call</color> from the Elemental Skill <color=#FFD780FF>Rechitativ: Sonorous Dawn</color> attacks the opponent, Vodyanitsa gains the "Two Voices in Black and White" effect which increases the CRIT DMG from <color=#80C0FFFF>Hydro DMG</color> and <color=#99FFFFFF>Cryo DMG</color> dealt by your own currently active party member by 50% for 5s.
+If there is a Wandering Vortex present on the field or in the 5s after a Wandering Vortex explodes, the effect changes to: increases the CRIT DMG from Stellar Swirl reaction DMG caused by your own currently active party member by 60% for 5s.
 Additionally, the Elemental Skill <color=#FFD780FF>Rechitativ: Sonorous Dawn</color> is enhanced as follows: the duration of the <color=#FFD780FF>{LINK#S11402}Song of Ages Past{/LINK}</color> effect is extended by 9s.
 
 Звуки музыки весенним утром

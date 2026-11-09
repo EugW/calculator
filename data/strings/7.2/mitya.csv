@@ -1,0 +1,11 @@
+category;name;rus;eng
+feature_attack;mitya_gradient_detonation;Урон Имплозии превращения;Gradient Detonation DMG
+feature_attack;mitya_gradient_detonation_stellarconduct;Имплозия превращения: урон Звёздного проводника;Gradient Detonation Stellar-Conduct DMG
+feature_skill;mitya_steady_state_core;Урон стабильного ядра;Steady State Core DMG
+feature_skill;mitya_steady_state_core_beacon_stellarconduct;Урон стабильного ядра при расходовании Маячков превращения;Steady State Core Gradient Beacon Consumption DMG
+feature_skill;mitya_steady_state_core_detonation_stellarconduct;Урон взрыва стабильного ядра;Steady State Core Detonation DMG
+feature_burst;mitya_gradient_beacons_generated;Создаваемые Маячки превращения;Gradient Beacons Generated
+feature_other;mitya_the_isotopes_born_of_decay_stellarconduct;Изотопы взаимного распада: урон Звёздного проводника;The Isotopes Born of Decay Stellar-Conduct DMG
+feature_other;mitya_top_secret_protocol;Базовый урон Звёздного проводника от мастерства стихий;Base Stellar-Conduct DMG from Elemental Mastery
+talent_name;mitya_detection_core_steady;Детекторное ядро: Стабильное состояние;Detection Core: Steady State
+talent_name;mitya_detection_core_overloaded;Детекторное ядро: Перегрузка;Detection Core: Overloaded

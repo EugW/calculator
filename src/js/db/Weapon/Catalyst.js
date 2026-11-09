@@ -53,6 +53,7 @@ import { EchoesOfTheHeart } from "./Catalyst/EchoesOfTheHeart";
 import { WintersHeavyHeart } from "./Catalyst/WintersHeavyHeart";
 import { HymnofTheMaelstrom } from "./Catalyst/HymnofTheMaelstrom";
 import { ApprenticesNotes } from "./Catalyst/ApprenticesNotes";
+import { StarsealedEdict } from "./Catalyst/StarsealedEdict";
 
 export const Catalyst = new DbObjectListSerializeStats({
     SolarPearl: SolarPearl, // 43
@@ -109,4 +110,5 @@ export const Catalyst = new DbObjectListSerializeStats({
     WintersHeavyHeart: WintersHeavyHeart, // 261
     HymnofTheMaelstrom: HymnofTheMaelstrom, // 262
     ApprenticesNotes: ApprenticesNotes, // 267
+    StarsealedEdict: StarsealedEdict, // 269
 });

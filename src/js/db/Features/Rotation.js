@@ -891,4 +891,14 @@ export const Rotation = new DbObjectRotation({
     'attack.traveler_dendro_verdessence_2': 942,
     'attack.traveler_dendro_vinecore_1': 943,
     'attack.traveler_dendro_vinecore_2': 944,
+    // Mitya: 945-950
+    'attack.mitya_gradient_detonation': 945,
+    'attack.mitya_gradient_detonation_stellarconduct': 946,
+    'skill.mitya_steady_state_core': 947,
+    'skill.mitya_steady_state_core_beacon_stellarconduct': 948,
+    'skill.mitya_steady_state_core_detonation_stellarconduct': 949,
+    'other.mitya_the_isotopes_born_of_decay_stellarconduct': 950,
+    // Valeriy: 951-952
+    'attack.valeriy_direct_fire_mortar': 951,
+    'burst.valeriy_thunderburst_shell': 952,
 });

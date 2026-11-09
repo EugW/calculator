@@ -1074,12 +1074,12 @@ When the wielder is healed or heals others, they will gain a Stoic's Symbol that
 
 Сильная атака
 <color=#99FFFFFF>Действует только для игроков</color>
-<color=#99FFFFFF>"PlayStation™Network".</color>
-Нанесённый противникам Крио урон повышает урон обычной и заряженной атаки персонажа на 10% в течение 6 сек. Эффект может складываться до 2 раз. Кроме этого, когда Хищником экипирована Элой, сила атаки повышается на 66 ед.
+<color=#99FFFFFF>"PlayStation®".</color>
+Нанесённый противникам Крио урон повышает урон обычной и заряженной атаки персонажа на 10% на 6 сек. Эффект может складываться до 2 раз. Кроме этого, когда Хищником экипирована Элой, сила атаки повышается на 66 ед.
 
 Strong Strike
 <color=#99FFFFFF>Effective only on the following platform: </color>
-<color=#99FFFFFF>"PlayStation™Network"</color>
+<color=#99FFFFFF>"PlayStation®"</color>
 Dealing Cryo DMG to opponents increases this character's Normal and Charged Attack DMG by 10% for 6s. This effect can have a maximum of 2 stacks. Additionally, when Aloy equips Predator, ATK is increased by 66.
 
 -= primordial_jade_cutter =-
@@ -1458,6 +1458,18 @@ The equipping character gains <color=#99FFFFFF>52%</color> of their Elemental Ma
 Offering Unto Wind and Sun
 Increases Elemental Mastery by <color=#99FFFFFF>100</color>. Gain the "Mirror of Night" effect within 15s after the equipping character creates a shield: The current active party member deals <color=#99FFFFFF>28%</color> increased DMG to nearby opponents. You can gain the "Mirror of Night" effect once every 14s.
 
+-= starsealed_edict =-
+
+След рассветной звезды
+Увеличивает крит. урон на <color=#99FFFFFF>24%</color>. Экипированный персонаж, применяя элементальный навык, получает Кристаллическое соединение: мастерство стихий повышается на <color=#99FFFFFF>48</color> ед. на 20 сек. Во время действия этого эффекта, когда персонажи отряда поблизости активируют элементальные реакции, экипированный персонаж также получает один уровень Закона сгорания: дополнительно повышает мастерство стихий на <color=#99FFFFFF>24</color> ед. Эффект складывается до 3 раз и длится до окончания Кристаллического соединения или повторного применения элементального навыка.
+Сияние - Звёздный проводник: каждый уровень Закона сгорания также повышает крит. урон Звёздного проводника экипированного персонажа на <color=#99FFFFFF>12%</color>.
+Этот эффект срабатывает, даже когда экипированный персонаж не на поле боя.
+
+Dawnstar's Flowing Trail
+Increases CRIT DMG by <color=#99FFFFFF>24%</color>. The equipping character gains the Crystal Compounding effect when they use their Elemental Skill, increasing Elemental Mastery by <color=#99FFFFFF>48</color> for 20s. During this time, the equipping character gains a Law of Combustion stack when a nearby party member triggers an Elemental Reaction. Each stack increases Elemental Mastery by an additional <color=#99FFFFFF>24</color>. Max 3 stacks. These stacks last until Crystal Compounding ends or the equipping character uses their Elemental Skill again.
+Radiance: Stellar-Conduct: Each Law of Combustion stack also increases the equipping character's Stellar-Conduct CRIT DMG by <color=#99FFFFFF>12%</color>.
+These effects can be triggered even when the equipping character is off-field.
+
 -= sturdy_bone =-
 
 Бахвальство ловчего
@@ -1488,12 +1500,12 @@ Max HP increased by <color=#99FFFFFF>20%</color>. Once every 15s, for the 14s af
 
 Пришествие
 #<color=#99FFFFFF>Действует только для игроков</color>
-<color=#99FFFFFF>"PlayStation™Network".</color>
-Атакуя противников обычными и заряженными атаками, вы получаете <color=#99FFFFFF>50%</color> шанс нанести урон, равный <color=#99FFFFFF>200%</color> силы атаки в небольшом радиусе. Эффект может возникнуть 1 раз в 10 сек. Кроме того, если {M#путешественник}{F#путешественница} экипирован Мечом нисхождения, его сила атаки увеличивается на <color=#99FFFFFF>66</color> единиц.
+<color=#99FFFFFF>"PlayStation®".</color>
+Поражая противников обычными и заряженными атаками, вы получаете <color=#99FFFFFF>50%</color> шанс нанести урон, равный <color=#99FFFFFF>200%</color> силы атаки в небольшом радиусе. Эффект может возникнуть 1 раз в 10 сек. Кроме того, если {M#путешественник экипирован}{F#путешественница экипирована} Мечом нисхождения, {F#её}{M#его} сила атаки увеличивается на <color=#99FFFFFF>66</color> единиц.
 
 Descension
 <color=#99FFFFFF>Effective only on the following platform: </color>
-<color=#99FFFFFF>"PlayStation™Network"</color>
+<color=#99FFFFFF>"PlayStation®"</color>
 Hitting opponents with Normal and Charged Attacks grants a <color=#99FFFFFF>50%</color> chance to deal <color=#99FFFFFF>200%</color> ATK as DMG in a small AoE. This effect can only occur once every 10s. Additionally, if the Traveler equips the Sword of Descension, their ATK is increased by <color=#99FFFFFF>66</color>.
 
 -= sword_of_narzissenkreuz =-

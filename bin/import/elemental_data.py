@@ -27,7 +27,7 @@ def split_list(data):
 
 def parse_curves():
     file   = open(data_dir + 'ElementCoeffExcelConfigData.json', 'r', encoding='utf-8')
-    out    = open(out_dir + 'ElementScale.js', 'w', encoding='utf-8')
+    out    = open(out_dir + 'ElementScale.js', 'w', encoding='utf-8', newline='\n')
     curves = {
         'reaction': {},
         'shield': {},

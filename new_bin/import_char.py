@@ -71,6 +71,7 @@ def resolve_param_tokens(txt):
         proud_id = int(match.group(1))
         param_index = int(match.group(2)) - 1
         scale = int(match.group(3))
+        value_format = match.group(4)
         proud = proud_data.get(proud_id)
         if not proud:
             raise ValueError(f'Text references missing ProudSkill id {proud_id}')
@@ -82,9 +83,17 @@ def resolve_param_tokens(txt):
                 f'but the row has {len(params)} params'
             )
 
-        return trim_param_value(params[param_index] * scale)
+        value = params[param_index] * scale
+        if value_format is None:
+            return trim_param_value(value)
+        if value_format == 'I':
+            return str(int(round(value)))
+        raise ValueError(
+            f'Text references ProudSkill {proud_id} param{param_index + 1} '
+            f'with unsupported format {value_format!r}'
+        )
 
-    return re.sub(r'{PARAM#P(\d+)\|(\d+)S(\d+)}', replace, txt or '')
+    return re.sub(r'{PARAM#P(\d+)\|(\d+)S(\d+)(?::(\w+))?}', replace, txt or '')
 
 for char in char_data.get_list():
     if char['id'] in SKIP_CHARACTERS:

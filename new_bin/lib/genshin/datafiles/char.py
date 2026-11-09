@@ -119,6 +119,7 @@ BUFFED_DESC_TEXT_MAP_HASH_KEYS = (
     'POMMPOECOFA',
     'uniqueDescTextMapHash',
     'BDLFGGJDHLI',
+    'LEFEPLAGMHH',  # 7.2 rel: same values as uniqueDescTextMapHash in 7.2 beta
 )
 
 

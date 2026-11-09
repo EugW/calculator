@@ -1,0 +1,7 @@
+category;name;rus;eng
+feature_attack;valeriy_direct_fire_mortar;Урон Огня из мортиры: Прямой наводкой;Direct-Fire Mortar: Point-Blank Bombardment DMG
+feature_attack;valeriy_offensive_directive_electro;Повышение Электро урона;Electro DMG Bonus
+feature_attack;valeriy_offensive_directive_stellarconduct;Повышение урона Звёздного проводника;Stellar-Conduct DMG Bonus
+feature_attack;valeriy_offensive_directive_stacks;Уровни Приказа о штурме;Offensive Directive Stacks
+feature_attack;valeriy_offensive_directive_duration;Длительность Приказа о штурме;Offensive Directive Duration
+feature_burst;valeriy_thunderburst_shell;Урон Громового снаряда;Thunderburst Shell DMG

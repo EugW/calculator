@@ -228,6 +228,7 @@ weapon_names = {
     14436: 'EchoesOfTheHeart',
     14437: 'WintersHeavyHeart',
     14524: 'HymnofTheMaelstrom',
+    14525: 'StarsealedEdict',
     15101: 'HuntersBow',
     15301: "RavenBow",
     15302: "SharpshootersOath",

@@ -543,3 +543,44 @@ peak_patrol_song_eng = Template(
         [3],
     ],
 )
+
+# Starsealed Edict: permanent CRIT DMG, Crystal Compounding, Law of Combustion
+# stacks and the Radiance: Stellar-Conduct per-stack CRIT DMG are separate
+# calculator conditions, so every source line becomes its own description.
+starsealed_edict_eng = Template(
+    patterns=[(r'<br>', '\n')],
+    sentences=[
+        ['24:crit_dmg'],
+        ['48:mastery', '20:ignore'],
+        [],
+        ['24:mastery'],
+        ['3:ignore'],
+        [],
+        ['12:text_percent_stellarconduct_crit_dmg'],
+        [],
+    ],
+    results=[
+        [0],
+        [1, 7],
+        [2, 3, 4, 5],
+        [6, 7],
+    ],
+)
+
+starsealed_edict_rus = Template(
+    patterns=[(r'<br>', '\n')],
+    sentences=[
+        ['24:crit_dmg'],
+        ['48:mastery', '20:ignore'],
+        ['24:mastery'],
+        ['3:ignore'],
+        ['12:text_percent_stellarconduct_crit_dmg'],
+        [],
+    ],
+    results=[
+        [0],
+        [1, 5],
+        [2, 3],
+        [4, 5],
+    ],
+)
