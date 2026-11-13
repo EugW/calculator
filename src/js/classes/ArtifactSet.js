@@ -60,6 +60,18 @@ export class ArtifactSet {
         return this.bonus[pieces] || {};
     }
 
+    /** The fewest pieces that give a bonus: 2 for most sets, 1 for the one-piece sets. */
+    getMinBonusPieces() {
+        for (let i = 1; i <= MAX_SET_SIZE; ++i) {
+            let bonus = this.bonus[i];
+            if (bonus && Object.keys(bonus).length) {
+                return i;
+            }
+        }
+
+        return 0;
+    }
+
     getStats(pieces, settings) {
         let result = {
             stats: new Stats(),

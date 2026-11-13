@@ -12,7 +12,6 @@ function makeData(element, tag) {
     const data = new BuildData({
         char_level: 90,
         enemy_level: 90,
-        ["enemy_res_" + element]: 0,
     }, {
         atk_base: 1000,
     });

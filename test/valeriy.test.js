@@ -2,10 +2,16 @@ import { BuildData } from "../src/js/classes/Build/Data";
 import { FeatureDamageSkill } from "../src/js/classes/Feature2/Damage/Skill";
 import { FeatureDamageStellarConduct } from "../src/js/classes/Feature2/Damage/StellarConduct";
 import { FeatureMultiplier } from "../src/js/classes/Feature2/Multiplier";
+import { loadLegacyTeam } from "../src/js/classes/Legacy/Team";
 import { StatTable } from "../src/js/classes/StatTable";
+import { Team } from "../src/js/classes/Team";
 import { Valeriy } from "../src/js/db/Char/Valeriy";
 import { DB } from "../src/js/db/DB";
 import { charTalentTables } from "../src/js/db/generated/CharTalentTables";
+import { featureValues, finalStats, makeBuild, pinStats, totalMastery } from "./support/team";
+
+global.DB = DB;
+global.UI ||= {Lang: {get: () => ''}};
 
 function applyConditions(data, conditions) {
     for (const condition of conditions) {
@@ -186,48 +192,144 @@ test("C2 grants EM and C6 doubles Mortar and Thunderburst Shell DMG with Electro
     expect(burst.normal).toBeCloseTo(1.3512 * 1000 * 0.5, 5);
 });
 
-test("party Valeriy shares Offensive Directive from his ATK and Normal Attack level", () => {
-    const base = {
-        enemy_res_electro: 0,
+/**
+ * Valeriy next to Keqing (Electro) on the field, his Normal Attack talent at
+ * level 1 and his ATK at 2000.
+ *
+ * @returns {{team: Team, receiver: CalcSet, valeriy: CalcSet}}
+ */
+function teamWithValeriy(constellation, settings, atk = 2000) {
+    const receiver = makeBuild('Keqing');
+    const valeriy = makeBuild('Valeriy');
+    valeriy.setCharLevels({level: 90, ascension: 6, constellation});
+    valeriy.setCharSkills({attack: 1, elemental: 1, burst: 1});
+    valeriy.setCharSettings(settings);
+    const team = Team.fromMember(receiver);
+    team.setMember(1, valeriy);
+    pinStats([[valeriy, 'atk', atk]]);
+    return {team, receiver, valeriy};
+}
+
+const stiletto = 'skill.keqing_skill_stiletto';
+const teamDirective = {valeriy_offensive_directive: 15, valeriy_impact_momentum: 100};
+
+/**
+ * The flat DMG a hit of the receiver gains from Valeriy's controls: its
+ * increase over the same team without Offensive Directive, divided by what
+ * one point of the hit's base DMG is worth (its DMG bonus, DEF and RES
+ * multipliers, from the hit's own talent value and the receiver's ATK).
+ */
+function flatBonus(constellation, settings, opts = {}) {
+    const make = (controls) => {
+        const result = teamWithValeriy(constellation, controls, opts.atk);
+        result.team.modifySettings(opts.teamSettings || {});
+        if (opts.onField) result.team.setOnFieldMember(result[opts.onField]);
+        return result;
+    };
+    const off = make(Object.assign({}, settings, {valeriy_offensive_directive: 0}));
+    const on = make(settings);
+    const plain = featureValues(off.receiver)[stiletto][0];
+    const base = charTalentTables.Keqing.s2.p1[9] / 100 * finalStats(off.receiver).getTotalPercent('atk');
+    return (featureValues(on.receiver)[stiletto][0] - plain) / (plain / base);
+}
+
+test("Valeriy shares Offensive Directive from his ATK and Normal Attack level with the active member", () => {
+    // Ordinary Electro DMG: the flat bonus is added to the hit's base.
+    expect(flatBonus(0, teamDirective)).toBeCloseTo((0.2432 + 0.003 * 100) * 2000, 5);
+    expect(flatBonus(0, {...teamDirective, valeriy_impact_momentum: 40})).toBeCloseTo((0.2432 + 0.003 * 40) * 2000, 5);
+    // His ATK, as it is now.
+    expect(flatBonus(0, teamDirective, {atk: 1000})).toBeCloseTo((0.2432 + 0.003 * 100) * 1000, 5);
+
+    // C3 raises the shared talent value: his own Normal Attack level.
+    const level4 = charTalentTables.Valeriy.s1.p7[3] / 100;
+    expect(flatBonus(3, teamDirective)).toBeCloseTo((level4 + 0.003 * 100) * 2000, 5);
+    // C4: 130 Impact Momentum.
+    expect(flatBonus(4, {...teamDirective, valeriy_impact_momentum: 130})).toBeCloseTo((level4 + 0.003 * 130) * 2000, 5);
+    expect(flatBonus(0, {...teamDirective, valeriy_impact_momentum: 130})).toBeCloseTo((0.2432 + 0.003 * 100) * 2000, 5);
+
+    // "A nearby active character in the party": not a member off the field.
+    expect(flatBonus(0, teamDirective, {onField: 'valeriy'})).toBeCloseTo(0, 8);
+
+    // In Radiance: Stellar-Conduct the directive is for Electro DMG that is
+    // considered Stellar-Conduct DMG: an ordinary Electro hit gains nothing.
+    const radiance = {...teamDirective, valeriy_radiance_stellarconduct: true};
+    expect(flatBonus(0, radiance, {teamSettings: {polestar_field: true}})).toBeCloseTo(0, 8);
+    // The state needs the Polestar Field.
+    expect(flatBonus(0, radiance)).toBeCloseTo((0.2432 + 0.003 * 100) * 2000, 5);
+});
+
+test("C2 and C6 controls grant the team EM and Electro CRIT buffs", () => {
+    const controls = {
+        valeriy_ranks_that_charge_as_one: true,
+        valeriy_the_strength_to_breach_enemy_lines: true,
+    };
+    const off = teamWithValeriy(6, {});
+    const on = teamWithValeriy(6, controls);
+    for (const member of ['receiver', 'valeriy']) {
+        const before = finalStats(off[member]);
+        const after = finalStats(on[member]);
+        expect(totalMastery(after) - totalMastery(before)).toBeCloseTo(100, 8);
+        expect(after.get("crit_rate_electro") - before.get("crit_rate_electro")).toBeCloseTo(0.1, 10);
+        expect(after.get("crit_dmg_electro_stellarconduct") - before.get("crit_dmg_electro_stellarconduct")).toBeCloseTo(0.4, 10);
+    }
+    // His own two hits' 100% stays his.
+    expect(finalStats(on.valeriy).get("dmg_valeriy_breach")).toBeCloseTo(1, 10);
+    expect(finalStats(on.receiver).get("dmg_valeriy_breach")).toBe(0);
+
+    // The controls are his constellations'.
+    const c1 = teamWithValeriy(1, controls);
+    expect(totalMastery(finalStats(c1.receiver))).toBeCloseTo(totalMastery(finalStats(off.receiver)), 8);
+    expect(finalStats(c1.receiver).get("crit_rate_electro")).toBe(0);
+});
+
+test("a released link's party row loads as Valeriy with the row's controls", () => {
+    expect(Valeriy.partyData).toBeUndefined();
+    expect(Valeriy.getLegacyPartyConditions().map((condition) => condition.getId())).toEqual([1, 2, 3, 4, 5, 6, 7, 8]);
+    expect(Valeriy.getLegacyPartyConditions().every((condition) => condition.isRetired())).toBe(true);
+
+    const load = (row) => {
+        const receiver = makeBuild('Keqing');
+        const team = Team.fromMember(receiver);
+        const report = loadLegacyTeam(team, {
+            party: [{charId: Valeriy.getId(), settings: row}],
+            buffs: {},
+            settings: {},
+            dropped: [],
+        });
+        return {receiver, entry: team.legacy.getBySourceId(Valeriy.getId()), report};
+    };
+    const flat = (row) => {
+        const typed = {valeriy_atk_total: row.valeriy_atk_total, valeriy_char_skill_attack: row.valeriy_char_skill_attack};
+        const off = load(typed);
+        const on = load(row);
+        expect(on.report.dropped).toEqual([]);
+        const plain = featureValues(off.receiver)[stiletto][0];
+        const base = charTalentTables.Keqing.s2.p1[9] / 100 * finalStats(off.receiver).getTotalPercent('atk');
+        return {entry: on.entry, bonus: (featureValues(on.receiver)[stiletto][0] - plain) / (plain / base)};
+    };
+
+    // The released engine's number for this row: (24.32% + 0.3% x 100) of
+    // the typed 2000 ATK, at the typed talent level 1.
+    const row = {
+        valeriy_atk_total: 2000,
         valeriy_char_skill_attack: 1,
         "party.valeriy_offensive_directive": 15,
         "party.valeriy_impact_momentum": 100,
     };
-    const electro = new BuildData(base, {atk_base: 1000, valeriy_atk_total: 2000});
-    electro.multipliers = Valeriy.getPartyMultipliers();
-    // Ordinary Electro DMG keeps its DEF multiplier; the flat bonus is added to its base.
-    const ordinary = electroSkillProbe().getResult(electro)["skill.electro_test_hit"];
-    expect(ordinary.normal).toBeCloseTo((1000 + (0.2432 + 0.003 * 100) * 2000) * 0.5, 5);
+    const loaded = flat(row);
+    expect(loaded.entry.getConstellation()).toBe(0);
+    expect(loaded.entry.char.getSettings().valeriy_offensive_directive).toBe(15);
+    expect(loaded.bonus).toBeCloseTo((0.2432 + 0.003 * 100) * 2000, 5);
 
-    const radiance = new BuildData({
-        ...base,
-        polestar_field: true,
-        "party.valeriy_radiance_stellarconduct": true,
-    }, {atk_base: 1000, valeriy_atk_total: 2000});
-    radiance.multipliers = Valeriy.getPartyMultipliers();
-    const stellar = stellarConductProbe().getResult(radiance)["skill.stellarconduct_test_hit"];
-    expect(stellar.normal).toBeCloseTo(1000 + (0.7296 + 0.009 * 100) * 2000, 5);
-    expect(electroSkillProbe().getResult(radiance)["skill.electro_test_hit"].normal).toBeCloseTo(1000 * 0.5, 5);
-
-    // C3 raises the shared talent value through the party level bonus.
-    const c3 = new BuildData({
-        ...base,
-        "party.valeriy_constellation_3": true,
-    }, {atk_base: 1000, valeriy_atk_total: 2000});
-    applyConditions(c3, Valeriy.getPartyConditions());
-    c3.multipliers = Valeriy.getPartyMultipliers();
+    // The row's C3 switch is his third constellation: the talent at level 4.
     const level4 = charTalentTables.Valeriy.s1.p7[3] / 100;
-    expect(electroSkillProbe().getResult(c3)["skill.electro_test_hit"].normal)
-        .toBeCloseTo((1000 + (level4 + 0.003 * 100) * 2000) * 0.5, 5);
-});
+    const c3 = flat({...row, "party.valeriy_constellation_3": true});
+    expect(c3.entry.getConstellation()).toBe(3);
+    expect(c3.bonus).toBeCloseTo((level4 + 0.003 * 100) * 2000, 5);
 
-test("party C2 and C6 toggles grant EM and Electro CRIT buffs", () => {
-    const data = new BuildData({
-        "party.valeriy_ranks_that_charge_as_one": true,
-        "party.valeriy_the_strength_to_breach_enemy_lines": true,
-    }, {});
-    applyConditions(data, Valeriy.getPartyConditions());
-    expect(data.stats.get("mastery")).toBe(100);
-    expect(data.stats.get("crit_rate_electro")).toBe(10);
-    expect(data.stats.get("crit_dmg_electro_stellarconduct")).toBe(40);
+    // More Impact Momentum than 100 means his fourth constellation, which
+    // allows it, and with it the third's talent level.
+    const c4 = flat({...row, "party.valeriy_impact_momentum": 130});
+    expect(c4.entry.getConstellation()).toBe(4);
+    expect(c4.bonus).toBeCloseTo((level4 + 0.003 * 130) * 2000, 5);
 });

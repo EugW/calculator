@@ -1,10 +1,11 @@
 import { charTables } from "../generated/CharTables";
 import { charTalentTables } from "../generated/CharTalentTables";
+import { percent } from "../Params";
 import { Condition } from "../../classes/Condition";
 import { ConditionAscensionChar } from "../../classes/Condition/Ascension/Char";
 import { ConditionBoolean } from "../../classes/Condition/Boolean";
+import { ConditionOnField } from "../../classes/Condition/Field";
 import { ConditionConstellation } from "../../classes/Condition/Constellation";
-import { ConditionNumber } from "../../classes/Condition/Number";
 import { ConditionNumberCitlali } from "../../classes/Condition/Number/Citlali";
 import { ConditionStatic } from "../../classes/Condition/Static";
 import { DbObjectChar } from "../../classes/DbObject/Char";
@@ -19,11 +20,15 @@ import { FeatureDamageCharged } from "../../classes/Feature2/Damage/Charged";
 import { FeatureDamageSkill } from "../../classes/Feature2/Damage/Skill";
 import { ValueTable } from "../../classes/ValueTable";
 import { ConditionAnd } from "../../classes/Condition/And";
+import { ConditionReceiver } from "../../classes/Condition/Receiver";
 import { FeatureShield } from "../../classes/Feature2/Shield";
 import { FeatureMultiplierList } from "../../classes/Feature2/Multiplier/List";
 import { FeatureDamageBurst } from "../../classes/Feature2/Damage/Burst";
 import { FeatureDamage } from "../../classes/Feature2/Damage";
 import { FeatureMultiplierTarget } from "../../classes/Feature2/Multiplier/Target";
+import { PostEffectStats } from "../../classes/PostEffect/Stats";
+import { CHANNELS } from "../../classes/PostEffect/Channels";
+import { RECEIVERS } from "../../classes/Team/Receivers";
 
 const Talents = new DbObjectTalents({
     attack: {
@@ -130,17 +135,23 @@ const Talents = new DbObjectTalents({
     },
 });
 
-const A1ResShred = -20;
-const A4SkillBonus = 90;
-const A4BurstBonus = 1200;
-const C1MasteryDmgBonus = 200;
-const C2MasterySelf = 125;
-const C2MasteryOther = 250;
-const C2ResShred = -20;
-const C4SkillDmg = 1800;
-const C6MaxPoints = 40;
-const C6PointDmgBonus = 1.5;
-const C6PointDmgBonusSelf = 2.5;
+const A1ResShred = -percent(charTalentTables.Citlali.a1.p3);
+const A4SkillBonus = percent(charTalentTables.Citlali.a4.p1);
+const A4BurstBonus = percent(charTalentTables.Citlali.a4.p2);
+const C1MasteryDmgBonus = percent(charTalentTables.Citlali.c1.p1);
+const C2MasterySelf = charTalentTables.Citlali.c2.p1;
+const C2MasteryOther = charTalentTables.Citlali.c2.p2;
+const C2ResShred = -percent(charTalentTables.Citlali.c2.p4);
+const C4SkillDmg = percent(charTalentTables.Citlali.c4.p1);
+const C6MaxPoints = charTalentTables.Citlali.c6.p4;
+const C6PointDmgBonus = percent(charTalentTables.Citlali.c6.p1);
+const C6PointDmgBonusSelf = percent(charTalentTables.Citlali.c6.p3);
+
+// Stellar Blade raises the DMG of a nearby active character other than
+// Citlali.
+const activeOtherReceiver = new ConditionReceiver({
+    condition: new ConditionOnField(),
+});
 
 export const Citlali = new DbObjectChar({
     name: 'citlali',
@@ -226,6 +237,10 @@ export const Citlali = new DbObjectChar({
                 }),
             ],
         }),
+        // A4 Itzpapalotl's Star Garments (Frostfall Storm): the game
+        // (Citalali_CurlocalAvatar_Attack in Avatar_Citlali_ElementalArt_Handler)
+        // scales damageExtra Ratio1 on FIGHT_PROP_ELEMENT_MASTERY (total EM).
+        // Hit damage multipliers read the total (scaling mastery*), no params.
         new FeatureDamageSkill({
             element: 'cryo',
             multipliers: [
@@ -244,6 +259,9 @@ export const Citlali = new DbObjectChar({
                 }),
             ],
         }),
+        // Skill Opal Shield: the game (UNIQUE_Citlali_ElementalArt_IceShield_Team,
+        // GlobalMainShieldMixin shieldHP with FIGHT_PROP_ELEMENT_MASTERY) reads
+        // total EM. Shield scalings read the total (mastery*), no params.
         new FeatureShield({
             category: 'skill',
             element: 'cryo',
@@ -255,6 +273,10 @@ export const Citlali = new DbObjectChar({
                 }),
             ],
         }),
+        // A4 Itzpapalotl's Star Garments (Ice Storm): the game
+        // (Skillobj_Citlali_ElementalBurst_Gadget1_Material Timer) scales
+        // damageExtra Ratio2 on FIGHT_PROP_ELEMENT_MASTERY (total EM).
+        // Hit damage multipliers read the total (scaling mastery*), no params.
         new FeatureDamageBurst({
             element: 'cryo',
             multipliers: [
@@ -282,6 +304,10 @@ export const Citlali = new DbObjectChar({
                 }),
             ],
         }),
+        // C4 Death Defier's Spirit Skull: the game
+        // (Skillobj_Citlali_ElementalBurst_Gadget3_Material Timer1) scales
+        // damageExtra Talent_Damage on FIGHT_PROP_ELEMENT_MASTERY (total EM).
+        // Hit damage multipliers read the total (scaling mastery*), no params.
         new FeatureDamage({
             category: 'other',
             element: 'cryo',
@@ -295,10 +321,36 @@ export const Citlali = new DbObjectChar({
             condition: new ConditionConstellation({constellation: 4}),
         }),
     ],
+    multipliers: [
+        // C1 Radiant Blades of Centzon Mimixcoah: Stellar Blade consumed by a
+        // nearby active character other than Citlali raises the dealt DMG by
+        // 200% of her Elemental Mastery. The game (UNIQUE_Avatar_Citlali_Talent1_Buff,
+        // ModifyDamageCountMixin damageExtra on FIGHT_PROP_ELEMENT_MASTERY) reads
+        // total EM. Hit damage multipliers read the total (scaling mastery*), no params.
+        new FeatureMultiplier({
+            receivers: RECEIVERS.OTHERS,
+            scaling: 'mastery*',
+            source: 'constellation1',
+            values: new ValueTable([C1MasteryDmgBonus]),
+            condition: new ConditionAnd([
+                new ConditionBoolean({name: 'citlali_radiant_blades_of_centzon_mimixcoah'}),
+                new ConditionConstellation({constellation: 1}),
+                activeOtherReceiver,
+            ]),
+            target: new FeatureMultiplierTarget({
+                damageTypes: ['normal', 'charged', 'plunge', 'skill', 'burst'],
+            }),
+        }),
+    ],
     conditions: [
+        // A1 Mamaloaco's Frigid Rain: flat Pyro/Hydro RES shred (enemy debuff,
+        // game UNIQUE_Avatar_Citlali_PermanentSkill_ResistDown, no stat read).
+        // Flat conditions need nothing.
         new ConditionBoolean({
             name: 'citlali_mamaloacos_frigid_rain',
             serializeId: 1,
+            // Frozen/Melt Pyro/Hydro RES shred is an enemy debuff.
+            receivers: RECEIVERS.TEAM,
             title: 'talent_name.citlali_mamaloacos_frigid_rain',
             description: 'talent_descr.citlali_mamaloacos_frigid_rain',
             info: {ascension: 1},
@@ -325,10 +377,34 @@ export const Citlali = new DbObjectChar({
             ],
         }),
     ],
+    postEffects: [
+        // C6 Teoiztac's Secret Pact: each Cifra point grants nearby party
+        // members 1.5% Pyro/Hydro DMG Bonus from Citlali's live points.
+        // Her own points control already grants her the same.
+        // The game (UNIQUE_Avatar_Citlali_Talent6_Buff) writes plain
+        // Actor_Fire/WaterAddHurtDelta, i.e. without "Extra": a premod
+        // (non-extra) DMG% write, so premod DMG% readers count it. GO writes
+        // it under premod as well. The read side is a points counter, not a stat.
+        new PostEffectStats({
+            receivers: RECEIVERS.OTHERS,
+            from: 'citlali_points',
+            percent: [
+                new StatTable('dmg_pyro', [C6PointDmgBonus]),
+                new StatTable('dmg_hydro', [C6PointDmgBonus]),
+            ],
+            writes: CHANNELS.PREMOD,
+            conditions: [
+                new ConditionBoolean({name: 'citlali_points'}),
+                new ConditionConstellation({constellation: 6}),
+            ],
+        }),
+    ],
     constellation: new DbObjectConstellation([
         {
             conditions: [
-                new ConditionStatic({
+                new ConditionBoolean({
+                    name: 'citlali_radiant_blades_of_centzon_mimixcoah',
+                    serializeId: 5,
                     title: 'talent_name.citlali_radiant_blades_of_centzon_mimixcoah',
                     description: 'talent_descr.citlali_radiant_blades_of_centzon_mimixcoah',
                     stats: {
@@ -339,6 +415,9 @@ export const Citlali = new DbObjectChar({
         },
         {
             conditions: [
+                // C2 Heart Devourer's Travail: flat +125 EM for Citlali. The game
+                // (Citlali_Talent_SelfMastery) writes plain Actor_ElemMasteryDelta
+                // (no "Extra"): premod. Flat conditions are premod, no params.
                 new ConditionBoolean({
                     name: 'citlali_heart_devourers_travail',
                     serializeId: 3,
@@ -350,7 +429,23 @@ export const Citlali = new DbObjectChar({
                         text_value_other: C2MasteryOther,
                     },
                 }),
+                // Other shielded or followed characters gain 250 Mastery.
+                // Citlali keeps her 125 above. The game
+                // (UNIQUE_Citlali_Talent2_Mastery) writes plain
+                // Actor_ElemMasteryDelta: premod. Flat conditions are premod, no params.
+                new Condition({
+                    isHidden: true,
+                    receivers: RECEIVERS.OTHERS,
+                    stats: {
+                        mastery: C2MasteryOther,
+                    },
+                    condition: new ConditionBoolean({name: 'citlali_heart_devourers_travail'}),
+                }),
                 new ConditionStatic({
+                    // C2 enhanced Mamaloaco's Frigid Rain: flat extra RES shred
+                    // (enemy debuff, no stat read). Flat conditions need nothing.
+                    // The enhanced Mamaloaco's Frigid Rain is an enemy debuff.
+                    receivers: RECEIVERS.TEAM,
                     title: 'talent_name.citlali_heart_devourers_travail',
                     description: 'talent_descr.citlali_heart_devourers_travail_2',
                     stats: {
@@ -359,6 +454,7 @@ export const Citlali = new DbObjectChar({
                     },
                     subConditions: [
                         new ConditionBoolean({name: 'citlali_mamaloacos_frigid_rain'}),
+                        new ConditionAscensionChar({ascension: 1}),
                     ],
                 }),
             ],
@@ -398,6 +494,14 @@ export const Citlali = new DbObjectChar({
                     title: 'talent_name.citlali_teoiztacs_secret_pact',
                     description: 'talent_descr.citlali_teoiztacs_secret_pact_1',
                 }),
+                // C6 Teoiztac's Secret Pact points control: each point grants
+                // Citlali 2.5% all-DMG (self) and 1.5% Pyro/Hydro DMG (the team
+                // copy, same as the postEffect above). The game self buff
+                // (UNIQUE_Avatar_Citlali_Talent6_SelfBuff) is a hit-level
+                // ModifyDamageMixin with no Actor channel, and dmg_all has no
+                // extra lane here; the Pyro/Hydro copy matches the team's plain
+                // (premod) Actor_Fire/WaterAddHurtDelta through this premod
+                // condition. Points, not a stat: no read channel. Defaults kept.
                 new ConditionNumberCitlali({
                     name: 'citlali_points',
                     serializeId: 4,
@@ -414,95 +518,5 @@ export const Citlali = new DbObjectChar({
             ],
         },
     ]),
-    partyData: {
-        loadStats: {
-            stats: ['mastery_total'],
-        },
-        conditions: [
-            new ConditionNumber({
-                name: 'citlali_mastery_total',
-                title: 'talent_name.stats_total_mastery',
-                partyStat: 'mastery_total',
-                serializeId: 1,
-                rotation: 'party',
-                max: 10000,
-            }),
-            new ConditionBoolean({
-                name: 'party.citlali_mamaloacos_frigid_rain',
-                serializeId: 2,
-                title: 'talent_name.citlali_mamaloacos_frigid_rain',
-                description: 'talent_descr.citlali_mamaloacos_frigid_rain',
-                rotation: 'party',
-                info: {ascension: 1},
-                stats:{
-                    enemy_res_pyro: A1ResShred,
-                    enemy_res_hydro: A1ResShred,
-                },
-            }),
-            new ConditionBoolean({
-                name: 'party.citlali_radiant_blades_of_centzon_mimixcoah',
-                serializeId: 3,
-                title: 'talent_name.citlali_radiant_blades_of_centzon_mimixcoah',
-                description: 'talent_descr.citlali_radiant_blades_of_centzon_mimixcoah',
-                rotation: 'party',
-                info: {constellation: 1},
-                stats: {
-                    text_percent: C1MasteryDmgBonus,
-                },
-            }),
-            new ConditionBoolean({
-                name: 'party.citlali_heart_devourers_travail',
-                serializeId: 4,
-                title: 'talent_name.citlali_heart_devourers_travail',
-                description: 'talent_descr.citlali_heart_devourers_travail_1',
-                rotation: 'party',
-                info: {constellation: 2},
-                stats: {
-                    mastery: C2MasteryOther,
-                    text_value_self: C2MasterySelf,
-                    text_value_other: C2MasteryOther,
-                },
-            }),
-            new ConditionBoolean({
-                name: 'party.citlali_heart_devourers_travail_2',
-                serializeId: 5,
-                title: 'talent_name.citlali_heart_devourers_travail',
-                description: 'talent_descr.citlali_heart_devourers_travail_2',
-                rotation: 'party',
-                info: {constellation: 2},
-                stats: {
-                    enemy_res_pyro: C2ResShred,
-                    enemy_res_hydro: C2ResShred,
-                },
-                subConditions: [
-                    new ConditionBoolean({name: 'party.citlali_mamaloacos_frigid_rain'}),
-                ],
-            }),
-            new ConditionNumberCitlali({
-                name: 'party_citlali_points',
-                serializeId: 6,
-                title: 'talent_name.citlali_teoiztacs_secret_pact',
-                description: 'talent_descr.citlali_teoiztacs_secret_pact_2',
-                rotation: 'party',
-                max: C6MaxPoints,
-                otherBonus: C6PointDmgBonus,
-                info: {constellation: 6},
-                stats: {
-                    text_percent_1: C6PointDmgBonus,
-                    text_percent_2: C6PointDmgBonusSelf,
-                },
-            }),
-        ],
-        multipliers: [
-            new FeatureMultiplier({
-                scaling: 'citlali_mastery_total',
-                source: 'citlali',
-                values: new ValueTable([C1MasteryDmgBonus]),
-                target: new FeatureMultiplierTarget({
-                    damageTypes: ['normal', 'charged', 'plunge', 'skill', 'burst'],
-                }),
-                condition: new ConditionBoolean({name: 'party.citlali_radiant_blades_of_centzon_mimixcoah'}),
-            }),
-        ],
-    },
+    retiredParty: [[1, 'number'], [2, 'checkbox'], [3, 'checkbox'], [4, 'checkbox'], [5, 'checkbox'], [6, 'number']],
 });

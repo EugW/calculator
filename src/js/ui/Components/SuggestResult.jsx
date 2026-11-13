@@ -14,19 +14,33 @@ import { TabDisclaimer } from "./Tab";
 import { FeatureTableValues } from "./FeatureTable";
 import { FeatureName } from "./FeatureName";
 
+// A row is the frozen build of a finished run: its features are computed
+// once, not on every refresh of the tab.
+const rowFeatures = new WeakMap();
+
+function featuresOf(item) {
+    let features = rowFeatures.get(item);
+    if (!features) {
+        features = item.calcFeatures();
+        rowFeatures.set(item, features);
+    }
+    return features;
+}
+
 export function SuggestResult(props) {
     let lang = new Lang();
+    const staleNotice = props.stale && <p className="suggest-result-stale" role="status">{lang.get('artifact_profile.stale')}</p>;
 
     if (props.result.items.length == 0) {
         return (
-            <TabDisclaimer>{lang.get('artifacts_ui.nothing_found')}</TabDisclaimer>
+            <>{staleNotice}<TabDisclaimer>{lang.get('artifacts_ui.nothing_found')}</TabDisclaimer></>
         );
     }
 
     let lines = [];
     let index = 0;
     let maxItem = props.result.items[0];
-    let maxFeatures = maxItem.calcFeatures(1);
+    let maxFeatures = featuresOf(maxItem);
 
     for (let item of props.result.items) {
         index++;
@@ -39,6 +53,7 @@ export function SuggestResult(props) {
                 maxFeatures={maxFeatures}
                 even={index % 2 == 0}
                 onApply={props.onApply}
+                stale={props.stale}
                 onCompare={props.onCompare}
                 displayMode={props.displayMode}
                 showWorkerValues={props.showWorkerValues}
@@ -51,6 +66,7 @@ export function SuggestResult(props) {
     return (
         <FullHeight>
             <FullHeightStatic>
+                {staleNotice}
                 <ControlsBar>
                     <RoundButton
                         icon="icon-settings"
@@ -112,10 +128,10 @@ export class SuggestResultItem extends React.Component {
                         </div>
                     </div>
                     <div className="button">
-                        <ResultTableButton
+                        {!this.props.stale && <ResultTableButton
                             icon="icon-load"
                             onClick={() => this.props.onApply(this.props.item.clone())}
-                        />
+                        />}
                     </div>
                     <div className="button">
                         <ResultTableButton
@@ -157,7 +173,7 @@ function SuggestSetIcon(props) {
 
 function SuggesterFeatures(props) {
     let lang = new Lang();
-    let features = props.item.calcFeatures(1);
+    let features = featuresOf(props.item);
     let workerValues = {};
 
     if (props.showWorkerValues &&
@@ -169,7 +185,7 @@ function SuggesterFeatures(props) {
 
     let items = [];
     for (let feat of props.otherFeatures) {
-        if (feat == props.mainFeature) {
+        if (feat == props.mainFeature || !features[feat]) {
             continue;
         }
 

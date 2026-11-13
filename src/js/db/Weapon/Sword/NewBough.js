@@ -6,6 +6,8 @@ import { DbObjectWeapon } from "../../../classes/DbObject/Weapon";
 import { StatTable } from "../../../classes/StatTable";
 import { StatTableConditions } from "../../../classes/StatTable/Condition";
 import { weaponStatTables } from "../../generated/WeaponStatTables";
+import { weaponPassiveTables } from "../../generated/WeaponPassiveTables";
+import { percent } from "../../Params";
 
 const normalMode = new ConditionBooleanDropdownValue({
     name: 'weapon_new_bough_mode',
@@ -30,10 +32,10 @@ export const NewBough = new DbObjectWeapon({
             title: 'talent_name.weapon_new_bough',
             description: 'talent_descr.weapon_new_bough',
             stats: [
-                new StatTable('text_percent_normal_atk', [4, 5, 6, 7, 8]),
-                new StatTable('text_number_normal_mastery', [20, 25, 30, 35, 40]),
-                new StatTable('text_percent_radiance_atk', [6, 7.5, 9, 10.5, 12]),
-                new StatTable('text_percent_radiance_dmg', [8, 10, 12, 14, 16]),
+                new StatTable('text_percent_normal_atk', percent(weaponPassiveTables.NewBough.p4)),
+                new StatTable('text_number_normal_mastery', weaponPassiveTables.NewBough.p6),
+                new StatTable('text_percent_radiance_atk', percent(weaponPassiveTables.NewBough.p5)),
+                new StatTable('text_percent_radiance_dmg', percent(weaponPassiveTables.NewBough.p7)),
             ],
         }),
         new ConditionDropdown({
@@ -61,14 +63,14 @@ export const NewBough = new DbObjectWeapon({
             serializeId: 2,
             title: 'talent_name.weapon_new_bough_stacks',
             description: 'talent_descr.weapon_new_bough_stacks',
-            maxStacks: 3,
+            maxStacks: weaponPassiveTables.NewBough.p3[0],
             levelSetting: 'weapon_refine',
             stats: [
-                new StatTableConditions('atk_percent', [4, 5, 6, 7, 8], [normalMode]),
-                new StatTableConditions('mastery', [20, 25, 30, 35, 40], [normalMode]),
-                new StatTableConditions('atk_percent', [6, 7.5, 9, 10.5, 12], [radianceMode]),
-                new StatTableConditions('dmg_stellarconduct', [8, 10, 12, 14, 16], [radianceMode]),
-                new StatTableConditions('dmg_stellarswirl', [8, 10, 12, 14, 16], [radianceMode]),
+                new StatTableConditions('atk_percent', percent(weaponPassiveTables.NewBough.p4), [normalMode]),
+                new StatTableConditions('mastery', weaponPassiveTables.NewBough.p6, [normalMode]),
+                new StatTableConditions('atk_percent', percent(weaponPassiveTables.NewBough.p5), [radianceMode]),
+                new StatTableConditions('dmg_stellarconduct', percent(weaponPassiveTables.NewBough.p7), [radianceMode]),
+                new StatTableConditions('dmg_stellarswirl', percent(weaponPassiveTables.NewBough.p7), [radianceMode]),
             ],
         }),
     ],

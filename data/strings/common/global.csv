@@ -5,6 +5,8 @@ tab_header;features;Показатели;Features
 tab_header;suggest-artifact-set;Подбор комплекта;Artifact set optimizer
 tab_header;suggest-artifact-substat;Бонусы доп. характеристики;Substat bonuses
 tab_header;share_view;Мои персонажи;My characters
+tab_header;build;Сборка;Build
+nav;title;Навигация;Navigation
 tab_header;char;Персонаж;Character
 tab_header;weapon;Оружие;Weapon
 tab_header;artifacts;Артефакты;Artifacts

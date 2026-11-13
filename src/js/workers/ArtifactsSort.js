@@ -1,9 +1,10 @@
+// The database joins this worker's module graph; see webpack.config.js.
+import "../db";
 import { Artifact } from "../classes/Artifact";
-import { CalcSet } from "../classes/CalcSet";
-import { Condition } from "../classes/Condition";
+import { deserializeWorkerMember } from "../classes/Team";
+import { ArtifactCandidateEvaluator } from "../classes/ArtifactCandidateEvaluator";
 import { Serializer } from "../classes/Serializer";
-
-importScripts('db.js?'+ __VERSION__);
+import { equipTeamArtifact } from "../classes/ArtifactTeamInventory";
 
 const slotOrders = {
     flower: 1,
@@ -15,7 +16,7 @@ const slotOrders = {
 
 self.onmessage = function(input) {
     let artifacts = input.data.artifacts;
-    let currentSet = CalcSet.deserialize(input.data.calcSet);
+    let currentSet = deserializeWorkerMember(input.data.calcSet);
     let featureName = input.data.feature;
     let featureType = input.data.featureType;
     let sortByFeature = input.data.sortByFeature;
@@ -23,16 +24,7 @@ self.onmessage = function(input) {
     let setsOrders = input.data.setsOrders;
 
     let results = [];
-    let feature;
-
-    if (sortByFeature) {
-        feature = currentSet.getFeatureByName(featureName);
-    }
-
-    let currentSettings = currentSet.artifacts.getSettings();
-    let conditions = currentSet.getConditions({objects: 'artifacts'});
-    let currentArtSettings = Condition.allConditionsOff(conditions);
-    Object.assign(currentArtSettings, currentSettings);
+    let evaluator = sortByFeature && new ArtifactCandidateEvaluator(featureName);
 
 
     for (let hash of artifacts) {
@@ -45,20 +37,15 @@ self.onmessage = function(input) {
             slotValue: slotOrders[art.getSlot()],
         };
 
-        if (sortByFeature && feature) {
+        if (evaluator) {
+            // The piece in the build as it is: set effects read the
+            // member's set-bonus profile.
             let build = currentSet.clone();
-            build.setArtifact(art);
+            equipTeamArtifact(build, art);
 
-            let conditions = build.getConditions({objects: 'artifacts'});
-            let artSettingsOn = Condition.allConditionsOn(conditions);
-            let newArtSettings = Object.assign({}, artSettingsOn, currentArtSettings);
-            build.setArtifactsSettings(newArtSettings);
-
-            let data = build.getBuildData();
-            let featureResult = feature.getResult(data);
-
-            if (featureResult[featureName]) {
-                item.featureValue = featureResult[featureName][featureType];
+            let featureResult = evaluator.getResult(build);
+            if (featureResult) {
+                item.featureValue = featureResult[featureType];
             }
         }
 

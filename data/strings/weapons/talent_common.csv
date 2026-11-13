@@ -1,14 +1,14 @@
 category;name;rus;eng
 talent_name;weapon_bane_flame_water;Погибель пламени и воды;Bane of Flame and Water
-talent_descr;weapon_bane_flame_water;Увеличивает на %{dmg_all} name{урон} против tab{enemy:врагов}, находящихся под действием hydro{Гидро} или pyro{Пиро} элементов.;Increases name{DMG} against tab{enemy:opponents} affected by hydro{Hydro} or pyro{Pyro} by %{dmg_all}.
+talent_descr;weapon_bane_flame_water;Увеличивает на %{dmg_all} name{урон} против tab{team:врагов}, находящихся под действием hydro{Гидро} или pyro{Пиро} элементов.;Increases name{DMG} against tab{team:opponents} affected by hydro{Hydro} or pyro{Pyro} by %{dmg_all}.
 talent_name;weapon_bane_of_fire_and_thunder;Погибель огня и грома;Bane of Fire and Thunder
-talent_descr;weapon_bane_of_fire_and_thunder;Увеличивает на %{dmg_all} name{урон} против tab{enemy:врагов}, находящихся под действием pyro{Пиро} или electro{Электро} элементов.;Increases DMG against tab{enemy:enemies} affected by pyro{Pyro} or electro{Electro} by %{dmg_all}.
+talent_descr;weapon_bane_of_fire_and_thunder;Увеличивает на %{dmg_all} name{урон} против tab{team:врагов}, находящихся под действием pyro{Пиро} или electro{Электро} элементов.;Increases DMG against tab{team:enemies} affected by pyro{Pyro} or electro{Electro} by %{dmg_all}.
 talent_name;weapon_bane_of_flame_and_water;Погибель пламени и воды;Bane of Flame and Water
-talent_descr;weapon_bane_of_flame_and_water;Увеличивает на %{dmg_all} name{урон} против tab{enemy:врагов}, находящихся под действием hydro{Гидро} или pyro{Пиро} элементов.;Increases name{DMG} against tab{enemy:opponents} affected by hydro{Hydro} or pyro{Pyro} by %{dmg_all}.
+talent_descr;weapon_bane_of_flame_and_water;Увеличивает на %{dmg_all} name{урон} против tab{team:врагов}, находящихся под действием hydro{Гидро} или pyro{Пиро} элементов.;Increases name{DMG} against tab{team:opponents} affected by hydro{Hydro} or pyro{Pyro} by %{dmg_all}.
 talent_name;weapon_bane_of_water_and_ice;Погибель воды и льда;Bane of Water and Ice
-talent_descr;weapon_bane_of_water_and_ice;Увеличивает name{урон} против tab{enemy:врагов}, находящихся под hydro{Гидро} и cryo{Крио} эффектом на %{dmg_all}.;Increases name{DMG} against tab{enemy:opponents} affected by hydro{Hydro} or cryo{Cryo} by %{dmg_all}.
+talent_descr;weapon_bane_of_water_and_ice;Увеличивает name{урон} против tab{team:врагов}, находящихся под hydro{Гидро} и cryo{Крио} эффектом на %{dmg_all}.;Increases name{DMG} against tab{team:opponents} affected by hydro{Hydro} or cryo{Cryo} by %{dmg_all}.
 talent_name;weapon_bane_of_storm_and_tide;Погибель бури и волны;Bane of Storm and Tide
-talent_descr;weapon_bane_of_storm_and_tide;Увеличивает на %{dmg_all} name{урон} против tab{enemy:врагов}, находящихся под действием hydro{Гидро} или electro{Электро} элементов.;Increases name{DMG} against tab{enemy:opponents} affected by hydro{Hydro} or electro{Electro} by %{dmg_all}.
+talent_descr;weapon_bane_of_storm_and_tide;Увеличивает на %{dmg_all} name{урон} против tab{team:врагов}, находящихся под действием hydro{Гидро} или electro{Электро} элементов.;Increases name{DMG} against tab{team:opponents} affected by hydro{Hydro} or electro{Electro} by %{dmg_all}.
 talent_name;weapon_focus;Сосредоточенный;Focus
 talent_descr;weapon_focus;При нанесении урона противнику повышает name{шанс крит. попадания} на %{crit_rate}. Эффект может складываться до 5 раз. Добавочный name{шанс крит. попадания} исчезает с первым name{крит. попаданием}.;Upon dealing damage to an opponent, increases name{CRIT Rate} by %{crit_rate}. Max 5 stacks. A name{CRIT hit} removes all existing stacks.
 talent_name;weapon_press_the_advantage;Преследование побеждённых;Press the Advantage
@@ -27,7 +27,7 @@ talent_descr;weapon_sacrificial_passive;Попадания name{Элемента
 talent_name;weapon_cull_the_weal;Жатва;Cull the Weak
 talent_descr;weapon_cull_the_weal;Победа над противником восстанавливает %{text_percent} name{HP}.;Defeating an opponent restores %{text_percent} name{HP}.
 talent_name;weapon_frost_burial;Морозное погребение;Frost Burial
-talent_descr;weapon_frost_burial;Если tab{enemy:противник} имеет эффект cryo{Крио}, то наносит ему %{text_percent_dmg} урона name{силы атаки}.;tab{enemy:Opponents} affected by cryo{Cryo} are dealt %{text_percent_dmg} name{ATK} DMG instead by the icicle.
+talent_descr;weapon_frost_burial;Если tab{team:противник} имеет эффект cryo{Крио}, то наносит ему %{text_percent_dmg} урона name{силы атаки}.;tab{team:Opponents} affected by cryo{Cryo} are dealt %{text_percent_dmg} name{ATK} DMG instead by the icicle.
 talent_descr;weapon_frost_burial_passive;Попадания name{обычной} или name{заряженной атакой} имеют %{text_percent_chance} шанс создать над противником ледяной кристалл и уронить его, нанося name{урон по площади} равный %{text_percent_dmg} от name{силы атаки}.;Hitting an opponent with name{Normal} and name{Charged Attacks} has a %{text_percent_chance} chance of forming and dropping an Everfrost Icicle above them, dealing name{AoE DMG} equal to %{text_percent_dmg} of name{ATK}.
 talent_name;weapon_samurai_conduct;Мастерство самурая;Samurai Conduct
 talent_descr;weapon_samurai_conduct_1;Увеличивает name{урон элементального навыка} на %{dmg_skill}.;Increases name{Elemental Skill} name{DMG} by %{dmg_skill}.

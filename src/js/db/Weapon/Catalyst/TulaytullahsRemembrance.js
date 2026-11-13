@@ -4,6 +4,8 @@ import { DbObjectWeapon } from "../../../classes/DbObject/Weapon";
 import { Stats } from "../../../classes/Stats";
 import { StatTable } from "../../../classes/StatTable";
 import { weaponStatTables } from "../../generated/WeaponStatTables";
+import { weaponPassiveTables } from "../../generated/WeaponPassiveTables";
+import { percent } from "../../Params";
 
 export const TulaytullahsRemembrance = new DbObjectWeapon({
     name: 'tulaytullahs_remembrance',
@@ -20,7 +22,7 @@ export const TulaytullahsRemembrance = new DbObjectWeapon({
             title: 'talent_name.weapon_tulaytullahs_remembrance',
             description: 'talent_descr.weapon_tulaytullahs_remembrance_1',
             stats: [
-                new StatTable('atk_speed_normal', [10, 12.5, 15, 17.5, 20]),
+                new StatTable('atk_speed_normal', percent(weaponPassiveTables.TulaytullahsRemembrance.p1)),
             ],
         }),
         new ConditionStacks({
@@ -28,7 +30,7 @@ export const TulaytullahsRemembrance = new DbObjectWeapon({
             serializeId: 2,
             title: 'talent_name.weapon_tulaytullahs_remembrance',
             description: 'talent_descr.weapon_tulaytullahs_remembrance_2',
-            maxStacks: 10,
+            maxStacks: weaponPassiveTables.TulaytullahsRemembrance.p7[0],
             levelSetting: 'weapon_refine',
             dropdownClass: 'stack-percent',
             titleFunc: function(value, stats) {
@@ -37,7 +39,7 @@ export const TulaytullahsRemembrance = new DbObjectWeapon({
                 }
             },
             stats: [
-                new StatTable('dmg_normal', [4.8, 6, 7.2, 8.4, 9.6]),
+                new StatTable('dmg_normal', percent(weaponPassiveTables.TulaytullahsRemembrance.p2)),
                 new StatTable('text_percent_1', [4.8*2, 6*2, 7.2*2, 8.4*2, 9.6*2]),
                 new StatTable('text_percent_2', [4.8*10, 6*10, 7.2*10, 8.4*10, 9.6*10]),
             ],

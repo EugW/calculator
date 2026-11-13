@@ -167,6 +167,18 @@ export class StorageItem {
         return item.data;
     }
 
+    /**
+     * Store a record read from a backup. It is packed again, so a record of
+     * an older layout is stored in the current one.
+     *
+     * @param {Object} object the decoded record
+     * @param {Object} meta its other fields
+     * @param {string} data the record as the backup holds it
+     */
+    addFromBackup(object, meta, data) {
+        this.add(object, meta);
+    }
+
     fromBackup(newItems, append) {
         if (!Array.isArray(newItems)) return;
 
@@ -183,14 +195,14 @@ export class StorageItem {
             }
 
             for (const item of newItems) {
-                if (exist[item.data]) continue;
+                if (exist[this.itemHash(item)]) continue;
 
                 let obj = this.decodeItem(item.data);
                 if (obj) {
                     exist[this.itemHash(item)] = 1;
                     let meta = Object.assign({}, item);
                     delete meta.data;
-                    this.add(obj, meta);
+                    this.addFromBackup(obj, meta, item.data);
                 }
             }
 

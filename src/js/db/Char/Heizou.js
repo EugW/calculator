@@ -15,8 +15,10 @@ import { FeatureDamagePlungeShockWave } from "../../classes/Feature2/Damage/Plun
 import { FeatureDamageSkill } from "../../classes/Feature2/Damage/Skill";
 import { FeatureMultiplier } from "../../classes/Feature2/Multiplier";
 import { StatTable } from "../../classes/StatTable";
+import { RECEIVERS } from "../../classes/Team/Receivers";
 import { charTables } from "../generated/CharTables";
 import { charTalentTables } from "../generated/CharTalentTables";
+import { percent } from "../Params";
 
 const Talents = new DbObjectTalents({
     attack: {
@@ -111,10 +113,10 @@ const Talents = new DbObjectTalents({
 });
 
 const TalentValues = {
-    A4Mastery: 80,
-    C1AtkSpeed: 15,
-    C6CritRate: 4,
-    C6CritDmg: 32,
+    A4Mastery: charTalentTables.Heizou.a4.p2,
+    C1AtkSpeed: percent(charTalentTables.Heizou.c1.p2),
+    C6CritRate: percent(charTalentTables.Heizou.c6.p1),
+    C6CritDmg: percent(charTalentTables.Heizou.c6.p2),
 };
 
 export const Heizou = new DbObjectChar({
@@ -432,6 +434,19 @@ export const Heizou = new DbObjectChar({
                 new ConditionAscensionChar({ascension: 4}),
             ],
         }),
+        // Heartstopper Strike hits: all party members but Heizou himself.
+        new ConditionBoolean({
+            name: 'shikanoin_heizou_penetrative_reasoning',
+            serializeId: 3,
+            receivers: RECEIVERS.OTHERS,
+            title: 'talent_name.shikanoin_heizou_penetrative_reasoning',
+            description: 'talent_descr.shikanoin_heizou_penetrative_reasoning',
+            info: {ascension: 4},
+            stats: {
+                mastery: TalentValues.A4Mastery,
+            },
+            displayStats: {text_value: TalentValues.A4Mastery},
+        }),
     ],
     constellation: new DbObjectConstellation([
         {
@@ -497,20 +512,5 @@ export const Heizou = new DbObjectChar({
             ],
         },
     ]),
-    partyData: {
-        conditions: [
-            new ConditionBoolean({
-                name: 'party.shikanoin_heizou_penetrative_reasoning',
-                serializeId: 1,
-                title: 'talent_name.shikanoin_heizou_penetrative_reasoning',
-                description: 'talent_descr.shikanoin_heizou_penetrative_reasoning',
-                rotation: 'party',
-                info: {ascension: 4},
-                stats: {
-                    text_value: TalentValues.A4Mastery,
-                    mastery: TalentValues.A4Mastery,
-                },
-            }),
-        ],
-    },
+    retiredParty: [[1, 'checkbox']],
 });

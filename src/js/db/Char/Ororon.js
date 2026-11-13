@@ -1,7 +1,11 @@
 import { Condition } from "../../classes/Condition";
+import { ConditionAnd } from "../../classes/Condition/And";
 import { ConditionAscensionChar } from "../../classes/Condition/Ascension/Char";
 import { ConditionBoolean } from "../../classes/Condition/Boolean";
+import { ConditionOnField } from "../../classes/Condition/Field";
 import { ConditionConstellation } from "../../classes/Condition/Constellation";
+import { ConditionLevels } from "../../classes/Condition/Levels";
+import { ConditionReceiver } from "../../classes/Condition/Receiver";
 import { ConditionStacks } from "../../classes/Condition/Stacks";
 import { ConditionStatic } from "../../classes/Condition/Static";
 import { DbObjectChar } from "../../classes/DbObject/Char";
@@ -16,16 +20,18 @@ import { FeatureDamagePlungeShockWave } from "../../classes/Feature2/Damage/Plun
 import { FeatureDamageSkill } from "../../classes/Feature2/Damage/Skill";
 import { FeatureMultiplier } from "../../classes/Feature2/Multiplier";
 import { StatTable } from "../../classes/StatTable";
+import { RECEIVERS } from "../../classes/Team/Receivers";
 import { charTables } from "../generated/CharTables";
 import { charTalentTables } from "../generated/CharTalentTables";
+import { percent } from "../Params";
 
-const A1Dmg = 160;
-const C1SkillDmg = 50;
-const C2ElectroDmg = 8;
+const A1Dmg = percent(charTalentTables.Ororon.a1.p2);
+const C1SkillDmg = percent(charTalentTables.Ororon.c1.p1);
+const C2ElectroDmg = percent(charTalentTables.Ororon.c2.p1);
 const C2ElectroDmgStacks = 4;
-const C6AtkBonus = 10;
-const C6AtkBonusStacks = 3;
-const C6Dmg = 200;
+const C6AtkBonus = percent(charTalentTables.Ororon.c6.p1);
+const C6AtkBonusStacks = charTalentTables.Ororon.c6.p3;
+const C6Dmg = percent(charTalentTables.Ororon.c6.p4);
 
 const Talents = new DbObjectTalents({
     attack: {
@@ -318,14 +324,26 @@ export const Ororon = new DbObjectChar({
         },
         {
             conditions: [
+                // The current active character. The source's stacks remain
+                // saved when Ororon is off-field and buffs somebody else.
                 new ConditionStacks({
                     name: 'ororon_ode_to_deep_springs',
                     serializeId: 3,
                     title: 'talent_name.ororon_ode_to_deep_springs',
                     description: 'talent_descr.ororon_ode_to_deep_springs_1',
                     maxStacks: C6AtkBonusStacks,
+                    displayStats: [new StatTable('atk_percent', [C6AtkBonus])],
+                }),
+                new ConditionLevels({
+                    levelSetting: 'ororon_ode_to_deep_springs',
+                    isHidden: true,
+                    receivers: RECEIVERS.TEAM,
+                    condition: new ConditionAnd([
+                        new ConditionBoolean({name: 'ororon_ode_to_deep_springs'}),
+                        new ConditionReceiver({condition: new ConditionOnField()}),
+                    ]),
                     stats: [
-                        new StatTable('atk_percent', [C6AtkBonus]),
+                        new StatTable('atk_percent', [C6AtkBonus, 2 * C6AtkBonus, 3 * C6AtkBonus]),
                     ],
                 }),
                 new ConditionStatic({
@@ -338,20 +356,5 @@ export const Ororon = new DbObjectChar({
             ],
         },
     ]),
-    partyData: {
-        conditions: [
-            new ConditionStacks({
-                name: 'ororon_ode_to_deep_springs',
-                serializeId: 1,
-                title: 'talent_name.ororon_ode_to_deep_springs',
-                description: 'talent_descr.ororon_ode_to_deep_springs_1',
-                rotation: 'party',
-                maxStacks: C6AtkBonusStacks,
-                info: {constellation: 6},
-                stats: [
-                    new StatTable('atk_percent', [C6AtkBonus]),
-                ],
-            }),
-        ],
-    },
+    retiredParty: [[1, 'stacks']],
 });

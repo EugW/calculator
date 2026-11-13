@@ -3,6 +3,8 @@ import { ConditionStaticRefine } from "../../../classes/Condition/Static/Refine"
 import { DbObjectWeapon } from "../../../classes/DbObject/Weapon";
 import { StatTable } from "../../../classes/StatTable";
 import { weaponStatTables } from "../../generated/WeaponStatTables";
+import { weaponPassiveTables } from "../../generated/WeaponPassiveTables";
+import { percent } from "../../Params";
 
 export const BloodtaintedGreatsword = new DbObjectWeapon({
     name: 'bloodtainted_greatsword',
@@ -38,7 +40,7 @@ export const BloodtaintedGreatsword = new DbObjectWeapon({
             title: 'talent_name.weapon_bane_of_fire_and_thunder',
             description: 'talent_descr.weapon_bane_of_fire_and_thunder',
             stats: [
-                new StatTable('dmg_all', [12, 15, 18, 21, 24]),
+                new StatTable('dmg_all', percent(weaponPassiveTables.BloodtaintedGreatsword.p1)),
             ],
             subConditions: [
                 new ConditionEnemyStatus({

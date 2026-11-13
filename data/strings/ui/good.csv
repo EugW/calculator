@@ -12,15 +12,35 @@ good_import;export;Экспортировать;Export
 good_import;replace_alert;Это действие удалит все существующите артефакты в хранилище. Вы уверены?;All existed artifacts in storage will be removed. Are you sure?
 good_import;disclaimer;<p>Вы можете импортировать артефакты из сторонних програм-сканнеров артефактов, которые могут сохранять результат в формате GOOD.</p><p>Используйте подобные програмы на свой страх и риск.</p>;You can import artifacts from third-party artifacts scanners that support GOOD format.</p><p>Use such programs at your own risk.</p>
 good_import;status_error_0;Успешно;Success
-good_import;status_error_1;Ошибка;Error
-good_import;status_error_2;Ошибка;Error
+good_import;status_error_1;Не удалось прочитать JSON. Проверьте файл или текст.;Unable to read JSON. Check the file or text.
+good_import;status_error_2;Ожидается файл GOOD с массивом артефактов.;Expected a GOOD file with an artifacts array.
 
 good_import;import_added;Новые;New
 good_import;import_updated;Новые метаданные;New metadata
-good_import;import_missing;Нет в Хранилище;Not in Storage
+good_import;import_missing;Нет в файле;Missing from file
 
 good_import;action_added;Добавить в Хранилише;Add to Storage
 good_import;action_updated;Дополнить в Хранилище;Enrich existing artifacts
 good_import;action_missing;Удалить из Хранилища;Delete from Storage
 good_import;import_locks;Новые заблокированные;Locked new
 good_import;action_locks;Применить игровые замки;Apply game locks
+
+tab_header;good_import;Импорт GOOD;GOOD import
+good_import;current_storage;Текущее хранилище;Current storage
+good_import;initial_values;Начальные значения;Initial values
+good_import;present;Есть;Present
+good_import;absent;Нет;Absent
+good_import;initial_values_note;Начальные значения учитываются, если известно хотя бы одно.;Initial values count when at least one is known.
+good_import;load_source;Файл GOOD или JSON;GOOD file or JSON
+good_import;reading;Чтение файла…;Reading file…
+good_import;source_empty;Загрузите файл или вставьте JSON.;Load a file or paste JSON.
+good_import;skipped;Пропущено записей;Skipped records
+good_import;import_applied;Импорт выполнен;Import applied
+good_import;changes;Изменения;Changes
+good_import;changes_empty;Загрузите данные GOOD для просмотра изменений.;Load GOOD data to preview changes.
+good_import;new_artifact_groups;Группы для новых артефактов;Groups for new artifacts
+good_import;create_group;Создать группу;Create group
+good_import;import_matched;Без изменений;Unchanged
+good_import;action_unchanged;Оставить в хранилище;Keep in storage
+good_import;choose_file;Выбрать файл;Choose file
+good_import;no_file_loaded;Файл не загружен;No file loaded

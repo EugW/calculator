@@ -2,13 +2,13 @@ import { Condition } from "../../classes/Condition";
 import { ConditionAnd } from "../../classes/Condition/And";
 import { ConditionAscensionChar } from "../../classes/Condition/Ascension/Char";
 import { ConditionBoolean } from "../../classes/Condition/Boolean";
+import { ConditionOnField } from "../../classes/Condition/Field";
 import { ConditionBooleanDropdownValue } from "../../classes/Condition/Boolean/DropdownValue";
 import { ConditionConstellation } from "../../classes/Condition/Constellation";
 import { ConditionDropdownElement } from "../../classes/Condition/Dropdown/Element";
 import { ConditionHexereiResonance } from "../../classes/Condition/HexereiResonance";
 import { ConditionNot } from "../../classes/Condition/Not";
-import { ConditionNumber } from "../../classes/Condition/Number";
-import { ConditionOr } from "../../classes/Condition/Or";
+import { ConditionReceiver } from "../../classes/Condition/Receiver";
 import { ConditionStatic } from "../../classes/Condition/Static";
 import { DbObjectChar } from "../../classes/DbObject/Char";
 import { DbObjectConstellation } from "../../classes/DbObject/Constellation";
@@ -22,10 +22,13 @@ import { FeatureDamagePlungeShockWave } from "../../classes/Feature2/Damage/Plun
 import { FeatureDamageSkill } from "../../classes/Feature2/Damage/Skill";
 import { FeatureMultiplier } from "../../classes/Feature2/Multiplier";
 import { FeatureMultiplierTarget } from "../../classes/Feature2/Multiplier/Target";
+import { CHANNELS } from "../../classes/PostEffect/Channels";
 import { PostEffectStatsAtk } from "../../classes/PostEffect/Stats/Atk";
+import { RECEIVERS } from "../../classes/Team/Receivers";
 import { StatTable } from "../../classes/StatTable";
 import { charTables } from "../generated/CharTables";
 import { charTalentTables } from "../generated/CharTalentTables";
+import { percent, plus, times } from "../Params";
 
 const Talents = new DbObjectTalents({
     attack: {
@@ -136,36 +139,55 @@ const Talents = new DbObjectTalents({
 });
 
 // Passive and constellation values
-const A1ResShred = 20;
-const A1ResShredHexerei = 35; // 20% * 1.75 = 35%
-const A1VaporizeMeltBonus = 40;
-const A1VaporizeMeltBonusHexerei = 70; // 40% * 1.75 = 70%
-const A4PrimordialMaxBonus = 75;
-const A4PrimordialAtkScale = 3; // 3% per 100 ATK (PostEffect divides by 100 for percent stats)
+const A1ResShred = percent(charTalentTables.Durin.a1.p1);
+const A1ResShredHexerei = percent(times(charTalentTables.Durin.a1.p1, plus(1, charTalentTables.Durin.sp.p1)));
+const A1VaporizeMeltBonus = percent(charTalentTables.Durin.a1.p3);
+const A1VaporizeMeltBonusHexerei = percent(times(charTalentTables.Durin.a1.p3, plus(1, charTalentTables.Durin.sp.p1)));
+const A4PrimordialMaxBonus = percent(charTalentTables.Durin.a4.p2);
+const A4PrimordialAtkScale = percent(charTalentTables.Durin.a4.p1); // per 100 ATK (PostEffect divides by 100 for percent stats)
 
 // A4 - Primordial Fusion: Dragon attacks consume stack and gain DMG multiplier based on ATK
 // This is a separate multiplicative layer, not additive DMG bonus
 // Formula: 100% + min(3% * ATK / 100, 75%) = up to 175% multiplier
+// Game data: Avatar_Durin_PermanentSkill_2 (UNIQUE_Avatar_Durin_PermanentSkill_2_DamageUp,
+// onThinkInterval/onHittingOther) reads FIGHT_PROP_CUR_ATTACK (total). GO reads
+// input.total.atk. Writes dmg_burst_periodic_special, which has no extra lane,
+// so no writes param is needed. KQM Durin page has no ATK-interaction test.
 const a4PrimordialPost = new PostEffectStatsAtk({
-    percent: new StatTable('dmg_burst_periodic_special', [A4PrimordialAtkScale]),
+    reads: CHANNELS.TOTAL,
+    // Game formula: 3% per 100 ATK (ATK/100 x 0.03, cap 0.75): the game sets
+    // ATTACK_PermanentSkill_2 = FIGHT_PROP_CUR_ATTACK/100 then x
+    // Permanent_2_DamageRatio (ProudSkill 12322 params [0.03, 0.75]); GO does
+    // prod(percent(3%), input.total.atk, 1/100). The /100 for "per 100 ATK"
+    // lives in content (cf. Odette stellarglimmer_multi [x/100]).
+    percent: new StatTable('dmg_burst_periodic_special', [A4PrimordialAtkScale / 100]),
     statCap: new StatTable('', [A4PrimordialMaxBonus]),
     conditions: [
         new ConditionAscensionChar({ascension: 4}),
         new ConditionBoolean({name: 'durin_primordial_fusion'}),
     ],
 });
-const C1CycleAtkScale = 60;
-const C1CycleSelfAtkScale = 150;
-const C2PyroDmgBonus = 50;
-const C4BurstDmgBonus = 40;
-const C6DefIgnore = 30;
-const C6DefShred = 30;
-const C6DarknessDefIgnoreExtra = 40;
+const C1CycleAtkScale = percent(charTalentTables.Durin.c1.p5);
+const C1CycleSelfAtkScale = percent(charTalentTables.Durin.c1.p7);
+const C2PyroDmgBonus = percent(charTalentTables.Durin.c2.p3);
+const C4BurstDmgBonus = percent(charTalentTables.Durin.c4.p3);
+const C6DefIgnore = percent(charTalentTables.Durin.c6.p1);
+const C6DefShred = percent(charTalentTables.Durin.c6.p2);
+const C6DarknessDefIgnoreExtra = percent(charTalentTables.Durin.c6.p4);
 
 // Condition shortcuts for Dragon Form
 // Toggle OFF (default) = Purity mode, Toggle ON = Darkness mode
 const condDarknessMode = new ConditionBoolean({name: 'durin_darkness_mode'});
 const condPurityMode = new ConditionNot([new ConditionBoolean({name: 'durin_darkness_mode'})]);
+
+// The White Flame form (Principle of Purity) gates A1's RES shred and C1's
+// party Cycle of Enlightenment. The old model gated only their controls, so
+// the effects still applied in Darkness mode, and its recordings were made
+// that way; the conversion row and the solo baseline open this gate.
+export const durinWhiteFlame = new ConditionNot([new ConditionBoolean({name: 'durin_darkness_mode'})]);
+const activeRecipient = new ConditionReceiver({
+    condition: new ConditionOnField(),
+});
 
 export const Durin = new DbObjectChar({
     name: 'durin',
@@ -387,6 +409,11 @@ export const Durin = new DbObjectChar({
         }),
     ],
     // C1 - Dark form (Principle of Darkness): 150% ATK flat damage bonus to Burst
+    // C1 - Light form (Principle of Purity): 60% ATK flat damage for other members
+    // Game data: Avatar_Durin_Talent_1 (UNIQUE_Avatar_Durin_DamageExtra_Black_Buff /
+    // _White_Buff, ModifyDamageCountMixin) reads FIGHT_PROP_CUR_ATTACK (total).
+    // GO reads input.total.atk. Damage flat bonuses read the total by
+    // construction (FeatureMultiplier scaling atk*), so no params are needed.
     multipliers: [
         new FeatureMultiplier({
             scaling: 'atk*',
@@ -394,10 +421,29 @@ export const Durin = new DbObjectChar({
             values: new StatTable('', [C1CycleSelfAtkScale]), // 150% of ATK
             condition: new ConditionAnd([
                 new ConditionConstellation({constellation: 1}),
+                condDarknessMode,
                 new ConditionBoolean({name: 'durin_c1_cycle_self'}),
             ]),
             target: new FeatureMultiplierTarget({
                 damageTypes: ['burst'],
+            }),
+        }),
+        // "All other nearby party members gain 20 stacks ... When nearby
+        // active characters deal ... DMG, 1 stack ... increase the DMG dealt
+        // by 60% of Durin's ATK": the on-field member among the others.
+        new FeatureMultiplier({
+            receivers: RECEIVERS.OTHERS,
+            scaling: 'atk*',
+            source: 'durin_c1',
+            values: new StatTable('', [C1CycleAtkScale]), // 60% of ATK
+            condition: new ConditionAnd([
+                new ConditionConstellation({constellation: 1}),
+                durinWhiteFlame,
+                new ConditionBoolean({name: 'durin_c1_cycle_party'}),
+                activeRecipient,
+            ]),
+            target: new FeatureMultiplierTarget({
+                damageTypes: ['normal', 'charged', 'plunge', 'skill', 'burst'],
             }),
         }),
     ],
@@ -439,13 +485,17 @@ export const Durin = new DbObjectChar({
                 { value: 'geo', serializeId: 5 },
             ],
         }),
-        // A1 - Dragon of White Flame RES shred effects (base, no Hexerei)
+        // A1 - Dragon of White Flame RES shred effects (base, no Hexerei).
+        // An opponent debuff, so it reaches the whole team.
         ...['pyro', 'dendro', 'electro', 'anemo', 'geo'].map((elem) => {
             return new Condition({
+                receivers: RECEIVERS.TEAM,
                 stats: {
                     ['enemy_res_' + elem]: -A1ResShred,
                 },
                 condition: new ConditionAnd([
+                    new ConditionAscensionChar({ascension: 1}),
+                    durinWhiteFlame,
                     new ConditionBooleanDropdownValue({name: 'durin_res_shred', value: elem}),
                     new ConditionNot([new ConditionHexereiResonance({})]),
                 ]),
@@ -454,10 +504,13 @@ export const Durin = new DbObjectChar({
         // A1 - Dragon of White Flame RES shred effects (Hexerei enhanced)
         ...['pyro', 'dendro', 'electro', 'anemo', 'geo'].map((elem) => {
             return new Condition({
+                receivers: RECEIVERS.TEAM,
                 stats: {
                     ['enemy_res_' + elem]: -A1ResShredHexerei,
                 },
                 condition: new ConditionAnd([
+                    new ConditionAscensionChar({ascension: 1}),
+                    durinWhiteFlame,
                     new ConditionBooleanDropdownValue({name: 'durin_res_shred', value: elem}),
                     new ConditionHexereiResonance({}),
                 ]),
@@ -483,6 +536,8 @@ export const Durin = new DbObjectChar({
                 dmg_reaction_melt: A1VaporizeMeltBonus,
             },
             condition: new ConditionAnd([
+                new ConditionAscensionChar({ascension: 1}),
+                condDarknessMode,
                 new ConditionBoolean({name: 'durin_vaporize_melt_bonus'}),
                 new ConditionNot([new ConditionHexereiResonance({})]),
             ]),
@@ -494,6 +549,8 @@ export const Durin = new DbObjectChar({
                 dmg_reaction_melt: A1VaporizeMeltBonusHexerei,
             },
             condition: new ConditionAnd([
+                new ConditionAscensionChar({ascension: 1}),
+                condDarknessMode,
                 new ConditionBoolean({name: 'durin_vaporize_melt_bonus'}),
                 new ConditionHexereiResonance({}),
             ]),
@@ -506,6 +563,59 @@ export const Durin = new DbObjectChar({
             description: 'talent_descr.durin_chaos_formed_like_the_night',
             info: {ascension: 4},
             condition: new ConditionAscensionChar({ascension: 4}),
+        }),
+        // C1 - Light form party buff (source control; the OTHERS multiplier
+        // above delivers it).
+        new ConditionBoolean({
+            name: 'durin_c1_cycle_party',
+            serializeId: 4,
+            hideInactive: true,
+            title: 'talent_name.durin_adamahs_redemption',
+            description: 'talent_descr.durin_adamahs_redemption',
+            stats: {
+                text_atk_percent: C1CycleAtkScale,
+            },
+            info: {constellation: 1},
+            condition: new ConditionAnd([
+                new ConditionConstellation({constellation: 1}),
+                durinWhiteFlame,
+            ]),
+        }),
+        // C2 - Unground Visions: "all nearby party members gain a 50% increase
+        // to their Pyro DMG and to the corresponding elemental DMG involved in
+        // the reaction". Pyro is durin_c2_pyro_bonus (TEAM); this dropdown
+        // picks the reactions' other elements.
+        new ConditionDropdownElement({
+            name: 'durin_c2_dmg_bonus',
+            serializeId: 5,
+            multiple: true,
+            hideEmpty: true,
+            dropdownClass: 'select-element-multiple',
+            title: 'talent_name.durin_unground_visions',
+            description: 'talent_descr.durin_unground_visions',
+            info: {constellation: 2},
+            condition: new ConditionConstellation({constellation: 2}),
+            values: [
+                { value: 'hydro', serializeId: 2 },
+                { value: 'cryo', serializeId: 3 },
+                { value: 'dendro', serializeId: 4 },
+                { value: 'electro', serializeId: 5 },
+                { value: 'anemo', serializeId: 6 },
+                { value: 'geo', serializeId: 7 },
+            ],
+        }),
+        ...['hydro', 'cryo', 'dendro', 'electro', 'anemo', 'geo'].map((elem) => {
+            return new Condition({
+                isHidden: true,
+                receivers: RECEIVERS.TEAM,
+                stats: {
+                    ['dmg_' + elem]: C2PyroDmgBonus,
+                },
+                condition: new ConditionAnd([
+                    new ConditionConstellation({constellation: 2}),
+                    new ConditionBooleanDropdownValue({name: 'durin_c2_dmg_bonus', value: elem}),
+                ]),
+            });
         }),
     ],
     postEffects: [
@@ -533,6 +643,7 @@ export const Durin = new DbObjectChar({
                 new ConditionBoolean({
                     name: 'durin_c2_pyro_bonus',
                     serializeId: 3,
+                    receivers: RECEIVERS.TEAM,
                     title: 'talent_name.durin_unground_visions',
                     description: 'talent_descr.durin_unground_visions',
                     stats: {
@@ -579,13 +690,14 @@ export const Durin = new DbObjectChar({
                     title: 'talent_name.durin_dual_birth',
                     description: 'talent_descr.durin_dual_birth',
                     stats: {
-                        enemy_def_ignore_burst: C6DefIgnore,
+                        def_ignore_burst: C6DefIgnore,
                     },
                 }),
-                // Purity form: DEF shred 30% - Purity mode only
+                // Purity form: DEF shred 30% - Purity mode only, opponent debuff shared with team
                 new ConditionBoolean({
                     name: 'durin_c6_def_shred',
                     serializeId: 6,
+                    receivers: RECEIVERS.TEAM,
                     hideInactive: true,
                     title: 'talent_name.durin_dual_birth',
                     description: 'talent_descr.durin_dual_birth',
@@ -597,156 +709,12 @@ export const Durin = new DbObjectChar({
                 // Darkness form: Additional 40% DEF ignore - Darkness mode only, auto-active
                 new Condition({
                     stats: {
-                        enemy_def_ignore_burst: C6DarknessDefIgnoreExtra,
+                        def_ignore_burst: C6DarknessDefIgnoreExtra,
                     },
                     condition: condDarknessMode,
                 }),
             ],
         },
     ]),
-    // Party buffs
-    partyData: {
-        loadStats: {
-            stats: ['atk_total'],
-        },
-        conditions: [
-            new ConditionNumber({
-                name: 'durin_atk_total',
-                title: 'talent_name.stats_total_atk',
-                partyStat: 'atk_total',
-                serializeId: 1,
-                rotation: 'party',
-                max: 10000,
-            }),
-            // Dragon Form selector for party buffs - OFF (default) = Purity, ON = Darkness
-            new ConditionBoolean({
-                name: 'party.durin_darkness_mode',
-                serializeId: 6,
-                rotation: 'party',
-                title: 'talent_name.durin_darkness_mode',
-            }),
-            // C1 - Light form party buff toggle - Purity mode only
-            new ConditionBoolean({
-                name: 'party.durin_c1_cycle_party',
-                serializeId: 2,
-                rotation: 'party',
-                hideInactive: true,
-                title: 'talent_name.durin_adamahs_redemption',
-                description: 'talent_descr.durin_adamahs_redemption',
-                stats: {
-                    text_atk_percent: C1CycleAtkScale,
-                },
-                info: {constellation: 1},
-                condition: new ConditionNot([new ConditionBoolean({name: 'party.durin_darkness_mode'})]),
-            }),
-            // A1 - Dragon of White Flame RES shred (party buff) - Purity mode only
-            new ConditionDropdownElement({
-                name: 'party.durin_res_shred',
-                serializeId: 3,
-                multiple: true,
-                hideEmpty: true,
-                hideInactive: true,
-                dropdownClass: 'select-element-multiple',
-                title: 'talent_name.durin_light_manifest_of_the_divine_calculus',
-                description: 'talent_descr.durin_light_manifest_of_the_divine_calculus',
-                info: {ascension: 1},
-                condition: new ConditionNot([new ConditionBoolean({name: 'party.durin_darkness_mode'})]),
-                values: [
-                    { value: 'pyro', serializeId: 1 },
-                    { value: 'dendro', serializeId: 2 },
-                    { value: 'electro', serializeId: 3 },
-                    { value: 'anemo', serializeId: 4 },
-                    { value: 'geo', serializeId: 5 },
-                ],
-            }),
-            // A1 - RES shred effects (base, no Hexerei) - party version
-            ...['pyro', 'dendro', 'electro', 'anemo', 'geo'].map((elem) => {
-                return new Condition({
-                    stats: {
-                        ['enemy_res_' + elem]: -A1ResShred,
-                    },
-                    condition: new ConditionAnd([
-                        new ConditionBooleanDropdownValue({name: 'party.durin_res_shred', value: elem}),
-                        new ConditionNot([new ConditionHexereiResonance({})]),
-                    ]),
-                });
-            }),
-            // A1 - RES shred effects (Hexerei enhanced) - party version
-            ...['pyro', 'dendro', 'electro', 'anemo', 'geo'].map((elem) => {
-                return new Condition({
-                    stats: {
-                        ['enemy_res_' + elem]: -A1ResShredHexerei,
-                    },
-                    condition: new ConditionAnd([
-                        new ConditionBooleanDropdownValue({name: 'party.durin_res_shred', value: elem}),
-                        new ConditionHexereiResonance({}),
-                    ]),
-                });
-            }),
-            // Witch Homework toggle for party (makes Durin count as Hexerei)
-            new ConditionBoolean({
-                name: 'party.durin_witch_homework',
-                serializeId: 4,
-                rotation: 'party',
-                title: 'talent_name.durin_ode_to_ascension',
-                description: 'talent_descr.durin_ode_to_ascension',
-                info: {hexerei: true},
-            }),
-            // C2 - Unground Visions: 50% elemental DMG bonus (party buff)
-            new ConditionDropdownElement({
-                name: 'party.durin_c2_dmg_bonus',
-                serializeId: 5,
-                multiple: true,
-                hideEmpty: true,
-                dropdownClass: 'select-element-multiple',
-                title: 'talent_name.durin_unground_visions',
-                description: 'talent_descr.durin_unground_visions',
-                info: {constellation: 2},
-                values: [
-                    { value: 'pyro', serializeId: 1 },
-                    { value: 'hydro', serializeId: 2 },
-                    { value: 'cryo', serializeId: 3 },
-                    { value: 'dendro', serializeId: 4 },
-                    { value: 'electro', serializeId: 5 },
-                    { value: 'anemo', serializeId: 6 },
-                    { value: 'geo', serializeId: 7 },
-                ],
-            }),
-            // C2 - DMG bonus effects
-            ...['pyro', 'hydro', 'cryo', 'dendro', 'electro', 'anemo', 'geo'].map((elem) => {
-                return new Condition({
-                    stats: {
-                        ['dmg_' + elem]: C2PyroDmgBonus,
-                    },
-                    condition: new ConditionBooleanDropdownValue({name: 'party.durin_c2_dmg_bonus', value: elem}),
-                });
-            }),
-            // C6 - Purity form: DEF shred 30% (party buff) - Purity mode only
-            new ConditionBoolean({
-                name: 'party.durin_c6_def_shred',
-                serializeId: 7,
-                rotation: 'party',
-                hideInactive: true,
-                title: 'talent_name.durin_dual_birth',
-                description: 'talent_descr.durin_dual_birth',
-                stats: {
-                    enemy_def_reduce: C6DefShred,
-                },
-                info: {constellation: 6},
-                condition: new ConditionNot([new ConditionBoolean({name: 'party.durin_darkness_mode'})]),
-            }),
-        ],
-        multipliers: [
-            // C1 Light form: 60% of Durin's ATK as flat damage for all damage types
-            new FeatureMultiplier({
-                scaling: 'durin_atk_total',
-                source: 'durin_c1',
-                values: new StatTable('', [C1CycleAtkScale]), // 60% of ATK
-                condition: new ConditionBoolean({name: 'party.durin_c1_cycle_party'}),
-                target: new FeatureMultiplierTarget({
-                    damageTypes: ['normal', 'charged', 'plunge', 'skill', 'burst'],
-                }),
-            }),
-        ],
-    },
+    retiredParty: [[1, 'number'], [6, 'checkbox'], [2, 'checkbox'], [3, 'dropdown'], [4, 'checkbox'], [5, 'dropdown'], [7, 'checkbox']],
 });

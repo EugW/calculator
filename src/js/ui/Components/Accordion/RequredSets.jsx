@@ -6,7 +6,6 @@ import { ArtifactSetIcon } from '../Icons';
 import { TitledButton } from '../Inputs/Buttons';
 import { GroupBox } from '../Inputs/GroupBox';
 import { ControlsBar } from '../ControlsBar';
-import { Condition } from '../../../classes/Condition';
 
 export class AccordionRequredSets extends React.Component {
     constructor(props) {
@@ -31,34 +30,6 @@ export class AccordionRequredSets extends React.Component {
                 this.props.onChange(slot, set ? set.key : '');
             }
         });
-    }
-
-    handleSettingsChange(artSetConditions) {
-        UI.ArtifactSetSettingsModal.show(artSetConditions, Object.assign(this.allSettings || {}, this.props.settings), (settings) => {
-            this.props.showSettingsCallback(settings);
-        });
-    }
-
-    getArtSetSettingsConditions() {
-        if (!this.props.showSettingsCallback) return [];
-
-        let setPieces = {};
-        for (let name of ['set1', 'set2']) {
-            let setName = this.props[name];
-            if (setName) {
-                setPieces[setName] = (setPieces[setName] || 0) + 2;
-            }
-        }
-
-        let conditions = [];
-        for (let setId of Object.keys(setPieces)) {
-            let setData = DB.Artifacts.Sets.get(setId);
-            conditions = conditions.concat( setData.getConditions(setPieces[setId]) );
-        }
-
-        this.allSettings = Condition.allConditionsOn(conditions);
-
-        return conditions.filter((i) => {return i.isSerializable();});
     }
 
     render() {
@@ -88,8 +59,6 @@ export class AccordionRequredSets extends React.Component {
             }
         }
 
-        let artSetConditions = this.getArtSetSettingsConditions();
-
         return (
             <GroupBox title={this.props.title}>
                 <div className="accordion-artifact-reqsets">
@@ -112,11 +81,6 @@ export class AccordionRequredSets extends React.Component {
                         title={this.strings.reset}
                         onClick={this.props.onReset}
                     />
-                    {artSetConditions.length ? <TitledButton
-                        icon="icon-ok"
-                        title={this.lang.get('artifacts_ui.settings')}
-                        onClick={() => this.handleSettingsChange(artSetConditions)}
-                    /> : <span />}
                 </ControlsBar>
             </GroupBox>
         );

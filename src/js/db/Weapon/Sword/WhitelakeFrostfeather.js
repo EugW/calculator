@@ -3,6 +3,8 @@ import { ConditionStacks } from "../../../classes/Condition/Stacks";
 import { DbObjectWeapon } from "../../../classes/DbObject/Weapon";
 import { StatTable } from "../../../classes/StatTable";
 import { weaponStatTables } from "../../generated/WeaponStatTables";
+import { weaponPassiveTables } from "../../generated/WeaponPassiveTables";
+import { percent } from "../../Params";
 
 export const WhitelakeFrostfeather = new DbObjectWeapon({
     name: 'whitelake_frostfeather',
@@ -18,10 +20,10 @@ export const WhitelakeFrostfeather = new DbObjectWeapon({
             serializeId: 1,
             title: 'talent_name.weapon_whitelake_frostfeather',
             description: 'talent_descr.weapon_whitelake_frostfeather_1',
-            maxStacks: 3,
+            maxStacks: weaponPassiveTables.WhitelakeFrostfeather.p4[0],
             levelSetting: 'weapon_refine',
             stats: [
-                new StatTable('atk_percent', [8, 10, 12, 14, 16]),
+                new StatTable('atk_percent', percent(weaponPassiveTables.WhitelakeFrostfeather.p2)),
             ],
         }),
         new ConditionBooleanValue({
@@ -30,10 +32,10 @@ export const WhitelakeFrostfeather = new DbObjectWeapon({
             levelSetting: 'weapon_refine',
             setting: 'weapon_whitelake_frostfeather',
             cond: 'ge',
-            value: 3,
+            value: weaponPassiveTables.WhitelakeFrostfeather.p4[0],
             stats: [
-                new StatTable('crit_dmg_stellarglimmer', [50, 65, 80, 95, 110]),
-                new StatTable('text_number_energy', [4, 4.5, 5, 5.5, 6]),
+                new StatTable('crit_dmg_stellarglimmer', percent(weaponPassiveTables.WhitelakeFrostfeather.p5)),
+                new StatTable('text_number_energy', weaponPassiveTables.WhitelakeFrostfeather.p1),
             ],
         }),
     ],

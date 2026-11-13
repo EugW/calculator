@@ -1,10 +1,14 @@
-import { ConditionBoolean } from "../../../classes/Condition/Boolean";
+import { ConditionShielded } from "../../../classes/Condition/Field";
+import { ConditionRetired } from "../../../classes/Condition/Retired";
+import { ConditionStatic } from "../../../classes/Condition/Static";
 import { ConditionStacks } from "../../../classes/Condition/Stacks";
 import { ConditionStaticRefine } from "../../../classes/Condition/Static/Refine";
 import { DbObjectWeapon } from "../../../classes/DbObject/Weapon";
 import { StatTable } from "../../../classes/StatTable";
 import { StatTableConditions } from "../../../classes/StatTable/Condition";
 import { weaponStatTables } from "../../generated/WeaponStatTables";
+import { weaponPassiveTables } from "../../generated/WeaponPassiveTables";
+import { percent, times } from "../../Params";
 
 export const Unforged = new DbObjectWeapon({
     name: 'the_unforged',
@@ -14,28 +18,12 @@ export const Unforged = new DbObjectWeapon({
     rarity: 5,
     weapon: 'claymore',
     statTable: weaponStatTables.Unforged,
-    settingsSets: [
-        {
-            name: 'no_shield',
-            settings: {
-                "weapon_unforged": 5,
-                "common.char_status_shield": 0,
-            },
-        },
-        {
-            name: 'with_shield',
-            settings: {
-                "weapon_unforged": 5,
-                "common.char_status_shield": 1,
-            },
-        },
-    ],
     conditions: [
         new ConditionStaticRefine({
             title: 'talent_name.weapon_golden_majesty',
             description: 'talent_descr.weapon_golden_majesty_passive',
             stats: [
-                new StatTable('shield', [20, 25, 30, 35, 40]),
+                new StatTable('shield', weaponPassiveTables.Unforged.shield),
             ],
         }),
         new ConditionStacks({
@@ -48,31 +36,29 @@ export const Unforged = new DbObjectWeapon({
             stats: [
                 new StatTableConditions(
                     'atk_percent',
-                    [4, 5, 6, 7, 8],
+                    percent(weaponPassiveTables.Unforged.p2),
                     [
-                        new ConditionBoolean({
-                            name: 'common.char_status_shield',
-                            invert: true,
-                        }),
+                        new ConditionShielded({invert: true}),
                     ]
                 ),
                 new StatTableConditions(
                     'atk_percent',
-                    [8, 10, 12, 14, 16],
+                    percent(times(weaponPassiveTables.Unforged.p2, 2)),
                     [
-                        new ConditionBoolean({
-                            name: 'common.char_status_shield',
-                        }),
+                        new ConditionShielded(),
                     ]
                 ),
             ],
         }),
-        new ConditionBoolean({
-            name: 'common.char_status_shield',
-            serializeId: 2,
+        // Shield state follows the team's on-field shield.
+        new ConditionStatic({
             title: 'talent_name.weapon_golden_majesty',
             description: 'talent_descr.weapon_golden_majesty_shield',
+            subConditions: [
+                new ConditionShielded(),
+            ],
         }),
+        new ConditionRetired({serializeId: 2, type: 'checkbox'}),
     ],
 });
 

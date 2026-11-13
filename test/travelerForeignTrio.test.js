@@ -7,12 +7,10 @@ import { Rotation } from "../src/js/db/Features/Rotation";
 function damage(char, name, settings = {}, element = 'geo') {
     const feature = char.getFeatures().find((f) => f.getName() === name);
     feature.compiled = undefined;
-    const resKey = 'enemy_res_' + element;
     const data = new BuildData({
         char_level: 90,
         enemy_level: 90,
         char_skill_attack: 1,
-        [resKey]: 0,
         ...settings,
     }, {
         atk_base: 1000,

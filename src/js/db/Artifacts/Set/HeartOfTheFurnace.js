@@ -1,6 +1,10 @@
 import { ArtifactSet } from "../../../classes/ArtifactSet";
+import { Condition } from "../../../classes/Condition";
 import { ConditionBoolean } from "../../../classes/Condition/Boolean";
 import { ConditionStatic } from "../../../classes/Condition/Static";
+import { RECEIVERS } from "../../../classes/Team/Receivers";
+import { artifactSetTables } from "../../generated/ArtifactSetTables";
+import { percent } from "../../Params";
 
 export const HeartOfTheFurnace = new ArtifactSet({
     serializeId: 63,
@@ -19,7 +23,7 @@ export const HeartOfTheFurnace = new ArtifactSet({
                     title: 'set_bonus.heart_of_the_furnace_2',
                     description: 'set_descr.heart_of_the_furnace_2',
                     stats: {
-                        atk_percent: 18,
+                        atk_percent: artifactSetTables.HeartOfTheFurnace.pc2.atk_percent,
                     },
                 }),
             ],
@@ -33,9 +37,14 @@ export const HeartOfTheFurnace = new ArtifactSet({
                     title: 'set_bonus.heart_of_the_furnace_4',
                     description: 'set_descr.heart_of_the_furnace_4',
                     stats: {
-                        atk_percent: 12,
-                        dmg_stellarglimmer: 50,
+                        atk_percent: percent(artifactSetTables.HeartOfTheFurnace.pc4.p1),
                     },
+                }),
+                new Condition({
+                    receivers: RECEIVERS.TEAM,
+                    stack: 'heart_of_the_furnace_4',
+                    condition: new ConditionBoolean({name: 'set.heart_of_the_furnace_4'}),
+                    stats: {dmg_stellarglimmer: percent(artifactSetTables.HeartOfTheFurnace.pc4.p2)},
                 }),
             ],
         },

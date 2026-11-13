@@ -5,6 +5,9 @@ import { ACTION_SLOTS, ARTIFACT_ACTION_MODEL } from './ArtifactActionProbability
 import { normalizeArtifactRVFilters } from './ArtifactUsefulRV';
 import { makeArtifactReshapeRecipes } from './ArtifactActionPrep';
 import { ArtifactPrepPool } from './ArtifactPrepPool';
+import { ArtifactCandidateEvaluator } from './ArtifactCandidateEvaluator';
+import { Artifact } from './Artifact';
+import { serializeWorkerMember } from './Team';
 export { actionBlockDistributions } from './ArtifactActionProjection';
 export { makeArtifactActionRecipes, makeArtifactReshapeRecipes, countArtifactActionOutcomes,
     iterateArtifactActionOutcomes, createArtifactActionAccumulator } from './ArtifactActionPrep';
@@ -146,22 +149,22 @@ export async function evaluateArtifactActionPredictions(params) {
     let slotsCompleted = 0;
     const report = progress => params.onProgress?.({...progress, slotsCompleted, slotsTotal: targets.length, workerCount,
         ...(targeted ? {unit: 'artifacts'} : {})});
-    const options = {build: params.baseBuild, featureName: params.feature, featureType: params.featureType || 'average',
-        useGPU: params.useGPU === true, gpuBatchSize: params.gpuBatchSize, showBeta: params.showBeta, limit: 20};
+    const options = baselineOptions(params);
     const baseline = new ArtifactsSuggest({...options, artifacts: inventory,
-        settings: makeArtifactOptimizerSettings(params.baseBuild, inventory, params.optimizerSettings)});
+        settings: makeArtifactOptimizerSettings(params.optimizerSettings)});
     baseline.prepare();
-    if (!params.useGPU && baseline.totalCombinations > 1000000) throw new Error('action_webgpu_required');
-    const baselineProgress = (current, total) => report({key: 'baseline', phase: 'baseline', current, total});
-    baselineProgress(0, baseline.totalCombinations);
-    const baselineResults = params.useGPU ? await baseline.getResultGPU(baselineProgress) : baseline.getResult(baselineProgress);
-    const baselineBest = bestCPUResult(baseline, baselineResults);
+    // A baseline computed by its own request (computeArtifactActionBaseline)
+    // is used as it is: the search is not run again.
+    const record = params.baseline
+        ? checkArtifactActionBaseline(params.baseline, params, inventory)
+        : await searchArtifactActionBaseline(params, inventory, baseline,
+            (current, total) => report({key: 'baseline', phase: 'baseline', current, total}));
+    const baselineBest = {value: record.value, artifacts: record.artifacts.map((item) => Artifact.deserialize(item.slice()))};
     const baseValue = baselineBest.value;
-    if (!Number.isFinite(baseValue)) throw new Error('action_no_baseline');
-    // Optional topology preservation: infer the baseline build's set-bonus
+    // Optional topology preservation: the baseline build's set-bonus
     // topology (4pc / 2pc+2pc / single 2pc). Craft additionally preserves a
     // 4-piece topology of the crafted set when it differs from the baseline's.
-    const baselineTopology = params.pruneOutcomeSets ? inferBaselineTopology(baselineBest) : null;
+    const baselineTopology = params.pruneOutcomeSets ? record.topology : null;
     const topologySpecs = baselineTopology ? [baselineTopology] : [];
     if (params.pruneOutcomeSets && !reshaping && params.set && !(baselineTopology?.sets || []).includes(params.set)) {
         topologySpecs.push({kind: '4pc', sets: [params.set]});
@@ -174,7 +177,7 @@ export async function evaluateArtifactActionPredictions(params) {
     for (const artifact of baselineBest.artifacts) artifactId(artifact);
     const inventoryHashes = outcomeInventory.map(artifact => artifact.getHash());
     const serializedInventory = inventory.map(artifact => artifact.serialize());
-    const serializedBuild = params.baseBuild.serialize();
+    const serializedBuild = serializeWorkerMember(params.baseBuild);
     let stopped = false;
     const gpuRuns = new Set();
     const executeGPU = (request, onProgress) => {
@@ -241,6 +244,197 @@ export async function evaluateArtifactActionPredictions(params) {
     return {rows, baseValue, rvFilters, model: ARTIFACT_ACTION_MODEL,
         ...(retainOutcomes ? {outcomeInventory: outcomeInventory.map(artifact => artifact.serialize()), baselineArtifacts} : {}),
         search: 'fused-gpu-forced-cpu-rescored', recipeSearch: 'all-eligible'};
+}
+
+/** Version of a baseline record (computeArtifactActionBaseline). */
+export const ARTIFACT_ACTION_BASELINE_SCHEMA = 1;
+
+function baselineOptions(params) {
+    return {build: params.baseBuild, featureName: params.feature, featureType: params.featureType || 'average',
+        useGPU: params.useGPU === true, gpuBatchSize: params.gpuBatchSize, showBeta: params.showBeta, limit: 20};
+}
+
+/**
+ * The optimized build a craft, reshape or upgrade prediction measures gains
+ * from, as its own request: the UI compares it with the equipped build
+ * before the prediction runs, and the prediction then takes it as it is.
+ *
+ * @param {Object} params the prediction's parameters (baseBuild, inventory,
+ *     feature, featureType, optimizerSettings, useGPU, showBeta)
+ * @returns {Promise.<Object>} a baseline record: plain data, see
+ *     makeBaselineRecord
+ */
+export async function computeArtifactActionBaseline(params) {
+    const inventory = params.inventory || [];
+    const suggester = new ArtifactsSuggest({...baselineOptions(params), artifacts: inventory,
+        settings: makeArtifactOptimizerSettings(params.optimizerSettings)});
+    suggester.prepare();
+    return searchArtifactActionBaseline(params, inventory, suggester,
+        (current, total) => params.onProgress?.({key: 'baseline', phase: 'baseline', current, total}));
+}
+
+async function searchArtifactActionBaseline(params, inventory, suggester, progress) {
+    if (!params.useGPU && suggester.totalCombinations > 1000000) throw new Error('action_webgpu_required');
+    progress(0, suggester.totalCombinations);
+    const results = params.useGPU ? await suggester.getResultGPU(progress) : suggester.getResult(progress);
+    const best = bestCPUResult(suggester, results);
+    if (!Number.isFinite(best.value)) throw new Error('action_no_baseline');
+    return makeBaselineRecord(params, inventory, suggester, best);
+}
+
+/**
+ * @returns {Object} {schema, fingerprint, value, artifacts (serialized, in
+ *     slot order), currentValue (the equipped build under the same settings),
+ *     topology, changedSlots, setCounts: {baseline, current}, exclusions:
+ *     why the equipped build could not be the baseline}
+ */
+function makeBaselineRecord(params, inventory, suggester, best) {
+    const build = params.baseBuild;
+    const current = Object.values(build.getArtifacts()).filter(Boolean);
+    const featureType = params.featureType || 'average';
+    const currentResult = new ArtifactCandidateEvaluator(params.feature).getResult(build);
+    const bySlot = (artifacts) => Object.fromEntries(artifacts.map((art) => [art.slot, art]));
+    const bestSlots = bySlot(best.artifacts.filter((art) => art && !art.isEmpty));
+    // An equipped piece is compared as the candidate it is.
+    const currentSlots = bySlot(current.map((art) => matchingCandidate(art, inventory) || art));
+
+    return {
+        schema: ARTIFACT_ACTION_BASELINE_SCHEMA,
+        fingerprint: artifactActionFingerprint(params, inventory),
+        value: best.value,
+        artifacts: ACTION_SLOTS.map((slot) => bestSlots[slot]).filter(Boolean).map((art) => art.serialize()),
+        currentValue: currentResult ? currentResult[featureType] || 0 : 0,
+        topology: inferBaselineTopology(best),
+        changedSlots: ACTION_SLOTS.filter((slot) => bestSlots[slot]?.getHash() !== currentSlots[slot]?.getHash()),
+        setCounts: {baseline: setCounts(Object.values(bestSlots)), current: setCounts(current)},
+        exclusions: currentBuildExclusions(suggester, inventory, current),
+    };
+}
+
+/**
+ * @param {Object} record a baseline record
+ * @param {Object} params the prediction's parameters
+ * @param {Array.<Artifact>} inventory
+ * @returns {Object} the record, when it was computed for these parameters
+ */
+function checkArtifactActionBaseline(record, params, inventory) {
+    if (!record || record.schema !== ARTIFACT_ACTION_BASELINE_SCHEMA || !Number.isFinite(record.value)
+        || !Array.isArray(record.artifacts)) {
+        throw new Error('action_invalid_baseline');
+    }
+    if (record.fingerprint !== artifactActionFingerprint(params, inventory)) {
+        throw new Error('action_stale_baseline');
+    }
+    return record;
+}
+
+/**
+ * Everything a baseline depends on: the team with every member's inputs
+ * (set-bonus profiles, the rotation, receiver values), the objective, the
+ * constraints and the candidates.
+ *
+ * @returns {string}
+ */
+export function artifactActionFingerprint(params, inventory) {
+    return hashString(JSON.stringify([
+        serializeWorkerMember(params.baseBuild),
+        params.feature, params.featureType || 'average', params.showBeta !== false,
+        sortedValue(makeArtifactOptimizerSettings(params.optimizerSettings)),
+        (inventory || []).map((art) => art.getHash()),
+    ]));
+}
+
+function sortedValue(value) {
+    if (Array.isArray(value)) return value.map(sortedValue);
+    if (value && typeof value == 'object') {
+        return Object.fromEntries(Object.keys(value).sort().map((key) => [key, sortedValue(value[key])]));
+    }
+    return value;
+}
+
+// cyrb53: a 53-bit string hash, as hex.
+function hashString(text) {
+    let h1 = 0xdeadbeef;
+    let h2 = 0x41c6ce57;
+    for (let i = 0; i < text.length; ++i) {
+        const ch = text.charCodeAt(i);
+        h1 = Math.imul(h1 ^ ch, 2654435761);
+        h2 = Math.imul(h2 ^ ch, 1597334677);
+    }
+    h1 = Math.imul(h1 ^ (h1 >>> 16), 2246822507) ^ Math.imul(h2 ^ (h2 >>> 13), 3266489909);
+    h2 = Math.imul(h2 ^ (h2 >>> 16), 2246822507) ^ Math.imul(h1 ^ (h1 >>> 13), 3266489909);
+    return (4294967296 * (2097151 & h2) + (h1 >>> 0)).toString(16);
+}
+
+function setCounts(artifacts) {
+    const result = {};
+    for (const art of artifacts) {
+        if (art && art.set) result[art.set] = (result[art.set] || 0) + 1;
+    }
+    return result;
+}
+
+/**
+ * Why the equipped build could not be the baseline: a set the Allow
+ * switches disallow (set_disallowed) or a required set it lacks
+ * (set_required), each with its set and pieces; an equipped piece outside
+ * the candidates (not_candidate, with its slot); or the stat constraints
+ * (stat_constraints).
+ *
+ * @returns {Array.<Object>}
+ */
+function currentBuildExclusions(suggester, inventory, current) {
+    const result = [];
+    const counts = setCounts(current);
+    const {minValues, maxValues} = suggester.optimizationPlanConstraints.setConstraints;
+    for (const [set, pieces] of Object.entries(maxValues || {})) {
+        if ((counts[set] || 0) >= pieces) result.push({kind: 'set_disallowed', set, pieces});
+    }
+    for (const [set, pieces] of Object.entries(minValues || {})) {
+        if ((counts[set] || 0) < pieces) result.push({kind: 'set_required', set, pieces});
+    }
+
+    const candidateSlots = new Set(inventory.map((art) => art.slot));
+    for (const art of current) {
+        if (candidateSlots.has(art.slot) && !matchingCandidate(art, inventory)) {
+            result.push({kind: 'not_candidate', slot: art.slot});
+        }
+    }
+
+    if (result.length == 0) {
+        let value;
+        try {
+            value = suggester.evaluateArtifactCombination(current);
+        } catch {
+            return result;
+        }
+        if (!Number.isFinite(value)) result.push({kind: 'stat_constraints'});
+    }
+    return result;
+}
+
+/**
+ * The candidate an equipped piece is, matched as storage matches pieces
+ * (StorageItemArtifacts.findMatching): the same piece, or the one candidate
+ * with its stats whose history agrees with it. An equipped copy can carry
+ * history its stored record lacks (edited in the build's artifact editor,
+ * loaded from a link): storage only adds its history to the copy
+ * (enrichBuild), so their hashes differ.
+ *
+ * @param {Artifact} artifact an equipped piece
+ * @param {Array.<Artifact>} candidates
+ * @returns {Artifact|undefined}
+ */
+function matchingCandidate(artifact, candidates) {
+    const hash = artifact.getHash();
+    const exact = candidates.find((item) => item.getHash() === hash);
+    if (exact) return exact;
+
+    const statsHash = artifact.getStatsHash();
+    const matches = candidates.filter((item) => item.slot === artifact.slot && item.set === artifact.set
+        && item.mainStat === artifact.mainStat && item.level === artifact.level
+        && item.getStatsHash() === statsHash && item.enrichFrom(artifact));
+    return matches.length === 1 ? matches[0] : undefined;
 }
 
 /**

@@ -4,7 +4,10 @@ import { ConditionNumber } from "../../../classes/Condition/Number";
 import { ConditionStatic } from "../../../classes/Condition/Static";
 import { FeatureMultiplier } from "../../../classes/Feature2/Multiplier";
 import { FeatureMultiplierTarget } from "../../../classes/Feature2/Multiplier/Target";
+import { RECEIVERS } from "../../../classes/Team/Receivers";
 import { ValueTable } from "../../../classes/ValueTable";
+import { artifactSetTables } from "../../generated/ArtifactSetTables";
+import { percent } from "../../Params";
 
 export const SongOfDaysPast = new ArtifactSet({
     serializeId: 48,
@@ -24,7 +27,7 @@ export const SongOfDaysPast = new ArtifactSet({
                     description: 'set_descr.song_of_days_past_2',
                     settings: {},
                     stats: {
-                        healing: 15,
+                        healing: artifactSetTables.SongOfDaysPast.pc2.healing,
                     },
                 })
             ],
@@ -37,7 +40,7 @@ export const SongOfDaysPast = new ArtifactSet({
                     serializeId: 35,
                     title: 'set_bonus.song_of_days_past_4_stack',
                     class: "gi-inputs-5digit",
-                    max: 15000,
+                    max: artifactSetTables.SongOfDaysPast.pc4.p5,
                 }),
                 new ConditionBoolean({
                     name: 'set.song_of_days_past_4',
@@ -45,8 +48,8 @@ export const SongOfDaysPast = new ArtifactSet({
                     title: 'set_bonus.song_of_days_past_4',
                     description: 'set_descr.song_of_days_past_4',
                     stats: {
-                        text_percent_dmg: 8,
-                        text_value_hp: 15000,
+                        text_percent_dmg: percent(artifactSetTables.SongOfDaysPast.pc4.p4),
+                        text_value_hp: artifactSetTables.SongOfDaysPast.pc4.p5,
                     },
                     settings: {
                         'set_bonus.song_of_days_past_4': 1,
@@ -55,9 +58,11 @@ export const SongOfDaysPast = new ArtifactSet({
             ],
             multipliers: [
                 new FeatureMultiplier({
+                    receivers: RECEIVERS.TEAM,
+                    stack: 'song_of_days_past_4',
                     source: 'artifacts',
                     scaling: 'days_past_healing_recorded',
-                    values: new ValueTable([8]),
+                    values: new ValueTable([percent(artifactSetTables.SongOfDaysPast.pc4.p4)]),
                     target: new FeatureMultiplierTarget({
                         damageTypes: ['normal', 'charged', 'plunge', 'skill', 'burst'],
                     }),

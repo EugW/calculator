@@ -16,6 +16,7 @@ import { ConditionNot } from "../../classes/Condition/Not";
 import { FeatureReactionLunarCharged } from "../../classes/Feature2/Reaction/Transformative/Lunar/Charged";
 import { FeatureReactionLunarCrystallize } from "../../classes/Feature2/Reaction/Transformative/Lunar/Crystallize";
 import { FeatureReactionStellarSwirl } from "../../classes/Feature2/Reaction/Transformative/StellarSwirl";
+import { FeatureReactionTeam } from "../../classes/Feature2/Reaction/Team";
 import { ConditionStellarVortexLevel } from "../../classes/Condition/StellarVortexLevel";
 
 const anemoReactionCond = new ConditionOr([
@@ -23,7 +24,7 @@ const anemoReactionCond = new ConditionOr([
     new ConditionBoolean({name: 'allowed_infusion_anemo'}),
 ]);
 
-const stellarswirlCond = new ConditionAnd([
+export const stellarswirlCond = new ConditionAnd([
     new ConditionBoolean({name: 'allowed_stellarswirl'}),
     new ConditionOr([
         new ConditionBooleanCharElement({element: ['anemo', 'cryo']}),
@@ -42,7 +43,7 @@ const stellarswirlVortexLevel2Cond = new ConditionAnd([
     new ConditionStellarVortexLevel({level: 2}),
 ]);
 
-const lunarchargedCond = new ConditionAnd([
+export const lunarchargedCond = new ConditionAnd([
     new ConditionBoolean({name: 'allowed_lunarcharged'}),
     new ConditionOr([
         new ConditionBooleanCharElement({element: ['hydro', 'electro', 'anemo']}),
@@ -52,7 +53,7 @@ const lunarchargedCond = new ConditionAnd([
     ]),
 ]);
 
-const lunarcrystallizeCond = new ConditionAnd([
+export const lunarcrystallizeCond = new ConditionAnd([
     new ConditionBoolean({name: 'allowed_lunarcrystallize'}),
     new ConditionOr([
         new ConditionBooleanCharElement({element: ['hydro', 'geo', 'anemo']}),
@@ -61,6 +62,14 @@ const lunarcrystallizeCond = new ConditionAnd([
         new ConditionBoolean({name: 'allowed_infusion_geo'}),
     ]),
 ]);
+
+/**
+ * The reactions a team deals together, each as one member deals it: what the
+ * member contributes before the contributions are ranked (FeatureReactionTeam).
+ * The rows with a fixed rank weight below are a member's contribution at that
+ * rank, kept for saved rotations.
+ */
+const teamReaction = (name, optOut, unit) => new FeatureReactionTeam({name, optOut, unit});
 
 export const Reactions = [
     new FeatureReactionSwirl({
@@ -92,6 +101,27 @@ export const Reactions = [
             new ConditionNot([stellarswirlCond]),
         ]),
     }),
+    teamReaction('stellarswirl_anemo', 'no_stellarswirl_contribution', new FeatureReactionStellarSwirl({
+        name: 'stellarswirl_anemo',
+        element: 'anemo',
+        reactionRate: 0.75,
+        tags: ['stellarswirl_immediate', 'stellarswirl_trigger'],
+        condition: stellarswirlCond,
+    })),
+    teamReaction('stellarswirl_vortex_1', 'no_stellarswirl_contribution', new FeatureReactionStellarSwirl({
+        name: 'stellarswirl_vortex_1',
+        element: 'cryo',
+        reactionRate: 2,
+        tags: ['stellarswirl_vortex', 'stellarswirl_vortex_1'],
+        condition: stellarswirlVortexLevel1Cond,
+    })),
+    teamReaction('stellarswirl_vortex_2', 'no_stellarswirl_contribution', new FeatureReactionStellarSwirl({
+        name: 'stellarswirl_vortex_2',
+        element: 'cryo',
+        reactionRate: 3,
+        tags: ['stellarswirl_vortex', 'stellarswirl_vortex_2'],
+        condition: stellarswirlVortexLevel2Cond,
+    })),
     new FeatureReactionStellarSwirl({
         name: 'stellarswirl_anemo_contribution',
         element: 'anemo',
@@ -191,6 +221,12 @@ export const Reactions = [
         cannotReact: true,
         condition: new ConditionNot([lunarchargedCond]),
     }),
+    teamReaction('lunarcharged', 'no_lunarcharged_contribution', new FeatureReactionLunarCharged({
+        name: 'lunarcharged',
+        element: 'electro',
+        cannotReact: true,
+        condition: lunarchargedCond,
+    })),
     new FeatureReactionLunarCharged({
         name: 'lunarcharged_contrubution',
         element: 'electro',
@@ -212,6 +248,12 @@ export const Reactions = [
         penalty: 0.05,
         condition: lunarchargedCond,
     }),
+    teamReaction('lunarcrystallize', 'no_lunarcrystallize_contribution', new FeatureReactionLunarCrystallize({
+        name: 'lunarcrystallize',
+        element: 'geo',
+        cannotReact: true,
+        condition: lunarcrystallizeCond,
+    })),
     new FeatureReactionLunarCrystallize({
         name: 'lunarcrystallize_contrubution',
         element: 'geo',

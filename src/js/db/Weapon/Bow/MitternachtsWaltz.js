@@ -2,6 +2,8 @@ import { ConditionBooleanRefine } from "../../../classes/Condition/Boolean/Refin
 import { DbObjectWeapon } from "../../../classes/DbObject/Weapon";
 import { StatTable } from "../../../classes/StatTable";
 import { weaponStatTables } from "../../generated/WeaponStatTables";
+import { weaponPassiveTables } from "../../generated/WeaponPassiveTables";
+import { percent } from "../../Params";
 
 export const MitternachtsWaltz = new DbObjectWeapon({
     name: 'mitternachts_waltz',
@@ -18,7 +20,7 @@ export const MitternachtsWaltz = new DbObjectWeapon({
             title: 'talent_name.weapon_mitternachts_waltz',
             description: 'talent_descr.weapon_mitternachts_waltz_1',
             stats: [
-                new StatTable('dmg_skill', [20, 25, 30, 35, 40]),
+                new StatTable('dmg_skill', percent(weaponPassiveTables.MitternachtsWaltz.p1)),
             ],
         }),
         new ConditionBooleanRefine({
@@ -27,7 +29,7 @@ export const MitternachtsWaltz = new DbObjectWeapon({
             title: 'talent_name.weapon_mitternachts_waltz',
             description: 'talent_descr.weapon_mitternachts_waltz_2',
             stats: [
-                new StatTable('dmg_normal', [20, 25, 30, 35, 40]),
+                new StatTable('dmg_normal', percent(weaponPassiveTables.MitternachtsWaltz.p3)),
             ],
         }),
     ],

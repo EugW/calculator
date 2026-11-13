@@ -1,0 +1,281 @@
+.gi-team-tab .gi-tab-item-inner {
+    background-image: url("../../../images/icons/tab_team_light.png");
+}
+
+.gi-team-tab.active .gi-tab-item-inner {
+    background-image: url("../../../images/icons/tab_team_dark.png");
+}
+
+/*
+ * The same margin on both sides of the tab. The scrollable part below the
+ * buttons leaves room for its scrollbar on the right, so the slots have that
+ * room on the left too, and the buttons on both sides.
+ */
+
+/* Buttons above the slots: they act on the selected slot, the reset on the team. */
+.team-buttons {
+    padding: 10px calc(10px + var(--full-height-gutter)) 0;
+}
+
+/* One row: the buttons that fill the slot on the left, removal and the team
+   reset on the right. */
+.team-buttons-row {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.team-link {
+    margin-top: 8px;
+}
+
+/* The slot a character link is loaded into, then the link. */
+.team-link-row {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+}
+
+.dropdown-wrapper.team-link-slot {
+    width: 92px;
+    flex-shrink: 0;
+}
+
+/* The link takes what the slot leaves. Without this the input keeps its
+   default width and the row is wider than the side panel. */
+.team-link-row .inputs-text-wrapper {
+    min-width: 0;
+}
+
+/* The options name the member of each slot: wider than the closed dropdown. */
+.team-link-slot .dropdown-options {
+    width: 220px;
+}
+
+.team-link-error {
+    margin-top: 4px;
+    font-size: 13px;
+    color: #E07B7B;
+}
+
+.team-slots {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    padding: 10px 10px 10px calc(10px + var(--full-height-gutter));
+}
+
+/* The side panel is narrower than a tab: less padding around the cards. */
+.gi-tab-side .team-buttons {
+    padding: 8px calc(2px + var(--full-height-gutter)) 0;
+}
+
+.gi-tab-side .team-slots {
+    padding: 8px 2px 8px calc(2px + var(--full-height-gutter));
+}
+
+.gi-tab-side .team-stacks,
+.gi-tab-side .team-section {
+    margin-left: calc(2px + var(--full-height-gutter));
+    margin-right: 2px;
+}
+
+/* The enemy and party setup sections, between the slots and the stacks. */
+.team-section {
+    margin: 0 10px 10px calc(10px + var(--full-height-gutter));
+}
+
+.team-section .accordion-item {
+    margin: 0;
+}
+
+.team-enemy-content {
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+/* The icon opens the enemy choice; beside it the name, the level and the slider. */
+.team-enemy-header {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    padding: 4px;
+}
+
+.team-enemy-icon {
+    flex-shrink: 0;
+    cursor: pointer;
+}
+
+.team-enemy-info {
+    flex-grow: 1;
+    min-width: 0;
+    display: flex;
+    flex-direction: column;
+    gap: 4px;
+}
+
+.team-enemy-name {
+    font-size: 18px;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+.team-enemy-level {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    font-size: 16px;
+}
+
+.team-enemy-level-input {
+    width: 55px;
+    font-size: 16px;
+}
+
+/* A long block title wraps instead of running into the cells. */
+.team-enemy .group-box > .title {
+    height: auto;
+    line-height: 20px;
+}
+
+/* Section captions. The enemy's names the enemy and its level; a long name is cut, the level stays. */
+.team-section .accordion-item-caption {
+    display: flex;
+    justify-content: center;
+    font-size: 16px;
+    padding: 0 10px;
+}
+
+.team-enemy-title {
+    display: flex;
+    min-width: 0;
+    gap: 0.3em;
+    white-space: nowrap;
+}
+
+.team-enemy-title-name {
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.team-enemy-title-level {
+    flex-shrink: 0;
+}
+
+.team-slot {
+    border: 1px solid #4B505E;
+    border-radius: 8px;
+    padding: 8px;
+    background: rgba(30, 30, 30, 0.3);
+    cursor: pointer;
+}
+
+.team-slot:hover {
+    border-color: #8A8687;
+}
+
+.team-slot.viewed {
+    border-color: #D3BC8E;
+    background: rgba(211, 188, 142, 0.08);
+}
+
+.team-slot.empty {
+    border-style: dashed;
+}
+
+.team-slot-main {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+}
+
+.team-slot-main .item-icon {
+    flex-shrink: 0;
+}
+
+.team-slot-info {
+    flex-grow: 1;
+    min-width: 0;
+}
+
+.team-slot-name {
+    font-size: 16px;
+}
+
+.team-slot-levels {
+    font-size: 13px;
+    color: #9B9FA8;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+}
+
+/* The weapon and the artifact sets in effect, as icons. */
+.team-slot-gear {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin-top: 2px;
+}
+
+.team-slot-gear-item {
+    display: flex;
+    align-items: center;
+    gap: 3px;
+}
+
+.team-slot-refine {
+    font-size: 12px;
+    color: #9B9FA8;
+}
+
+.team-slot-state {
+    display: flex;
+    flex-direction: column;
+    align-items: flex-end;
+    gap: 4px;
+    flex-shrink: 0;
+    cursor: default;
+}
+
+.team-stacks {
+    margin: 0 10px 10px calc(10px + var(--full-height-gutter));
+    padding: 8px;
+    border: 1px solid #4B505E;
+    border-radius: 8px;
+}
+
+.team-stacks-title {
+    font-size: 15px;
+    margin-bottom: 4px;
+}
+
+.team-stacks-descr {
+    font-size: 13px;
+    color: #9B9FA8;
+    margin-bottom: 8px;
+}
+
+.team-stacks-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 10px;
+    margin-top: 6px;
+}
+
+.team-stacks-name {
+    min-width: 0;
+    flex-grow: 1;
+}
+
+.inputs-button-icon.team-icon-enka {
+    background-image: url("../../../images/icons/enka.png");
+    background-size: 20px 20px;
+    background-position: center;
+    background-repeat: no-repeat;
+}

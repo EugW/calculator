@@ -1,4 +1,5 @@
 import { ConditionBoolean } from "../Boolean";
+import { assumed } from "../../Team/Scope";
 
 export class ConditionBooleanNightSoul extends ConditionBoolean {
     isActive(settings) {
@@ -12,6 +13,7 @@ export class ConditionBooleanNightSoul extends ConditionBoolean {
             return true;
         }
 
-        return false;
+        // A floating set has no wearer: the check is met (Team/Legacy).
+        return assumed(settings, 'wielder');
     }
 }

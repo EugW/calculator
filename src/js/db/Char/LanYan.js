@@ -17,9 +17,11 @@ import { FeatureMultiplierList } from "../../classes/Feature2/Multiplier/List";
 import { FeatureMultiplierTarget } from "../../classes/Feature2/Multiplier/Target";
 import { FeatureShield } from "../../classes/Feature2/Shield";
 import { StatTable } from "../../classes/StatTable";
+import { RECEIVERS } from "../../classes/Team/Receivers";
 import { ValueTable } from "../../classes/ValueTable";
 import { charTables } from "../generated/CharTables";
 import { charTalentTables } from "../generated/CharTalentTables";
+import { percent } from "../Params";
 
 const Talents = new DbObjectTalents({
     attack: {
@@ -117,10 +119,10 @@ const Talents = new DbObjectTalents({
     },
 });
 
-const A1Scale = 50;
-const A4SkillScale = 309;
-const A4BurstScale = 774;
-const C4Mastery = 60;
+const A1Scale = percent(charTalentTables.LanYan.a1.p1);
+const A4SkillScale = percent(charTalentTables.LanYan.a4.p1);
+const A4BurstScale = percent(charTalentTables.LanYan.a4.p2);
+const C4Mastery = charTalentTables.LanYan.c4.p1;
 
 export const LanYan = new DbObjectChar({
     name: 'lan_yan',
@@ -415,9 +417,11 @@ export const LanYan = new DbObjectChar({
         },
         {
             conditions: [
+                // After Lustrous Moonrise: all nearby party members, Lan Yan included.
                 new ConditionBoolean({
                     name: 'lanyan_with_drakefalcons_blood_pearls_adorned',
                     serializeId: 1,
+                    receivers: RECEIVERS.TEAM,
                     title: 'talent_name.lan_yan_with_drakefalcons_blood_pearls_adorned',
                     description: 'talent_descr.lan_yan_with_drakefalcons_blood_pearls_adorned',
                     stats: {
@@ -444,19 +448,5 @@ export const LanYan = new DbObjectChar({
             ],
         }
     ]),
-    partyData: {
-        conditions: [
-            new ConditionBoolean({
-                name: 'party.lanyan_with_drakefalcons_blood_pearls_adorned',
-                serializeId: 1,
-                title: 'talent_name.lan_yan_with_drakefalcons_blood_pearls_adorned',
-                description: 'talent_descr.lan_yan_with_drakefalcons_blood_pearls_adorned',
-                rotation: 'party',
-                stats: {
-                    mastery: C4Mastery,
-                },
-                info: {constellation: 4},
-            }),
-        ],
-    },
+    retiredParty: [[1, 'checkbox']],
 });

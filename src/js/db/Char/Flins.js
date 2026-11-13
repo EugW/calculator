@@ -6,8 +6,8 @@ import { ConditionBooleanLevels } from "../../classes/Condition/Boolean/Levels";
 import { ConditionCalcMoonsign } from "../../classes/Condition/CalcMoonsign";
 import { ConditionConstellation } from "../../classes/Condition/Constellation";
 import { ConditionNot } from "../../classes/Condition/Not";
-import { ConditionNumber } from "../../classes/Condition/Number";
 import { ConditionStatic } from "../../classes/Condition/Static";
+import { ConditionStaticLevel } from "../../classes/Condition/Static/Level";
 import { DbObjectChar } from "../../classes/DbObject/Char";
 import { DbObjectConstellation } from "../../classes/DbObject/Constellation";
 import { DbObjectTalents } from "../../classes/DbObject/Talents";
@@ -20,12 +20,14 @@ import { FeatureDamageSkill } from "../../classes/Feature2/Damage/Skill";
 import { FeatureMultiplier } from "../../classes/Feature2/Multiplier";
 import { FeaturePostEffectValue } from "../../classes/Feature2/PostEffectValue";
 import { FeatureReactionLunarChargedLike } from "../../classes/Feature2/Reaction/Transformative/Lunar/ChargedLike";
-import { PostEffectStats } from "../../classes/PostEffect/Stats";
+import { CHANNELS } from "../../classes/PostEffect/Channels";
 import { PostEffectStatsAtk } from "../../classes/PostEffect/Stats/Atk";
 import { StatTable } from "../../classes/StatTable";
+import { RECEIVERS } from "../../classes/Team/Receivers";
 import { ValueTable } from "../../classes/ValueTable";
 import { charTables } from "../generated/CharTables";
 import { charTalentTables } from "../generated/CharTalentTables";
+import { percent } from "../Params";
 
 const Talents = new DbObjectTalents({
     attack: {
@@ -139,28 +141,42 @@ const Talents = new DbObjectTalents({
 });
 
 // Passive scaling constants
-const PassiveLunarScale = 0.7;
-const PassiveLunarScaleCap = 14;
-const A1LunarChargedDmg = 20;
-const A4EmScale = 8;
-const A4EmCap = 160;
+const PassiveLunarScale = percent(charTalentTables.Flins.a0.p1);
+const PassiveLunarScaleCap = percent(charTalentTables.Flins.a0.p2);
+const A1LunarChargedDmg = percent(charTalentTables.Flins.a1.p1);
+const A4EmScale = percent(charTalentTables.Flins.a4.p1);
+const A4EmCap = charTalentTables.Flins.a4.p2;
 
 // Constellation constants
-const C2AtkScale = 50;
-const C2ResShred = 25;
-const C4AtkBonus = 20;
-const C4EmScale = 10;
-const C4EmCap = 220;
-const C6LunarChargedElevate = 35;
-const C6PartyElevate = 10;
+const C2AtkScale = percent(charTalentTables.Flins.c2.p1);
+const C2ResShred = percent(charTalentTables.Flins.c2.p3);
+const C4AtkBonus = percent(charTalentTables.Flins.c4.p1);
+const C4EmScale = percent(charTalentTables.Flins.c4.p2);
+const C4EmCap = charTalentTables.Flins.c4.p3;
+const C6LunarChargedElevate = percent(charTalentTables.Flins.c6.p1);
+const C6PartyElevate = percent(charTalentTables.Flins.c6.p2);
 
-// Lunar-Charged base bonus post effect based on ATK
+// Lunar-Charged base bonus post effect based on ATK. Delivered to the whole
+// team from the source's live ATK (old priority kept). Moonsign Benedictions
+// of different members stack, so no stack key.
+// Game data: Avatar_Flins_PermanentSkill_3 sets the reaction base-damage ratio
+// with SetNewElementReactionBaseDamageRatioParam (AttackTransferRatio x 0.01,
+// cap MaxTransRatio), which names no premod/total read. The same call reads
+// the total ATK in game (Ineffa's Benediction, in-game test: md/buff_chains.md):
+// extra ATK (Bennett's burst) counts, as in GO (input.total.atk).
 const lunarChargedPost = new PostEffectStatsAtk({
+    receivers: RECEIVERS.TEAM,
+    reads: CHANNELS.TOTAL,
     percent: new StatTable('lunarcharged_multi', [PassiveLunarScale / 100]),
     statCap: new ValueTable([PassiveLunarScaleCap]),
 });
 
 // A4 EM from ATK post effect (disabled at C4 where it's replaced by enhanced version)
+// Game data: Avatar_Flins_PermanentSkill_2 computes FIGHT_PROP_NONEXTRA_ATTACK
+// (premod) x Ratio (8%, cap MaxMastery 160; ProudSkill 1202201, GO:
+// prod(percent, input.premod.atk) into total eleMas) into
+// Actor_ElemMasteryExtraDelta (extra), so the default premod read and extra
+// write are confirmed.
 const a4EmPost = new PostEffectStatsAtk({
     percent: new StatTable('mastery', [A4EmScale / 100]),
     statCap: new ValueTable([A4EmCap]),
@@ -171,6 +187,11 @@ const a4EmPost = new PostEffectStatsAtk({
 });
 
 // C4 enhanced EM from ATK post effect (replaces A4 passive)
+// Game data: same Avatar_Flins_PermanentSkill_2 modifier, C4 branch
+// (FIGHT_PROP_NONEXTRA_ATTACK x Ratio2 10%, cap MaxMastery2 220 from talent
+// Flins_Constellation_4 paramList [0.2, 0.1, 220]) into
+// Actor_ElemMasteryExtraDelta, so the default premod read and extra write
+// are confirmed.
 const c4EmPost = new PostEffectStatsAtk({
     percent: new StatTable('mastery', [C4EmScale / 100]),
     statCap: new ValueTable([C4EmCap]),
@@ -188,6 +209,11 @@ export const Flins = new DbObjectChar({
     origin: 'nodkrai',
     talents: Talents,
     statTable: charTables.Flins,
+    // Talent damage hits read the total ATK: the game computes them from
+    // FIGHT_PROP_CUR_ATTACK (e.g. Avatar_Flins_Talent_MoonShockAttack
+    // Timer_Talent2: Talent_Damage x FIGHT_PROP_CUR_ATTACK). Damage
+    // multipliers need nothing. lunarcharged_multi below is a reaction base
+    // bonus with no extra lane, so its scaling is total by construction.
     features: [
         // Normal attacks
         new FeatureDamageNormal({
@@ -400,7 +426,9 @@ export const Flins = new DbObjectChar({
                 }),
             ],
         }),
-        // C2 Lunar-Charged damage after Spearstorm
+        // C2 Lunar-Charged damage after Spearstorm: 50% of Flins's ATK
+        // (talent Flins_Constellation_2 paramList[0]; game scales Talent_Damage
+        // x FIGHT_PROP_CUR_ATTACK, total), so a plain damage hit needs nothing.
         new FeatureReactionLunarChargedLike({
             element: 'electro',
             category: 'skill',
@@ -414,6 +442,8 @@ export const Flins = new DbObjectChar({
             ],
             condition: new ConditionConstellation({constellation: 2}),
         }),
+        // Displays of lunarChargedPost / a4EmPost / c4EmPost; they follow
+        // their post-effects' channels, need nothing.
         new FeaturePostEffectValue({
             category: 'other',
             name: 'flins_lunar_bonus',
@@ -437,17 +467,26 @@ export const Flins = new DbObjectChar({
         }),
     ],
     conditions: [
+        // Flins unlocks Lunar-Charged for the whole team (merged with the old
+        // partyData copy).
         new Condition({
+            receivers: RECEIVERS.TEAM,
             settings: {
                 allowed_lunarcharged: 1,
             },
         }),
-        new ConditionCalcMoonsign(),
+        // Moonsign level comes from the real team; every Moonsign member
+        // delivers the same values, so this needs no stack key.
+        new ConditionCalcMoonsign({receivers: RECEIVERS.TEAM}),
         new ConditionBooleanLevels({
             name: 'flins_symphony_of_winter',
             serializeId: 1,
             title: 'talent_name.flins_symphony_of_winter',
             description: 'talent_descr.flins_symphony_of_winter',
+            // A1: game writes the flat Ratio (20%, ProudSkill 1202101) into
+            // Actor_ElemReactMoonShockDelta (Flins_PermanentSkill_1_Buff; no
+            // stat read, no extra lane), and the energy restore is a flat
+            // ReviveElemEnergy: flat conditions (premod) need nothing.
             info: {ascension: 1},
             levelSetting: 'party_moonsign',
             stats: [
@@ -490,6 +529,10 @@ export const Flins = new DbObjectChar({
         },
         {
             conditions: [
+                // C2: game writes the flat ElecDown into Actor_ElecSubHurtDelta
+                // (enemy RES, UNIQUE_Avatar_Flins_Talent2_ElecDown) and deals
+                // the flat Talent_Damage hit above: no stat read, flat
+                // conditions (premod) need nothing.
                 new ConditionBooleanLevels({
                     name: 'flins_the_devils_wall',
                     serializeId: 2,
@@ -514,6 +557,10 @@ export const Flins = new DbObjectChar({
         },
         {
             conditions: [
+                // C4: game writes the flat AttackUp (20%, talent
+                // Flins_Constellation_4 paramList[0]) into Actor_AttackRatio
+                // (Avatar_Flins_Constellation_4_Property), a premod write;
+                // flat conditions are always premod, so this needs nothing.
                 new ConditionStatic({
                     title: 'talent_name.flins_night_on_bald_mountain',
                     description: 'talent_descr.flins_night_on_bald_mountain',
@@ -536,6 +583,11 @@ export const Flins = new DbObjectChar({
         },
         {
             conditions: [
+                // C6: game writes the flat Ratio / Team_Ratio (35% / 10%,
+                // talent Flins_Constellation_6) into
+                // Actor_ElemReactMoonShockEffectFactor (no stat read, no extra
+                // lane): flat conditions (premod) need nothing.
+                // C6 elevates Flins's own Lunar-Charged DMG by 35%.
                 new ConditionBoolean({
                     name: 'flins_songs_and_dances_of_death',
                     serializeId: 4,
@@ -545,57 +597,23 @@ export const Flins = new DbObjectChar({
                         'dmg_lunarcharged_special': C6LunarChargedElevate,
                     },
                 }),
+                // At Ascendant Gleam all other nearby party members'
+                // Lunar-Charged DMG is elevated by 10%. Flins keeps his own
+                // copy above, so the delivery excludes the source.
+                new ConditionStaticLevel({
+                    isHidden: true,
+                    receivers: RECEIVERS.OTHERS,
+                    levelSetting: 'party_moonsign',
+                    stats: [
+                        new StatTable('dmg_lunarcharged_special', [0, C6PartyElevate]),
+                    ],
+                    condition: new ConditionAnd([
+                        new ConditionBoolean({name: 'flins_songs_and_dances_of_death'}),
+                        new ConditionConstellation({constellation: 6}),
+                    ]),
+                }),
             ],
         },
     ]),
-    partyData: {
-        loadStats: {
-            stats: ['atk_total'],
-        },
-        conditions: [
-            new Condition({settings: {allowed_lunarcharged: 1}}),
-            new ConditionCalcMoonsign(),
-            new ConditionNumber({
-                name: 'flins_atk_total',
-                title: 'talent_name.stats_total_atk',
-                partyStat: 'atk_total',
-                serializeId: 1,
-                rotation: 'party',
-                max: 5000,
-            }),
-            new ConditionStatic({
-                title: 'talent_name.flins_old_world_secrets',
-                description: 'talent_descr.flins_old_world_secrets',
-                stats: {
-                    text_percent: PassiveLunarScale,
-                    text_percent_max: PassiveLunarScaleCap,
-                },
-            }),
-            // Legacy placeholder for removed party A1 (self-only passive).
-            // Keeps old serializeId 2 deserializable without applying any buff.
-            new ConditionStatic({
-                serializeId: 2,
-                isHidden: true,
-            }),
-            new ConditionBooleanLevels({
-                name: 'party.flins_songs_and_dances_of_death',
-                serializeId: 3,
-                title: 'talent_name.flins_songs_and_dances_of_death',
-                description: 'talent_descr.flins_songs_and_dances_of_death',
-                info: {constellation: 6},
-                rotation: 'party',
-                levelSetting: 'party_moonsign',
-                stats: [
-                    new StatTable('dmg_lunarcharged_special', [0, C6PartyElevate]),
-                ],
-            }),
-        ],
-        postEffects: [
-            new PostEffectStats({
-                from: 'flins_atk_total',
-                percent: new StatTable('lunarcharged_multi', [PassiveLunarScale / 100]),
-                statCap: new ValueTable([PassiveLunarScaleCap]),
-            }),
-        ],
-    },
+    retiredParty: [[1, 'number'], [2, 'checkbox'], [3, 'checkbox']],
 });

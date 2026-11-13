@@ -1,4 +1,5 @@
 import { Condition } from "../../classes/Condition";
+import { ConditionAnd } from "../../classes/Condition/And";
 import { ConditionAscensionChar } from "../../classes/Condition/Ascension/Char";
 import { ConditionBoolean } from "../../classes/Condition/Boolean";
 import { ConditionBooleanValue } from "../../classes/Condition/Boolean/Value";
@@ -18,9 +19,11 @@ import { FeatureDamageSkill } from "../../classes/Feature2/Damage/Skill";
 import { FeatureMultiplier } from "../../classes/Feature2/Multiplier";
 import { FeatureMultiplierStatic } from "../../classes/Feature2/Multiplier/Static";
 import { FeatureStatic } from "../../classes/Feature2/Static";
+import { RECEIVERS } from "../../classes/Team/Receivers";
 import { StatTable } from "../../classes/StatTable";
 import { charTables } from "../generated/CharTables";
 import { charTalentTables } from "../generated/CharTalentTables";
+import { percent } from "../Params";
 
 const Talents = new DbObjectTalents({
     attack: {
@@ -123,8 +126,8 @@ const Talents = new DbObjectTalents({
 
 const TalentValues = {
     A1AtkSelf: 16,
-    A1AtkOther: 8,
-    A4CryoDmg: 3.5,
+    A1AtkOther: percent(charTalentTables.Aloy.a1.p1),
+    A4CryoDmg: percent(charTalentTables.Aloy.a4.p1),
     A4CryoDmgMax: 35,
 };
 
@@ -380,6 +383,19 @@ export const Aloy = new DbObjectChar({
                 new ConditionAscensionChar({ascension: 1}),
             ],
         }),
+        // Combat Override also raises nearby party members' ATK by 8%;
+        // Aloy herself keeps the 16% from her own toggle above.
+        new Condition({
+            isHidden: true,
+            receivers: RECEIVERS.OTHERS,
+            stats: {
+                atk_percent: TalentValues.A1AtkOther,
+            },
+            condition: new ConditionAnd([
+                new ConditionBoolean({name: 'aloy_combat_override'}),
+                new ConditionAscensionChar({ascension: 1}),
+            ]),
+        }),
         new ConditionStacks({
             name: 'aloy_strong_strike',
             serializeId: 3,
@@ -407,23 +423,5 @@ export const Aloy = new DbObjectChar({
             ],
         },
     ]),
-    partyData: {
-        conditions: [
-            new ConditionBoolean({
-                name: 'party.aloy_combat_override',
-                serializeId: 1,
-                rotation: 'party',
-                title: 'talent_name.aloy_combat_override',
-                description: 'talent_descr.aloy_combat_override',
-                stats: {
-                    atk_percent: TalentValues.A1AtkOther,
-                    text_percent_1: TalentValues.A1AtkSelf,
-                    text_percent_2: TalentValues.A1AtkOther,
-                },
-                info: {
-                    ascension: 1,
-                },
-            }),
-        ],
-    },
+    retiredParty: [[1, 'checkbox']],
 });

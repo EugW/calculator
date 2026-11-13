@@ -28,9 +28,9 @@ function defMultiplier(stats, settings) {
 test('total DEF ignore is capped at 100% (Durin C6 darkness + Nicole C6)', () => {
     // Durin C6 darkness: 30% + 40% = 70% burst ignore, Nicole C6: 40% generic ignore = 110% total
     const value = defMultiplier({
-        enemy_def_reduce: 0,
-        enemy_def_ignore: 0.4,
-        enemy_def_ignore_burst: 0.7,
+        enemy__def_reduce: 0,
+        def_ignore: 0.4,
+        def_ignore_burst: 0.7,
     });
     // Fully ignored DEF => (90+100)/((90+100)*0 + (90+100)) = 1
     expect(value).toBeCloseTo(1, 5);
@@ -38,9 +38,9 @@ test('total DEF ignore is capped at 100% (Durin C6 darkness + Nicole C6)', () =>
 
 test('total DEF ignore capped at 100% combined with DEF reduce', () => {
     const value = defMultiplier({
-        enemy_def_reduce: 0.3,
-        enemy_def_ignore: 0.4,
-        enemy_def_ignore_burst: 0.7,
+        enemy__def_reduce: 0.3,
+        def_ignore: 0.4,
+        def_ignore_burst: 0.7,
     });
     expect(value).toBeCloseTo(1, 5);
 });
@@ -48,9 +48,9 @@ test('total DEF ignore capped at 100% combined with DEF reduce', () => {
 test('partial DEF ignore below cap is unaffected', () => {
     // 40% ignore, no reduce: (190)/(190*0.6 + 190) = 190/304
     const value = defMultiplier({
-        enemy_def_reduce: 0,
-        enemy_def_ignore: 0.4,
-        enemy_def_ignore_burst: 0,
+        enemy__def_reduce: 0,
+        def_ignore: 0.4,
+        def_ignore_burst: 0,
     });
     expect(value).toBeCloseTo(190 / (190 * 0.6 + 190), 5);
 });

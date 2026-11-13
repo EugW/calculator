@@ -2,6 +2,7 @@ import { ConditionBooleanRefine } from "../../../classes/Condition/Boolean/Refin
 import { DbObjectWeapon } from "../../../classes/DbObject/Weapon";
 import { StatTable } from "../../../classes/StatTable";
 import { weaponStatTables } from "../../generated/WeaponStatTables";
+import { weaponPassiveTables } from "../../generated/WeaponPassiveTables";
 
 export const DawningFrost = new DbObjectWeapon({
     name: 'dawning_frost',
@@ -18,7 +19,7 @@ export const DawningFrost = new DbObjectWeapon({
             title: 'talent_name.weapon_dawning_frost',
             description: 'talent_descr.weapon_dawning_frost_1',
             stats: [
-                new StatTable('mastery', [72, 90, 108, 126, 144]),
+                new StatTable('mastery', weaponPassiveTables.DawningFrost.p1),
             ],
         }),
         new ConditionBooleanRefine({
@@ -27,7 +28,7 @@ export const DawningFrost = new DbObjectWeapon({
             title: 'talent_name.weapon_dawning_frost',
             description: 'talent_descr.weapon_dawning_frost_2',
             stats: [
-                new StatTable('mastery', [48, 60, 72, 84, 96]),
+                new StatTable('mastery', weaponPassiveTables.DawningFrost.p3),
             ],
         }),
     ],

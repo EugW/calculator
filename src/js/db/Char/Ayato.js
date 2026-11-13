@@ -6,7 +6,6 @@ import { ConditionBooleanLevels } from "../../classes/Condition/Boolean/Levels";
 import { ConditionBooleanValue } from "../../classes/Condition/Boolean/Value";
 import { ConditionConstellation } from "../../classes/Condition/Constellation";
 import { ConditionNot } from "../../classes/Condition/Not";
-import { ConditionNumberTalent } from "../../classes/Condition/Number/Talent";
 import { ConditionStacks } from "../../classes/Condition/Stacks";
 import { ConditionStatic } from "../../classes/Condition/Static";
 import { DbObjectChar } from "../../classes/DbObject/Char";
@@ -22,8 +21,10 @@ import { FeatureMultiplier } from "../../classes/Feature2/Multiplier";
 import { FeatureMultiplierTarget } from "../../classes/Feature2/Multiplier/Target";
 import { StatTable } from "../../classes/StatTable";
 import { ValueTable } from "../../classes/ValueTable";
+import { RECEIVERS } from "../../classes/Team/Receivers";
 import { charTables } from "../generated/CharTables";
 import { charTalentTables } from "../generated/CharTalentTables";
+import { percent } from "../Params";
 
 const Talents = new DbObjectTalents({
     attack: {
@@ -128,10 +129,10 @@ const Talents = new DbObjectTalents({
 });
 
 const TalentValues = {
-    C1DamageBonus: 40,
-    C2HpBonus: 50,
-    C4AtkSpeed: 15,
-    C6AttackDmg: 450,
+    C1DamageBonus: percent(charTalentTables.Ayato.c1.p2),
+    C2HpBonus: percent(charTalentTables.Ayato.c2.p2),
+    C4AtkSpeed: percent(charTalentTables.Ayato.c4.p1),
+    C6AttackDmg: percent(charTalentTables.Ayato.c6.p1),
 };
 
 const condStance = new ConditionBoolean({name: 'ayato_takimeguri_kanka'});
@@ -369,6 +370,7 @@ export const Ayato = new DbObjectChar({
         new ConditionBooleanLevels({
             name: 'ayato_bloomwater_blades',
             serializeId: 3,
+            receivers: RECEIVERS.TEAM,
             title: 'talent_name.ayato_bloomwater_blades',
             description: 'talent_descr.ayato_bloomwater_blades',
             levelSetting: 'char_skill_burst',
@@ -435,6 +437,7 @@ export const Ayato = new DbObjectChar({
                 new ConditionBoolean({
                     name: 'kamisato_ayato_endless_flow',
                     serializeId: 5,
+                    receivers: RECEIVERS.TEAM,
                     title: 'talent_name.kamisato_ayato_endless_flow',
                     description: 'talent_descr.kamisato_ayato_endless_flow',
                     stats: {
@@ -456,59 +459,5 @@ export const Ayato = new DbObjectChar({
             ],
         },
     ]),
-    partyData: {
-        loadStats: {
-            settings: ['char_skill_burst'],
-        },
-        conditions: [
-            new ConditionNumberTalent({
-                name: 'ayato_char_skill_burst',
-                title: 'talent_name.stats_level_burst',
-                partySetting: 'char_skill_burst',
-                serializeId: 1,
-            }),
-            new Condition({
-                settings: {
-                    ayato_char_skill_burst_bonus: 3,
-                },
-                subConditions: [
-                    new ConditionBoolean({
-                        name: 'party.ayato_constellation_5',
-                    }),
-                ],
-            }),
-            new ConditionBooleanLevels({
-                name: 'party.ayato_bloomwater_blades',
-                serializeId: 2,
-                rotation: 'party',
-                title: 'talent_name.ayato_bloomwater_blades',
-                description: 'talent_descr.ayato_bloomwater_blades',
-                levelSetting: 'ayato_char_skill_burst',
-                stats: [
-                    Talents.getAlias('burst.ayato_normal_attack_bonus', 'dmg_normal'),
-                ],
-            }),
-            new ConditionBoolean({
-                name: 'party.kamisato_ayato_endless_flow',
-                serializeId: 3,
-                title: 'talent_name.kamisato_ayato_endless_flow',
-                description: 'talent_descr.kamisato_ayato_endless_flow',
-                info: {
-                    constellation: 4,
-                },
-                stats: {
-                    atk_speed_normal: TalentValues.C4AtkSpeed,
-                },
-            }),
-            new ConditionBoolean({
-                name: 'party.ayato_constellation_5',
-                serializeId: 4,
-                title: 'talent_name.kamisato_ayato_bansui_ichiro',
-                description: 'talent_descr.char_constellation_burst',
-                info: {
-                    constellation: 5,
-                },
-            }),
-        ],
-    },
+    retiredParty: [[1, 'number'], [2, 'checkbox'], [3, 'checkbox'], [4, 'checkbox']],
 });

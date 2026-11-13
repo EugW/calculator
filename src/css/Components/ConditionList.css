@@ -122,33 +122,6 @@
     background-position-x: 0;
 }
 
-.condition-list-item.party-weapon .control:nth-child(n+2) {
-    margin-left: 5px;
-}
-
-.condition-list-item.party-weapon .info {
-    cursor: pointer;
-    margin-left: 5px;
-}
-
-.condition-list-item.party-weapon .party-weapon-mode-line {
-    min-height: 28px;
-}
-
-.condition-list-item.party-weapon .party-weapon-mode-control {
-    flex-grow: 1;
-    flex-shrink: 1;
-    width: 100%;
-    box-sizing: border-box;
-    padding-right: 6px;
-}
-
-.condition-list-item.party-weapon .party-weapon-mode-control .dropdown-wrapper {
-    width: 100%;
-    min-width: 0;
-    max-width: none;
-}
-
 .condition-list-item .condition-control-line {
     min-height: 28px;
 }
@@ -173,26 +146,35 @@
     max-width: none;
 }
 
-.condition-list-item .party-load {
-    flex-shrink: 0;
-    font-size: 12px;
-    width: 28px;
-    height: 28px;
-    line-height: 26px;
-    text-align: center;
-    border-radius: 50%;
-    background-color: #353D4F;
-    border: solid 2px #626770;
-    box-sizing: border-box;
-    background-image: url("../../images/icons/team.png");
-    background-size: 24px 24px;
-    background-position: center;
-    background-repeat: no-repeat;
-    cursor: pointer;
-    right: 2px;
-    position: relative;
+
+.condition-receivers {
+    margin-top: 8px;
+    font-size: 13px;
 }
 
-.condition-list-item .party-load.weapon {
-    top: -5px;
+.condition-receivers summary {
+    cursor: pointer;
+    color: #BEAEA9;
+}
+
+.condition-receiver {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 6px;
+    padding: 5px 0;
+}
+
+.condition-receiver-name {
+    flex: 1 0 100%;
+}
+
+.condition-receiver .control {
+    margin-left: auto;
+    max-width: 100%;
+}
+
+.condition-inherited {
+    margin-left: auto;
+    color: #BEAEA9;
 }

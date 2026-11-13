@@ -12,6 +12,14 @@
     display: inline-block;
 }
 
+.inputs-button.icon-only {
+    padding: 0 5px;
+}
+
+.inputs-button.icon-only .inputs-button-icon {
+    margin-right: 0;
+}
+
 .inputs-button.native {
     border: 0;
     font-family: inherit;

@@ -3,6 +3,8 @@ import { ConditionStaticRefine } from "../../../classes/Condition/Static/Refine"
 import { DbObjectWeapon } from "../../../classes/DbObject/Weapon";
 import { StatTable } from "../../../classes/StatTable";
 import { weaponStatTables } from "../../generated/WeaponStatTables";
+import { weaponPassiveTables } from "../../generated/WeaponPassiveTables";
+import { percent } from "../../Params";
 
 export const MountainBracingBolt = new DbObjectWeapon({
     name: 'mountain_bracing_bolt',
@@ -17,7 +19,7 @@ export const MountainBracingBolt = new DbObjectWeapon({
             title: 'talent_name.weapon_mountain_bracing_bolt',
             description: 'talent_descr.weapon_mountain_bracing_bolt_1',
             stats: [
-                new StatTable('dmg_skill', [12, 15, 18, 21, 24]),
+                new StatTable('dmg_skill', percent(weaponPassiveTables.MountainBracingBolt.p2)),
             ],
         }),
         new ConditionBooleanRefine({
@@ -26,7 +28,7 @@ export const MountainBracingBolt = new DbObjectWeapon({
             title: 'talent_name.weapon_mountain_bracing_bolt',
             description: 'talent_descr.weapon_mountain_bracing_bolt_2',
             stats: [
-                new StatTable('dmg_skill', [12, 15, 18, 21, 24]),
+                new StatTable('dmg_skill', percent(weaponPassiveTables.MountainBracingBolt.p3)),
             ],
         }),
     ],

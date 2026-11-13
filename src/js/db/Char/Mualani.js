@@ -22,6 +22,7 @@ import { StatTable } from "../../classes/StatTable";
 import { ValueTable } from "../../classes/ValueTable";
 import { charTables } from "../generated/CharTables";
 import { charTalentTables } from "../generated/CharTalentTables";
+import { percent } from "../Params";
 
 const Talents = new DbObjectTalents({
     attack: {
@@ -108,11 +109,11 @@ const Talents = new DbObjectTalents({
     },
 });
 
-const A4StackValue1 = 15;
-const A4StackValue2 = 30;
-const A4StackValue3 = 45;
-const C1HpBonus = 66;
-const C4DmgBonus = 75;
+const A4StackValue1 = percent(charTalentTables.Mualani.a4.p2);
+const A4StackValue2 = percent(charTalentTables.Mualani.a4.p3);
+const A4StackValue3 = percent(charTalentTables.Mualani.a4.p4);
+const C1HpBonus = percent(charTalentTables.Mualani.c1.p1);
+const C4DmgBonus = percent(charTalentTables.Mualani.c4.p2);
 
 export const Mualani = new DbObjectChar({
     name: 'mualani',

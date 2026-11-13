@@ -1,16 +1,16 @@
-import { CalcSet } from "../classes/CalcSet";
-
-importScripts('db.js?'+ __VERSION__);
+// The database joins this worker's module graph; see webpack.config.js.
+import "../db";
+import { deserializeWorkerMember } from "../classes/Team";
+import { ArtifactCandidateEvaluator } from "../classes/ArtifactCandidateEvaluator";
 
 self.onmessage = function(input) {
-    let original = CalcSet.deserialize(input.data.build);
+    let original = deserializeWorkerMember(input.data.build);
     let featureName = input.data.feature;
 
     let results = [];
 
-    let buildData = original.getBuildData();
-    let feature = original.getFeatureByName(featureName);
-    let usedStats = feature.getUsedStats(buildData);
+    let evaluator = new ArtifactCandidateEvaluator(featureName);
+    let usedStats = evaluator.getUsedStats(original);
 
     let arts = original.getArtifacts();
     let statsBySlot = {};
@@ -65,8 +65,7 @@ self.onmessage = function(input) {
             arts[slot].mainStat = stat || uselessStats[slot];
         }
 
-        let data  = build.getBuildData();
-        let value = feature.getResult(data)[featureName];
+        let value = evaluator.getResult(build);
 
         results.push({
             feature: value,

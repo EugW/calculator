@@ -5,6 +5,8 @@ import { ConditionStaticRefine } from "../../../classes/Condition/Static/Refine"
 import { DbObjectWeapon } from "../../../classes/DbObject/Weapon";
 import { StatTable } from "../../../classes/StatTable";
 import { weaponStatTables } from "../../generated/WeaponStatTables";
+import { weaponPassiveTables } from "../../generated/WeaponPassiveTables";
+import { percent } from "../../Params";
 
 export const CalamityQueller = new DbObjectWeapon({
     name: 'calamity_queller',
@@ -35,13 +37,13 @@ export const CalamityQueller = new DbObjectWeapon({
             title: 'talent_name.weapon_calamity_queller',
             description: 'talent_descr.weapon_calamity_queller',
             stats: [
-                new StatTable('dmg_anemo', [12, 15, 18, 21, 24]),
-                new StatTable('dmg_geo', [12, 15, 18, 21, 24]),
-                new StatTable('dmg_pyro', [12, 15, 18, 21, 24]),
-                new StatTable('dmg_electro', [12, 15, 18, 21, 24]),
-                new StatTable('dmg_hydro', [12, 15, 18, 21, 24]),
-                new StatTable('dmg_cryo', [12, 15, 18, 21, 24]),
-                new StatTable('dmg_dendro', [12, 15, 18, 21, 24]),
+                new StatTable('dmg_anemo', percent(weaponPassiveTables.CalamityQueller.p1)),
+                new StatTable('dmg_geo', percent(weaponPassiveTables.CalamityQueller.p1)),
+                new StatTable('dmg_pyro', percent(weaponPassiveTables.CalamityQueller.p1)),
+                new StatTable('dmg_electro', percent(weaponPassiveTables.CalamityQueller.p1)),
+                new StatTable('dmg_hydro', percent(weaponPassiveTables.CalamityQueller.p1)),
+                new StatTable('dmg_cryo', percent(weaponPassiveTables.CalamityQueller.p1)),
+                new StatTable('dmg_dendro', percent(weaponPassiveTables.CalamityQueller.p1)),
             ],
         }),
         new ConditionStacks({
@@ -49,10 +51,10 @@ export const CalamityQueller = new DbObjectWeapon({
             serializeId: 1,
             title: 'talent_name.weapon_calamity_queller',
             description: 'talent_descr.weapon_calamity_queller_2',
-            maxStacks: 6,
+            maxStacks: weaponPassiveTables.CalamityQueller.p4[0],
             levelSetting: 'weapon_refine',
             stats: [
-                new StatTable('atk_percent', [3.2, 4, 4.8, 5.6, 6.4]),
+                new StatTable('atk_percent', percent(weaponPassiveTables.CalamityQueller.p3)),
             ],
         }),
         new ConditionBoolean({
@@ -63,10 +65,10 @@ export const CalamityQueller = new DbObjectWeapon({
         }),
         new ConditionStacksHidden({
             name: 'weapon_calamity_queller',
-            maxStacks: 6,
+            maxStacks: weaponPassiveTables.CalamityQueller.p4[0],
             levelSetting: 'weapon_refine',
             stats: [
-                new StatTable('atk_percent', [3.2, 4, 4.8, 5.6, 6.4]),
+                new StatTable('atk_percent', percent(weaponPassiveTables.CalamityQueller.p3)),
             ],
             subConditions: [
                 new ConditionBoolean({name: 'weapon_calamity_queller_off_field'}),

@@ -3,6 +3,8 @@ import { ConditionStaticRefine } from "../../../classes/Condition/Static/Refine"
 import { DbObjectWeapon } from "../../../classes/DbObject/Weapon";
 import { StatTable } from "../../../classes/StatTable";
 import { weaponStatTables } from "../../generated/WeaponStatTables";
+import { weaponPassiveTables } from "../../generated/WeaponPassiveTables";
+import { percent } from "../../Params";
 
 export const FleuveCendreFerryman = new DbObjectWeapon({
     name: 'fleuve_cendre_ferryman',
@@ -17,7 +19,7 @@ export const FleuveCendreFerryman = new DbObjectWeapon({
             title: 'talent_name.weapon_fleuve_cendre_ferryman',
             description: 'talent_descr.weapon_fleuve_cendre_ferryman_1',
             stats: [
-                new StatTable('crit_rate_skill', [8, 10, 12, 14, 16]),
+                new StatTable('crit_rate_skill', percent(weaponPassiveTables.FleuveCendreFerryman.p1)),
             ],
         }),
         new ConditionBooleanRefine({
@@ -26,7 +28,7 @@ export const FleuveCendreFerryman = new DbObjectWeapon({
             title: 'talent_name.weapon_fleuve_cendre_ferryman',
             description: 'talent_descr.weapon_fleuve_cendre_ferryman_2',
             stats: [
-                new StatTable('recharge', [16, 20, 24, 28, 32]),
+                new StatTable('recharge', percent(weaponPassiveTables.FleuveCendreFerryman.p2)),
             ],
         }),
     ],

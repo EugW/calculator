@@ -16,6 +16,7 @@ import { FeatureMultiplier } from '../../classes/Feature2/Multiplier';
 import { StatTable } from "../../classes/StatTable"
 import { charTables } from '../generated/CharTables';
 import { charTalentTables } from '../generated/CharTalentTables';
+import { percent } from "../Params";
 
 const Talents = new DbObjectTalents({
     attack: {
@@ -111,14 +112,15 @@ const Talents = new DbObjectTalents({
 });
 
 const TalentValues = {
-    A1StaminaCharged: 50,
-    A4PyroDmg: 20,
-    C1DmgAll: 15,
-    C2AtkBonus: 10,
-    C2AtkSpeed: 5,
-    C4SkillBonus: 40,
-    C6AtkBonus: 30,
-    C6AtkSpeed: 30,
+    A1StaminaCharged: percent(charTalentTables.Diluc.a1.p1),
+    A4PyroDmg: percent(charTalentTables.Diluc.a4.p2),
+    C1DmgAll: percent(charTalentTables.Diluc.c1.p1),
+    C2AtkBonus: percent(charTalentTables.Diluc.c2.p1),
+    C2AtkSpeed: percent(charTalentTables.Diluc.c2.p2),
+    C2MaxStacks: charTalentTables.Diluc.c2.p4,
+    C4SkillBonus: percent(charTalentTables.Diluc.c4.p1),
+    C6AtkBonus: percent(charTalentTables.Diluc.c6.p3),
+    C6AtkSpeed: percent(charTalentTables.Diluc.c6.p2),
 };
 
 export const Diluc = new DbObjectChar({
@@ -339,7 +341,7 @@ export const Diluc = new DbObjectChar({
                     serializeId: 4,
                     title: 'talent_name.diluc_searing_ember',
                     description: 'talent_descr.diluc_searing_ember',
-                    maxStacks: 3,
+                    maxStacks: TalentValues.C2MaxStacks,
                     stats: [
                         new StatTable('atk_percent', [TalentValues.C2AtkBonus]),
                         new StatTable('atk_speed_normal', [TalentValues.C2AtkSpeed]),

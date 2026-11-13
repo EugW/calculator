@@ -23,6 +23,7 @@ export class ArtifactSetTab extends Tab {
 
         this.id = 'suggestset';
         this.rightRab = false;
+        this.title = 'tab_header.suggest-artifact-set';
     }
 
     refresh() {
@@ -70,7 +71,7 @@ class ArtifactSetView extends React.Component {
     }
 
     dataFeaturesItems() {
-        return Feature2.buildDropdown(this.props.app.currentSet());
+        return Feature2.buildDropdown(this.props.app.view());
     }
 
     handleFeature(feature) {
@@ -137,8 +138,11 @@ class ArtifactSetView extends React.Component {
         for (const art of arts) {
             build.setArtifact(art);
         }
-        build.setArtifactsSettings(data.settings);
+        // Set effects read the member's set-bonus profile. A set's scenario
+        // is the team's and its enemy's (Blizzard Strayer assumes a
+        // Cryo-affected enemy): it changes on the team.
         this.props.app.replaceSet(build);
+        this.props.app.applySharedSettings(data.settings);
     }
 
     triggerGenerate() {
@@ -168,7 +172,7 @@ class ArtifactSetView extends React.Component {
     }
 
     completeCallback(data) {
-        this.baseFeature = this.props.app.currentSet().getFeatureResultByName(this.state.feature);
+        this.baseFeature = this.props.app.view().getFeatureResultByName(this.state.feature);
 
         this.setState({
             isLoading: false,

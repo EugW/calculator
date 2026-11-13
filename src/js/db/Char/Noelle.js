@@ -22,6 +22,7 @@ import { StatTable } from "../../classes/StatTable";
 import { ValueTable } from "../../classes/ValueTable";
 import { charTables } from "../generated/CharTables";
 import { charTalentTables } from "../generated/CharTalentTables";
+import { percent } from "../Params";
 
 const Talents = new DbObjectTalents({
     attack: {
@@ -135,11 +136,11 @@ const Talents = new DbObjectTalents({
     },
 });
 
-const A1Shield = 400;
-const C1ChargedStamina = 20;
-const C1ChargedBonus = 15;
-const C4ShieldDmg = 400;
-const C6BuffBonus = 50;
+const A1Shield = percent(charTalentTables.Noelle.a1.p2);
+const C1ChargedStamina = -percent(charTalentTables.Noelle.c2.p1);
+const C1ChargedBonus = percent(charTalentTables.Noelle.c2.p2);
+const C4ShieldDmg = percent(charTalentTables.Noelle.c4.p1);
+const C6BuffBonus = percent(charTalentTables.Noelle.c6.p1);
 
 export const Noelle = new DbObjectChar({
     name: 'noelle',
@@ -152,6 +153,14 @@ export const Noelle = new DbObjectChar({
     origin: 'mondstadt',
     talents: Talents,
     statTable: charTables.Noelle,
+    // Every 'def*' multiplier below reads the total DEF: the game computes
+    // these hits, heals and shields from FIGHT_PROP_CUR_DEFENSE
+    // (Avatar_Noel_Skill_S: Heal amount, ShieldBrokenEevet damageExtra and
+    // UNIQUE_Noel_Skill_S_Shield shieldHP; Avatar_Noel_ProudSkill_21
+    // onAbilityStart _ABILITY_Noel_ProudSkill_21_ShieldHp). def* is already
+    // total, so they need nothing. The C4 hit scales with the total ATK
+    // (game text: 400% of ATK; KQM: it takes the ATK when the shield breaks):
+    // the default 'atk*' scaling needs nothing.
     features: [
         new FeatureDamageNormal({
             name: 'normal_hit_1',
@@ -315,6 +324,17 @@ export const Noelle = new DbObjectChar({
             condition: new ConditionAscensionChar({ascension: 1}),
         }),
     ],
+    // Sweeping Time (DEF -> ATK) reads premod DEF and writes extra ATK: game
+    // data (Avatar_Noel_Skill_E Buff modifier: AS_Skill_E_AttackUp_PS33_P3 x
+    // FIGHT_PROP_NONEXTRA_DEFENSE into Actor_AttackExtraDelta; extra_scan:
+    // R-nonextra:NONEXTRA_DEFENSE W-extra:Actor_AttackExtraDelta). The default
+    // channels are confirmed, so premod DEF writers (Columbina's C2 DEF)
+    // count and extra DEF does not (nothing writes it in the game). C6's
+    // additional 50% of DEF rides the same property (same channel). GO reads
+    // input.total.def here, but the game data says NONEXTRA: the game wins
+    // (as with Peak Patrol Song, md/buff_chains.md). KQM has no
+    // stat-interaction test for her burst (only that it snapshots DEF at
+    // cast).
     postEffects: [
         new PostEffectStatsDef({
             levelSetting: 'char_skill_burst',

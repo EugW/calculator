@@ -2,6 +2,8 @@ import { ConditionStaticRefine } from "../../../classes/Condition/Static/Refine"
 import { DbObjectWeapon } from "../../../classes/DbObject/Weapon";
 import { StatTable } from "../../../classes/StatTable";
 import { weaponStatTables } from "../../generated/WeaponStatTables";
+import { weaponPassiveTables } from "../../generated/WeaponPassiveTables";
+import { percent } from "../../Params";
 
 export const Stringless = new DbObjectWeapon({
     name: 'the_stringless',
@@ -16,8 +18,8 @@ export const Stringless = new DbObjectWeapon({
             title: 'talent_name.weapon_stringless',
             description: 'talent_descr.weapon_stringless',
             stats: [
-                new StatTable('dmg_burst', [24, 30, 36, 42, 48]),
-                new StatTable('dmg_skill', [24, 30, 36, 42, 48]),
+                new StatTable('dmg_burst', percent(weaponPassiveTables.Stringless.p1)),
+                new StatTable('dmg_skill', percent(weaponPassiveTables.Stringless.p1)),
             ],
         }),
     ],

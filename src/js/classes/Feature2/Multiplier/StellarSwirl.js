@@ -1,5 +1,6 @@
 import { CConst } from "../Compile/Types/Item";
 import { FeatureMultiplierStellarGlimmer } from "./StellarGlimmer";
+import { teamSettings } from "../../Team/Scope";
 
 export class FeatureMultiplierStellarSwirl extends FeatureMultiplierStellarGlimmer {
     static getSubtype() {
@@ -15,10 +16,8 @@ export class FeatureMultiplierStellarSwirl extends FeatureMultiplierStellarGlimm
     }
 
     static getVortexTriggerCount(data) {
-        let settings = data.settings || data;
-        let value = settings.getNumber
-            ? settings.getNumber('stellarswirl_vortex_triggers')
-            : settings.stellarswirl_vortex_triggers || 0;
+        // The team's shared Stellar Vortex input.
+        let value = Number(teamSettings(data.settings || data).stellarswirl_vortex_triggers) || 0;
         return Math.max(0, Math.min(6, value));
     }
 

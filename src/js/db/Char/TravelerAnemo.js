@@ -23,11 +23,13 @@ import { FeatureHeal } from "../../classes/Feature2/Heal";
 import { FeatureMultiplier } from "../../classes/Feature2/Multiplier";
 import { FeatureMultiplierStatic } from "../../classes/Feature2/Multiplier/Static";
 import { FeatureStatic } from "../../classes/Feature2/Static";
+import { RECEIVERS } from "../../classes/Team/Receivers";
 import { StatTable } from "../../classes/StatTable";
 import { StatTableAscensionScale } from "../../classes/StatTable/Ascension/Scale";
 import { ValueTable } from "../../classes/ValueTable";
 import { charTables } from "../generated/CharTables";
 import { charTalentTables } from "../generated/CharTalentTables";
+import { percent } from "../Params";
 
 const Talents = new DbObjectTalents({
     attack: {
@@ -151,9 +153,9 @@ function makeChargedHit2Multipliers() {
     ];
 }
 
-const ForeignWindwrathBonus = 60;
-const ForeignBladeWindDmg = 50;
-const ForeignWindwrathCooldown = 15;
+const ForeignWindwrathBonus = percent(charTalentTables.TravelerAnemo.sp.p8);
+const ForeignBladeWindDmg = percent(charTalentTables.TravelerAnemo.sp.p10);
+const ForeignWindwrathCooldown = charTalentTables.TravelerAnemo.sp.p9;
 
 const bladeReadyCondition = new ConditionBooleanValue({
     setting: 'traveler_anemo_blade_dawn_breeze',
@@ -603,9 +605,11 @@ export const TravelerAnemo = new DbObjectChar({
         },
         {
             conditions: [
+                // Targets hit by Gust Surge lose Anemo RES; absorbed element RES too. Enemy debuff (TEAM).
                 new ConditionBoolean({
                     name: 'traveler_intertwined_winds',
                     serializeId: 1,
+                    receivers: RECEIVERS.TEAM,
                     title: 'talent_name.traveler_intertwined_winds',
                     description: 'talent_descr.traveler_intertwined_winds',
                     stats: {
@@ -615,6 +619,7 @@ export const TravelerAnemo = new DbObjectChar({
                 new ConditionDropdownElement({
                     name: 'traveler_intertwined_winds_element',
                     serializeId: 2,
+                    receivers: RECEIVERS.TEAM,
                     title: 'talent_name.traveler_intertwined_winds',
                     description: 'talent_descr.traveler_intertwined_winds_element',
                     values: [
@@ -654,60 +659,5 @@ export const TravelerAnemo = new DbObjectChar({
             ],
         },
     ]),
-    partyData: {
-        conditions: [
-            new ConditionBoolean({
-                name: 'party.traveler_intertwined_winds',
-                serializeId: 1,
-                rotation: 'party',
-                title: 'talent_name.traveler_intertwined_winds',
-                description: 'talent_descr.traveler_intertwined_winds',
-                info: {constellation: 6},
-                stats: {
-                    enemy_res_anemo: -20,
-                },
-            }),
-            new ConditionDropdownElement({
-                name: 'party.traveler_intertwined_winds_element',
-                serializeId: 2,
-                rotation: 'party',
-                title: 'talent_name.traveler_intertwined_winds',
-                description: 'talent_descr.traveler_intertwined_winds_element',
-                values: [
-                    {
-                        value: 'cryo',
-                        serializeId: 1,
-                        conditions: [
-                            new Condition({stats: {enemy_res_cryo: -20}}),
-                        ],
-                    },
-                    {
-                        value: 'electro',
-                        serializeId: 2,
-                        conditions: [
-                            new Condition({stats: {enemy_res_electro: -20}}),
-                        ],
-                    },
-                    {
-                        value: 'hydro',
-                        serializeId: 3,
-                        conditions: [
-                            new Condition({stats: {enemy_res_hydro: -20}}),
-                        ],
-                    },
-                    {
-                        value: 'pyro',
-                        serializeId: 4,
-                        conditions: [
-                            new Condition({stats: {enemy_res_pyro: -20}}),
-                        ],
-                    },
-                ],
-                info: {constellation: 6},
-                subConditions: [
-                    new ConditionBoolean({name: 'party.traveler_intertwined_winds'}),
-                ],
-            }),
-        ],
-    },
+    retiredParty: [[1, 'checkbox'], [2, 'dropdown']],
 });

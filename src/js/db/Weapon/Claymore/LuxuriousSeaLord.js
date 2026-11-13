@@ -4,6 +4,8 @@ import { FeatureDamage } from "../../../classes/Feature2/Damage";
 import { FeatureMultiplier } from "../../../classes/Feature2/Multiplier";
 import { StatTable } from "../../../classes/StatTable";
 import { weaponStatTables } from "../../generated/WeaponStatTables";
+import { weaponPassiveTables } from "../../generated/WeaponPassiveTables";
+import { percent } from "../../Params";
 
 export const LuxuriousSeaLord = new DbObjectWeapon({
     name: 'luxurious_sea_lord',
@@ -19,8 +21,8 @@ export const LuxuriousSeaLord = new DbObjectWeapon({
             title: 'weapon_name.luxurious_sea_lord',
             description: 'talent_descr.weapon_luxurious_sea_lord',
             stats: [
-                new StatTable('dmg_burst', [12, 15, 18, 21, 24]),
-                new StatTable('text_percent_dmg', [100, 125, 150, 175, 200]),
+                new StatTable('dmg_burst', percent(weaponPassiveTables.LuxuriousSeaLord.p1)),
+                new StatTable('text_percent_dmg', percent(weaponPassiveTables.LuxuriousSeaLord.p3)),
             ],
         }),
     ],
@@ -30,7 +32,7 @@ export const LuxuriousSeaLord = new DbObjectWeapon({
             multipliers: [
                 new FeatureMultiplier({
                     leveling: 'weapon_refine',
-                    values: new StatTable('titanic_tuna_dmg', [100, 125, 150, 175, 200]),
+                    values: new StatTable('titanic_tuna_dmg', percent(weaponPassiveTables.LuxuriousSeaLord.p3)),
                 }),
             ],
         }),

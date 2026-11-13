@@ -1,5 +1,6 @@
-import { Stats } from "../Stats";
 import { Condition } from "../Condition";
+import { Stats } from "../Stats";
+import { teammateElements } from "../Team/Party";
 
 export class ConditionCalcElementsNahida extends Condition {
     getData(settings) {
@@ -10,10 +11,7 @@ export class ConditionCalcElementsNahida extends Condition {
         }
 
         if (this.isActive(settings)) {
-            for (let name of ['resonance_element_1', 'resonance_element_2', 'resonance_element_3']) {
-                let element = settings[name] || '';
-                if (!element) continue;
-
+            for (const element of teammateElements(settings)) {
                 if (['pyro', 'hydro', 'electro'].includes(element)) {
                     result['nahida_elements_' + element] = (result['nahida_elements_' + element] || 0) + 1;
                 }

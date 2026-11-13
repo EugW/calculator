@@ -4,6 +4,8 @@ import { ConditionFalse } from "../../../classes/Condition/False";
 import { ConditionStatic } from "../../../classes/Condition/Static";
 import { PostEffectStatsRecharge } from "../../../classes/PostEffect/Stats/Recharge";
 import { StatTable } from "../../../classes/StatTable";
+import { artifactSetTables } from "../../generated/ArtifactSetTables";
+import { percent } from "../../Params";
 
 export const EmblemofSeveredFate = new ArtifactSet({
     serializeId: 30,
@@ -22,7 +24,7 @@ export const EmblemofSeveredFate = new ArtifactSet({
                     title: 'set_bonus.emblem_of_severed_fate_2',
                     description: 'set_descr.emblem_of_severed_fate_2',
                     stats: {
-                        recharge: 20,
+                        recharge: artifactSetTables.EmblemofSeveredFate.pc2.recharge,
                     },
                 }),
             ],
@@ -34,17 +36,21 @@ export const EmblemofSeveredFate = new ArtifactSet({
                     title: 'set_bonus.emblem_of_severed_fate_4',
                     description: 'set_descr.emblem_of_severed_fate_4',
                     stats: {
-                        text_percent: 25,
-                        text_percent_max: 75,
+                        text_percent: percent(artifactSetTables.EmblemofSeveredFate.pc4.p1),
+                        text_percent_max: percent(artifactSetTables.EmblemofSeveredFate.pc4.p2),
                     },
                 }),
             ],
         },
     ],
     postEffects: [
+        // Game data: Relic_ElementalBurstUpByChargeEfficiency reads
+        // FIGHT_PROP_NONEXTRA_CHARGE_EFFICIENCY; KQM: Xiphos' and the Electro
+        // Traveler's amulet ER do not affect it. The default (premod read) is
+        // confirmed (md/buff_chains.md).
         new PostEffectStatsRecharge({
-            percent: new StatTable('dmg_burst', [25]),
-            statCap: new StatTable('', [75]),
+            percent: new StatTable('dmg_burst', [percent(artifactSetTables.EmblemofSeveredFate.pc4.p1)]),
+            statCap: new StatTable('', [percent(artifactSetTables.EmblemofSeveredFate.pc4.p2)]),
             conditions: [
                 new ConditionBooleanPiecesCount({
                     setName: 'EmblemofSeveredFate',

@@ -1,10 +1,12 @@
 import { Condition } from "../../classes/Condition";
 import { ConditionAscensionChar } from "../../classes/Condition/Ascension/Char";
 import { ConditionBoolean } from "../../classes/Condition/Boolean";
+import { ConditionOnField } from "../../classes/Condition/Field";
 import { ConditionConstellation } from "../../classes/Condition/Constellation";
 import { ConditionNot } from "../../classes/Condition/Not";
-import { ConditionNumber } from "../../classes/Condition/Number";
+import { ConditionReceiver } from "../../classes/Condition/Receiver";
 import { ConditionStatic } from "../../classes/Condition/Static";
+import { CHANNELS } from "../../classes/PostEffect/Channels";
 import { DbObjectChar } from "../../classes/DbObject/Char";
 import { DbObjectConstellation } from "../../classes/DbObject/Constellation";
 import { DbObjectTalents } from "../../classes/DbObject/Talents";
@@ -20,13 +22,13 @@ import { FeatureMultiplier } from "../../classes/Feature2/Multiplier";
 import { FeatureMultiplierList } from "../../classes/Feature2/Multiplier/List";
 import { FeaturePostEffectValue } from "../../classes/Feature2/PostEffectValue";
 import { FeatureShield } from "../../classes/Feature2/Shield";
-import { PostEffectStats } from "../../classes/PostEffect/Stats";
 import { PostEffectStatsHP } from "../../classes/PostEffect/Stats/HP";
 import { StatTable } from "../../classes/StatTable";
+import { RECEIVERS } from "../../classes/Team/Receivers";
 import { ValueTable } from "../../classes/ValueTable";
-import { CHARACTER_MAX_POSSIBLE_HP } from "../Constants";
 import { charTables } from "../generated/CharTables";
 import { charTalentTables } from "../generated/CharTalentTables";
+import { percent, times } from "../Params";
 
 const Talents = new DbObjectTalents({
     attack: {
@@ -133,39 +135,63 @@ const Talents = new DbObjectTalents({
     },
 });
 
-const A4BloomBonus = 0.002;
-const A4BloomBonusCap = 100;
-const A4LunarBloomBonus = 0.0007;
-const A4LunarBloomBonusCap = 35;
-const A4QuickenBonus = 0.0008;
-const A4QuickenBonusCap = 40;
-const C2HealValue = 20;
-const C2Damage = 250;
-const C4MasteryBonus = 80;
-const C6HpScale = 8;
+const A1HealingBonus = percent(charTalentTables.Baizhu.a1.p2);
+const A1DendroBonus = percent(charTalentTables.Baizhu.a1.p3);
+const A4BloomBonus = percent(times(charTalentTables.Baizhu.a4.p2, 0.001));
+const A4BloomBonusCap = percent(times(charTalentTables.Baizhu.a4.p2, charTalentTables.Baizhu.a4.p4, 0.001));
+const A4LunarBloomBonus = percent(times(charTalentTables.Baizhu.a4.p5, 0.001));
+const A4LunarBloomBonusCap = percent(times(charTalentTables.Baizhu.a4.p5, charTalentTables.Baizhu.a4.p4, 0.001));
+const A4QuickenBonus = percent(times(charTalentTables.Baizhu.a4.p3, 0.001));
+const A4QuickenBonusCap = percent(times(charTalentTables.Baizhu.a4.p3, charTalentTables.Baizhu.a4.p4, 0.001));
+const C2HealValue = percent(charTalentTables.Baizhu.c2.p3);
+const C2Damage = percent(charTalentTables.Baizhu.c2.p2);
+const C4MasteryBonus = charTalentTables.Baizhu.c4.p1;
+const C6HpScale = percent(charTalentTables.Baizhu.c6.p2);
+
+// A4: "Characters who are healed by Seamless Shields will gain the Year of
+// Verdant Favor effect"; the Seamless Shield heals "your own active
+// character", so the effect goes to the on-field member, Baizhu included.
+const healedActiveCharacter = new ConditionReceiver({
+    condition: new ConditionOnField(),
+});
 
 const buffBloom = new PostEffectStatsHP({
+    receivers: RECEIVERS.TEAM,
+    // Game data: A4 (PermanentSkill_2) scales on FIGHT_PROP_MAX_HP (total) in
+    // Avatar_Baizhuer_Heal_ControlAbiilty; GO reads input.total.hp.
+    reads: CHANNELS.TOTAL,
     percent: new StatTable('dmg_reaction_bloom', [A4BloomBonus]),
     statCap: new StatTable('', [A4BloomBonusCap]),
     conditions: [
         new ConditionAscensionChar({ascension: 4}),
         new ConditionBoolean({name: 'baizhu_all_things_are_of_the_earth'}),
+        healedActiveCharacter,
     ],
 });
 const buffQuicken = new PostEffectStatsHP({
+    receivers: RECEIVERS.TEAM,
+    // Game data: A4 (PermanentSkill_2) scales on FIGHT_PROP_MAX_HP (total) in
+    // Avatar_Baizhuer_Heal_ControlAbiilty; GO reads input.total.hp.
+    reads: CHANNELS.TOTAL,
     percent: new StatTable('dmg_reaction_quicken', [A4QuickenBonus]),
     statCap: new StatTable('', [A4QuickenBonusCap]),
     conditions: [
         new ConditionAscensionChar({ascension: 4}),
         new ConditionBoolean({name: 'baizhu_all_things_are_of_the_earth'}),
+        healedActiveCharacter,
     ],
 });
 const buffLunarBloom = new PostEffectStatsHP({
+    receivers: RECEIVERS.TEAM,
+    // Game data: A4 (PermanentSkill_2) scales on FIGHT_PROP_MAX_HP (total) in
+    // Avatar_Baizhuer_Heal_ControlAbiilty; GO reads input.total.hp.
+    reads: CHANNELS.TOTAL,
     percent: new StatTable('dmg_reaction_lunarbloom', [A4LunarBloomBonus]),
     statCap: new StatTable('', [A4LunarBloomBonusCap]),
     conditions: [
         new ConditionAscensionChar({ascension: 4}),
         new ConditionBoolean({name: 'baizhu_all_things_are_of_the_earth'}),
+        healedActiveCharacter,
     ],
 });
 
@@ -341,6 +367,8 @@ export const Baizhu = new DbObjectChar({
                 new FeatureMultiplier({
                     scaling: 'hp*',
                     source: 'constellation6',
+                    // Game data: C6 damageExtra reads FIGHT_PROP_MAX_HP (total);
+                    // hp* already reads the total.
                     values: new ValueTable([C6HpScale]),
                     condition: new ConditionConstellation({constellation: 6}),
                 }),
@@ -387,7 +415,7 @@ export const Baizhu = new DbObjectChar({
             title: 'talent_name.baizhu_five_fortunes_forever',
             description: 'talent_descr.baizhu_five_fortunes_forever_2',
             stats: {
-                dmg_dendro: 25,
+                dmg_dendro: A1DendroBonus,
             },
             info: {ascension: 1},
             subConditions: [
@@ -404,7 +432,7 @@ export const Baizhu = new DbObjectChar({
             description: 'talent_descr.baizhu_five_fortunes_forever_1',
             info: {ascension: 1},
             stats: {
-                healing: 20,
+                healing: A1HealingBonus,
             },
             subConditions: [
                 new ConditionAscensionChar({ascension: 1}),
@@ -423,11 +451,17 @@ export const Baizhu = new DbObjectChar({
     ],
     postEffects: [
         new PostEffectStatsHP({
+            receivers: RECEIVERS.TEAM,
+            // Game data: A4 (PermanentSkill_2) scales on FIGHT_PROP_MAX_HP
+            // (total) in Avatar_Baizhuer_Heal_ControlAbiilty; GO reads
+            // input.total.hp.
+            reads: CHANNELS.TOTAL,
             percent: new StatTable('dmg_reaction_burning', [A4BloomBonus]),
             statCap: new StatTable('', [A4BloomBonusCap]),
             conditions: [
                 new ConditionAscensionChar({ascension: 4}),
                 new ConditionBoolean({name: 'baizhu_all_things_are_of_the_earth'}),
+                healedActiveCharacter,
             ],
         }),
         buffBloom,
@@ -465,6 +499,10 @@ export const Baizhu = new DbObjectChar({
                 new ConditionBoolean({
                     name: 'baizhu_ancient_art_of_perception',
                     serializeId: 4,
+                    receivers: RECEIVERS.TEAM,
+                    // Game data: C4 (UNIQUE_Baizhuer_ElementalBurst_Talent4Buff)
+                    // writes Actor_ElemMasteryDelta, i.e. premod; a stage-0
+                    // condition writes premod. GO puts it under teamBuff.premod.
                     title: 'talent_name.baizhu_ancient_art_of_perception',
                     description: 'talent_descr.baizhu_ancient_art_of_perception',
                     stats: {
@@ -494,72 +532,5 @@ export const Baizhu = new DbObjectChar({
             ],
         },
     ]),
-    partyData: {
-        loadStats: {
-            stats: ['hp_total'],
-        },
-        conditions: [
-            new ConditionNumber({
-                name: 'baizhu_max_hp',
-                title: 'talent_name.stats_total_hp',
-                partyStat: 'hp_total',
-                serializeId: 1,
-                max: CHARACTER_MAX_POSSIBLE_HP,
-                class: "gi-inputs-5digit",
-            }),
-            new ConditionBoolean({
-                name: 'party.baizhu_all_things_are_of_the_earth',
-                serializeId: 2,
-                rotation: 'party',
-                title: 'talent_name.baizhu_all_things_are_of_the_earth',
-                description: 'talent_descr.baizhu_all_things_are_of_the_earth',
-                info: {ascension: 4},
-            }),
-            new ConditionBoolean({
-                name: 'party.baizhu_ancient_art_of_perception',
-                serializeId: 3,
-                rotation: 'party',
-                title: 'talent_name.baizhu_ancient_art_of_perception',
-                description: 'talent_descr.baizhu_ancient_art_of_perception',
-                info: {constellation: 4},
-                stats: {
-                    mastery: C4MasteryBonus,
-                },
-            }),
-        ],
-        postEffects: [
-            new PostEffectStats({
-                from: 'baizhu_max_hp',
-                percent: new StatTable('dmg_reaction_burning', [A4BloomBonus]),
-                statCap: new StatTable('', [A4BloomBonusCap]),
-                conditions: [
-                    new ConditionBoolean({name: 'party.baizhu_all_things_are_of_the_earth'}),
-                ],
-            }),
-            new PostEffectStats({
-                from: 'baizhu_max_hp',
-                percent: new StatTable('dmg_reaction_bloom', [A4BloomBonus]),
-                statCap: new StatTable('', [A4BloomBonusCap]),
-                conditions: [
-                    new ConditionBoolean({name: 'party.baizhu_all_things_are_of_the_earth'}),
-                ],
-            }),
-            new PostEffectStats({
-                from: 'baizhu_max_hp',
-                percent: new StatTable('dmg_reaction_lunarbloom', [A4LunarBloomBonus]),
-                statCap: new StatTable('', [A4LunarBloomBonusCap]),
-                conditions: [
-                    new ConditionBoolean({name: 'party.baizhu_all_things_are_of_the_earth'}),
-                ],
-            }),
-            new PostEffectStats({
-                from: 'baizhu_max_hp',
-                percent: new StatTable('dmg_reaction_quicken', [A4QuickenBonus]),
-                statCap: new StatTable('', [A4QuickenBonusCap]),
-                conditions: [
-                    new ConditionBoolean({name: 'party.baizhu_all_things_are_of_the_earth'}),
-                ],
-            }),
-        ],
-    },
+    retiredParty: [[1, 'number'], [2, 'checkbox'], [3, 'checkbox']],
 });

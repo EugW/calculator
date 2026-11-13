@@ -2,6 +2,8 @@ import { ArtifactSet } from "../../../classes/ArtifactSet";
 import { ConditionStacks } from "../../../classes/Condition/Stacks";
 import { ConditionStatic } from "../../../classes/Condition/Static";
 import { StatTable } from "../../../classes/StatTable";
+import { artifactSetTables } from "../../generated/ArtifactSetTables";
+import { percent, times } from "../../Params";
 
 export const VourukashasGlow = new ArtifactSet({
     serializeId: 45,
@@ -20,7 +22,7 @@ export const VourukashasGlow = new ArtifactSet({
                     title: 'set_bonus.vourukashas_glow_2',
                     description: 'set_descr.vourukashas_glow_2',
                     stats: {
-                        hp_percent: 20,
+                        hp_percent: artifactSetTables.VourukashasGlow.pc2.hp_percent,
                     },
                 }),
             ],
@@ -32,8 +34,8 @@ export const VourukashasGlow = new ArtifactSet({
                     title: 'set_bonus.vourukashas_glow_4',
                     description: 'set_descr.vourukashas_glow_4_1',
                     stats: {
-                        dmg_skill: 10,
-                        dmg_burst: 10,
+                        dmg_skill: percent(artifactSetTables.VourukashasGlow.pc4.p1),
+                        dmg_burst: percent(artifactSetTables.VourukashasGlow.pc4.p1),
                     },
                 }),
                 new ConditionStacks({
@@ -41,10 +43,10 @@ export const VourukashasGlow = new ArtifactSet({
                     serializeId: 32,
                     title: 'set_bonus.vourukashas_glow_4',
                     description: 'set_descr.vourukashas_glow_4_2',
-                    maxStacks: 5,
+                    maxStacks: artifactSetTables.VourukashasGlow.pc4.p4,
                     stats: [
-                        new StatTable('dmg_skill', [8, 16, 24, 32, 40]),
-                        new StatTable('dmg_burst', [8, 16, 24, 32, 40]),
+                        new StatTable('dmg_skill', times(percent(times(artifactSetTables.VourukashasGlow.pc4.p1, artifactSetTables.VourukashasGlow.pc4.p2)), [1, 2, 3, 4, 5])),
+                        new StatTable('dmg_burst', times(percent(times(artifactSetTables.VourukashasGlow.pc4.p1, artifactSetTables.VourukashasGlow.pc4.p2)), [1, 2, 3, 4, 5])),
                     ],
                 }),
             ],

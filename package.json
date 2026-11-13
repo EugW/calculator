@@ -1,6 +1,6 @@
 {
     "name": "genshin_impact_calculator",
-    "version": "3.7.3",
+    "version": "3.7.6",
     "draft_version": "0.6.19",
     "private": true,
     "scripts": {
@@ -31,7 +31,6 @@
         }
     },
     "dependencies": {
-        "core-js": "^3.48.0",
         "file-saver": "^2.0.5",
         "jquery": "",
         "js-levenshtein": "^1.1.6",
@@ -68,12 +67,16 @@
         "html-webpack-plugin": "^5.6.6",
         "jest": "^30.2.0",
         "mini-css-extract-plugin": "^2.10.0",
-        "npm-watch": "^0.13.0",
         "style-loader": "^4.0.0",
         "terser-webpack-plugin": "^5.6.1",
         "webgpu": "^0.6.1",
         "webpack": "^5.105.2",
         "webpack-cli": "^7.2.3",
         "webpack-dev-server": "^6.0.0"
+    },
+    "overrides": {
+        "@istanbuljs/load-nyc-config": {
+            "js-yaml": "^4.1.1"
+        }
     }
 }

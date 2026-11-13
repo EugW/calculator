@@ -1,6 +1,8 @@
 import { ArtifactSet } from "../../../classes/ArtifactSet";
 import { ConditionBoolean } from "../../../classes/Condition/Boolean";
 import { ConditionStatic } from "../../../classes/Condition/Static";
+import { artifactSetTables } from "../../generated/ArtifactSetTables";
+import { percent } from "../../Params";
 
 export const DisenchantmentInDeepShadow = new ArtifactSet({
     serializeId: 61,
@@ -19,23 +21,20 @@ export const DisenchantmentInDeepShadow = new ArtifactSet({
                     title: 'set_bonus.disenchantment_in_deep_shadow_2',
                     description: 'set_descr.disenchantment_in_deep_shadow_2',
                     stats: {
-                        atk_percent: 18,
+                        atk_percent: artifactSetTables.DisenchantmentInDeepShadow.pc2.atk_percent,
                     },
                 })
             ],
         },
         {},
         {
-            suggesterSettings: {
-                "set.disenchantment_in_deep_shadow_4_2": 1,
-            },
             conditions: [
                 new ConditionStatic({
                     title: 'set_bonus.disenchantment_in_deep_shadow_4',
                     description: 'set_descr.disenchantment_in_deep_shadow_4_1',
                     stats: {
-                        dmg_reaction_superconduct: 80,
-                        dmg_stellarconduct: 40,
+                        dmg_reaction_superconduct: percent(artifactSetTables.DisenchantmentInDeepShadow.pc4.p1),
+                        dmg_stellarconduct: percent(artifactSetTables.DisenchantmentInDeepShadow.pc4.p3),
                     },
                 }),
                 new ConditionBoolean({
@@ -44,7 +43,7 @@ export const DisenchantmentInDeepShadow = new ArtifactSet({
                     title: 'set_bonus.disenchantment_in_deep_shadow_4',
                     description: 'set_descr.disenchantment_in_deep_shadow_4_2',
                     stats: {
-                        crit_rate_enemy: 16,
+                        crit_rate_enemy: percent(artifactSetTables.DisenchantmentInDeepShadow.pc4.p2),
                     },
                 }),
             ],

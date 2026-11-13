@@ -4,6 +4,8 @@ import { ConditionBooleanValue } from "../../../classes/Condition/Boolean/Value"
 import { ConditionStacks } from "../../../classes/Condition/Stacks";
 import { ConditionStatic } from "../../../classes/Condition/Static";
 import { StatTable } from "../../../classes/StatTable";
+import { artifactSetTables } from "../../generated/ArtifactSetTables";
+import { percent } from "../../Params";
 
 export const PaleFlame = new ArtifactSet({
     serializeId: 29,
@@ -22,7 +24,7 @@ export const PaleFlame = new ArtifactSet({
                     title: 'set_bonus.pale_flame_2',
                     description: 'set_descr.pale_flame_2',
                     stats: {
-                        dmg_phys: 25,
+                        dmg_phys: artifactSetTables.PaleFlame.pc2.dmg_phys,
                     },
                 }),
             ],
@@ -37,12 +39,12 @@ export const PaleFlame = new ArtifactSet({
                     description: 'set_descr.pale_flame_4',
                     maxStacks: 2,
                     stats: [
-                        new StatTable('atk_percent', [9]),
+                        new StatTable('atk_percent', [percent(artifactSetTables.PaleFlame.pc4.p1)]),
                     ],
                 }),
                 new Condition({
                     stats: {
-                        dmg_phys: 25,
+                        dmg_phys: percent(artifactSetTables.PaleFlame.pc4.p4),
                     },
                     condition: new ConditionBooleanValue({
                         setting: 'set.pale_flame_4',

@@ -2,6 +2,8 @@ import { ConditionBooleanRefine } from "../../../classes/Condition/Boolean/Refin
 import { DbObjectWeapon } from "../../../classes/DbObject/Weapon";
 import { StatTable } from "../../../classes/StatTable";
 import { weaponStatTables } from "../../generated/WeaponStatTables";
+import { weaponPassiveTables } from "../../generated/WeaponPassiveTables";
+import { percent, plus, times } from "../../Params";
 
 export const Slingshot = new DbObjectWeapon({
     name: 'slingshot',
@@ -12,8 +14,8 @@ export const Slingshot = new DbObjectWeapon({
     weapon: 'bow',
     statTable: weaponStatTables.Slingshot,
     refineTable: [
-        new StatTable('dmg_normal', [-10]),
-        new StatTable('dmg_charged', [-10]),
+        new StatTable('dmg_normal', [percent(times(weaponPassiveTables.Slingshot.p3[0], -1))]),
+        new StatTable('dmg_charged', [percent(times(weaponPassiveTables.Slingshot.p3[0], -1))]),
     ],
     conditions: [
         new ConditionBooleanRefine({
@@ -22,9 +24,9 @@ export const Slingshot = new DbObjectWeapon({
             title: 'talent_name.weapon_slingshot',
             description: 'talent_descr.weapon_slingshot',
             stats: [
-                new StatTable('text_percent', [36, 42, 48, 54, 60]),
-                new StatTable('dmg_normal', [46, 52, 58, 64, 70]),
-                new StatTable('dmg_charged', [46, 52, 58, 64, 70]),
+                new StatTable('text_percent', percent(weaponPassiveTables.Slingshot.p2)),
+                new StatTable('dmg_normal', percent(plus(weaponPassiveTables.Slingshot.p2, weaponPassiveTables.Slingshot.p3))),
+                new StatTable('dmg_charged', percent(plus(weaponPassiveTables.Slingshot.p2, weaponPassiveTables.Slingshot.p3))),
             ],
         })
     ],

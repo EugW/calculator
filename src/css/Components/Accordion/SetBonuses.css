@@ -23,3 +23,13 @@
 .accordion-set-bonuses .pieces .checkbox-wrapper {
     padding-right: 15px;
 }
+
+.set-profile-link {
+    background: none;
+    border: 0;
+    color: inherit;
+    font: inherit;
+    text-decoration: underline;
+    cursor: pointer;
+    margin-top: 8px;
+}

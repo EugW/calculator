@@ -20,10 +20,12 @@ import { FeatureDamagePlungeShockWave } from "../../classes/Feature2/Damage/Plun
 import { FeatureDamageSkill } from "../../classes/Feature2/Damage/Skill";
 import { FeatureMultiplier } from "../../classes/Feature2/Multiplier";
 import { FeatureMultiplierRazorBurst } from "../../classes/Feature2/Multiplier/RazorBurst";
+import { RECEIVERS } from "../../classes/Team/Receivers";
 import { StatTable } from "../../classes/StatTable";
 import { ValueTable } from "../../classes/ValueTable";
 import { charTables } from "../generated/CharTables";
 import { charTalentTables } from "../generated/CharTalentTables";
+import { percent } from "../Params";
 
 const Talents = new DbObjectTalents({
     attack: {
@@ -136,9 +138,12 @@ const Talents = new DbObjectTalents({
 
 const condWitchHomeworkOn  = new ConditionBoolean({name: 'razor_witch_homework'});
 const condWitchHomeworkOff = new ConditionNot([condWitchHomeworkOn]);
-const condPartyWitchHomeworkOn  = new ConditionBoolean({name: 'party.razor_witch_homework'});
-const condPartyWitchHomeworkOff = new ConditionNot([condPartyWitchHomeworkOn]);
 const condHexereiResonance = new ConditionHexereiResonance({});
+
+const SpWolfDmg = percent(charTalentTables.Razor.sp.p1);
+const SpThunderfallDmg = percent(charTalentTables.Razor.sp.p2);
+const C6CritRate = percent(charTalentTables.Razor.c6.p1);
+const C6CritDmg = percent(charTalentTables.Razor.c6.p2);
 
 export const Razor = new DbObjectChar({
     name: 'razor',
@@ -201,7 +206,7 @@ export const Razor = new DbObjectChar({
                 new FeatureMultiplier({
                     scaling: 'atk*',
                     condition: condWitchHomeworkOn,
-                    values: new ValueTable([70]),
+                    values: new ValueTable([SpWolfDmg]),
                 }),
             ],
             condition: new ConditionBoolean({name: 'razor_wolf_within'}),
@@ -219,7 +224,7 @@ export const Razor = new DbObjectChar({
                 new FeatureMultiplier({
                     scaling: 'atk*',
                     condition: condWitchHomeworkOn,
-                    values: new ValueTable([70]),
+                    values: new ValueTable([SpWolfDmg]),
                 }),
             ],
             condition: new ConditionBoolean({name: 'razor_wolf_within'}),
@@ -237,7 +242,7 @@ export const Razor = new DbObjectChar({
                 new FeatureMultiplier({
                     scaling: 'atk*',
                     condition: condWitchHomeworkOn,
-                    values: new ValueTable([70]),
+                    values: new ValueTable([SpWolfDmg]),
                 }),
             ],
             condition: new ConditionBoolean({name: 'razor_wolf_within'}),
@@ -255,7 +260,7 @@ export const Razor = new DbObjectChar({
                 new FeatureMultiplier({
                     scaling: 'atk*',
                     condition: condWitchHomeworkOn,
-                    values: new ValueTable([70]),
+                    values: new ValueTable([SpWolfDmg]),
                 }),
             ],
             condition: new ConditionBoolean({name: 'razor_wolf_within'}),
@@ -352,7 +357,7 @@ export const Razor = new DbObjectChar({
             multipliers: [
                 new FeatureMultiplier({
                     scaling: 'atk*',
-                    values: new ValueTable([150]),
+                    values: new ValueTable([SpThunderfallDmg]),
                 }),
             ],
         }),
@@ -470,6 +475,7 @@ export const Razor = new DbObjectChar({
                 new ConditionBoolean({
                     name: 'razor_bite',
                     serializeId: 6,
+                    receivers: RECEIVERS.TEAM,
                     title: 'talent_name.razor_bite',
                     description: 'talent_descr.razor_bite',
                     stats: {
@@ -498,34 +504,12 @@ export const Razor = new DbObjectChar({
                     condition: condWitchHomeworkOn,
                     stats: {
                         text_percent_dmg: 100,
-                        crit_rate: 10,
-                        crit_dmg: 50,
+                        crit_rate: C6CritRate,
+                        crit_dmg: C6CritDmg,
                     },
                 }),
             ],
         },
     ]),
-    partyData: {
-        conditions: [
-            new ConditionBoolean({
-                name: 'party.razor_witch_homework',
-                serializeId: 3,
-                rotation: 'party',
-                title: 'talent_name.razor_surge_of_lightning',
-                description: 'talent_descr.razor_surge_of_lightning',
-                info: {hexerei: true},
-            }),
-            new ConditionBoolean({
-                name: 'party.razor_bite',
-                serializeId: 1,
-                rotation: 'party',
-                title: 'talent_name.razor_bite',
-                description: 'talent_descr.razor_bite',
-                info: {constellation: 4},
-                stats: {
-                    enemy_def_reduce: 15,
-                },
-            }),
-        ],
-    },
+    retiredParty: [[1, 'checkbox'], [3, 'checkbox']],
 });

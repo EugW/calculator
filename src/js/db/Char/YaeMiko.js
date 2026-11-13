@@ -2,9 +2,12 @@ import { Condition } from "../../classes/Condition";
 import { ConditionAnd } from "../../classes/Condition/And";
 import { ConditionAscensionChar } from "../../classes/Condition/Ascension/Char";
 import { ConditionBoolean } from "../../classes/Condition/Boolean";
+import { ConditionOnField } from "../../classes/Condition/Field";
+import { ConditionTeam } from "../../classes/Condition/Team";
 import { ConditionBooleanValue } from "../../classes/Condition/Boolean/Value";
 import { ConditionConstellation } from "../../classes/Condition/Constellation";
 import { ConditionNumber } from "../../classes/Condition/Number";
+import { ConditionReceiver } from "../../classes/Condition/Receiver";
 import { ConditionStatic } from "../../classes/Condition/Static";
 import { ConditionStaticLevel } from "../../classes/Condition/Static/Level";
 import { DbObjectChar } from "../../classes/DbObject/Char";
@@ -21,9 +24,12 @@ import { FeatureMultiplier } from "../../classes/Feature2/Multiplier";
 import { FeaturePostEffectValue } from "../../classes/Feature2/PostEffectValue";
 import { PostEffectStatsMastery } from "../../classes/PostEffect/Stats/Mastery";
 import { StatTable } from "../../classes/StatTable";
+import { RECEIVERS } from "../../classes/Team/Receivers";
 import { ValueTable } from "../../classes/ValueTable";
 import { charTables } from "../generated/CharTables";
 import { charTalentTables } from "../generated/CharTalentTables";
+import { percent } from "../Params";
+import { CHANNELS } from "../../classes/PostEffect/Channels";
 
 const Talents = new DbObjectTalents({
     attack: {
@@ -109,25 +115,33 @@ const Talents = new DbObjectTalents({
     },
 });
 
+const TalentValues = {
+    A1ThunderDmg: percent(charTalentTables.YaeMiko.a1.p1),
+    A1RadianceDmg: percent(charTalentTables.YaeMiko.a1.p2),
+    A4SkillDmg: percent(charTalentTables.YaeMiko.a4.p1),
+    EdictDmg: percent(charTalentTables.YaeMiko.sp.p1),
+    EdictRadianceDmg: percent(charTalentTables.YaeMiko.sp.p3),
+    C1Dmg: percent(charTalentTables.YaeMiko.c1.p2),
+    C2Mastery: [charTalentTables.YaeMiko.c2.p4, charTalentTables.YaeMiko.c2.p5, charTalentTables.YaeMiko.c2.p6, charTalentTables.YaeMiko.c2.p7],
+    C4ElectroDmg: percent(charTalentTables.YaeMiko.c4.p1),
+    C4BurstDmg: percent(charTalentTables.YaeMiko.c4.p5),
+    C6DefIgnore: percent(charTalentTables.YaeMiko.c6.p1),
+    C6StellarCritDmg: percent(charTalentTables.YaeMiko.c6.p2),
+};
+
+// A4 Enlightened Blessing: Sesshou Sakura DMG +0.15% per EM.
+// Game data: Avatar_Yae_PermanentSkill_2 (ModifyDamageMixin on Elemental_Art) reads
+// FIGHT_PROP_ELEMENT_MASTERY (total), ratio Yae_PermanentSkill_2_AttackUpRatio (ProudSkill 582201: 0.0015).
+// KQM Yae: Sucrose A4 extra EM counts (also Kazuha C2 / Diona C6 flat EM); KQM Nahida lists
+// Yae A4 among the bonuses counting Nahida A1 extra EM. GO reads input.total.eleMas,
+// writes total skill_dmg_.
 const skillDmgPost = new PostEffectStatsMastery({
-    global: true,
-    percent: new StatTable('dmg_skill_yaemiko', [0.15]),
+    reads: CHANNELS.TOTAL,
+    percent: new StatTable('dmg_skill_yaemiko', [TalentValues.A4SkillDmg]),
     conditions: [
         new ConditionAscensionChar({ascension: 4}),
     ],
 });
-
-const TalentValues = {
-    A1RadianceDmg: 50,
-    EdictDmg: 80,
-    EdictRadianceDmg: 200,
-    C1Dmg: 50,
-    C2Mastery: [60, 90, 120, 200],
-    C4ElectroDmg: 20,
-    C4BurstDmg: 100,
-    C6DefIgnore: 60,
-    C6StellarCritDmg: 200,
-};
 
 function enhancedSesshouSakuraCondition(level) {
     let conditions = [
@@ -142,6 +156,9 @@ function enhancedSesshouSakuraCondition(level) {
 }
 
 function enhancedSesshouSakuraFeature(level) {
+    // Edict of Cleansing enhanced lightning: game data Avatar_Yae_PermanentSkill_3
+    // UNIQUE_Yae_EnhanceEAReady(_Star) damageExtra AS_Yae_PermanentSkill_3_AttackRatio *
+    // FIGHT_PROP_CUR_ATTACK (total). Hits read the total; plain multipliers need nothing.
     return new FeatureDamageSkill({
         name: 'yae_miko_enhanced_sesshou_sakura_'+ level,
         element: 'electro',
@@ -337,11 +354,14 @@ export const YaeMiko = new DbObjectChar({
         }),
     ],
     conditions: [
+        // A1 The Shrine's Sacred Shade: game data Avatar_Yae_PermanentSkill_1 only applies
+        // ModifyAvatarSkillCD on skill/burst hits (Yae_PermanentSkill_1_Handler); the extra
+        // lightning is a plain ATK hit (40%/50% Radiance). No stat read, needs nothing.
         new ConditionStatic({
             title: 'talent_name.yae_miko_the_shrines_sacred_shade',
             description: 'talent_descr.yae_miko_the_shrines_sacred_shade_buffed',
             stats: {
-                text_percent: 40,
+                text_percent: TalentValues.A1ThunderDmg,
                 text_percent_2: TalentValues.A1RadianceDmg,
             },
             info: {ascension: 1},
@@ -353,7 +373,7 @@ export const YaeMiko = new DbObjectChar({
             title: 'talent_name.yae_miko_enlightened_blessing',
             description: 'talent_descr.yae_miko_enlightened_blessing',
             stats: {
-                text_percent: 0.15,
+                text_percent: TalentValues.A4SkillDmg,
             },
             info: {ascension: 4},
             subConditions: [
@@ -375,13 +395,17 @@ export const YaeMiko = new DbObjectChar({
             title: 'talent_name.yae_miko_edict_of_cleansing',
             description: 'talent_descr.yae_miko_edict_of_cleansing',
             subConditions: [
-                new ConditionBoolean({name: 'polestar_field'}),
+                new ConditionTeam({condition: new ConditionBoolean({name: 'polestar_field'})}),
             ],
         }),
     ],
     constellation: new DbObjectConstellation([
         {
             conditions: [
+                // C1: game data Avatar_Yae_PermanentSkill_3 UNIQUE_Yae_Constellation_1_Buff writes
+                // Actor_ElecAddHurtDelta + Actor_ElemReactStarSConductElectricDelta/IceDelta
+                // (premod, no Extra). GO writes premod electro/stellarconduct dmg. Conditions
+                // write premod: default confirmed, no params.
                 new ConditionStatic({
                     title: 'talent_name.yae_miko_yakan_offering',
                     description: 'talent_descr.yae_miko_yakan_offering_buffed',
@@ -389,6 +413,7 @@ export const YaeMiko = new DbObjectChar({
                 new ConditionBoolean({
                     name: 'yae_miko_yakan_offering_buff',
                     serializeId: 4,
+                    receivers: RECEIVERS.TEAM,
                     title: 'talent_name.yae_miko_yakan_offering',
                     description: 'talent_descr.yae_miko_yakan_offering_buffed',
                     stats: {
@@ -408,6 +433,11 @@ export const YaeMiko = new DbObjectChar({
                     max: 4,
                     noStat: true,
                 }),
+                // C2: game data Avatar_Yae_PermanentSkill_3
+                // UNIQUE_Yae_Constellation2_FoxCountBuff_1..4 (+ LocalAvatar_Real) writes
+                // Actor_ElemMasteryDelta (premod, no Extra) from AS_ElemMasteryDelta_1..4
+                // (ProudSkill talent 582: 60/90/120/200). GO writes premod eleMas (teamBuff).
+                // Conditions write premod: default confirmed, no params.
                 new ConditionStaticLevel({
                     title: 'talent_name.yae_miko_foxs_mooncall',
                     description: 'talent_descr.yae_miko_foxs_mooncall_buffed',
@@ -420,6 +450,26 @@ export const YaeMiko = new DbObjectChar({
                             setting: 'yae_miko_sesshou_sakura_level',
                             cond: 'ge',
                             value: 1,
+                        }),
+                    ],
+                }),
+                // Sesshou Sakura also raises the current active character's
+                // Mastery; Yae herself keeps the static above.
+                new ConditionStaticLevel({
+                    isHidden: true,
+                    receivers: RECEIVERS.OTHERS,
+                    levelSetting: 'yae_miko_sesshou_sakura_level',
+                    stats: [
+                        new StatTable('mastery', TalentValues.C2Mastery),
+                    ],
+                    subConditions: [
+                        new ConditionBooleanValue({
+                            setting: 'yae_miko_sesshou_sakura_level',
+                            cond: 'ge',
+                            value: 1,
+                        }),
+                        new ConditionReceiver({
+                            condition: new ConditionOnField(),
                         }),
                     ],
                 }),
@@ -436,6 +486,11 @@ export const YaeMiko = new DbObjectChar({
         },
         {
             conditions: [
+                // C4: game data Avatar_Yae_Constellation_4 UNIQUE_Yae_Constellation_ElecAddHurt writes
+                // Actor_ElecAddHurtDelta (premod, no Extra); UNIQUE_Yae_Constellation_Permanent3_EB_Buff
+                // is a flat ModifyDamageMixin on Elemental_Burst (no stat read) + flat energy.
+                // GO writes premod electro_dmg_ / burst_dmg_. Conditions write premod:
+                // default confirmed, no params.
                 new ConditionBoolean({
                     name: 'miko_sakura_channeling',
                     serializeId: 1,
@@ -445,6 +500,16 @@ export const YaeMiko = new DbObjectChar({
                         dmg_electro: TalentValues.C4ElectroDmg,
                         dmg_burst: TalentValues.C4BurstDmg,
                     },
+                }),
+                // Sesshou lightning raises all nearby party members' Electro
+                // DMG; Yae keeps her own copy above (plus her Burst DMG).
+                new Condition({
+                    isHidden: true,
+                    receivers: RECEIVERS.OTHERS,
+                    stats: {
+                        dmg_electro: TalentValues.C4ElectroDmg,
+                    },
+                    condition: new ConditionBoolean({name: 'miko_sakura_channeling'}),
                 }),
             ],
         },
@@ -459,11 +524,15 @@ export const YaeMiko = new DbObjectChar({
         },
         {
             conditions: [
+                // C6: game data Avatar_Yae_Constellation_6 ModifyDamageMixin DefenseIgnoreRatio on
+                // Elemental_Art + StarCritcalDamageUp bonusCriticalHurt on Stellar-Conduct (both flat,
+                // no stat read). GO writes premod defIgn_ / stellarconduct_critDMG_. Conditions
+                // write premod: default confirmed, no params.
                 new ConditionStatic({
                     title: 'talent_name.yae_miko_daisesshou',
                     description: 'talent_descr.yae_miko_daisesshou_buffed',
                     stats: {
-                        enemy_def_ignore_skill: TalentValues.C6DefIgnore,
+                        def_ignore_skill: TalentValues.C6DefIgnore,
                         crit_dmg_stellarconduct: TalentValues.C6StellarCritDmg,
                     },
                 }),
@@ -473,56 +542,5 @@ export const YaeMiko = new DbObjectChar({
     postEffects: [
         skillDmgPost,
     ],
-    partyData: {
-        conditions: [
-            new ConditionBoolean({
-                name: 'party.miko_sakura_channeling',
-                serializeId: 1,
-                rotation: 'party',
-                title: 'talent_name.yae_miko_sakura_channeling',
-                description: 'talent_descr.yae_miko_sakura_channeling_buffed',
-                info: {constellation: 4},
-                stats: {
-                    dmg_electro: TalentValues.C4ElectroDmg,
-                },
-            }),
-            new ConditionBoolean({
-                name: 'party.yae_miko_yakan_offering_buff',
-                serializeId: 2,
-                rotation: 'party',
-                title: 'talent_name.yae_miko_yakan_offering',
-                description: 'talent_descr.yae_miko_yakan_offering_buffed',
-                info: {constellation: 1},
-                stats: {
-                    dmg_electro: TalentValues.C1Dmg,
-                    dmg_stellarconduct: TalentValues.C1Dmg,
-                },
-            }),
-            new ConditionNumber({
-                name: 'party.yae_miko_sesshou_sakura_level',
-                serializeId: 3,
-                rotation: 'party',
-                title: 'talent_name.yae_miko_foxs_mooncall',
-                description: 'talent_descr.yae_miko_foxs_mooncall_buffed',
-                info: {constellation: 2},
-                max: 4,
-                noStat: true,
-            }),
-            new ConditionStaticLevel({
-                title: 'talent_name.yae_miko_foxs_mooncall',
-                description: 'talent_descr.yae_miko_foxs_mooncall_buffed',
-                levelSetting: 'party.yae_miko_sesshou_sakura_level',
-                stats: [
-                    new StatTable('mastery', TalentValues.C2Mastery),
-                ],
-                subConditions: [
-                    new ConditionBooleanValue({
-                        setting: 'party.yae_miko_sesshou_sakura_level',
-                        cond: 'ge',
-                        value: 1,
-                    }),
-                ],
-            }),
-        ],
-    },
+    retiredParty: [[1, 'checkbox'], [2, 'checkbox'], [3, 'number']],
 });

@@ -5,6 +5,8 @@ import { ConditionStaticRefine } from "../../../classes/Condition/Static/Refine"
 import { DbObjectWeapon } from "../../../classes/DbObject/Weapon";
 import { StatTable } from "../../../classes/StatTable";
 import { weaponStatTables } from "../../generated/WeaponStatTables";
+import { weaponPassiveTables } from "../../generated/WeaponPassiveTables";
+import { percent, times } from "../../Params";
 
 export const ReliquaryOfTruth = new DbObjectWeapon({
     name: 'reliquary_of_truth',
@@ -20,7 +22,7 @@ export const ReliquaryOfTruth = new DbObjectWeapon({
             title: 'talent_name.weapon_reliquary_of_truth',
             description: 'talent_descr.weapon_reliquary_of_truth_1',
             stats: [
-                new StatTable('crit_rate', [8, 10, 12, 14, 16]),
+                new StatTable('crit_rate', weaponPassiveTables.ReliquaryOfTruth.crit_rate),
             ],
         }),
         // Secret of Lies: EM bonus on Elemental Skill (12s)
@@ -30,7 +32,7 @@ export const ReliquaryOfTruth = new DbObjectWeapon({
             title: 'talent_name.weapon_reliquary_of_truth',
             description: 'talent_descr.weapon_reliquary_of_truth_2',
             stats: [
-                new StatTable('mastery', [80, 100, 120, 140, 160]),
+                new StatTable('mastery', weaponPassiveTables.ReliquaryOfTruth.p1),
             ],
         }),
         // Moon of Truth: CRIT DMG bonus on Lunar-Bloom (4s)
@@ -40,7 +42,7 @@ export const ReliquaryOfTruth = new DbObjectWeapon({
             title: 'talent_name.weapon_reliquary_of_truth',
             description: 'talent_descr.weapon_reliquary_of_truth_3',
             stats: [
-                new StatTable('crit_dmg', [24, 30, 36, 42, 48]),
+                new StatTable('crit_dmg', percent(weaponPassiveTables.ReliquaryOfTruth.p2)),
             ],
         }),
         // Combined bonus: +50% to both effects when both are active
@@ -48,8 +50,8 @@ export const ReliquaryOfTruth = new DbObjectWeapon({
             title: 'talent_name.weapon_reliquary_of_truth',
             description: 'talent_descr.weapon_reliquary_of_truth_4',
             stats: [
-                new StatTable('mastery', [40, 50, 60, 70, 80]),
-                new StatTable('crit_dmg', [12, 15, 18, 21, 24]),
+                new StatTable('mastery', times(weaponPassiveTables.ReliquaryOfTruth.p1, weaponPassiveTables.ReliquaryOfTruth.p5)),
+                new StatTable('crit_dmg', percent(times(weaponPassiveTables.ReliquaryOfTruth.p2, weaponPassiveTables.ReliquaryOfTruth.p5))),
             ],
             condition: new ConditionAnd([
                 new ConditionBoolean({name: 'weapon_reliquary_of_truth'}),

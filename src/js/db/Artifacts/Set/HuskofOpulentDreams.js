@@ -2,6 +2,8 @@ import { ArtifactSet } from "../../../classes/ArtifactSet";
 import { ConditionStacks } from "../../../classes/Condition/Stacks";
 import { ConditionStatic } from "../../../classes/Condition/Static";
 import { StatTable } from "../../../classes/StatTable";
+import { artifactSetTables } from "../../generated/ArtifactSetTables";
+import { percent, times } from "../../Params";
 
 export const HuskofOpulentDreams = new ArtifactSet({
     serializeId: 36,
@@ -21,7 +23,7 @@ export const HuskofOpulentDreams = new ArtifactSet({
                     description: 'set_descr.husk_of_opulent_dreams_2',
                     settings: {},
                     stats: {
-                        def_percent: 30,
+                        def_percent: artifactSetTables.HuskofOpulentDreams.pc2.def_percent,
                     },
                 })
             ],
@@ -41,7 +43,7 @@ export const HuskofOpulentDreams = new ArtifactSet({
                     description: 'set_descr.husk_of_opulent_dreams_4_def',
                     maxStacks: 4,
                     stats: [
-                        new StatTable('def_percent', [6, 12, 18, 24]),
+                        new StatTable('def_percent', times(percent(artifactSetTables.HuskofOpulentDreams.pc4.p3), [1, 2, 3, 4])),
                     ],
                 }),
                 new ConditionStacks({
@@ -51,7 +53,7 @@ export const HuskofOpulentDreams = new ArtifactSet({
                     description: 'set_descr.husk_of_opulent_dreams_4_geo',
                     maxStacks: 4,
                     stats: [
-                        new StatTable('dmg_geo', [6, 12, 18, 24]),
+                        new StatTable('dmg_geo', times(percent(artifactSetTables.HuskofOpulentDreams.pc4.p4), [1, 2, 3, 4])),
                     ],
                 }),
             ],

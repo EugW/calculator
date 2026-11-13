@@ -22,9 +22,11 @@ import { FeatureMultiplier } from "../../classes/Feature2/Multiplier";
 import { FeatureMultiplierSkirkBurst } from "../../classes/Feature2/Multiplier/SkirkBurst";
 import { FeatureMultiplierSkirkNormal } from "../../classes/Feature2/Multiplier/SkirkNormal";
 import { StatTable } from "../../classes/StatTable";
+import { RECEIVERS } from "../../classes/Team/Receivers";
 import { ValueTable } from "../../classes/ValueTable";
 import { charTables } from "../generated/CharTables";
 import { charTalentTables } from "../generated/CharTalentTables";
+import { percent } from "../Params";
 
 const Talents = new DbObjectTalents({
     attack: {
@@ -169,14 +171,14 @@ const stanceCondRev = new ConditionNot([
     new ConditionBoolean({name: 'skirk_seven_phase_flash'}),
 ]);
 
-const C1Dmg = 500;
-const C2StackBonus = 10;
-const C2AtkBonus = 70;
-const C4AtkStack1 = 10;
-const C4AtkStack2 = 20;
-const C4AtkStack3 = 40;
-const C6BurstDmg = 750;
-const C6NormalDmg = 180;
+const C1Dmg = percent(charTalentTables.Skirk.c1.p1);
+const C2StackBonus = charTalentTables.Skirk.c2.p1;
+const C2AtkBonus = percent(charTalentTables.Skirk.c2.p3);
+const C4AtkStack1 = percent(charTalentTables.Skirk.c4.p1);
+const C4AtkStack2 = percent(charTalentTables.Skirk.c4.p2);
+const C4AtkStack3 = percent(charTalentTables.Skirk.c4.p3);
+const C6BurstDmg = percent(charTalentTables.Skirk.c6.p2);
+const C6NormalDmg = percent(charTalentTables.Skirk.c6.p3);
 
 export const Skirk = new DbObjectChar({
     name: 'skirk',
@@ -594,9 +596,12 @@ export const Skirk = new DbObjectChar({
             maxStacks: 3,
             info: {ascension: 4},
         }),
+        // Your own party members, Skirk included; the party check reads the
+        // source scope, so the team composition is the carrier's own team.
         new ConditionBoolean({
             name: 'skirk_mutual_weapons_mentorship',
             serializeId: 4,
+            receivers: RECEIVERS.TEAM,
             title: 'talent_name.skirk_mutual_weapons_mentorship',
             description: 'talent_descr.skirk_mutual_weapons_mentorship',
             settings: {
@@ -712,19 +717,5 @@ export const Skirk = new DbObjectChar({
             ],
         },
     ]),
-    partyData: {
-        conditions: [
-            new ConditionBoolean({
-                name: 'party.skirk_mutual_weapons_mentorship',
-                serializeId: 1,
-                title: 'talent_name.skirk_mutual_weapons_mentorship',
-                description: 'talent_descr.skirk_mutual_weapons_mentorship',
-                settings: {
-                    char_skill_elemental_bonus_2: 1,
-                    char_skill_elemental_bonus_party: 1,
-                },
-                condition: new ConditionBooleanSkirkParty(),
-            }),
-        ],
-    },
+    retiredParty: [[1, 'checkbox']],
 });

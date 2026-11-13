@@ -2,7 +2,10 @@ import { ConditionBooleanRefine } from "../../../classes/Condition/Boolean/Refin
 import { ConditionStaticRefine } from "../../../classes/Condition/Static/Refine";
 import { DbObjectWeapon } from "../../../classes/DbObject/Weapon";
 import { StatTable } from "../../../classes/StatTable";
+import { RECEIVERS } from "../../../classes/Team/Receivers";
 import { weaponStatTables } from "../../generated/WeaponStatTables";
+import { weaponPassiveTables } from "../../generated/WeaponPassiveTables";
+import { percent } from "../../Params";
 
 export const StarcallersWatch = new DbObjectWeapon({
     name: 'starcallers_watch',
@@ -17,17 +20,19 @@ export const StarcallersWatch = new DbObjectWeapon({
             title: 'talent_name.weapon_starcallers_watch',
             description: 'talent_descr.weapon_starcallers_watch_1',
             stats: [
-                new StatTable('mastery', [100, 125, 150, 175, 200]),
+                new StatTable('mastery', weaponPassiveTables.StarcallersWatch.mastery),
             ],
         }),
         new ConditionBooleanRefine({
             name: 'weapon_starcallers_watch',
             serializeId: 1,
+            receivers: RECEIVERS.TEAM,
+            stack: 'starcallers_watch',
             title: 'talent_name.weapon_starcallers_watch',
             description: 'talent_descr.weapon_starcallers_watch_2',
             levelSetting: 'weapon_refine',
             stats: [
-                new StatTable('dmg_all', [28, 35, 42, 49, 56]),
+                new StatTable('dmg_all', percent(weaponPassiveTables.StarcallersWatch.p1)),
             ],
         }),
     ],

@@ -2,6 +2,8 @@ import { ConditionStacks } from "../../../classes/Condition/Stacks";
 import { DbObjectWeapon } from "../../../classes/DbObject/Weapon";
 import { StatTable } from "../../../classes/StatTable";
 import { weaponStatTables } from "../../generated/WeaponStatTables";
+import { weaponPassiveTables } from "../../generated/WeaponPassiveTables";
+import { percent } from "../../Params";
 
 export const IronSting = new DbObjectWeapon({
     name: 'iron_sting',
@@ -20,7 +22,7 @@ export const IronSting = new DbObjectWeapon({
             maxStacks: 2,
             levelSetting: 'weapon_refine',
             stats: [
-                new StatTable('dmg_all', [6, 7.5, 9, 10.5, 12]),
+                new StatTable('dmg_all', percent(weaponPassiveTables.IronSting.p1)),
             ],
         })
     ],

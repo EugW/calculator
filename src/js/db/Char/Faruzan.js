@@ -3,8 +3,6 @@ import { ConditionAscensionChar } from "../../classes/Condition/Ascension/Char";
 import { ConditionBoolean } from "../../classes/Condition/Boolean";
 import { ConditionBooleanLevels } from "../../classes/Condition/Boolean/Levels";
 import { ConditionConstellation } from "../../classes/Condition/Constellation";
-import { ConditionNumber } from "../../classes/Condition/Number";
-import { ConditionNumberTalent } from "../../classes/Condition/Number/Talent";
 import { ConditionStatic } from "../../classes/Condition/Static";
 import { DbObjectChar } from "../../classes/DbObject/Char";
 import { DbObjectConstellation } from "../../classes/DbObject/Constellation";
@@ -17,10 +15,12 @@ import { FeatureDamagePlungeShockWave } from "../../classes/Feature2/Damage/Plun
 import { FeatureDamageSkill } from "../../classes/Feature2/Damage/Skill";
 import { FeatureMultiplier } from "../../classes/Feature2/Multiplier";
 import { FeatureMultiplierTarget } from "../../classes/Feature2/Multiplier/Target";
+import { RECEIVERS } from "../../classes/Team/Receivers";
 import { StatTable } from "../../classes/StatTable";
 import { ValueTable } from "../../classes/ValueTable";
 import { charTables } from "../generated/CharTables";
 import { charTalentTables } from "../generated/CharTalentTables";
+import { percent } from "../Params";
 
 const Talents = new DbObjectTalents({
     attack: {
@@ -117,8 +117,8 @@ const Talents = new DbObjectTalents({
 });
 
 const TalentValues = {
-    A4AtkScale: 32,
-    C6CritDmgAnemo: 40,
+    A4AtkScale: percent(charTalentTables.Faruzan.a4.p1),
+    C6CritDmgAnemo: percent(charTalentTables.Faruzan.c6.p1),
 };
 
 export const Faruzan = new DbObjectChar({
@@ -258,6 +258,7 @@ export const Faruzan = new DbObjectChar({
         new ConditionBooleanLevels({
             name: 'faruzan_wind_bale',
             serializeId: 1,
+            receivers: RECEIVERS.TEAM,
             title: 'talent_name.faruzan_wind_bale',
             description: 'talent_descr.faruzan_wind_bale',
             levelSetting: 'char_skill_burst',
@@ -272,6 +273,7 @@ export const Faruzan = new DbObjectChar({
         new ConditionBooleanLevels({
             name: 'faruzan_wind_benefit',
             serializeId: 2,
+            receivers: RECEIVERS.TEAM,
             title: 'talent_name.faruzan_wind_benefit',
             description: 'talent_descr.faruzan_wind_benefit',
             levelSetting: 'char_skill_burst',
@@ -304,6 +306,7 @@ export const Faruzan = new DbObjectChar({
     ],
     multipliers: [
         new FeatureMultiplier({
+            receivers: RECEIVERS.TEAM,
             scaling: 'atk_base',
             source: 'ascension4',
             values: new ValueTable([TalentValues.A4AtkScale]),
@@ -353,6 +356,7 @@ export const Faruzan = new DbObjectChar({
                 new ConditionStatic({
                     title: 'talent_name.faruzan_the_wondrous_path_of_truth',
                     description: 'talent_descr.faruzan_the_wondrous_path_of_truth_1',
+                    receivers: RECEIVERS.TEAM,
                     stats: {
                         crit_dmg_anemo: TalentValues.C6CritDmgAnemo,
                     },
@@ -367,97 +371,5 @@ export const Faruzan = new DbObjectChar({
             ],
         },
     ]),
-    partyData: {
-        loadStats: {
-            stats: ['atk_base'],
-            settings: ['char_skill_burst'],
-        },
-        conditions: [
-            new ConditionNumber({
-                name: 'faruzan_atk_base',
-                title: 'talent_name.stats_base_atk',
-                partyStat: 'atk_base',
-                serializeId: 1,
-                max: 10000,
-            }),
-            new ConditionNumberTalent({
-                name: 'faruzan_char_skill_burst',
-                title: 'talent_name.stats_level_burst',
-                partySetting: 'char_skill_burst',
-                serializeId: 2,
-            }),
-            new ConditionBoolean({
-                name: 'party.faruzan_constellation_5',
-                serializeId: 3,
-                title: 'talent_name.faruzan_wonderland_of_rumination',
-                description: 'talent_descr.char_constellation_burst',
-                settings: {
-                    faruzan_char_skill_burst_bonus: 3,
-                },
-                info: {constellation: 5},
-            }),
-            new ConditionBooleanLevels({
-                name: 'party.faruzan_wind_bale',
-                serializeId: 4,
-                rotation: 'party',
-                title: 'talent_name.faruzan_wind_bale',
-                description: 'talent_descr.faruzan_wind_bale',
-                levelSetting: 'faruzan_char_skill_burst',
-                stats: [
-                    Talents.getMulti({
-                        name: 'enemy_res_anemo',
-                        from: 'burst.faruzan_anemo_res_decrease',
-                        multi: -1,
-                    }),
-                ],
-            }),
-            new ConditionBooleanLevels({
-                name: 'party.faruzan_wind_benefit',
-                serializeId: 5,
-                rotation: 'party',
-                title: 'talent_name.faruzan_wind_benefit',
-                description: 'talent_descr.faruzan_wind_benefit',
-                levelSetting: 'faruzan_char_skill_burst',
-                stats: [
-                    Talents.getAlias('burst.faruzan_anemo_dmg_bonus', 'dmg_anemo'),
-                ],
-            }),
-            new ConditionBoolean({
-                name: 'party.faruzan_lost_wisdom_of_the_seven_caverns',
-                serializeId: 6,
-                rotation: 'party',
-                title: 'talent_name.faruzan_lost_wisdom_of_the_seven_caverns',
-                description: 'talent_descr.faruzan_lost_wisdom_of_the_seven_caverns',
-                info: {ascension: 4},
-                subConditions: [
-                    new ConditionBoolean({name: 'party.faruzan_wind_benefit'}),
-                ],
-            }),
-            new ConditionBoolean({
-                name: 'party.faruzan_the_wondrous_path_of_truth',
-                serializeId: 7,
-                title: 'talent_name.faruzan_the_wondrous_path_of_truth',
-                description: 'talent_descr.faruzan_the_wondrous_path_of_truth_1',
-                stats: {
-                    crit_dmg_anemo: TalentValues.C6CritDmgAnemo,
-                },
-                info: {constellation: 6},
-                subConditions: [
-                    new ConditionBoolean({name: 'party.faruzan_constellation_5'}),
-                    new ConditionBoolean({name: 'party.faruzan_wind_benefit'}),
-                ],
-            }),
-        ],
-        multipliers: [
-            new FeatureMultiplier({
-                scaling: 'faruzan_atk_base',
-                source: 'ascension4',
-                values: new ValueTable([TalentValues.A4AtkScale]),
-                condition: new ConditionBoolean({name: 'party.faruzan_lost_wisdom_of_the_seven_caverns'}),
-                target: new FeatureMultiplierTarget({
-                    damageElements: ['anemo'],
-                }),
-            }),
-        ],
-    },
+    retiredParty: [[1, 'number'], [2, 'number'], [3, 'checkbox'], [4, 'checkbox'], [5, 'checkbox'], [6, 'checkbox'], [7, 'checkbox']],
 });

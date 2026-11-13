@@ -23,6 +23,7 @@ import { StatTable } from "../../classes/StatTable";
 import { ValueTable } from "../../classes/ValueTable";
 import { charTables } from "../generated/CharTables";
 import { charTalentTables } from "../generated/CharTalentTables";
+import { percent, plus } from "../Params";
 
 
 const Talents = new DbObjectTalents({
@@ -150,11 +151,14 @@ const Talents = new DbObjectTalents({
 });
 
 const TalenValues = {
-    C1VerificationHeal: 80,
-    C2AtkBonus: 10,
-    C4BurstBonus: 1.1,
-    C6CoordAtk: 180,
-    C6CoordHeal: 42,
+    A4HealingBonus: percent(charTalentTables.Charlotte.a4.p1),
+    A4CryoDmgBonus: percent(charTalentTables.Charlotte.a4.p2),
+    C1VerificationHeal: percent(charTalentTables.Charlotte.c1.p2),
+    C2AtkBonus: percent(charTalentTables.Charlotte.c2.p1),
+    C4BurstBonus: plus(1, charTalentTables.Charlotte.c4.p1),
+    C4DmgBonus: percent(charTalentTables.Charlotte.c4.p1),
+    C6CoordAtk: percent(charTalentTables.Charlotte.c6.p1),
+    C6CoordHeal: percent(charTalentTables.Charlotte.c6.p2),
 };
 
 export const Charlotte = new DbObjectChar({
@@ -307,7 +311,7 @@ export const Charlotte = new DbObjectChar({
                 new FeatureMultiplier({
                     leveling: 'char_skill_burst',
                     values: Talents.get('burst.burst_dmg'),
-                    scalingMultiplier: 1.1,
+                    scalingMultiplier: TalenValues.C4BurstBonus,
                     scalingSource: 'constellation4',
                     scalingMultiplierCondition: new ConditionAnd([
                         new ConditionBoolean({name: 'charlotte_a_responsibility_to_oversee'}),
@@ -333,7 +337,7 @@ export const Charlotte = new DbObjectChar({
                 new FeatureMultiplier({
                     leveling: 'char_skill_burst',
                     values: Talents.get('burst.charlotte_kamera_dmg'),
-                    scalingMultiplier: 1.1,
+                    scalingMultiplier: TalenValues.C4BurstBonus,
                     scalingSource: 'constellation4',
                     scalingMultiplierCondition: new ConditionAnd([
                         new ConditionBoolean({name: 'charlotte_a_responsibility_to_oversee'}),
@@ -360,7 +364,7 @@ export const Charlotte = new DbObjectChar({
                 new FeatureMultiplier({
                     source: 'constellation6',
                     values: new ValueTable([TalenValues.C6CoordAtk]),
-                    scalingMultiplier: 1.1,
+                    scalingMultiplier: TalenValues.C4BurstBonus,
                     scalingSource: 'constellation4',
                     scalingMultiplierCondition: new ConditionAnd([
                         new ConditionBoolean({name: 'charlotte_a_responsibility_to_oversee'}),
@@ -399,7 +403,7 @@ export const Charlotte = new DbObjectChar({
             fromZero: true,
             info: {ascension: 4},
             stats: [
-                new StatTable('healing', [0, 5, 10, 15]),
+                new StatTable('healing', [0, TalenValues.A4HealingBonus, 10, 15]),
                 new StatTable('text_number', [0.001, 1, 2, 3]),
             ],
             subConditions: [
@@ -413,7 +417,7 @@ export const Charlotte = new DbObjectChar({
             fromZero: true,
             info: {ascension: 4},
             stats: [
-                new StatTable('dmg_cryo', [0, 5, 10, 15]),
+                new StatTable('dmg_cryo', [0, TalenValues.A4CryoDmgBonus, 10, 15]),
                 new StatTable('text_number', [0.001, 1, 2, 3]),
             ],
             subConditions: [
@@ -464,7 +468,7 @@ export const Charlotte = new DbObjectChar({
                     title: 'talent_name.charlotte_a_responsibility_to_oversee',
                     description: 'talent_descr.charlotte_a_responsibility_to_oversee',
                     stats: {
-                        text_percent_dmg: 10,
+                        text_percent_dmg: TalenValues.C4DmgBonus,
                     },
                 }),
             ],

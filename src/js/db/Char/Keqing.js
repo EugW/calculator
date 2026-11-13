@@ -20,6 +20,7 @@ import { StatTable } from "../../classes/StatTable"
 import { ValueTable } from '../../classes/ValueTable';
 import { charTables } from "../generated/CharTables";
 import { charTalentTables } from '../generated/CharTalentTables';
+import { percent } from "../Params";
 
 const Talents = new DbObjectTalents({
     attack: {
@@ -119,11 +120,11 @@ const Talents = new DbObjectTalents({
 });
 
 const TalentValues = {
-    A4CritRate: 15,
-    A4Recharge: 15,
-    C1Dmg: 50,
-    C4AtkBonus: 25,
-    C6ElectroBonus: 6,
+    A4CritRate: percent(charTalentTables.Keqing.a4.p1),
+    A4Recharge: percent(charTalentTables.Keqing.a4.p2),
+    C1Dmg: percent(charTalentTables.Keqing.c1.p1),
+    C4AtkBonus: percent(charTalentTables.Keqing.c4.p2),
+    C6ElectroBonus: percent(charTalentTables.Keqing.c6.p1),
 };
 
 export const Keqing = new DbObjectChar({

@@ -2,6 +2,8 @@ import { ConditionBooleanRefine } from "../../../classes/Condition/Boolean/Refin
 import { DbObjectWeapon } from "../../../classes/DbObject/Weapon";
 import { StatTable } from "../../../classes/StatTable";
 import { weaponStatTables } from "../../generated/WeaponStatTables";
+import { weaponPassiveTables } from "../../generated/WeaponPassiveTables";
+import { percent } from "../../Params";
 
 export const TwinNephrite = new DbObjectWeapon({
     name: 'twin_nephrite',
@@ -19,8 +21,8 @@ export const TwinNephrite = new DbObjectWeapon({
             description: 'talent_descr.weapon_twin_nephrite',
             levelSetting: 'weapon_refine',
             stats: [
-                new StatTable('atk_percent', [12, 14, 16, 18, 20]),
-                new StatTable('move_speed', [12, 14, 16, 18, 20]),
+                new StatTable('atk_percent', percent(weaponPassiveTables.TwinNephrite.p1)),
+                new StatTable('move_speed', percent(weaponPassiveTables.TwinNephrite.p1)),
             ],
         })
     ],

@@ -1,9 +1,13 @@
 import { Condition } from "../../classes/Condition";
+import { ConditionAnd } from "../../classes/Condition/And";
 import { ConditionAscensionChar } from "../../classes/Condition/Ascension/Char";
 import { ConditionBoolean } from "../../classes/Condition/Boolean";
+import { ConditionOnField } from "../../classes/Condition/Field";
 import { ConditionBooleanValue } from "../../classes/Condition/Boolean/Value";
 import { ConditionDropdownElement } from "../../classes/Condition/Dropdown/Element";
 import { ConditionDropdownTravelerResonated } from "../../classes/Condition/Dropdown/TravelerResonated";
+import { ConditionLevels } from "../../classes/Condition/Levels";
+import { ConditionReceiver } from "../../classes/Condition/Receiver";
 import { ConditionStacks } from "../../classes/Condition/Stacks";
 import { ConditionNot } from "../../classes/Condition/Not";
 import { ConditionStatic } from "../../classes/Condition/Static";
@@ -22,11 +26,14 @@ import { FeatureMultiplierStatic } from "../../classes/Feature2/Multiplier/Stati
 import { FeaturePostEffectValue } from "../../classes/Feature2/PostEffectValue";
 import { FeatureStatic } from "../../classes/Feature2/Static";
 import { PostEffectStatsMastery } from "../../classes/PostEffect/Stats/Mastery";
+import { RECEIVERS } from "../../classes/Team/Receivers";
 import { StatTable } from "../../classes/StatTable";
 import { StatTableAscensionScale } from "../../classes/StatTable/Ascension/Scale";
 import { ValueTable } from "../../classes/ValueTable";
 import { charTables } from "../generated/CharTables";
 import { charTalentTables } from "../generated/CharTalentTables";
+import { percent } from "../Params";
+import { CHANNELS } from "../../classes/PostEffect/Channels";
 
 const Talents = new DbObjectTalents({
     attack: {
@@ -113,17 +120,23 @@ const Talents = new DbObjectTalents({
     },
 });
 
+// A4 Verdant Luxury: skill +0.15%/EM, burst +0.1%/EM. Game data:
+// Avatar_Player_Grass_Damage_Up_By_Element_Mastery caches FIGHT_PROP_ELEMENT_MASTERY (total)
+// and scales Elemental_Art / Elemental_Burst through ModifyDamageMixin, so extra EM counts
+// (KQM Nahida: Dendro Traveler A4 works with Nahida's A1; GO reads input.total.eleMas).
+const A4SkillDmgBonus = percent(charTalentTables.TravelerDendro.a4.p1);
+const A4BurstDmgBonus = percent(charTalentTables.TravelerDendro.a4.p2);
 const skillDmgPost = new PostEffectStatsMastery({
-    percent: new StatTable('dmg_skill_traveler_dendro', [0.15]),
-    global: true,
+    percent: new StatTable('dmg_skill_traveler_dendro', [A4SkillDmgBonus]),
+    reads: CHANNELS.TOTAL,
     conditions: [
         new ConditionAscensionChar({ascension: 4}),
     ],
 });
 
 const burstDmgPost = new PostEffectStatsMastery({
-    percent: new StatTable('dmg_burst_traveler_dendro', [0.1]),
-    global: true,
+    percent: new StatTable('dmg_burst_traveler_dendro', [A4BurstDmgBonus]),
+    reads: CHANNELS.TOTAL, // Game data: same ability reads FIGHT_PROP_ELEMENT_MASTERY (total).
     conditions: [
         new ConditionAscensionChar({ascension: 4}),
     ],
@@ -133,14 +146,23 @@ const burstDmgPost = new PostEffectStatsMastery({
 const condTravelerAether = new ConditionBoolean({name: 'traveler_aether'});
 const condLumineDefault = new ConditionNot([condTravelerAether]);
 
-const ForeignVerdessenceBonus = 80;
-const ForeignVinecoreDmg = 120;
-const ForeignVerdessenceCooldown = 15;
+const ForeignVerdessenceBonus = percent(charTalentTables.TravelerDendro.sp.p8);
+const ForeignVinecoreDmg = percent(charTalentTables.TravelerDendro.sp.p11);
+const ForeignVerdessenceCooldown = charTalentTables.TravelerDendro.sp.p9;
+const A1Mastery = charTalentTables.TravelerDendro.a1.p1;
+const C1Energy = charTalentTables.TravelerDendro.c1.p1;
+const C2DurationBonus = charTalentTables.TravelerDendro.c2.p1;
+const C6DmgBonus = percent(charTalentTables.TravelerDendro.c6.p1);
 
 const bladeReadyCondition = new ConditionBooleanValue({
     setting: 'traveler_dendro_blade_viridis',
     cond: 'ge',
     value: 3,
+});
+
+// Verdant Overgrowth and Withering Aggregation reach the active character(s) within the Lamp AoE.
+const activeReceiver = new ConditionReceiver({
+    condition: new ConditionOnField(),
 });
 
 function makeChargedHit2Multipliers() {
@@ -427,12 +449,27 @@ export const TravelerDendro = new DbObjectChar({
             dropdownClass: 'two-digits',
             maxStacks: 10,
             info: {ascension: 1},
-            stats: [
-                new StatTable('mastery', [6]),
-            ],
             subConditions: [
                 new ConditionAscensionChar({ascension: 1}),
             ],
+        }),
+        // Active character(s) within the Lamp AoE gain the Mastery. The saved stacks stay
+        // selectable off-field; the hidden delivery carries the active check.
+        // A1 Verdant Overgrowth: flat +6 EM/stack (Player_Grass_PermanentSkill_1). Game data:
+        // UNIQUE_Player_Grass_Seed_Aura_Element_Mastery_Up writes Actor_ElemMasteryDelta
+        // (no "Extra": premod). Conditions write premod: confirmed default, no params.
+        new ConditionLevels({
+            levelSetting: 'traveler_verdant_overgrowth',
+            isHidden: true,
+            receivers: RECEIVERS.TEAM,
+            stats: [
+                new StatTable('mastery', [A1Mastery, 12, 18, 24, 30, 36, 42, 48, 54, 60]),
+            ],
+            condition: new ConditionAnd([
+                new ConditionBoolean({name: 'traveler_verdant_overgrowth'}),
+                new ConditionAscensionChar({ascension: 1}),
+                activeReceiver,
+            ]),
         }),
         new ConditionStatic({
             title: 'talent_name.traveler_verdant_luxury',
@@ -487,7 +524,7 @@ export const TravelerDendro = new DbObjectChar({
                     title: 'talent_name.traveler_symbiotic_creeper',
                     description: 'talent_descr.traveler_symbiotic_creeper',
                     stats: {
-                        text_value: 3.5,
+                        text_value: C1Energy,
                     },
                 }),
             ],
@@ -498,7 +535,7 @@ export const TravelerDendro = new DbObjectChar({
                     title: 'talent_name.traveler_green_resilience',
                     description: 'talent_descr.traveler_green_resilience',
                     stats: {
-                        text_duration: 3,
+                        text_duration: C2DurationBonus,
                     },
                 }),
             ],
@@ -534,18 +571,33 @@ export const TravelerDendro = new DbObjectChar({
         },
         {
             conditions: [
+                // C6 Withering Aggregation: flat +12% Dendro / transfigured-element DMG
+                // (Player_Grass_Constellation_6, param 0.12). Game data:
+                // Player_Grass_Seed_Aura_Element_Damage_Up_* writes Actor_*AddHurtDelta
+                // (no "Extra": premod). Conditions write premod: confirmed default, no params.
+                // Saved toggles only; hidden deliveries reach the active character under the Lamp.
                 new ConditionBoolean({
                     name: 'traveler_withering_aggregation_1',
                     serializeId: 2,
                     title: 'talent_name.traveler_withering_aggregation',
                     description: 'talent_descr.traveler_withering_aggregation_1',
+                    displayStats: {dmg_dendro: C6DmgBonus},
+                }),
+                new Condition({
+                    isHidden: true,
+                    receivers: RECEIVERS.TEAM,
                     stats: {
-                        dmg_dendro: 12,
+                        dmg_dendro: C6DmgBonus,
                     },
+                    condition: new ConditionAnd([
+                        new ConditionBoolean({name: 'traveler_withering_aggregation_1'}),
+                        activeReceiver,
+                    ]),
                 }),
                 new ConditionDropdownElement({
                     name: 'traveler_withering_aggregation_2',
                     serializeId: 3,
+                    receivers: RECEIVERS.TEAM,
                     title: 'talent_name.traveler_withering_aggregation',
                     description: 'talent_descr.traveler_withering_aggregation_2',
                     valueAliases: ['party.traveler_withering_aggregation_2'],
@@ -555,8 +607,9 @@ export const TravelerDendro = new DbObjectChar({
                             serializeId: 1,
                             conditions: [
                                 new Condition({
+                                    condition: activeReceiver,
                                     stats: {
-                                        dmg_pyro: 12,
+                                        dmg_pyro: C6DmgBonus,
                                     },
                                 }),
                             ],
@@ -566,8 +619,9 @@ export const TravelerDendro = new DbObjectChar({
                             serializeId: 2,
                             conditions: [
                                 new Condition({
+                                    condition: activeReceiver,
                                     stats: {
-                                        dmg_electro: 12,
+                                        dmg_electro: C6DmgBonus,
                                     },
                                 }),
                             ],
@@ -577,8 +631,9 @@ export const TravelerDendro = new DbObjectChar({
                             serializeId: 3,
                             conditions: [
                                 new Condition({
+                                    condition: activeReceiver,
                                     stats: {
-                                        dmg_hydro: 12,
+                                        dmg_hydro: C6DmgBonus,
                                     },
                                 }),
                             ],
@@ -593,89 +648,5 @@ export const TravelerDendro = new DbObjectChar({
             ],
         },
     ]),
-    partyData: {
-        conditions: [
-            new ConditionStacks({
-                name: 'party.traveler_verdant_overgrowth',
-                serializeId: 1,
-                rotation: 'party',
-                title: 'talent_name.traveler_verdant_overgrowth',
-                description: 'talent_descr.traveler_verdant_overgrowth',
-                dropdownClass: 'two-digits',
-                maxStacks: 10,
-                info: {
-                    ascension: 1,
-                },
-                stats: [
-                    new StatTable('mastery', [6]),
-                ],
-                subConditions: [
-                    new ConditionAscensionChar({ascension: 1}),
-                ],
-            }),
-            new ConditionBoolean({
-                name: 'party.traveler_withering_aggregation_1',
-                serializeId: 2,
-                rotation: 'party',
-                title: 'talent_name.traveler_withering_aggregation',
-                description: 'talent_descr.traveler_withering_aggregation_1',
-                stats: {
-                    dmg_dendro: 12,
-                },
-                info: {
-                    constellation: 6,
-                },
-            }),
-            new ConditionDropdownElement({
-                name: 'party.traveler_withering_aggregation_2',
-                serializeId: 3,
-                rotation: 'party',
-                title: 'talent_name.traveler_withering_aggregation',
-                description: 'talent_descr.traveler_withering_aggregation_2',
-                info: {
-                    constellation: 6,
-                },
-                values: [
-                    {
-                        value: 'pyro',
-                        serializeId: 1,
-                        conditions: [
-                            new Condition({
-                                stats: {
-                                    dmg_pyro: 12,
-                                },
-                            }),
-                        ],
-                    },
-                    {
-                        value: 'electro',
-                        serializeId: 2,
-                        conditions: [
-                            new Condition({
-                                stats: {
-                                    dmg_electro: 12,
-                                },
-                            }),
-                        ],
-                    },
-                    {
-                        value: 'hydro',
-                        serializeId: 3,
-                        conditions: [
-                            new Condition({
-                                stats: {
-                                    dmg_hydro: 12,
-                                },
-                            }),
-                        ],
-                    },
-                ],
-                subConditions: [
-                    new ConditionBoolean({
-                        name: 'party.traveler_withering_aggregation_1',
-                    }),
-                ],
-            }),
-        ],
-    },
+    retiredParty: [[1, 'stacks'], [2, 'checkbox'], [3, 'dropdown']],
 });

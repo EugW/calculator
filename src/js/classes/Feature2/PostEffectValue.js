@@ -74,14 +74,15 @@ export class FeaturePostEffectValue extends Feature2 {
 
     /**
      * @param {BuildData} data
+     * @param {FeatureCompiler} [compiler] prepared for these settings; only stats may vary
      * @returns {Object}
      */
-    getResult(data) {
+    getResult(data, compiler) {
         if (!this.checkConditions(data)) {
             return {};
         }
 
-        let compiler = this.getCompiled(data);
+        compiler ||= this.getCompiled(data);
         let [normal, crit, average] = compiler.execute(data);
 
         if (this.format == 'percent') {

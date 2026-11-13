@@ -4,6 +4,8 @@ import { ConditionStacks } from "../../../classes/Condition/Stacks";
 import { DbObjectWeapon } from "../../../classes/DbObject/Weapon";
 import { StatTable } from "../../../classes/StatTable";
 import { weaponStatTables } from "../../generated/WeaponStatTables";
+import { weaponPassiveTables } from "../../generated/WeaponPassiveTables";
+import { percent } from "../../Params";
 
 const travelerOnly = new ConditionBooleanChar({
     chars: [
@@ -32,8 +34,8 @@ export const ExaiphanesBlade = new DbObjectWeapon({
             title: 'talent_name.weapon_exaiphanes_blade',
             description: 'talent_descr.weapon_exaiphanes_blade_hit',
             stats: [
-                new StatTable('atk_percent', [16, 20, 24, 32, 40]),
-                new StatTable('text_number_energy', [3, 3, 5, 5, 5]),
+                new StatTable('atk_percent', percent(weaponPassiveTables.ExaiphanesBlade.p1)),
+                new StatTable('text_number_energy', weaponPassiveTables.ExaiphanesBlade.p4),
             ],
             subConditions: [travelerOnly],
         }),
@@ -45,7 +47,7 @@ export const ExaiphanesBlade = new DbObjectWeapon({
             maxStacks: 7,
             levelSetting: 'weapon_refine',
             stats: [
-                new StatTable('crit_dmg', [0, 6, 6, 6, 6]),
+                new StatTable('crit_dmg', percent(weaponPassiveTables.ExaiphanesBlade.p3)),
             ],
             subConditions: [travelerOnly],
         }),

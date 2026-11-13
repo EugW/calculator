@@ -1,17 +1,16 @@
-import { CalcSet } from "../classes/CalcSet";
-import { Condition } from "../classes/Condition";
-
-importScripts('db.js?'+ __VERSION__);
+// The database joins this worker's module graph; see webpack.config.js.
+import "../db";
+import { deserializeWorkerMember } from "../classes/Team";
+import { ArtifactCandidateEvaluator } from "../classes/ArtifactCandidateEvaluator";
 
 self.onmessage = function(input) {
-    let original = CalcSet.deserialize(input.data.calcset);
+    let original = deserializeWorkerMember(input.data.calcset);
     let featureName = input.data.feature;
     let showBeta = input.data.showBeta;
 
     let maxPieces = 0;
     let arts = original.getArtifacts();
-    let feature = original.getFeatureByName(featureName);
-    let isRotation = feature.isRotation();
+    let evaluator = new ArtifactCandidateEvaluator(featureName);
 
     for (const slot of Object.keys(arts)) {
         if (arts[slot]) {
@@ -19,7 +18,7 @@ self.onmessage = function(input) {
         }
     }
 
-    let sets = getSets(original, featureName, maxPieces, showBeta);
+    let sets = getSets(original, evaluator, maxPieces, showBeta);
     let results = [];
 
     for (let s1 = 0; s1 < sets.length; ++s1) {
@@ -31,10 +30,9 @@ self.onmessage = function(input) {
             let currentSet = original.clone();
             currentSet.artifacts.modifySets(setNames);
             let settings1 = Object.assign(item1.settings);
-            currentSet.setArtifactsSettings(settings1);
+            setScenario(currentSet, settings1);
 
-            let data  = currentSet.getBuildData();
-            let value = feature.getResult(data)[featureName];
+            let value = evaluator.getResult(currentSet);
 
             results.push({
                 feature: value,
@@ -57,14 +55,9 @@ self.onmessage = function(input) {
                     currentSet = original.clone();
                     currentSet.artifacts.modifySets(names2);
                     let settings2 = Object.assign({}, settings1, item2.settings);
-                    currentSet.setArtifactsSettings(settings2);
+                    setScenario(currentSet, settings2);
 
-                    if (isRotation) {
-                        feature = currentSet.compileRotation();
-                    }
-
-                    let data  = currentSet.getBuildData();
-                    let value = feature.getResult(data)[featureName];
+                    let value = evaluator.getResult(currentSet);
 
                     results.push({
                         feature: value,
@@ -84,16 +77,13 @@ self.onmessage = function(input) {
     self.postMessage({result: results});
 };
 
-function getSets(original, featureName, maxPieces, showBeta) {
+function getSets(original, evaluator, maxPieces, showBeta) {
     let sets = [];
 
     let calc = original.clone();
     calc.artifacts.modifySets([]);
 
-    let feature = calc.getFeatureByName(featureName);
-
-    const base = calc.getBuildData();
-    const reference = feature.getResult(base)[featureName];
+    const reference = evaluator.getResult(calc);
 
     for (const setId of DB.Artifacts.Sets.getKeys(1)) {
         let setData = DB.Artifacts.Sets.get(setId);
@@ -122,19 +112,10 @@ function getSets(original, featureName, maxPieces, showBeta) {
                 let newSet = original.clone();
                 newSet.artifacts.modifySets(setNames);
 
-                let settings;
-                if (pieceData.settings) {
-                    settings = pieceData.settings;
-                } else {
-                    settings = Object.assign({}, Condition.allConditionsOn(newSet.artifacts.getConditions()));
-                }
+                let settings = Object.assign({}, pieceData.settings);
+                setScenario(newSet, settings);
 
-                let newset = Object.assign({}, settings);
-                newSet.setArtifactsSettings(newset);
-
-                let feature = newSet.getFeatureByName(featureName);
-                let data = newSet.getBuildData();
-                let value = feature.getResult(data)[featureName];
+                let value = evaluator.getResult(newSet);
 
                 if (valueIsGreater(prev, value)) {
                     setResult.push({
@@ -157,6 +138,18 @@ function getSets(original, featureName, maxPieces, showBeta) {
     }
 
     return sets;
+}
+
+/**
+ * A set's scenario on a candidate's copy of the team: the team's and the
+ * enemy's state it assumes (Blizzard Strayer a Cryo-affected, Frozen enemy).
+ * The set's effects read the member's set-bonus profile.
+ *
+ * @param {CalcSet} candidate
+ * @param {Object} settings
+ */
+function setScenario(candidate, settings) {
+    candidate.team.applyShared(settings);
 }
 
 function valueIsGreater(reference, value) {

@@ -2,6 +2,8 @@ import { ConditionStacks } from "../../../classes/Condition/Stacks";
 import { DbObjectWeapon } from "../../../classes/DbObject/Weapon";
 import { StatTable } from "../../../classes/StatTable";
 import { weaponStatTables } from "../../generated/WeaponStatTables";
+import { weaponPassiveTables } from "../../generated/WeaponPassiveTables";
+import { percent } from "../../Params";
 
 export const PrototypeStarglitter = new DbObjectWeapon({
     name: 'prototype_starglitter',
@@ -20,8 +22,8 @@ export const PrototypeStarglitter = new DbObjectWeapon({
             maxStacks: 2,
             levelSetting: 'weapon_refine',
             stats: [
-                new StatTable('dmg_normal', [8, 10, 12, 14, 16]),
-                new StatTable('dmg_charged', [8, 10, 12, 14, 16]),
+                new StatTable('dmg_normal', percent(weaponPassiveTables.PrototypeStarglitter.p1)),
+                new StatTable('dmg_charged', percent(weaponPassiveTables.PrototypeStarglitter.p1)),
             ],
         })
     ],

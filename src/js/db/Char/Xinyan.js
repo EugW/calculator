@@ -18,9 +18,11 @@ import { FeatureMultiplier } from "../../classes/Feature2/Multiplier";
 import { FeatureMultiplierList } from "../../classes/Feature2/Multiplier/List";
 import { FeatureShield } from "../../classes/Feature2/Shield";
 import { PostEffectStatsDef } from "../../classes/PostEffect/Stats/Def";
+import { RECEIVERS } from "../../classes/Team/Receivers";
 import { StatTable } from "../../classes/StatTable";
 import { charTables } from "../generated/CharTables";
 import { charTalentTables } from "../generated/CharTalentTables";
+import { percent } from "../Params";
 
 const Talents = new DbObjectTalents({
     attack: {
@@ -137,6 +139,13 @@ const Talents = new DbObjectTalents({
     },
 });
 
+const A4PhysDmg = percent(charTalentTables.Xinyan.a4.p1);
+const C1AtkSpeed = percent(charTalentTables.Xinyan.c1.p1);
+const C2CritRate = percent(charTalentTables.Xinyan.c2.p1);
+const C4PhysRes = percent(charTalentTables.Xinyan.c4.p1);
+const C6AtkBonus = charTalentTables.Xinyan.c6.p2;
+const C6Stamina = -percent(charTalentTables.Xinyan.c6.p1);
+
 export const Xinyan = new DbObjectChar({
     name: 'xinyan',
     serializeId: 30,
@@ -244,6 +253,14 @@ export const Xinyan = new DbObjectChar({
             category: 'skill',
             element: 'pyro',
             multipliers: [
+                // Sweeping Fervor shields (levels 1-3): absorption = DEF ratio
+                // x DEF + flat. Game data: UNIQUE_Xinyan_Skill_S_Shield (in
+                // Avatar_Xinyan_ElementalArt_Shield_1/2/3) builds shieldHP as
+                // Xinyan_ShieldN_DefRatioDurability x FIGHT_PROP_CUR_DEFENSE
+                // (total) + Xinyan_ShieldN_BaseDurability. scaling 'def*'
+                // reads the total by construction and needs nothing; no
+                // ability writes extra DEF, so premod and total DEF agree
+                // today. GO shieldNodeTalent('def', ...) agrees.
                 new FeatureMultiplierList({
                     scaling: 'def*',
                     leveling: 'char_skill_elemental',
@@ -292,8 +309,20 @@ export const Xinyan = new DbObjectChar({
         }),
     ],
     postEffects: [
+        // Rockin' in a Flaming World (C6): Charged Attacks gain ATK equal to
+        // 50% of DEF. Game data: Avatar_Xinyan_Talent_EnhanceExtraAttack
+        // writes Actor_AttackExtraDelta (extra) as
+        // Xinyan_Talent_EnhanceExtraAttack_DefPer x FIGHT_PROP_NONEXTRA_DEFENSE
+        // (premod); talent config Xinyan_Constellation_6 paramList [-0.3, 0.5].
+        // The default channels (premod read, extra write) are confirmed, so no
+        // params: premod DEF writers (Columbina's C2 Geo) count, while extra
+        // ATK (Bennett's burst) does not feed it back. KQM Xinyan ("C6 affects
+        // her Skill and Burst"): the bonus lands on the stats page as flat ATK
+        // and her dynamic skill/burst hits count it; no KQM buff-chain
+        // interaction test. GO reads input.total.def into premod.atk
+        // (supporting evidence only; the game data wins on both ends).
         new PostEffectStatsDef({
-            percent: new StatTable('atk', [0.3]),
+            percent: new StatTable('atk', [C6AtkBonus]),
             condition: new ConditionAnd([
                 new ConditionBoolean({name: 'xinyan_rockin_in_a_flaming_world'}),
                 new ConditionConstellation({constellation: 6}),
@@ -312,10 +341,17 @@ export const Xinyan = new DbObjectChar({
         new ConditionBoolean({
             name: 'xinyan_now_thats_rock',
             serializeId: 1,
+            receivers: RECEIVERS.TEAM,
             title: 'talent_name.xinyan_now_thats_rock_n_roll',
             description: 'talent_descr.xinyan_now_thats_rock_n_roll',
+            // "...Now That's Rock 'N' Roll!" (A4): flat 15% Physical DMG under
+            // the shield. Game data: Xinyan_Talent_ShieldEnhancePhysicalDMG
+            // writes Actor_PhysicalAddHurtDelta from the flat
+            // Xinyan_Talent_ShieldEnhancePhysicalDMG_DMGRate, no stat read.
+            // Flat conditions are always premod: needs nothing. GO
+            // teamBuff.premod.physical_dmg_ agrees.
             stats: {
-                dmg_phys: 15,
+                dmg_phys: A4PhysDmg,
             },
             info: {ascension: 4},
             subConditions: [
@@ -326,25 +362,36 @@ export const Xinyan = new DbObjectChar({
     constellation: new DbObjectConstellation([
         {
             conditions: [
+                // Fatal Acceleration (C1): flat ATK SPD on CRIT. Game data:
+                // Xinyan_Talent_CritEnhanceAtkSpeed writes
+                // Animator_OverallSpeedRatio from the flat
+                // Avatar_Xinyan_Talent_CritEnhanceAtkSpeed_AttackSpeedRatio
+                // (talent Xinyan_Constellation_1 paramList [0.12, 5]), no stat
+                // read. Flat conditions are always premod: needs nothing.
                 new ConditionBoolean({
                     name: 'xinyan_fatal_acceleration',
                     serializeId: 2,
                     title: 'talent_name.xinyan_fatal_acceleration',
                     description: 'talent_descr.xinyan_fatal_acceleration',
                     stats: {
-                        atk_speed_normal: 12,
-                        atk_speed_charged: 12,
+                        atk_speed_normal: C1AtkSpeed,
+                        atk_speed_charged: C1AtkSpeed,
                     },
                 }),
             ],
         },
         {
             conditions: [
+                // Impromptu Opening (C2): flat 100% burst Physical CRIT. Game
+                // data: the burst hit's attackProperty.bonusCritical =
+                // Xinyan_Talent_CritWhenElementalBurst_CritRate (talent
+                // Xinyan_Constellation_2 paramList [1, ...]), no stat read.
+                // Flat conditions are always premod: needs nothing.
                 new ConditionStatic({
                     title: 'talent_name.xinyan_impromptu_opening',
                     description: 'talent_descr.xinyan_impromptu_opening',
                     stats: {
-                        crit_rate_xinyan: 100,
+                        crit_rate_xinyan: C2CritRate,
                     },
                 }),
             ],
@@ -360,13 +407,18 @@ export const Xinyan = new DbObjectChar({
         },
         {
             conditions: [
+                // Wildfire Rhythm (C4): flat Physical RES shred on skill hit.
+                // Game data (talent Xinyan_Constellation_4 paramList [-0.15,
+                // 12]): no stat read. Flat conditions are always premod:
+                // needs nothing.
                 new ConditionBoolean({
                     name: 'xinyan_wildfire_rhythm',
                     serializeId: 4,
+                    receivers: RECEIVERS.TEAM,
                     title: 'talent_name.xinyan_wildfire_rhythm',
                     description: 'talent_descr.xinyan_wildfire_rhythm',
                     stats: {
-                        enemy_res_phys: -15,
+                        enemy_res_phys: C4PhysRes,
                     },
                 }),
             ],
@@ -382,42 +434,21 @@ export const Xinyan = new DbObjectChar({
         },
         {
             conditions: [
+                // Rockin' in a Flaming World (C6) toggle: the -30% Charged
+                // stamina is display-only here (game: Actor_CostStaminaRatio =
+                // Xinyan_Talent_EnhanceExtraAttack_StaminaCost); the ATK bonus
+                // itself is the postEffect above. No stat read.
                 new ConditionBoolean({
                     name: 'xinyan_rockin_in_a_flaming_world',
                     serializeId: 5,
                     title: 'talent_name.xinyan_rockin_in_a_flaming_world',
                     description: 'talent_descr.xinyan_rockin_in_a_flaming_world',
                     stats: {
-                        text_percent: 30,
+                        text_percent: C6Stamina,
                     },
                 }),
             ],
         },
     ]),
-    partyData: {
-        conditions: [
-            new ConditionBoolean({
-                name: 'party.xinyan_now_thats_rock',
-                serializeId: 1,
-                rotation: 'party',
-                title: 'talent_name.xinyan_now_thats_rock_n_roll',
-                description: 'talent_descr.xinyan_now_thats_rock_n_roll',
-                info: {ascension: 4},
-                stats: {
-                    dmg_phys: 15,
-                },
-            }),
-            new ConditionBoolean({
-                name: 'party.xinyan_wildfire_rhythm',
-                serializeId: 2,
-                rotation: 'party',
-                title: 'talent_name.xinyan_wildfire_rhythm',
-                description: 'talent_descr.xinyan_wildfire_rhythm',
-                info: {constellation: 4},
-                stats: {
-                    enemy_res_phys: -15,
-                },
-            }),
-        ],
-    },
+    retiredParty: [[1, 'checkbox'], [2, 'checkbox']],
 });

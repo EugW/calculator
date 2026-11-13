@@ -20,6 +20,7 @@ import { StatTable } from "../../classes/StatTable"
 import { ValueTable } from '../../classes/ValueTable';
 import { charTables } from '../generated/CharTables';
 import { charTalentTables } from '../generated/CharTalentTables';
+import { percent } from "../Params";
 
 const Talents = new DbObjectTalents({
     attack: {
@@ -150,15 +151,15 @@ const Talents = new DbObjectTalents({
 });
 
 const TalentValues = {
-    A4Heal: 20,
-    A4HealDot: 6,
-    C1MaxHp: 20,
-    C1SkillHpBonus: 3.6,
-    C1BurstHpBonus: 6,
-    C2SkillDmg: 50,
-    C4SelfHeal: 2.5,
-    C6CritRate: 10,
-    C6CritDmg: 15,
+    A4Heal: percent(charTalentTables.Dehya.a4.p2),
+    A4HealDot: percent(charTalentTables.Dehya.a4.p3),
+    C1MaxHp: percent(charTalentTables.Dehya.c1.p1),
+    C1SkillHpBonus: percent(charTalentTables.Dehya.c1.p2),
+    C1BurstHpBonus: percent(charTalentTables.Dehya.c1.p3),
+    C2SkillDmg: percent(charTalentTables.Dehya.c2.p2),
+    C4SelfHeal: percent(charTalentTables.Dehya.c4.p2),
+    C6CritRate: percent(charTalentTables.Dehya.c6.p1),
+    C6CritDmg: percent(charTalentTables.Dehya.c6.p2),
 };
 
 export const Dehya = new DbObjectChar({

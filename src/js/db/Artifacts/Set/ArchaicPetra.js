@@ -1,6 +1,10 @@
 import { ArtifactSet } from "../../../classes/ArtifactSet";
+import { ConditionArchaic } from "../../../classes/Condition/Archaic";
+import { ConditionBoolean } from "../../../classes/Condition/Boolean";
 import { ConditionDropdownElement } from "../../../classes/Condition/Dropdown/Element";
 import { ConditionStatic } from "../../../classes/Condition/Static";
+import { RECEIVERS } from "../../../classes/Team/Receivers";
+import { artifactSetTables } from "../../generated/ArtifactSetTables";
 
 export const ArchaicPetra = new ArtifactSet({
     serializeId: 2,
@@ -20,7 +24,7 @@ export const ArchaicPetra = new ArtifactSet({
                     description: 'set_descr.archaic_petra_2',
                     settings: {},
                     stats: {
-                        dmg_geo: 15,
+                        dmg_geo: artifactSetTables.ArchaicPetra.pc2.dmg_geo,
                     },
                 })
             ],
@@ -52,6 +56,11 @@ export const ArchaicPetra = new ArtifactSet({
                             serializeId: 4,
                         },
                     ],
+                }),
+                new ConditionArchaic({
+                    receivers: RECEIVERS.TEAM,
+                    stack: 'archaic_petra_4',
+                    condition: new ConditionBoolean({name: 'set_bonus.archaic_petra_4'}),
                 }),
             ],
         },

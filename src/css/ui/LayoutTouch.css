@@ -1,23 +1,37 @@
+.narrow .gi-page {
+    display: flex;
+    align-items: flex-start;
+    margin-top: 0;
+}
+
 .narrow .gi-main-container {
+    flex: 1 1 auto;
     min-width: 600px;
-    width: 100%;
+    width: auto;
     height: auto !important;
+    margin: 0 0 0 5px;
+    border-radius: 0;
+    background-color: unset;
 }
 
-.narrow .gi-layout-left-tabs, .narrow .gi-layout-right-tabs {
-    float: right;
+/* The single nav column stays beside the content as a slim icon strip. */
+.narrow .gi-layout-nav {
+    position: static;
+    width: 56px;
+    flex-shrink: 0;
+    margin: 0 5px 0;
+    padding: 0;
+    background: unset;
+    border-radius: 0;
+    max-height: none;
+    overflow: visible;
 }
 
-.tab-narrow {
-    display: none;
-}
-
-.narrow .tab-narrow {
-    display: block;
-}
-
+/* The nav column is beside the main container, not in it: the content
+   takes the whole container. */
 .narrow .gi-main-container .gi-layout-left-container, .narrow .gi-main-container .gi-layout-right-container {
-    width: calc(100% - 70px);
+    width: 100%;
+    border-radius: 0;
 }
 
 .narrow .gi-tab-scrollable {
@@ -36,24 +50,10 @@
     max-height: none;
 }
 
-.narrow .gi-layout-right-tabs {
-    display: none;
-}
-
 .narrow .gi-main-container {
-    margin: 5px;
+    margin: 0 0 0 5px;
     border-radius: 0;
-    width: 100%;
-    height: 100%;
     background-color: unset;
-}
-
-.narrow .tabs-narrow {
-    display: block;
-}
-
-.narrow .gi-tab-item {
-    margin-bottom: 10px;
 }
 
 .narrow .gi-main-copyright {

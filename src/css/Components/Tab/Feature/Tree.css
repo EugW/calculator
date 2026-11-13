@@ -77,6 +77,14 @@
     padding-left: 10px;
 }
 
+/* A remark under a block's lines: it wraps. */
+.feature-detail-tree .block .note {
+    color: #beaea9;
+    font-size: 11px;
+    line-height: 14px;
+    padding: 0 7px 8px;
+}
+
 .feature-detail-block {
     margin: 5px;
 }
@@ -146,4 +154,14 @@
     border-top: solid 2px #626770;
     border-bottom: solid 2px #626770;
     border-left: solid 2px #626770;
+}
+
+.feature-detail-tree .block.results .line {
+    justify-content: space-around;
+}
+
+.feature-detail-tree .block.results .feature-detail-block.result .stat-value {
+    font-size: 18px;
+    line-height: 22px;
+    color: #D3BC8E;
 }

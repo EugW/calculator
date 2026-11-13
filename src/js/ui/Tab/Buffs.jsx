@@ -1,18 +1,16 @@
 import React from 'react';
 import "../../../css/Components/Tab/Buffs.css"
-import { Condition } from '../../classes/Condition';
-import { Stats } from '../../classes/Stats';
 
 import { Accordion, AccordionItem } from '../Components/Accordion';
-import { ConditionList } from '../Components/ConditionList';
-import { ControlsBar, ControlsBarDivider } from '../Components/ControlsBar';
 import { FullHeight, FullHeightScrollable } from '../Components/FullHeight';
-import { TitledButton } from '../Components/Inputs/Buttons';
 import { ReactTab } from '../Components/Tab';
 import { Lang } from '../Lang';
 import { Tab } from "../Tab";
+import { teammateContributions } from '../../classes/Team/Contributions';
 import { CustomStats } from './Buffs/CustomStats';
-import { PartyList } from './Buffs/PartyList';
+import { chosenFoodCount, FoodSection } from './Buffs/Food';
+import { legacyCount, LegacySection } from './Buffs/Legacy';
+import { Received } from './Buffs/Received';
 
 export class BuffsTab extends Tab {
     constructor(params) {
@@ -20,7 +18,7 @@ export class BuffsTab extends Tab {
 
         this.id = 'buffs';
         this.rightRab = true;
-        this.title = 'tab_header.artifact_pool_suggest';
+        this.title = 'tab_header.buff_view';
     }
 
     refresh() {
@@ -30,6 +28,7 @@ export class BuffsTab extends Tab {
 
         this.component.setState({
             feature: this.app.getFeature(),
+            displayMode: this.app.getDisplayMode(),
         });
     }
 
@@ -39,69 +38,52 @@ export class BuffsTab extends Tab {
                 ref={element => { this.component = element; }}
                 app={this.app}
                 title={this.title}
+                feature={this.app.getFeature()}
+                displayMode={this.app.getDisplayMode()}
             />
         );
     }
 }
 
+/**
+ * What the viewed member gets besides its own gear: from its teammates,
+ * from the team's additional buffs (the legacy source, Team/Legacy: virtual
+ * characters, weapons and sets with no wielder), from food and as custom
+ * bonuses.
+ */
 export class Buffs extends React.Component {
     constructor(props) {
         super(props);
 
         this.lang = new Lang();
         this.state = {
-            expandedExtraChars: {},  // Track which extra characters are expanded
+            feature: props.feature,
+            displayMode: props.displayMode,
         };
 
         this.strings = {
             title: this.lang.get('tab_header.buff_view'),
-            party: this.lang.get('buff_group.elemental_resonance'),
-            additionalSupports: this.lang.get('buff_group.additional_supports'),
-            artifacts: this.lang.get('buff_group.artifacts'),
-            weapons: this.lang.get('buff_group.weapons'),
+            received: this.lang.get('team.received'),
+            food: this.lang.get('tab_header.food'),
             custom: this.lang.get('buff_group.custom'),
-            load_char: this.lang.get('buff_view.buff_char_load'),
+            legacy: this.lang.get('legacy.title'),
         };
+    }
 
-        this.resonanceConditions = DB.Buffs.get('ElementalResonance').getConditions();
-        this.artifactsConditions = DB.Buffs.get('Artifacts').getConditions();
-        this.weaponsConditions = DB.Buffs.get('Weapons').getConditions();
+    handleFeature(feature) {
+        this.setState({feature: feature});
+        this.props.app.setFeature(feature);
+    }
+
+    handleDisplayMode(mode) {
+        this.setState({displayMode: mode});
+        this.props.app.setDisplayMode(mode);
     }
 
     handleSettingChange(name, value) {
         let data = {};
         data[name] = value;
         this.props.app.modifyBuffsSettings(data);
-    }
-
-    handlePartyChars(ids) {
-        this.props.app.setPartyChars(ids);
-    }
-
-    handleCharLoad(charId, data) {
-        let char = DB.Chars.getById(charId);
-
-        if (char) {
-            UI.PartyLoad.show({
-                charId: charId,
-                stats: data ? data.stats: null,
-                settings: data ? data.settings: null,
-                callback: (data) => {
-                    this.props.app.modifyBuffsSettings(
-                        partyCharSettings(char, data)
-                    );
-                },
-            });
-        }
-    }
-
-    toggleExtraChar(charId) {
-        this.setState(prevState => ({
-            expandedExtraChars: {
-                ...prevState.expandedExtraChars,
-                [charId]: !prevState.expandedExtraChars[charId],
-            },
-        }));
     }
 
     render() {
@@ -117,141 +99,34 @@ export class Buffs extends React.Component {
     tabContent() {
         let settings = this.props.app.getStats().settings;
 
-        let charItems = [];
-        for (let i = 1; i <= 3; ++i) {
-            let char = DB.Chars.getById(settings['party_char_'+ i]);
-            if (!char) {
-                continue;
-            }
-
-            let conditions = char.getPartyConditions();
-            if (countConditions(conditions) < 1) {
-                continue;
-            }
-
-            let partyButton = null;
-            let loadData = char.isLoadParty();
-            if (loadData) {
-                partyButton = (
-                    <ControlsBar>
-                        <ControlsBarDivider/>
-                        <TitledButton
-                            icon="icon-ok"
-                            title={this.strings.load_char}
-                            onClick={() => this.handleCharLoad(char.getId(), loadData)}
-                        />
-                    </ControlsBar>
-                );
-            }
-
-            charItems.push(
-                <AccordionItem id={'char'+ char.getId()} title={makeTitleWithCount(this.lang.get(char.getName()), conditions, settings)}>
-                    {partyButton}
-                    <ConditionList
-                        charId={char.getId()}
-                        items={conditions}
-                        settings={settings}
-                        hideInactive={true}
-                        onChange={(name, value) => this.handleSettingChange(name, value)}
-                    />
-                </AccordionItem>
-            );
-        }
-
-        // Extra party members (beyond core 4)
-        let extraCharItems = [];
-        let extraIndex = 1;
-        while (settings['party_char_extra_' + extraIndex]) {
-            let char = DB.Chars.getById(settings['party_char_extra_' + extraIndex]);
-            if (char) {
-                let conditions = char.getPartyConditions();
-                if (countConditions(conditions) >= 1) {
-                    let charId = char.getId();
-                    let isExpanded = this.state.expandedExtraChars[charId];
-                    let partyButton = null;
-                    let loadData = char.isLoadParty();
-                    if (loadData) {
-                        partyButton = (
-                            <ControlsBar>
-                                <ControlsBarDivider/>
-                                <TitledButton
-                                    icon="icon-ok"
-                                    title={this.strings.load_char}
-                                    onClick={() => this.handleCharLoad(charId, loadData)}
-                                />
-                            </ControlsBar>
-                        );
-                    }
-
-                    extraCharItems.push(
-                        <div key={'char_extra_'+ charId} className="buffs-char-extended">
-                            <div
-                                className="buffs-char-extended-header"
-                                onClick={() => this.toggleExtraChar(charId)}
-                            >
-                                <span>{makeTitleWithCount(this.lang.get(char.getName()), conditions, settings)}</span>
-                                <span className={'buffs-char-extended-toggle' + (isExpanded ? ' open' : '')}></span>
-                            </div>
-                            {isExpanded && (
-                                <div className="buffs-char-extended-content">
-                                    {partyButton}
-                                    <ConditionList
-                                        charId={charId}
-                                        items={conditions}
-                                        settings={settings}
-                                        hideInactive={true}
-                                        onChange={(name, value) => this.handleSettingChange(name, value)}
-                                    />
-                                </div>
-                            )}
-                        </div>
-                    );
-                }
-            }
-            extraIndex++;
-        }
-
         let buffCount = countCustomStats(settings);
+        let foodCount = chosenFoodCount(this.props.app);
+        let entryCount = legacyCount(this.props.app.getTeam());
+        let contributions = teammateContributions(this.props.app.currentSet());
 
         return (
             <FullHeight>
                 <FullHeightScrollable>
                     <Accordion>
-                        <AccordionItem id="party" title={makeTitleWithCount(this.strings.party, this.resonanceConditions, settings)}>
-                            <PartyList
-                                settings={settings}
-                                onChange={(ids) => this.handlePartyChars(ids)}
-                            />
-                            <ConditionList
-                                items={this.resonanceConditions}
-                                settings={settings}
-                                hideInactive={true}
-                                onChange={(name, value) => this.handleSettingChange(name, value)}
-                            />
-                        </AccordionItem>
-                        <AccordionItem id="artifacts" title={makeTitleWithCount(this.strings.artifacts, this.artifactsConditions, settings)}>
-                            <ConditionList
-                                items={this.artifactsConditions}
-                                settings={settings}
-                                onChange={(name, value) => this.handleSettingChange(name, value)}
-                            />
-                        </AccordionItem>
-                        <AccordionItem id="weapons" title={makeTitleWithCount(this.strings.weapons, this.weaponsConditions, settings)}>
-                            <ConditionList
-                                showBeta={this.props.app.showBetaContent()}
-                                items={this.weaponsConditions}
-                                settings={settings}
-                                onChange={(name, value) => this.handleSettingChange(name, value)}
-                            />
-                        </AccordionItem>
-                        {charItems[0] ? charItems[0] : null}
-                        {charItems[1] ? charItems[1] : null}
-                        {charItems[2] ? charItems[2] : null}
-                        {extraCharItems.length > 0 && (
-                            <AccordionItem id="additional_supports" title={this.strings.additionalSupports + ` (${extraCharItems.length})`}>
-                                {extraCharItems}
+                        {contributions.length ? (
+                            <AccordionItem id="received" title={this.strings.received}>
+                                <Received items={contributions} />
                             </AccordionItem>
-                        )}
+                        ) : null}
+                        {/* The team's, whichever member is viewed. Every entry's controls: lazy. */}
+                        <AccordionItem id="legacy" lazy={true} title={this.strings.legacy + (entryCount ? ` (${entryCount})` : '')}>
+                            <LegacySection app={this.props.app} />
+                        </AccordionItem>
+                        {/* Each dish is a separate evaluation of the team: lazy. */}
+                        <AccordionItem id="food" lazy={true} title={this.strings.food + (foodCount ? ` (${foodCount})` : '')}>
+                            <FoodSection
+                                app={this.props.app}
+                                feature={this.state.feature}
+                                displayMode={this.state.displayMode}
+                                onFeatureChange={(feature) => this.handleFeature(feature)}
+                                onDisplayModeChange={(mode) => this.handleDisplayMode(mode)}
+                            />
+                        </AccordionItem>
                         <AccordionItem id="custom" title={this.strings.custom + (buffCount ? ` (${buffCount})` : '')}>
                             <CustomStats
                                 settings={settings}
@@ -265,43 +140,6 @@ export class Buffs extends React.Component {
     }
 }
 
-function makeTitleWithCount(title, conditions, settings) {
-    let cntActive = 0;
-
-    for (const cond of conditions) {
-        if (cond.isHidden(settings)) {
-            continue;
-        }
-
-        let type = cond.getType();
-        if (!type || type == 'static' || type == 'number' && !cond.params.countable) {
-            continue;
-        }
-
-        if (cond.isActive(settings)) {
-            cntActive++;
-        }
-    }
-
-    let result = title;
-    if (cntActive) {
-        result += ` (${cntActive})`;
-    }
-    return result;
-}
-
-function countConditions(conditions) {
-    let cnt = 0;
-
-    for (const cond of conditions) {
-        if (cond.isSerializable()) {
-            ++cnt;
-        }
-    }
-
-    return cnt;
-}
-
 function countCustomStats(settings) {
     let count = 0;
 
@@ -313,32 +151,4 @@ function countCustomStats(settings) {
     }
 
     return count;
-}
-
-function partyCharSettings(char, data) {
-    let conditions = char.getPartyConditions();
-    let settings = {};
-    let totals = data.stats.calcTotals();
-
-    for (const cond of conditions) {
-        let info = cond.getInfo();
-
-        if (cond.params.partyStat) {
-            let value = data.stats.get(cond.params.partyStat) || totals.get(cond.params.partyStat);
-            value = Stats.format(cond.params.partyStat, value);
-            value = value.replace(/[^\d\.]/, '');
-            settings[cond.getName()] = value;
-        } else if (cond.params.partySetting) {
-            settings[cond.getName()] = data.settings[cond.params.partySetting] || '';
-        } else if (info) {
-            let isOn = info.constellation && data.settings.char_constellation >= info.constellation;
-            isOn ||= info.ascension && data.settings.char_ascension >= info.ascension;
-
-            if (isOn) {
-                settings = Object.assign(settings, Condition.allConditionsOn([cond]));
-            }
-        }
-    }
-
-    return settings;
 }

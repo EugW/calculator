@@ -4,15 +4,10 @@ import {Stats} from "./Stats";
 export class Condition {
     constructor(params) {
         this.params = params || {};
-        this.entityId = 0;
     }
 
     getId() {
         return this.params.serializeId || 0;
-    }
-
-    getEntityId() {
-        return this.entityId;
     }
 
     getName() {
@@ -96,21 +91,8 @@ export class Condition {
         return this.params.maxStacks || 0;
     }
 
-    isPartyRestriction() {
-        return false;
-    }
-
     checkSubconditions(settings) {
-        // Check if this condition belongs to an extra party member
-        const isExtraParty = this.entityId && settings['party_extra_override_' + this.entityId];
-
         if (this.params.condition) {
-            // Skip party restrictions for extra party members
-            if (isExtraParty &&
-                this.params.condition.isPartyRestriction &&
-                this.params.condition.isPartyRestriction()) {
-                return true;
-            }
             return this.params.condition.isActive(settings);
         } else {
             // deprecated
@@ -118,12 +100,6 @@ export class Condition {
             if (subcond) {
                 for (let i = 0; i < subcond.length; ++i) {
                     const cond = subcond[i];
-                    // Skip party restrictions for extra party members
-                    if (isExtraParty &&
-                        cond.isPartyRestriction &&
-                        cond.isPartyRestriction()) {
-                        continue;
-                    }
                     if (!cond.isActive(settings)) {
                         return false;
                     }
@@ -153,6 +129,28 @@ export class Condition {
         return new Stats(this.params.stats || {});
     }
 
+    /**
+     * Stats shown in the title and description: the condition's own stats
+     * plus `displayStats` (same format as `stats`), which are never applied.
+     * A saved control whose effect is a hidden delivery keeps quoting the
+     * delivered numbers this way.
+     *
+     * @param {Object} settings
+     * @returns {Stats}
+     */
+    getDisplayStats(settings) {
+        let result = this.getStats(settings);
+        if (!this.params.displayStats) {
+            return result;
+        }
+
+        let view = Object.create(this);
+        view.params = Object.assign({}, this.params, {stats: this.params.displayStats, displayStats: undefined});
+        result = new Stats(result);
+        result.concat(view.getStats(settings));
+        return result;
+    }
+
     getBuffRotationSection(settings) {
         return this.params.rotation || '';
     }
@@ -163,6 +161,10 @@ export class Condition {
 
         for (let i = 0; i < conditions.length; ++i) {
             const cond = conditions[i];
+            // A retired serialize ID only decodes old data; it has no setting.
+            if (cond.isRetired && cond.isRetired()) {
+                continue;
+            }
 
             let type = cond.getType();
             if (type == 'stacks') {
@@ -194,6 +196,9 @@ export class Condition {
 
         for (let i = 0; i < conditions.length; ++i) {
             const cond = conditions[i];
+            if (cond.isRetired && cond.isRetired()) {
+                continue;
+            }
 
             let type = cond.getType();
             if (type == 'stacks') {

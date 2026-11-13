@@ -2,6 +2,8 @@ import { ArtifactSet } from "../../../classes/ArtifactSet";
 import { ConditionStacks } from "../../../classes/Condition/Stacks";
 import { ConditionStatic } from "../../../classes/Condition/Static";
 import { StatTable } from "../../../classes/StatTable";
+import { artifactSetTables } from "../../generated/ArtifactSetTables";
+import { percent } from "../../Params";
 
 export const LongNightsOath = new ArtifactSet({
     serializeId: 54,
@@ -21,7 +23,7 @@ export const LongNightsOath = new ArtifactSet({
                     description: 'set_descr.long_nights_oath_2',
                     settings: {},
                     stats: {
-                        dmg_plunge: 25,
+                        dmg_plunge: percent(artifactSetTables.LongNightsOath.pc2.p1),
                     },
                 })
             ],
@@ -34,9 +36,9 @@ export const LongNightsOath = new ArtifactSet({
                     serializeId: 45,
                     title: 'set_bonus.long_nights_oath_4',
                     description: 'set_descr.long_nights_oath_4',
-                    maxStacks: 5,
+                    maxStacks: artifactSetTables.LongNightsOath.pc4.p7,
                     stats: [
-                        new StatTable('dmg_plunge', [15]),
+                        new StatTable('dmg_plunge', [percent(artifactSetTables.LongNightsOath.pc4.p4)]),
                     ],
                 }),
             ],

@@ -2,6 +2,8 @@ import { ConditionStacks } from "../../../classes/Condition/Stacks";
 import { DbObjectWeapon } from "../../../classes/DbObject/Weapon";
 import { StatTable } from "../../../classes/StatTable";
 import { weaponStatTables } from "../../generated/WeaponStatTables";
+import { weaponPassiveTables } from "../../generated/WeaponPassiveTables";
+import { percent } from "../../Params";
 
 export const AlleyHunter = new DbObjectWeapon({
     name: 'alley_hunter',
@@ -21,7 +23,7 @@ export const AlleyHunter = new DbObjectWeapon({
             levelSetting: 'weapon_refine',
             dropdownClass: 'two-digits',
             stats: [
-                new StatTable('dmg_all', [2, 2.5, 3, 3.5, 4]),
+                new StatTable('dmg_all', percent(weaponPassiveTables.AlleyHunter.p1)),
                 new StatTable('text_percent_max', [20, 25, 30, 35, 40]),
                 new StatTable('text_percent_reduce', [4, 5, 6, 7, 8]),
             ],

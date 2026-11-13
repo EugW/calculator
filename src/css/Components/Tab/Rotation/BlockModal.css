@@ -21,3 +21,18 @@
     font-size: 14px;
     color: #BEAEA9;
 }
+
+.rotation-block-modal .description.switch {
+    margin: 5px 5px 10px;
+}
+
+.rotation-block-modal .item.member {
+    align-items: center;
+    display: flex;
+    gap: 10px;
+    min-height: 0;
+}
+
+.rotation-block-modal .item.member .title {
+    margin-bottom: 0;
+}

@@ -1,6 +1,7 @@
 import React from 'react';
 import "../../../../css/Components/Char/Info.css"
 import { Stats } from '../../../classes/Stats';
+import { Team } from '../../../classes/Team';
 import { Lang } from '../../Lang';
 import { StatLine } from '../../Tab/Artifacts/StatsInfo';
 import { ArtifactList } from '../Artifact';
@@ -75,6 +76,10 @@ export class CharInfo extends React.Component {
         if (this.props.buttons) {
             let buttonCounter = 0;
             for (let item of this.props.buttons) {
+                if (item.visible && !item.visible(this.props.set, this.props.callbackData)) {
+                    continue;
+                }
+
                 buttons.push(
                     <div
                         key={++buttonCounter}
@@ -134,6 +139,7 @@ export class CharInfo extends React.Component {
                             {buttons}
                         </div>
                     </div>
+                    {this.props.sideControls ? this.props.sideControls(this.props.set, this.props.callbackData) : ''}
                 </div>
                 {showMoreInfo && this.state.showDetails ? <div>
                     {moreButtons.length > 0 ? <ControlsBar>
@@ -158,7 +164,7 @@ function BuildDetails(props) {
 
     let charData = build.getChar();
     let skills = charData.getSkills();
-    let data = build.getStats().stats;
+    let data = Team.solo(build).getStats().stats;
 
     let items = [];
 
@@ -220,7 +226,7 @@ function BuildDetails(props) {
 
 function CharInfoStats(props) {
     let items = [];
-    let data = props.build.getBaseStatsWithSets();
+    let data = Team.solo(props.build).getBaseStatsWithSets();
     let stats = data.stats;
     let settings = data.settings;
 

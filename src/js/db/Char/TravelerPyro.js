@@ -1,10 +1,12 @@
 import { Condition } from "../../classes/Condition";
+import { ConditionAnd } from "../../classes/Condition/And";
 import { ConditionAscensionChar } from "../../classes/Condition/Ascension/Char";
 import { ConditionBoolean } from "../../classes/Condition/Boolean";
-import { ConditionBooleanNightSoul } from "../../classes/Condition/Boolean/NightSoul";
+import { ConditionOnField } from "../../classes/Condition/Field";
 import { ConditionBooleanValue } from "../../classes/Condition/Boolean/Value";
 import { ConditionDropdownTravelerResonated } from "../../classes/Condition/Dropdown/TravelerResonated";
 import { ConditionNot } from "../../classes/Condition/Not";
+import { ConditionReceiver } from "../../classes/Condition/Receiver";
 import { ConditionStacks } from "../../classes/Condition/Stacks";
 import { ConditionStatic } from "../../classes/Condition/Static";
 import { DbObjectChar } from "../../classes/DbObject/Char";
@@ -20,11 +22,13 @@ import { FeatureDamageSkill } from "../../classes/Feature2/Damage/Skill";
 import { FeatureMultiplier } from "../../classes/Feature2/Multiplier";
 import { FeatureMultiplierStatic } from "../../classes/Feature2/Multiplier/Static";
 import { FeatureStatic } from "../../classes/Feature2/Static";
+import { RECEIVERS } from "../../classes/Team/Receivers";
 import { StatTable } from "../../classes/StatTable";
 import { StatTableAscensionScale } from "../../classes/StatTable/Ascension/Scale";
 import { ValueTable } from "../../classes/ValueTable";
 import { charTables } from "../generated/CharTables";
 import { charTalentTables } from "../generated/CharTalentTables";
+import { percent } from "../Params";
 
 const Talents = new DbObjectTalents({
     attack: {
@@ -118,8 +122,8 @@ const C1DmgBonus = 6;
 const C1DmgBonusNightsoul = 9;
 const C4PyroDmg = 20;
 const C6CritDmg = 40;
-const ForeignStarfireBonus = 200;
-const ForeignStarfireCooldown = 15;
+const ForeignStarfireBonus = percent(charTalentTables.TravelerPyro.sp.p8);
+const ForeignStarfireCooldown = charTalentTables.TravelerPyro.sp.p9;
 
 
 const condTravelerAether = new ConditionBoolean({name: 'traveler_aether'});
@@ -147,6 +151,11 @@ const bladeMaxCondition = new ConditionBooleanValue({
     setting: 'traveler_pyro_blade_sacred_flame',
     cond: 'ge',
     value: 2,
+});
+
+// Starfire's Flowing Light reaches the current active character.
+const activeReceiver = new ConditionReceiver({
+    condition: new ConditionOnField(),
 });
 export const TravelerPyro = new DbObjectChar({
     name: 'traveler_pyro',
@@ -437,25 +446,52 @@ export const TravelerPyro = new DbObjectChar({
     constellation: new DbObjectConstellation([
         {
             conditions: [
+                // Saved toggle only; the bonus reaches the active character (TEAM + active check).
                 new ConditionBoolean({
                     name: 'traveler_pyro_starfires_flowing_light',
                     serializeId: 2,
                     title: 'talent_name.traveler_starfires_flowing_light',
                     description: 'talent_descr.traveler_starfires_flowing_light_1',
-                    stats: {
-                        dmg_all: C1DmgBonus
-                    },
+                    displayStats: {dmg_all: C1DmgBonus},
                 }),
+                // The Nightsoul part's description; whether it applies is the
+                // receiving character's Blessing state (hidden delivery below).
                 new ConditionStatic({
                     title: 'talent_name.traveler_starfires_flowing_light',
                     description: 'talent_descr.traveler_starfires_flowing_light_2',
+                    displayStats: {dmg_all: C1DmgBonusNightsoul},
+                    subConditions: [
+                        new ConditionBoolean({name: 'traveler_pyro_starfires_flowing_light'}),
+                    ],
+                }),
+                new Condition({
+                    isHidden: true,
+                    receivers: RECEIVERS.TEAM,
+                    stats: {
+                        dmg_all: C1DmgBonus,
+                    },
+                    condition: new ConditionAnd([
+                        new ConditionBoolean({name: 'traveler_pyro_starfires_flowing_light'}),
+                        activeReceiver,
+                    ]),
+                }),
+                // Additional DMG when the receiving active character is in Nightsoul's Blessing.
+                // The old party checked capability (NightSoul origin); the receiver's blessing
+                // state decides it now, matching "If said character is in the Nightsoul's
+                // Blessing state". Recorded receivers are not blessed, so both give 0.
+                new Condition({
+                    isHidden: true,
+                    receivers: RECEIVERS.TEAM,
                     stats: {
                         dmg_all: C1DmgBonusNightsoul,
                     },
-                    subConditions: [
+                    condition: new ConditionAnd([
                         new ConditionBoolean({name: 'traveler_pyro_starfires_flowing_light'}),
-                        new ConditionBoolean({name: 'common.nightsoul_blessing_state'}),
-                    ],
+                        activeReceiver,
+                        new ConditionReceiver({
+                            condition: new ConditionBoolean({name: 'common.nightsoul_blessing_state'}),
+                        }),
+                    ]),
                 }),
             ],
         },
@@ -518,32 +554,5 @@ export const TravelerPyro = new DbObjectChar({
             ],
         },
     ]),
-    partyData: {
-        conditions: [
-            new ConditionBoolean({
-                name: 'party.traveler_pyro_starfires_flowing_light',
-                serializeId: 1,
-                title: 'talent_name.traveler_starfires_flowing_light',
-                description: 'talent_descr.traveler_starfires_flowing_light_1',
-                rotation: 'party',
-                stats: {
-                    dmg_all: C1DmgBonus,
-                },
-            }),
-            new ConditionBoolean({
-                name: 'party.traveler_pyro_starfires_flowing_light_2',
-                serializeId: 2,
-                title: 'talent_name.traveler_starfires_flowing_light',
-                description: 'talent_descr.traveler_starfires_flowing_light_2',
-                rotation: 'party',
-                stats: {
-                    dmg_all: C1DmgBonusNightsoul,
-                },
-                subConditions: [
-                    new ConditionBoolean({name: 'party.traveler_pyro_starfires_flowing_light'}),
-                    new ConditionBooleanNightSoul(),
-                ],
-            }),
-        ],
-    },
+    retiredParty: [[1, 'checkbox'], [2, 'checkbox']],
 });

@@ -25,4 +25,11 @@ talent_name;bond_of_life;Долг жизни;Bond of Life
 talent_name;imaginarium_theatre;Театр Воображариум;Imaginarium Theatre
 talent_descr;imaginarium_theatre;После включения в отряд name{макс. HP}, name{сила атаки} и name{защита} увеличиваются на %{atk_percent}. Эффект действует как в театре Воображариум, так и за его пределами.;After chatacter joins your party, name{Max HP}, name{ATK}, and name{DEF} are increased by %{atk_percent}. This will take effect both inside and outside Imaginarium Theatre.
 
+talent_name;no_lunarcharged_contribution;Не участвует в Лунном заряде;Takes no part in Lunar-Charged
+talent_descr;no_lunarcharged_contribution;Персонаж не накладывает name{Гидро} или name{Электро} на противников: урон name{Лунного заряда} отряда считается без его вклада.;The character applies no name{Hydro} or name{Electro} to opponents: the party's name{Lunar-Charged} DMG is calculated without its contribution.
+talent_name;no_lunarcrystallize_contribution;Не участвует в Лунной кристаллизации;Takes no part in Lunar-Crystallize
+talent_descr;no_lunarcrystallize_contribution;Персонаж не накладывает name{Гидро} и не вызывает реакцию name{Гео} атаками: урон name{Лунной кристаллизации} отряда считается без его вклада.;The character applies no name{Hydro} and triggers no reaction with name{Geo}: the party's name{Lunar-Crystallize} DMG is calculated without its contribution.
+talent_name;no_stellarswirl_contribution;Не участвует в Звёздном рассеивании;Takes no part in Stellar Swirl
+talent_descr;no_stellarswirl_contribution;Персонаж не накладывает name{Крио} и не вызывает реакцию name{Анемо} атаками: урон name{Звёздного рассеивания} и name{Звёздного вихря} отряда считается без его вклада.;The character applies no name{Cryo} and triggers no reaction with name{Anemo}: the party's name{Stellar Swirl} and name{Stellar Vortex} DMG is calculated without its contribution.
+
 talent_name;nightsoul_blessing_state;Благословение Ночного духа;Nightsoul's Blessing state

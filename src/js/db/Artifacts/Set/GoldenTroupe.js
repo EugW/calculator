@@ -1,6 +1,8 @@
 import { ArtifactSet } from "../../../classes/ArtifactSet";
 import { ConditionBoolean } from "../../../classes/Condition/Boolean";
 import { ConditionStatic } from "../../../classes/Condition/Static";
+import { artifactSetTables } from "../../generated/ArtifactSetTables";
+import { percent } from "../../Params";
 
 export const GoldenTroupe = new ArtifactSet({
     serializeId: 47,
@@ -19,7 +21,7 @@ export const GoldenTroupe = new ArtifactSet({
                     title: 'set_bonus.golden_troupe_2',
                     description: 'set_descr.golden_troupe_2',
                     stats: {
-                        dmg_skill: 20,
+                        dmg_skill: percent(artifactSetTables.GoldenTroupe.pc2.p1),
                     },
                 })
             ],
@@ -31,7 +33,7 @@ export const GoldenTroupe = new ArtifactSet({
                     title: 'set_bonus.golden_troupe_4',
                     description: 'set_descr.golden_troupe_4_1',
                     stats: {
-                        dmg_skill: 25,
+                        dmg_skill: percent(artifactSetTables.GoldenTroupe.pc4.p1),
                     },
                 }),
                 new ConditionBoolean({
@@ -40,7 +42,7 @@ export const GoldenTroupe = new ArtifactSet({
                     title: 'set_bonus.golden_troupe_4',
                     description: 'set_descr.golden_troupe_4_2',
                     stats: {
-                        dmg_skill: 25,
+                        dmg_skill: percent(artifactSetTables.GoldenTroupe.pc4.p1),
                     },
                 }),
             ],

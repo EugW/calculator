@@ -2,6 +2,8 @@ import { ConditionStacks } from "../../../classes/Condition/Stacks";
 import { DbObjectWeapon } from "../../../classes/DbObject/Weapon";
 import { StatTable } from "../../../classes/StatTable";
 import { weaponStatTables } from "../../generated/WeaponStatTables";
+import { weaponPassiveTables } from "../../generated/WeaponPassiveTables";
+import { percent } from "../../Params";
 
 export const Whiteblind = new DbObjectWeapon({
     name: 'whiteblind',
@@ -20,8 +22,8 @@ export const Whiteblind = new DbObjectWeapon({
             maxStacks: 4,
             levelSetting: 'weapon_refine',
             stats: [
-                new StatTable('atk_percent', [6, 7.5, 9, 10.5, 12]),
-                new StatTable('def_percent', [6, 7.5, 9, 10.5, 12]),
+                new StatTable('atk_percent', percent(weaponPassiveTables.Whiteblind.p1)),
+                new StatTable('def_percent', percent(weaponPassiveTables.Whiteblind.p1)),
             ],
         })
     ],

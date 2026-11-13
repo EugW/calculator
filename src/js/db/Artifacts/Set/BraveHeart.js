@@ -1,6 +1,8 @@
 import { ArtifactSet } from "../../../classes/ArtifactSet";
 import { ConditionBoolean } from "../../../classes/Condition/Boolean";
 import { ConditionStatic } from "../../../classes/Condition/Static";
+import { artifactSetTables } from "../../generated/ArtifactSetTables";
+import { percent } from "../../Params";
 
 export const BraveHeart = new ArtifactSet({
     serializeId: 6,
@@ -19,7 +21,7 @@ export const BraveHeart = new ArtifactSet({
                     title: 'set_bonus.brave_heart_2',
                     description: 'set_descr.brave_heart_2',
                     stats: {
-                        atk_percent: 18,
+                        atk_percent: artifactSetTables.BraveHeart.pc2.atk_percent,
                     },
                 })
             ],
@@ -33,7 +35,7 @@ export const BraveHeart = new ArtifactSet({
                     title: 'set_bonus.brave_heart_4',
                     description: 'set_descr.brave_heart_4',
                     stats: {
-                        dmg_all: 30,
+                        dmg_all: percent(artifactSetTables.BraveHeart.pc4.p1),
                     },
                 })
             ],

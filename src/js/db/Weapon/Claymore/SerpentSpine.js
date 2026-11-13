@@ -2,6 +2,8 @@ import { ConditionStacks } from "../../../classes/Condition/Stacks";
 import { DbObjectWeapon } from "../../../classes/DbObject/Weapon";
 import { StatTable } from "../../../classes/StatTable";
 import { weaponStatTables } from "../../generated/WeaponStatTables";
+import { weaponPassiveTables } from "../../generated/WeaponPassiveTables";
+import { percent } from "../../Params";
 
 export const SerpentSpine = new DbObjectWeapon({
     name: 'serpent_spine',
@@ -20,8 +22,8 @@ export const SerpentSpine = new DbObjectWeapon({
             maxStacks: 5,
             levelSetting: 'weapon_refine',
             stats: [
-                new StatTable('dmg_all', [6, 7, 8, 9, 10]),
-                new StatTable('dmg_recieved', [3, 2.7, 2.4, 2.2, 2]),
+                new StatTable('dmg_all', percent(weaponPassiveTables.SerpentSpine.p2)),
+                new StatTable('dmg_recieved', percent(weaponPassiveTables.SerpentSpine.p3)),
             ],
         }),
     ],

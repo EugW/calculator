@@ -6,6 +6,8 @@ import { ConditionStatic } from "../../../classes/Condition/Static";
 import { FeatureMultiplier } from "../../../classes/Feature2/Multiplier";
 import { FeatureMultiplierTarget } from "../../../classes/Feature2/Multiplier/Target";
 import { ValueTable } from "../../../classes/ValueTable";
+import { artifactSetTables } from "../../generated/ArtifactSetTables";
+import { percent } from "../../Params";
 
 export const EchoesofanOffering = new ArtifactSet({
     serializeId: 38,
@@ -24,7 +26,7 @@ export const EchoesofanOffering = new ArtifactSet({
                     title: 'set_bonus.echoes_of_an_offering_2',
                     description: 'set_descr.echoes_of_an_offering_2',
                     stats: {
-                        atk_percent: 18,
+                        atk_percent: artifactSetTables.EchoesofanOffering.pc2.atk_percent,
                     },
                 })
             ],
@@ -38,9 +40,9 @@ export const EchoesofanOffering = new ArtifactSet({
                     title: 'set_bonus.echoes_of_an_offering_4',
                     description: 'set_descr.echoes_of_an_offering_4',
                     stats: {
-                        text_percent: 70,
-                        text_percent_chance: 36,
-                        text_percent_chance_2: 20,
+                        text_percent: percent(artifactSetTables.EchoesofanOffering.pc4.p2),
+                        text_percent_chance: percent(artifactSetTables.EchoesofanOffering.pc4.p1),
+                        text_percent_chance_2: percent(artifactSetTables.EchoesofanOffering.pc4.p4),
                     },
                 }),
                 new ConditionBoolean({
@@ -58,7 +60,7 @@ export const EchoesofanOffering = new ArtifactSet({
             multipliers: [
                 new FeatureMultiplier({
                     source: 'artifacts',
-                    values: new ValueTable([70]),
+                    values: new ValueTable([percent(artifactSetTables.EchoesofanOffering.pc4.p2)]),
                     target: new FeatureMultiplierTarget({
                         damageTypes: ['normal'],
                     }),
@@ -71,7 +73,7 @@ export const EchoesofanOffering = new ArtifactSet({
                 }),
                 new FeatureMultiplier({
                     source: 'artifacts',
-                    values: new ValueTable([70 * 0.502]),
+                    values: new ValueTable([percent(artifactSetTables.EchoesofanOffering.pc4.p2) * 0.502]),
                     target: new FeatureMultiplierTarget({
                         damageTypes: ['normal'],
                     }),

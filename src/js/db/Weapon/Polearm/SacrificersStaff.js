@@ -2,6 +2,8 @@ import { ConditionStacks } from "../../../classes/Condition/Stacks";
 import { DbObjectWeapon } from "../../../classes/DbObject/Weapon";
 import { StatTable } from "../../../classes/StatTable";
 import { weaponStatTables } from "../../generated/WeaponStatTables";
+import { weaponPassiveTables } from "../../generated/WeaponPassiveTables";
+import { percent } from "../../Params";
 
 export const SacrificersStaff = new DbObjectWeapon({
     name: 'sacrificers_staff',
@@ -17,11 +19,11 @@ export const SacrificersStaff = new DbObjectWeapon({
             serializeId: 1,
             title: 'talent_name.weapon_sacrificers_staff',
             description: 'talent_descr.weapon_sacrificers_staff',
-            maxStacks: 3,
+            maxStacks: weaponPassiveTables.SacrificersStaff.p4[0],
             levelSetting: 'weapon_refine',
             stats: [
-                new StatTable('atk_percent', [8, 10, 12, 14, 16]),
-                new StatTable('recharge', [6, 7.5, 9, 10.5, 12]),
+                new StatTable('atk_percent', percent(weaponPassiveTables.SacrificersStaff.p2)),
+                new StatTable('recharge', percent(weaponPassiveTables.SacrificersStaff.p3)),
             ],
         }),
     ],

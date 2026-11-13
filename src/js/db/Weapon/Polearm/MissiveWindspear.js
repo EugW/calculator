@@ -3,6 +3,8 @@ import { ConditionBooleanRefine } from "../../../classes/Condition/Boolean/Refin
 import { DbObjectWeapon } from "../../../classes/DbObject/Weapon";
 import { StatTable } from "../../../classes/StatTable";
 import { weaponStatTables } from "../../generated/WeaponStatTables";
+import { weaponPassiveTables } from "../../generated/WeaponPassiveTables";
+import { percent } from "../../Params";
 
 export const MissiveWindspear = new DbObjectWeapon({
     name: 'missive_windspear',
@@ -19,8 +21,8 @@ export const MissiveWindspear = new DbObjectWeapon({
             title: 'talent_name.the_wind_unattained',
             description: 'talent_descr.the_wind_unattained',
             stats: [
-                new StatTable('atk_percent', [12, 15, 18, 21, 24]),
-                new StatTable('mastery', [48, 60, 72, 84, 96]),
+                new StatTable('atk_percent', percent(weaponPassiveTables.MissiveWindspear.p1)),
+                new StatTable('mastery', weaponPassiveTables.MissiveWindspear.p2),
             ],
         }),
     ],

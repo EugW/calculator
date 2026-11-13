@@ -3,7 +3,19 @@ import os
 import re
 import static
 
-from char_common import parse_scales, parse_skills
+from char_common import (
+    format_param,
+    parse_constellations,
+    parse_depots,
+    parse_lang,
+    parse_proud_groups,
+    parse_scales,
+    parse_skills,
+    parse_talent_configs,
+    passive_block_keys,
+    talent_config_links,
+    trim_params,
+)
 from source_config import get_excel_dir
 
 dirname = os.path.dirname(__file__)
@@ -67,6 +79,7 @@ def format_table(data, fmt):
 
 
 def make_tables(data, group_id):
+    """Write the described params of a skill; returns the written indices."""
     params = {}
     processed = {}
     levels = data['levels'].keys()
@@ -108,6 +121,108 @@ def make_tables(data, group_id):
                 format_table(params.get(ind, []), fmt)
             )))
             del params[ind]
+
+    return sorted(processed)
+
+
+def collect_param_blocks(depotId, sources):
+    """Passive (a*, sp) and constellation (c*) blocks that have params.
+
+    The params are single values without a format code: they are written raw
+    (0.15 for 15%), under the name of the ability parameter each one feeds.
+    """
+    depot = sources['depots'][depotId]
+    rows = []
+    for (key, group_id) in passive_block_keys(depot):
+        row = sources['prouds'].get(group_id)
+        if row:
+            rows.append((key, row))
+    for (index, talent_id) in enumerate(depot.get('talents') or [], start=1):
+        row = sources['constellations'].get(talent_id)
+        if row:
+            rows.append((f'c{index}', row))
+
+    blocks = []
+    for (key, row) in rows:
+        params = trim_params(row['paramList'])
+        if not params:
+            continue
+        open_config = row.get('openConfig') or ''
+        (abilities, targets) = talent_config_links(
+            sources['talent_configs'].get(open_config, [])
+        )
+        out_of_range = [ind for ind in targets if ind > len(row['paramList'])]
+        if out_of_range:
+            raise ValueError(
+                f'Talent config {open_config} passes on param'
+                f'{max(out_of_range)}, but the row has only '
+                f"{len(row['paramList'])} params"
+            )
+        blocks.append({
+            'key': key,
+            'title': sources['lang'].get(str(row.get('nameTextMapHash'))) or '',
+            'open_config': open_config,
+            'abilities': abilities,
+            'params': params,
+            'targets': {
+                ind: targets[ind] for ind in targets if ind <= len(params)
+            },
+        })
+    return blocks
+
+
+def write_param_blocks(blocks, skill_blocks, sources):
+    # Every block position that feeds the same ability parameter: a
+    # constellation often adds to a passive's or a skill's parameter.
+    usage = {}
+    for (key, group_id, indices) in skill_blocks:
+        row = sources['prouds'].get(group_id) or {}
+        (_, targets) = talent_config_links(
+            sources['talent_configs'].get(row.get('openConfig') or '', [])
+        )
+        for ind in indices:
+            for (ability, special, _) in targets.get(ind, []):
+                usage.setdefault((ability, special), []).append(f'{key}.p{ind}')
+    for block in blocks:
+        for (ind, targets) in block['targets'].items():
+            for (ability, special, _) in targets:
+                usage.setdefault((ability, special), []).append(
+                    f"{block['key']}.p{ind}"
+                )
+
+    for block in blocks:
+        if block['title']:
+            out.write('\t\t// ' + block['title'] + '\n')
+        header = block['open_config']
+        abilities = block['abilities']
+        if abilities and len(header) + sum(len(name) + 2 for name in abilities) <= 110:
+            header += ' -> ' + ', '.join(abilities)
+            abilities = []
+        elif abilities:
+            header += ' ->'
+        if header:
+            out.write('\t\t// ' + header + '\n')
+        for ability in abilities:
+            out.write('\t\t//     ' + ability + '\n')
+        out.write('\t\t' + block['key'] + ': {\n')
+
+        several_abilities = len({
+            ability
+            for targets in block['targets'].values()
+            for (ability, _, _) in targets
+        }) > 1
+        for (ind, value) in enumerate(block['params'], start=1):
+            own = f"{block['key']}.p{ind}"
+            for (ability, special, note) in block['targets'].get(ind, []):
+                name = f'{ability}.{special}' if several_abilities else special
+                if note:
+                    name += f' ({note})'
+                others = [ref for ref in usage[(ability, special)] if ref != own]
+                if others:
+                    name += ', also fed by ' + ', '.join(others)
+                out.write('\t\t\t// ' + name + '\n')
+            out.write('\t\t\tp%d: %s,\n' % (ind, format_param(value)))
+        out.write('\t\t},\n')
 
 
 def twin_param_meta(scale):
@@ -183,15 +298,16 @@ def write_twin_block(group_id, twin_group_id, scales):
     out.write('\t\t},\n')
 
 
-def parse_char_skills(charName, scales, skills, depotId, groupmap):
+def parse_char_skills(charName, scales, skills, depotId, groupmap, sources):
     skillsIds = skills.get(depotId)
+    skill_blocks = []
 
     out.write("\t" + charName + ': {\n')
     for (index, id) in enumerate(sorted(skillsIds)):
         scale = scales.get(id)
         out.write(f'\t\ts{str(index + 1)}_id: {groupmap.get(id) or 0 },\n')
         out.write("\t\ts" + str(index + 1) + ": {\n")
-        make_tables(scale, id)
+        skill_blocks.append((f's{index + 1}', id, make_tables(scale, id)))
         out.write("\t\t},\n")
 
         if index == 0:
@@ -206,6 +322,8 @@ def parse_char_skills(charName, scales, skills, depotId, groupmap):
                 twinGroupId = sorted(twinSkillsIds)[0]
                 write_twin_block(id, twinGroupId, scales)
 
+    write_param_blocks(collect_param_blocks(depotId, sources), skill_blocks, sources)
+
     out.write('\t},\n')
 
 
@@ -214,6 +332,13 @@ def parse_chars():
 
     (skills, groupmap) = parse_skills()
     scales = parse_scales()
+    sources = {
+        'depots': parse_depots(),
+        'prouds': parse_proud_groups(),
+        'constellations': parse_constellations(),
+        'talent_configs': parse_talent_configs(),
+        'lang': parse_lang(),
+    }
     chars = {}
 
     for item in json.load(file):
@@ -233,9 +358,9 @@ def parse_chars():
                 charName = static.getCharById(depotId)
                 if not charName:
                     continue
-                parse_char_skills(charName, scales, skills, depotId, groupmap)
+                parse_char_skills(charName, scales, skills, depotId, groupmap, sources)
         else:
-            parse_char_skills(charName, scales, skills, item.get('skillDepotId'), groupmap)
+            parse_char_skills(charName, scales, skills, item.get('skillDepotId'), groupmap, sources)
 
 
 out = open(out_dir + 'CharTalentTables.js', 'w', encoding='utf-8', newline='\n')

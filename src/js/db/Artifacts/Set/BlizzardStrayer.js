@@ -1,7 +1,10 @@
 import { ArtifactSet } from "../../../classes/ArtifactSet";
 import { ConditionBoolean } from "../../../classes/Condition/Boolean";
 import { ConditionEnemyStatus } from "../../../classes/Condition/Boolean/EnemyStatus";
+import { ConditionEnemy } from "../../../classes/Condition/Enemy";
 import { ConditionStatic } from "../../../classes/Condition/Static";
+import { artifactSetTables } from "../../generated/ArtifactSetTables";
+import { percent } from "../../Params";
 
 export const BlizzardStrayer = new ArtifactSet({
     serializeId: 4,
@@ -21,7 +24,7 @@ export const BlizzardStrayer = new ArtifactSet({
                     description: 'set_descr.blizzard_strayer_2',
                     settings: {},
                     stats: {
-                        dmg_cryo: 15,
+                        dmg_cryo: artifactSetTables.BlizzardStrayer.pc2.dmg_cryo,
                     },
                 }),
             ],
@@ -38,7 +41,7 @@ export const BlizzardStrayer = new ArtifactSet({
                     title: 'set_bonus.blizzard_strayer_4',
                     description: 'set_descr.blizzard_strayer_4_1',
                     stats: {
-                        crit_rate_enemy: 20,
+                        crit_rate_enemy: percent(artifactSetTables.BlizzardStrayer.pc4.p1),
                     },
                     subConditions: [
                         new ConditionEnemyStatus({
@@ -51,14 +54,14 @@ export const BlizzardStrayer = new ArtifactSet({
                     title: 'set_bonus.blizzard_strayer_4',
                     description: 'set_descr.blizzard_strayer_4_2',
                     stats: {
-                        crit_rate_enemy: 20,
+                        crit_rate_enemy: percent(artifactSetTables.BlizzardStrayer.pc4.p2),
                     },
                     subConditions: [
                         new ConditionEnemyStatus({
                             status: ['cryo'],
                         }),
-                        new ConditionBoolean({
-                            name: 'enemy_frozen',
+                        new ConditionEnemy({
+                            condition: new ConditionBoolean({name: 'enemy_frozen'}),
                         }),
                     ],
                 }),

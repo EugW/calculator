@@ -253,12 +253,12 @@ function getIconsFromRotation(item, hasChar) {
     let usedIcons = {};
 
     for (const part of item.getItems()) {
-        if (part.type == 'condition') {
+        if (part.type == 'feature' && !hasChar && !char) {
+            // The first member with a hit.
+            char = DB.Chars.getById(part.charId);
+        } else if (part.type == 'condition') {
             let data = Rotation.getConditionData(part);
-
-            if (data.typeId == 1 && !hasChar) {
-                char = data.dbObject;
-            } else {
+            if (data.icon) {
                 usedIcons[data.icon] = 1;
             }
         }

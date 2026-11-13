@@ -6,7 +6,7 @@ import { ConditionBooleanLevels } from "../../classes/Condition/Boolean/Levels";
 import { ConditionConstellation } from "../../classes/Condition/Constellation";
 import { ConditionHexereiResonance } from "../../classes/Condition/HexereiResonance";
 import { ConditionNot } from "../../classes/Condition/Not";
-import { ConditionNumberTalent } from "../../classes/Condition/Number/Talent";
+import { ConditionReceiver } from "../../classes/Condition/Receiver";
 import { ConditionStacks } from "../../classes/Condition/Stacks";
 import { ConditionStatic } from "../../classes/Condition/Static";
 import { ConditionWitchHomework } from "../../classes/Condition/WitchHomework";
@@ -22,10 +22,12 @@ import { FeatureDamageSkill } from "../../classes/Feature2/Damage/Skill";
 import { FeatureMultiplier } from "../../classes/Feature2/Multiplier";
 import { FeaturePostEffectValue } from "../../classes/Feature2/PostEffectValue";
 import { PostEffectStatsRecharge } from "../../classes/PostEffect/Stats/Recharge";
+import { RECEIVERS } from "../../classes/Team/Receivers";
 import { StatTable } from "../../classes/StatTable";
 import { ValueTable } from "../../classes/ValueTable";
 import { charTables } from "../generated/CharTables";
 import { charTalentTables } from "../generated/CharTalentTables";
+import { percent } from "../Params";
 
 const Talents = new DbObjectTalents({
     attack: {
@@ -127,13 +129,21 @@ const Talents = new DbObjectTalents({
     },
 });
 
-const A1SkillDmg = 50;
-const A4HydroDmgRatio = 20;
-const C1ReactionBonus = 15;
-const C2ChargedProb = 20;
-const C4CritRate = 15;
-const C6ChargedDmg = 60;
+const A1SkillDmg = percent(charTalentTables.Mona.a1.p3);
+const A4HydroDmgRatio = percent(charTalentTables.Mona.a4.p2);
+const C1ReactionBonus = percent(charTalentTables.Mona.c1.p1);
+const C2ChargedProb = percent(charTalentTables.Mona.c2.p1);
+const C4CritRate = -percent(charTalentTables.Mona.c4.p1);
+const C6ChargedDmg = percent(charTalentTables.Mona.c6.p2);
+const SpAstralGlow = percent(charTalentTables.Mona.sp.p3);
+const C1OffFieldRatio = charTalentTables.Mona.c1.p7;
+const C2Mastery = charTalentTables.Mona.c2.p5;
+const C4CritDmg = percent(charTalentTables.Mona.c4.p2);
 
+// Game data: Avatar_Mona_Talent_ChargeEfficiencyToWaterAddHurt reads
+// FIGHT_PROP_NONEXTRA_CHARGE_EFFICIENCY (premod ER) and writes
+// Actor_WaterAddHurtExtraDelta (extra Hydro DMG%): the defaults. KQM
+// (Electro Traveler evidence): the amulet ER does not affect Mona's A4.
 const hydroDmgPost = new PostEffectStatsRecharge({
     percent: new StatTable('dmg_hydro', [A4HydroDmgRatio]),
     conditions: [
@@ -143,8 +153,6 @@ const hydroDmgPost = new PostEffectStatsRecharge({
 
 const condWitchHomeworkOn = new ConditionBoolean({name: 'mona_witch_homework'});
 const condWitchHomeworkOff = new ConditionNot([condWitchHomeworkOn]);
-const condPartyWitchHomeworkOn = new ConditionBoolean({name: 'party.mona_witch_homework'});
-const condPartyWitchHomeworkOff = new ConditionNot([condPartyWitchHomeworkOn]);
 
 export const Mona = new DbObjectChar({
     name: 'mona',
@@ -289,6 +297,8 @@ export const Mona = new DbObjectChar({
                 }),
             ],
         }),
+        // A1: a damage hit (50% of Mirror Reflection of Doom). Damage
+        // hits read the total and need nothing.
         new FeatureDamageSkill({
             name: 'mona_phantom_explosion_dmg',
             element: 'hydro',
@@ -312,6 +322,7 @@ export const Mona = new DbObjectChar({
                 }),
             ],
         }),
+        // Display of hydroDmgPost above; not a separate stat read.
         new FeaturePostEffectValue({
             category: 'other',
             name: 'hydro_dmg_bonus',
@@ -334,9 +345,11 @@ export const Mona = new DbObjectChar({
                 char_skill_burst_bonus: 3,
             },
         }),
+        // Omen: a talent-scaled team DMG bonus, no stat read.
         new ConditionBooleanLevels({
             name: 'mona_omen',
             serializeId: 1,
+            receivers: RECEIVERS.TEAM,
             title: 'talent_name.mona_omen',
             description: 'talent_descr.mona_omen',
             levelSetting: 'char_skill_burst',
@@ -366,6 +379,25 @@ export const Mona = new DbObjectChar({
                 new ConditionAscensionChar({ascension: 4}),
             ],
         }),
+        // Astral Glow of Mercury: when other party members trigger Vaporize,
+        // the consumed stacks raise that reaction's DMG by 5% each.
+        new ConditionStacks({
+            name: 'mona_astral_glow',
+            serializeId: 7,
+            receivers: RECEIVERS.OTHERS,
+            title: 'talent_name.mona_genesis_of_starsigns',
+            description: 'talent_descr.mona_genesis_of_starsigns',
+            maxStacks: 3,
+            hideCondition: [new ConditionNot([new ConditionHexereiResonance({})])],
+            condition: new ConditionAnd([
+                condWitchHomeworkOn,
+                new ConditionHexereiResonance({}),
+            ]),
+            stats: [
+                new StatTable('dmg_reaction_vaporize', [SpAstralGlow]),
+            ],
+            info: {hexerei: true},
+        }),
     ],
     postEffects: [
         hydroDmgPost,
@@ -373,9 +405,12 @@ export const Mona = new DbObjectChar({
     constellation: new DbObjectConstellation([
         {
             conditions: [
+                // C1: flat reaction bonuses, no stat read. Conditions are
+                // always premod, which is right for flat buffs.
                 new ConditionBoolean({
                     name: 'mona_prophecy_of_submersion',
                     serializeId: 4,
+                    receivers: RECEIVERS.TEAM,
                     title: 'talent_name.mona_prophecy_of_submersion',
                     description: 'talent_descr.mona_prophecy_of_submersion',
                     hideCondition: [condWitchHomeworkOn],
@@ -392,6 +427,7 @@ export const Mona = new DbObjectChar({
                 new ConditionBoolean({
                     name: 'mona_prophecy_of_submersion',
                     serializeId: 4,
+                    receivers: RECEIVERS.TEAM,
                     title: 'talent_name.mona_prophecy_of_submersion',
                     description: 'talent_descr.mona_prophecy_of_submersion_buffed',
                     hideCondition: [condWitchHomeworkOff],
@@ -408,6 +444,7 @@ export const Mona = new DbObjectChar({
                 new ConditionBoolean({
                     name: 'mona_prophecy_of_submersion_off_field',
                     serializeId: 5,
+                    receivers: RECEIVERS.TEAM,
                     title: 'talent_name.mona_prophecy_of_submersion',
                     hideCondition: [condWitchHomeworkOff],
                     condition: new ConditionAnd([
@@ -415,18 +452,21 @@ export const Mona = new DbObjectChar({
                         new ConditionBoolean({name: 'mona_prophecy_of_submersion'}),
                     ]),
                     stats: {
-                        dmg_reaction_electrocharged: C1ReactionBonus * 0.6,
-                        dmg_reaction_vaporize: C1ReactionBonus * 0.6,
-                        dmg_reaction_swirl_hydro: C1ReactionBonus * 0.6,
-                        duration_frozen: C1ReactionBonus * 0.6,
-                        dmg_reaction_lunarcharged: C1ReactionBonus * 0.6,
-                        dmg_reaction_lunarcrystallize: C1ReactionBonus * 0.6,
+                        dmg_reaction_electrocharged: C1ReactionBonus * C1OffFieldRatio,
+                        dmg_reaction_vaporize: C1ReactionBonus * C1OffFieldRatio,
+                        dmg_reaction_swirl_hydro: C1ReactionBonus * C1OffFieldRatio,
+                        duration_frozen: C1ReactionBonus * C1OffFieldRatio,
+                        dmg_reaction_lunarcharged: C1ReactionBonus * C1OffFieldRatio,
+                        dmg_reaction_lunarcrystallize: C1ReactionBonus * C1OffFieldRatio,
                     },
                 }),
             ],
         },
         {
             conditions: [
+                // C2: a charged-attack proc chance plus flat team EM (80 in
+                // the Hexerei variant). No stat read; the flat EM is premod,
+                // so premod EM readers count it.
                 new ConditionStatic({
                     title: 'talent_name.mona_lunar_chain',
                     description: 'talent_descr.mona_lunar_chain',
@@ -438,13 +478,14 @@ export const Mona = new DbObjectChar({
                 new ConditionBoolean({
                     name: 'mona_lunar_chain_buff',
                     serializeId: 6,
+                    receivers: RECEIVERS.TEAM,
                     title: 'talent_name.mona_lunar_chain',
                     description: 'talent_descr.mona_lunar_chain_buffed',
                     hideCondition: [condWitchHomeworkOff],
                     condition: condWitchHomeworkOn,
                     stats: {
                         text_percent_chance: C2ChargedProb,
-                        mastery: 80,
+                        mastery: C2Mastery,
                     },
                 }),
             ],
@@ -452,34 +493,52 @@ export const Mona = new DbObjectChar({
         {},
         {
             conditions: [
+                // C4: CRIT Rate against an opponent affected by an Omen (plus
+                // CRIT DMG for Hexerei receivers). Game data: the Omen
+                // (Avatar_Mona_StarChart, UNIQUE_Debuff_HurtUp and
+                // UNIQUE_Debuff_Bubble_RemoveDamage) writes
+                // Actor_AntiCriticalDelta on the opponent, so it is not a CRIT
+                // Rate stat of the member: crit_rate_enemy, as Blizzard
+                // Strayer's (Rosaria's A4 does not share it). The description
+                // quotes it as crit_rate.
                 new ConditionBoolean({
                     name: 'mona_prophecy_of_oblivion',
                     serializeId: 2,
+                    receivers: RECEIVERS.TEAM,
                     title: 'talent_name.mona_prophecy_of_oblivion',
                     description: 'talent_descr.mona_prophecy_of_oblivion',
                     hideCondition: [condWitchHomeworkOn],
                     condition: condWitchHomeworkOff,
                     stats: {
-                        crit_rate: C4CritRate,
+                        crit_rate_enemy: C4CritRate,
                     },
+                    displayStats: {crit_rate: C4CritRate},
                 }),
                 new ConditionBoolean({
                     name: 'mona_prophecy_of_oblivion',
                     serializeId: 2,
+                    receivers: RECEIVERS.TEAM,
                     title: 'talent_name.mona_prophecy_of_oblivion',
                     description: 'talent_descr.mona_prophecy_of_oblivion_buffed',
                     hideCondition: [condWitchHomeworkOff],
                     condition: condWitchHomeworkOn,
                     stats: {
-                        crit_rate: C4CritRate,
+                        crit_rate_enemy: C4CritRate,
                     },
+                    displayStats: {crit_rate: C4CritRate},
                 }),
+                // The C4 toggle assumes an Omen-affected target independently
+                // of the Omen DMG bonus toggle. Hexerei receivers also gain CD.
                 new Condition({
+                    receivers: RECEIVERS.TEAM,
                     condition: new ConditionAnd([
                         new ConditionBoolean({name: 'mona_prophecy_of_oblivion'}),
                         condWitchHomeworkOn,
+                        new ConditionReceiver({
+                            condition: new ConditionWitchHomework({}),
+                        }),
                     ]),
-                    stats: {crit_dmg: 15},
+                    stats: {crit_dmg: C4CritDmg},
                 }),
             ]
         },
@@ -494,6 +553,11 @@ export const Mona = new DbObjectChar({
         },
         {
             conditions: [
+                // C6: hit-level Charged DMG bonuses (the Hexerei variant's
+                // extra charged multiplier vs Omen included). Damage
+                // multipliers read the total and need nothing. (Game:
+                // Avatar_Mona_Hexenzirkel_Constellation_6 damageExtra reads
+                // FIGHT_PROP_CUR_ATTACK, total.)
                 new ConditionStacks({
                     name: 'mona_rhetorics_of_calamitas',
                     serializeId: 3,
@@ -521,170 +585,5 @@ export const Mona = new DbObjectChar({
             ],
         },
     ]),
-    partyData: {
-        loadStats: {
-            settings: ['char_skill_burst'],
-        },
-        conditions: [
-            new ConditionBoolean({
-                name: 'party.mona_witch_homework',
-                serializeId: 10,
-                rotation: 'party',
-                title: 'talent_name.mona_genesis_of_starsigns',
-                description: 'talent_descr.mona_genesis_of_starsigns',
-                info: {hexerei: true},
-            }),
-            new ConditionStacks({
-                name: 'party.mona_astral_glow',
-                serializeId: 9,
-                rotation: 'party',
-                title: 'talent_name.mona_genesis_of_starsigns',
-                description: 'talent_descr.mona_genesis_of_starsigns',
-                maxStacks: 3,
-                hideCondition: [new ConditionNot([new ConditionHexereiResonance({})])],
-                condition: new ConditionHexereiResonance({}),
-                stats: [
-                    new StatTable('dmg_reaction_vaporize', [5]),
-                ],
-                info: {hexerei: true},
-            }),
-            new ConditionNumberTalent({
-                name: 'mona_char_skill_burst',
-                serializeId: 1,
-                title: 'talent_name.stats_level_burst',
-                partySetting: 'char_skill_burst',
-                serializeId: 1,
-            }),
-            new ConditionBoolean({
-                name: 'party.mona_constellation_5',
-                serializeId: 2,
-                title: 'talent_name.mona_restless_revolution',
-                description: 'talent_descr.char_constellation_burst',
-                info: {constellation: 3},
-                settings: {
-                    mona_char_skill_burst_bonus: 3,
-                },
-            }),
-            new ConditionBooleanLevels({
-                name: 'party.mona_omen',
-                serializeId: 3,
-                rotation: 'party',
-                title: 'talent_name.mona_omen',
-                description: 'talent_descr.mona_omen',
-                levelSetting: 'mona_char_skill_burst',
-                stats: [
-                    Talents.getAlias('burst.mona_dmg_bonus', 'dmg_all'),
-                ],
-            }),
-            new ConditionBoolean({
-                name: 'party.mona_prophecy_of_submersion',
-                serializeId: 4,
-                rotation: 'party',
-                title: 'talent_name.mona_prophecy_of_submersion',
-                description: 'talent_descr.mona_prophecy_of_submersion',
-                hideCondition: [condPartyWitchHomeworkOn],
-                condition: condPartyWitchHomeworkOff,
-                stats: {
-                    dmg_reaction_electrocharged: C1ReactionBonus,
-                    dmg_reaction_vaporize: C1ReactionBonus,
-                    dmg_reaction_swirl_hydro: C1ReactionBonus,
-                    duration_frozen: C1ReactionBonus,
-                    dmg_reaction_lunarcharged: C1ReactionBonus,
-                    dmg_reaction_lunarcrystallize: C1ReactionBonus,
-                },
-                info: {constellation: 1},
-            }),
-            new ConditionBoolean({
-                name: 'party.mona_prophecy_of_submersion',
-                serializeId: 4,
-                rotation: 'party',
-                title: 'talent_name.mona_prophecy_of_submersion',
-                description: 'talent_descr.mona_prophecy_of_submersion_buffed',
-                hideCondition: [condPartyWitchHomeworkOff],
-                condition: condPartyWitchHomeworkOn,
-                stats: {
-                    dmg_reaction_electrocharged: C1ReactionBonus,
-                    dmg_reaction_vaporize: C1ReactionBonus,
-                    dmg_reaction_swirl_hydro: C1ReactionBonus,
-                    duration_frozen: C1ReactionBonus,
-                    dmg_reaction_lunarcharged: C1ReactionBonus,
-                    dmg_reaction_lunarcrystallize: C1ReactionBonus,
-                },
-                info: {constellation: 1},
-            }),
-            new ConditionBoolean({
-                name: 'party.mona_prophecy_of_submersion_off_field',
-                serializeId: 6,
-                rotation: 'party',
-                title: 'talent_name.mona_prophecy_of_submersion',
-                hideCondition: [condPartyWitchHomeworkOff],
-                condition: new ConditionAnd([
-                    condPartyWitchHomeworkOn,
-                    new ConditionBoolean({name: 'party.mona_prophecy_of_submersion'}),
-                ]),
-                stats: {
-                    dmg_reaction_electrocharged: C1ReactionBonus * 0.6,
-                    dmg_reaction_vaporize: C1ReactionBonus * 0.6,
-                    dmg_reaction_swirl_hydro: C1ReactionBonus * 0.6,
-                    duration_frozen: C1ReactionBonus * 0.6,
-                    dmg_reaction_lunarcharged: C1ReactionBonus * 0.6,
-                    dmg_reaction_lunarcrystallize: C1ReactionBonus * 0.6,
-                },
-                info: {constellation: 1},
-            }),
-            new ConditionBoolean({
-                name: 'party.mona_lunar_chain_buff',
-                serializeId: 7,
-                rotation: 'party',
-                title: 'talent_name.mona_lunar_chain',
-                description: 'talent_descr.mona_lunar_chain_buffed',
-                hideCondition: [condPartyWitchHomeworkOff],
-                condition: condPartyWitchHomeworkOn,
-                stats: {
-                    mastery: 80,
-                },
-                info: {constellation: 2},
-            }),
-            new ConditionBoolean({
-                name: 'party.mona_prophecy_of_oblivion',
-                serializeId: 5,
-                rotation: 'party',
-                title: 'talent_name.mona_prophecy_of_oblivion',
-                description: 'talent_descr.mona_prophecy_of_oblivion',
-                hideCondition: [condPartyWitchHomeworkOn],
-                condition: condPartyWitchHomeworkOff,
-                stats: {
-                    crit_rate: C4CritRate,
-                },
-                info: {constellation: 4},
-                subConditions: [
-                    new ConditionBoolean({name: 'party.mona_omen'}),
-                ],
-            }),
-            new ConditionBoolean({
-                name: 'party.mona_prophecy_of_oblivion',
-                serializeId: 5,
-                rotation: 'party',
-                title: 'talent_name.mona_prophecy_of_oblivion',
-                description: 'talent_descr.mona_prophecy_of_oblivion_buffed',
-                hideCondition: [condPartyWitchHomeworkOff],
-                condition: condPartyWitchHomeworkOn,
-                stats: {
-                    crit_rate: C4CritRate,
-                },
-                info: {constellation: 4},
-                subConditions: [
-                    new ConditionBoolean({name: 'party.mona_omen'}),
-                ],
-            }),
-            new Condition({
-                condition: new ConditionAnd([
-                    new ConditionWitchHomework({}),
-                    new ConditionBoolean({name: 'party.mona_prophecy_of_oblivion'}),
-                    condPartyWitchHomeworkOn,
-                ]),
-                stats: {crit_dmg: 15},
-            }),
-        ],
-    },
+    retiredParty: [[10, 'checkbox'], [9, 'stacks'], [1, 'number'], [2, 'checkbox'], [3, 'checkbox'], [4, 'checkbox'], [6, 'checkbox'], [7, 'checkbox'], [5, 'checkbox']],
 });

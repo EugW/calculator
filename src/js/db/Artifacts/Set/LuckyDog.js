@@ -1,5 +1,6 @@
 import { ArtifactSet } from "../../../classes/ArtifactSet";
 import { ConditionStatic } from "../../../classes/Condition/Static";
+import { artifactSetTables } from "../../generated/ArtifactSetTables";
 
 export const LuckyDog = new ArtifactSet({
     serializeId: 15,
@@ -19,7 +20,7 @@ export const LuckyDog = new ArtifactSet({
                     description: 'set_descr.lucky_dog_2',
                     settings: {},
                     stats: {
-                        def: 100,
+                        def: artifactSetTables.LuckyDog.pc2.def,
                     },
                 })
             ],

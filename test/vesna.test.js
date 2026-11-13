@@ -6,6 +6,10 @@ import { Vesna } from "../src/js/db/Char/Vesna";
 import { DB } from "../src/js/db/DB";
 import { Rotation } from "../src/js/db/Features/Rotation";
 import { charTalentTables } from "../src/js/db/generated/CharTalentTables";
+import { Team } from "../src/js/classes/Team";
+import { finalStats, makeBuild } from "./support/team";
+
+global.DB = DB;
 
 function applyConditions(data, conditions) {
     for (const condition of conditions) {
@@ -23,8 +27,8 @@ function getFeature(name) {
     return Vesna.getFeatures().find((feature) => feature.getName() === name);
 }
 
-function getCondition(name, party = false) {
-    const conditions = party ? Vesna.getPartyConditions() : Vesna.getAllConditions();
+function getCondition(name) {
+    const conditions = Vesna.getAllConditions();
     return conditions.find((condition) => condition.getName() === name);
 }
 
@@ -32,7 +36,6 @@ function getDamage(name, settings = {}, stats = {}) {
     const data = new BuildData({
         char_level: 90,
         enemy_level: 90,
-        enemy_res_anemo: 0,
         char_skill_attack: 1,
         char_skill_elemental: 1,
         char_skill_burst: 1,
@@ -193,7 +196,6 @@ test("A1 is a dynamic original-DMG multiplier and only affects tagged blades", (
     const data = new BuildData({
         char_level: 90,
         enemy_level: 90,
-        enemy_res_anemo: 0,
         char_skill_elemental: 1,
         char_skill_burst: 1,
         char_ascension: 1,
@@ -228,7 +230,6 @@ test("A1 is a dynamic original-DMG multiplier and only affects tagged blades", (
     const differentStacks = new BuildData({
         char_level: 90,
         enemy_level: 90,
-        enemy_res_anemo: 0,
         char_skill_elemental: 1,
         char_ascension: 1,
         vesna_armed_for_action: true,
@@ -309,35 +310,33 @@ test.each([0, 2, 6])("manual Disciplinary Action stacks are respected during Arm
     }
 });
 
-test("A4 counts the four-member party and C4 triples both types of bonus", () => {
-    const settings = {
-        char_ascension: 4,
-        vesna_radiance_stellarswirl: true,
-        resonance_element_1: "cryo",
-        resonance_element_2: "pyro",
-        resonance_element_3: "anemo",
-    };
-    const c0 = new BuildData({...settings, char_constellation: 0}, {});
-    applyConditions(c0, localConditions(0));
+test("A4 counts the real team and C4 triples both types of bonus", () => {
+    const vesna = makeBuild('Vesna');
+    const team = Team.fromMember(vesna);
+    ['Kaeya', 'Amber', 'Jean'].forEach((key, index) => team.setMember(index + 1, makeBuild(key)));
+    vesna.setCharSettings({vesna_radiance_stellarswirl: true});
+
+    const c0 = vesna.getBuildData();
     expect(c0.settings.vesna_truth_prevails_cryo_anemo_count).toBe(3);
     expect(c0.settings.vesna_truth_prevails_other_count).toBe(1);
-    expect(c0.stats.get("atk_percent")).toBe(18);
-    expect(c0.stats.get("mastery")).toBe(25);
+    expect(c0.stats.get('atk_percent')).toBeCloseTo(0.18, 10);
+    expect(c0.stats.get('mastery')).toBe(25);
 
-    const c4 = new BuildData({...settings, char_constellation: 4}, {});
-    applyConditions(c4, localConditions(4));
-    expect(c4.stats.get("atk_percent")).toBe(54);
-    expect(c4.stats.get("mastery")).toBe(75);
+    vesna.setCharLevels({level: 90, ascension: 6, constellation: 4});
+    const c4 = vesna.getBuildData();
+    expect(c4.stats.get('atk_percent')).toBeCloseTo(0.54, 10);
+    expect(c4.stats.get('mastery')).toBe(75);
 
-    const inactive = new BuildData({...settings, vesna_radiance_stellarswirl: false}, {});
-    applyConditions(inactive, localConditions(0));
-    expect(inactive.stats.get("atk_percent")).toBe(0);
-    expect(inactive.stats.get("mastery")).toBe(0);
+    vesna.setCharSettings({vesna_radiance_stellarswirl: false});
+    const inactive = vesna.getBuildData();
+    expect(inactive.stats.get('atk_percent')).toBe(0);
+    expect(inactive.stats.get('mastery')).toBe(0);
 
-    const conductPriority = new BuildData({...settings, polestar_field: true}, {});
-    applyConditions(conductPriority, localConditions(0));
-    expect(conductPriority.stats.get("atk_percent")).toBe(0);
-    expect(conductPriority.stats.get("mastery")).toBe(0);
+    vesna.setCharSettings({vesna_radiance_stellarswirl: true});
+    team.setSettings({...team.getSettings(), polestar_field: true});
+    const conductPriority = vesna.getBuildData();
+    expect(conductPriority.stats.get('atk_percent')).toBe(0);
+    expect(conductPriority.stats.get('mastery')).toBe(0);
 });
 
 test("Jubilee applies 0.7% per 100 ATK and caps at 14%", () => {
@@ -351,17 +350,16 @@ test("Jubilee applies 0.7% per 100 ATK and caps at 14%", () => {
     capped.applyPostEffects();
     expect(capped.stats.get("stellarswirl_multi")).toBeCloseTo(0.14, 5);
 
-    const inactiveParty = new BuildData({}, {vesna_atk_total: 1000});
-    inactiveParty.postEffects = Vesna.getPartyPostEffects();
-    inactiveParty.applyPostEffects();
-    expect(inactiveParty.stats.get("stellarswirl_multi")).toBe(0);
-
-    const party = new BuildData({"party.vesna_stellar_jubilee": true}, {
-        vesna_atk_total: 1000,
+    // Party model retired: the carrier's live ATK now delivers to a real team.
+    const receiver = makeBuild('Ayaka');
+    const vesna = makeBuild('Vesna');
+    const team = Team.fromMember(receiver);
+    team.setMember(1, vesna);
+    const stats = finalStats(vesna);
+    vesna.modifyBuffsSettings({
+        'custom_buffs.atk': 1000 - stats.get('atk_base') - stats.get('atk'),
     });
-    party.postEffects = Vesna.getPartyPostEffects();
-    party.applyPostEffects();
-    expect(party.stats.get("stellarswirl_multi")).toBeCloseTo(0.07, 5);
+    expect(finalStats(receiver).get("stellarswirl_multi")).toBeCloseTo(0.07, 5);
 });
 
 test("C3/C5 raise Talent levels and C6 models Tread, Feather, and elevation", () => {

@@ -1,6 +1,8 @@
 import { ArtifactSet } from "../../../classes/ArtifactSet";
 import { ConditionBoolean } from "../../../classes/Condition/Boolean";
 import { ConditionStatic } from "../../../classes/Condition/Static";
+import { artifactSetTables } from "../../generated/ArtifactSetTables";
+import { percent } from "../../Params";
 
 export const ShimenawasReminiscence = new ArtifactSet({
     serializeId: 31,
@@ -19,7 +21,7 @@ export const ShimenawasReminiscence = new ArtifactSet({
                     title: 'set_bonus.shimenawas_reminiscence_2',
                     description: 'set_descr.shimenawas_reminiscence_2',
                     stats: {
-                        atk_percent: 18,
+                        atk_percent: artifactSetTables.ShimenawasReminiscence.pc2.atk_percent,
                     },
                 }),
             ],
@@ -33,10 +35,10 @@ export const ShimenawasReminiscence = new ArtifactSet({
                     title: 'set_bonus.shimenawas_reminiscence_4',
                     description: 'set_descr.shimenawas_reminiscence_4',
                     stats: {
-                        text_percent: 50,
-                        dmg_normal: 50,
-                        dmg_charged: 50,
-                        dmg_plunge: 50,
+                        text_percent: percent(artifactSetTables.ShimenawasReminiscence.pc4.p2),
+                        dmg_normal: percent(artifactSetTables.ShimenawasReminiscence.pc4.p2),
+                        dmg_charged: percent(artifactSetTables.ShimenawasReminiscence.pc4.p2),
+                        dmg_plunge: percent(artifactSetTables.ShimenawasReminiscence.pc4.p2),
                     },
                 }),
             ],

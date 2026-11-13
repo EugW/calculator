@@ -18,9 +18,12 @@ import { FeatureMultiplier } from "../../classes/Feature2/Multiplier";
 import { FeaturePostEffectValue } from "../../classes/Feature2/PostEffectValue";
 import { PostEffectStatsMastery } from "../../classes/PostEffect/Stats/Mastery";
 import { StatTable } from "../../classes/StatTable";
+import { RECEIVERS } from "../../classes/Team/Receivers";
 import { ValueTable } from "../../classes/ValueTable";
 import { charTables } from "../generated/CharTables";
 import { charTalentTables } from "../generated/CharTalentTables";
+import { percent } from "../Params";
+import { CHANNELS } from "../../classes/PostEffect/Channels";
 
 const Talents = new DbObjectTalents({
     attack: {
@@ -110,13 +113,25 @@ const Talents = new DbObjectTalents({
     },
 });
 
+const A1Mastery = charTalentTables.Tighnari.a1.p1;
+const A4DmgBonus = percent(charTalentTables.Tighnari.a4.p1);
+const A4DmgBonusMax = percent(charTalentTables.Tighnari.a4.p2);
+const C1CritRate = percent(charTalentTables.Tighnari.c1.p1);
+const C2DendroDmg = percent(charTalentTables.Tighnari.c2.p1);
+const C4Mastery = charTalentTables.Tighnari.c4.p1;
+const C6Dmg = percent(charTalentTables.Tighnari.c6.p2);
+
 const chargedBuffPost = new PostEffectStatsMastery({
-    global: true,
+    // Game data: Avatar_Tighnari_PermanentSkill_2 (ModifyDamageMixin, ExtraAttack+Elemental_Burst)
+    // reads FIGHT_PROP_ELEMENT_MASTERY (total): damagePercentageRatio [Ratio, FIGHT_PROP_ELEMENT_MASTERY, MUL], capped by MaxDamageUp.
+    // KQM Nahida: Tighnari A4 counts Nahida A1 extra EM; KQM Tighnari: Sucrose A4 extra EM counted by Tighnari A4 (CA and Burst).
+    // GO reads input.total.eleMas for the A4 bonus.
+    reads: CHANNELS.TOTAL,
     percent: [
-        new StatTable('dmg_charged_tighnari', [0.06]),
-        new StatTable('dmg_burst_tighnari', [0.06]),
+        new StatTable('dmg_charged_tighnari', [A4DmgBonus]),
+        new StatTable('dmg_burst_tighnari', [A4DmgBonus]),
     ],
-    statCap: new StatTable('', [60]),
+    statCap: new StatTable('', [A4DmgBonusMax]),
     conditions: [
         new ConditionAscensionChar({ascension: 4}),
     ],
@@ -232,7 +247,7 @@ export const Tighnari = new DbObjectChar({
             multipliers: [
                 new FeatureMultiplier({
                     leveling: 'char_skill_attack',
-                    values: new ValueTable([150]),
+                    values: new ValueTable([C6Dmg]),
                 }),
             ],
             condition: new ConditionConstellation({constellation: 6}),
@@ -299,13 +314,15 @@ export const Tighnari = new DbObjectChar({
         }),
     ],
     conditions: [
+        // Game data: Avatar_Tighnari_PermanentSkill_1 Tighnari_PermanentSkill_1 writes
+        // Actor_ElemMasteryDelta (premod, no Extra). Conditions write premod: default confirmed, no params.
         new ConditionBoolean({
             name: 'tighnari_keen_sight',
             serializeId: 1,
             title: 'talent_name.tighnari_keen_sight',
             description: 'talent_descr.tighnari_keen_sight',
             stats: {
-                mastery: 50,
+                mastery: A1Mastery,
             },
             info: {ascension: 1},
             subConditions: [
@@ -331,7 +348,7 @@ export const Tighnari = new DbObjectChar({
                     title: 'talent_name.tighnari_beginnings_determined_at_the_roots',
                     description: 'talent_descr.tighnari_beginnings_determined_at_the_roots',
                     stats: {
-                        crit_rate_charged: 15,
+                        crit_rate_charged: C1CritRate,
                     },
                 }),
             ],
@@ -344,7 +361,7 @@ export const Tighnari = new DbObjectChar({
                     title: 'talent_name.tighnari_origins_known_from_the_stem',
                     description: 'talent_descr.tighnari_origins_known_from_the_stem',
                     stats: {
-                        dmg_dendro: 20,
+                        dmg_dendro: C2DendroDmg,
                     },
                 }),
             ],
@@ -360,22 +377,26 @@ export const Tighnari = new DbObjectChar({
         },
         {
             conditions: [
+                // Game data: UNIQUE_Tighnari_ElementalBurst_Constellation_4_Buff1/Buff2 write
+                // Actor_ElemMasteryDelta (premod, no Extra). Conditions write premod: default confirmed, no params.
                 new ConditionBoolean({
                     name: 'tighnari_withering_glimpsed_in_the_leaves_1',
                     serializeId: 3,
+                    receivers: RECEIVERS.TEAM,
                     title: 'talent_name.tighnari_withering_glimpsed_in_the_leaves',
                     description: 'talent_descr.tighnari_withering_glimpsed_in_the_leaves_1',
                     stats: {
-                        mastery: 60,
+                        mastery: C4Mastery,
                     },
                 }),
                 new ConditionBoolean({
                     name: 'tighnari_withering_glimpsed_in_the_leaves_2',
                     serializeId: 4,
+                    receivers: RECEIVERS.TEAM,
                     title: 'talent_name.tighnari_withering_glimpsed_in_the_leaves',
                     description: 'talent_descr.tighnari_withering_glimpsed_in_the_leaves_2',
                     stats: {
-                        mastery: 60,
+                        mastery: C4Mastery,
                     },
                     subConditions: [
                         new ConditionBoolean({
@@ -400,39 +421,11 @@ export const Tighnari = new DbObjectChar({
                     title: 'talent_name.tighnari_karma_adjudged_from_the_leaden_fruit',
                     description: 'talent_descr.tighnari_karma_adjudged_from_the_leaden_fruit',
                     stats: {
-                        text_percent_dmg: 150,
+                        text_percent_dmg: C6Dmg,
                     },
                 }),
             ],
         },
     ]),
-    partyData: {
-        conditions: [
-            new ConditionBoolean({
-                name: 'party.tighnari_withering_glimpsed_in_the_leaves_1',
-                serializeId: 1,
-                rotation: 'party',
-                title: 'talent_name.tighnari_withering_glimpsed_in_the_leaves',
-                description: 'talent_descr.tighnari_withering_glimpsed_in_the_leaves_1',
-                info: {constellation: 4},
-                stats: {
-                    mastery: 60,
-                },
-            }),
-            new ConditionBoolean({
-                name: 'party.tighnari_withering_glimpsed_in_the_leaves_2',
-                serializeId: 2,
-                rotation: 'party',
-                title: 'talent_name.tighnari_withering_glimpsed_in_the_leaves',
-                description: 'talent_descr.tighnari_withering_glimpsed_in_the_leaves_2',
-                stats: {
-                    mastery: 60,
-                },
-                info: {constellation: 4},
-                subConditions: [
-                    new ConditionBoolean({name: 'party.tighnari_withering_glimpsed_in_the_leaves_1'}),
-                ],
-            }),
-        ],
-    },
+    retiredParty: [[1, 'checkbox'], [2, 'checkbox']],
 });

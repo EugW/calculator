@@ -1,6 +1,6 @@
 import React from "react";
 
-import { ControlsBar, ControlsBarDivider } from "../ControlsBar";
+import { ControlsBar } from "../ControlsBar";
 import { DialogContainer } from "../Dialog/Container";
 import { Dropdown } from "../Inputs/Dropdown";
 import { Lang } from "../../Lang";
@@ -20,6 +20,7 @@ export class RotationArtifactConditionModal extends React.PureComponent {
         this.state = {
             isVisible: false,
             selectedSetId: 0,
+            receiverId: 0,
             conditions: [],
             values: {},
         };
@@ -41,6 +42,7 @@ export class RotationArtifactConditionModal extends React.PureComponent {
 
         this.setState({
             isVisible: true,
+            receiverId: 0,
             selectedSetId,
             conditions,
             values: {},
@@ -108,13 +110,18 @@ export class RotationArtifactConditionModal extends React.PureComponent {
 
         for (const cond of conditions) {
             const val = values[cond.getName()];
+            // A step on the viewed member's artifacts.
             const itemSpec = {
                 type: 'condition',
-                subtype: 'artifacts',
+                subtype: 'member',
+                charId: this.props.build.char.getId(),
+                object: 'artifacts',
                 itemId: selectedSetId,
                 conditionId: cond.getId(),
                 value: val !== undefined ? val : '',
             };
+
+            if (this.state.receiverId) itemSpec.receiverId = this.state.receiverId;
 
             // For dropdown-type conditions resolve the value id
             const condData = Rotation.getConditionData(itemSpec);
@@ -131,17 +138,6 @@ export class RotationArtifactConditionModal extends React.PureComponent {
         }
 
         this.saveCallback(items);
-        this.setState({ isVisible: false });
-    }
-
-    handleDisableAll() {
-        if (!this.saveCallback) return;
-
-        this.saveCallback([{
-            type: 'action',
-            action: 'disable_artifacts',
-        }]);
-
         this.setState({ isVisible: false });
     }
 
@@ -184,6 +180,18 @@ export class RotationArtifactConditionModal extends React.PureComponent {
                     />
                 </ControlsBar>
 
+                <ControlsBar>
+                    <div>{lang.get('rotation_view.condition_receiver')}</div>
+                    <Dropdown
+                        barClass="resizable"
+                        items={[{value: 0, text: lang.get('rotation_view.condition_source')}].concat(this.props.build.team.getMembers().map((member) => ({
+                            value: member.char.getId(), text: lang.get(member.char.object.getName()),
+                        })))}
+                        selected={this.state.receiverId}
+                        onChange={(item) => this.setState({receiverId: item.value})}
+                    />
+                </ControlsBar>
+
                 {/* Condition value editor */}
                 <ConditionList
                     items={conditions}
@@ -195,12 +203,6 @@ export class RotationArtifactConditionModal extends React.PureComponent {
 
                 {/* Action buttons */}
                 <ControlsBar>
-                    <TitledButton
-                        icon="icon-delete"
-                        title={lang.get('rotation_view.add_artifacts_disable_all')}
-                        onClick={() => this.handleDisableAll()}
-                    />
-                    <ControlsBarDivider />
                     <TitledButton
                         icon="icon-ok"
                         title={lang.get('modal_buttons.confirm')}

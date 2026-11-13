@@ -41,3 +41,20 @@ test('rotation feature names wrap instead of using ellipsis', () => {
     expect(featureLine).toContain('overflow-wrap: anywhere');
     expect(featureLine).not.toContain('text-overflow: ellipsis');
 });
+
+test('feature rows wrap in a portal too', () => {
+    const source = fs.readFileSync(
+        path.join(root, 'src/js/ui/Components/Inputs/Dropdown.jsx'),
+        'utf8',
+    );
+    const css = fs.readFileSync(
+        path.join(root, 'src/css/Components/Inputs/Dropdown.css'),
+        'utf8',
+    );
+
+    // The options of a portal are outside the wrapper: they carry the class themselves.
+    expect(source).toMatch(/dropdown-portal ' \+ \(isFeatureDropdown \? 'feature-dropdown ' : ''\)/);
+    for (const rule of [' .dropdown-option', ' .dropdown-option > .text', ' .dropdown-text-content', ' .dropdown-option.selected::after']) {
+        expect(css).toContain('.dropdown-options.dropdown-portal.feature-dropdown' + rule);
+    }
+});

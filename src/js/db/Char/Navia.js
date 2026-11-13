@@ -21,8 +21,10 @@ import { FeatureDamageSkill } from "../../classes/Feature2/Damage/Skill";
 import { FeatureMultiplier } from "../../classes/Feature2/Multiplier";
 import { FeatureMultiplierNaviaSkill } from "../../classes/Feature2/Multiplier/NaviaSkill";
 import { StatTable } from "../../classes/StatTable";
+import { RECEIVERS } from "../../classes/Team/Receivers";
 import { charTables } from "../generated/CharTables";
 import { charTalentTables } from "../generated/CharTalentTables";
+import { percent } from "../Params";
 
 const Talents = new DbObjectTalents({
     attack: {
@@ -122,11 +124,11 @@ const Talents = new DbObjectTalents({
 });
 
 const SkillDmgBonus = 15;
-const A1DamageBonus = 40;
-const A4AtkBonus = 20;
-const C2CritRate = 12;
-const C4EnemyGeoRes = -20;
-const C6CritDmg = 45;
+const A1DamageBonus = percent(charTalentTables.Navia.a1.p1);
+const A4AtkBonus = percent(charTalentTables.Navia.a4.p1);
+const C2CritRate = percent(charTalentTables.Navia.c2.p1);
+const C4EnemyGeoRes = -percent(charTalentTables.Navia.c4.p1);
+const C6CritDmg = percent(charTalentTables.Navia.c6.p1);
 
 export const Navia = new DbObjectChar({
     name: 'navia',
@@ -391,6 +393,7 @@ export const Navia = new DbObjectChar({
                 new ConditionBoolean({
                     name: 'navia_the_oathsworn_never_capitulate',
                     serializeId: 5,
+                    receivers: RECEIVERS.TEAM,
                     title: 'talent_name.navia_the_oathsworn_never_capitulate',
                     description: 'talent_descr.navia_the_oathsworn_never_capitulate',
                     stats: {
@@ -427,19 +430,5 @@ export const Navia = new DbObjectChar({
             ],
         },
     ]),
-    partyData: {
-        conditions: [
-            new ConditionBoolean({
-                name: 'party.navia_the_oathsworn_never_capitulate',
-                serializeId: 1,
-                title: 'talent_name.navia_the_oathsworn_never_capitulate',
-                description: 'talent_descr.navia_the_oathsworn_never_capitulate',
-                rotation: 'party',
-                info: {constellation: 4},
-                stats: {
-                    enemy_res_geo: C4EnemyGeoRes,
-                },
-            }),
-        ],
-    },
+    retiredParty: [[1, 'checkbox']],
 });

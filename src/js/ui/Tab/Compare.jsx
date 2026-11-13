@@ -13,6 +13,7 @@ import { Radio } from '../Components/Inputs/Input';
 import { ReactTab } from '../Components/Tab';
 import { RoundButton, TitledButton, ToggleRoundButton } from '../Components/Inputs/Buttons';
 import { Serializer } from '../../classes/Serializer';
+import { serializeWorkerMember, deserializeWorkerMember, Team } from '../../classes/Team';
 import { Tab } from "../Tab";
 
 let lang = new Lang();
@@ -27,6 +28,7 @@ export class CompareTab extends Tab {
 
         this.id = 'compare';
         this.rightRab = false;
+        this.title = 'tab_header.compare';
     }
 
     refresh() {
@@ -77,11 +79,11 @@ export class CompareView extends React.Component {
         for (let item of this.state.items) {
             result.push({
                 title: item.title || '',
-                data: Serializer.pack(item.build)
+                snapshot: serializeWorkerMember(item.build)
             });
 
             if (result.length >= MAX_STORAGE_LEGNTH) {
-                continue;
+                break;
             }
         }
         localStorage.setItem('compare_items', JSON.stringify(result));
@@ -99,14 +101,14 @@ export class CompareView extends React.Component {
 
         if (Array.isArray(result)) {
             for (let item of result) {
-                if (!item || typeof item != 'object' || typeof item.data != 'string') {
+                if (!item || typeof item != 'object' || (!item.snapshot && typeof item.data != 'string')) {
                     continue;
                 }
 
                 let build;
                 try {
-                    let input = Serializer.unpack(item.data);
-                    build = input ? CalcSet.deserialize(input) : null;
+                    build = item.snapshot ? deserializeWorkerMember(item.snapshot)
+                        : CalcSet.deserialize(Serializer.unpack(item.data));
                 } catch (error) {
                     build = null;
                 }
@@ -115,7 +117,7 @@ export class CompareView extends React.Component {
                     continue;
                 }
 
-                let isBeta = build.hasBetaContent();
+                let isBeta = build.team ? build.team.getMembers().some((member) => member.hasBetaContent()) : build.hasBetaContent();
                 if (showBetaContent || !isBeta) {
                     let title = typeof item.title == 'string' ? item.title : '';
                     this.addFromBuild(build, title, true);
@@ -125,6 +127,8 @@ export class CompareView extends React.Component {
     }
 
     addFromBuild(build, title, noRefresh) {
+        // A saved build is compared as a team of one.
+        build = Team.solo(build);
         this.index++;
         title = title || lang.get(build.getChar().getName()) +' '+ this.index;
 
@@ -145,7 +149,7 @@ export class CompareView extends React.Component {
     }
 
     dataFeaturesItems() {
-        return Feature2.buildDropdown(this.props.app.currentSet());
+        return Feature2.buildDropdown(this.props.app.view());
     }
 
     handleFeature(feature) {
@@ -231,7 +235,9 @@ export class CompareView extends React.Component {
         }
 
         UI.ConfirmWindow.show('modal.confirm', 'share_view.confirm_load', () => {
-            this.props.app.replaceSet(item.build.clone());
+            const copy = item.build.clone();
+            const slot = copy.team ? copy.team.slotOf(copy) : 0;
+            this.props.app.setTeam(copy.team || Team.fromMember(copy), slot);
         });
     }
 
@@ -278,8 +284,10 @@ export class CompareView extends React.Component {
 
     calcBuildFeatures(build, rotation) {
         if (rotation) {
+            // The current team's rotation in the compared build's team: the
+            // hits and steps of members it has apply.
             let copy = build.clone();
-            copy.setRotation(rotation);
+            copy.team.setRotation(rotation.clone());
             return copy.calcFeatures(1);
         }
 

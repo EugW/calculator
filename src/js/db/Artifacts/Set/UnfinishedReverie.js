@@ -2,6 +2,8 @@ import { ArtifactSet } from "../../../classes/ArtifactSet";
 import { ConditionStacks } from "../../../classes/Condition/Stacks";
 import { ConditionStatic } from "../../../classes/Condition/Static";
 import { StatTable } from "../../../classes/StatTable";
+import { artifactSetTables } from "../../generated/ArtifactSetTables";
+import { percent, times } from "../../Params";
 
 export const UnfinishedReverie = new ArtifactSet({
     serializeId: 51,
@@ -21,7 +23,7 @@ export const UnfinishedReverie = new ArtifactSet({
                     description: 'set_descr.unfinished_reverie_2',
                     settings: {},
                     stats: {
-                        atk_percent: 18,
+                        atk_percent: artifactSetTables.UnfinishedReverie.pc2.atk_percent,
                     },
                 })
             ],
@@ -34,10 +36,10 @@ export const UnfinishedReverie = new ArtifactSet({
                     serializeId: 39,
                     title: 'set_bonus.unfinished_reverie_4',
                     description: 'set_descr.unfinished_reverie_4',
-                    maxStacks: 5,
+                    maxStacks: artifactSetTables.UnfinishedReverie.pc4.p1,
                     stats: [
-                        new StatTable('text_percent_max', [50]),
-                        new StatTable('dmg_all', [10]),
+                        new StatTable('text_percent_max', [percent(times(artifactSetTables.UnfinishedReverie.pc4.p1, artifactSetTables.UnfinishedReverie.pc4.p2))]),
+                        new StatTable('dmg_all', [percent(artifactSetTables.UnfinishedReverie.pc4.p2)]),
                     ],
                 }),
             ],

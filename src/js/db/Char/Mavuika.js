@@ -2,11 +2,13 @@ import { Condition } from "../../classes/Condition";
 import { ConditionAnd } from "../../classes/Condition/And";
 import { ConditionAscensionChar } from "../../classes/Condition/Ascension/Char";
 import { ConditionBoolean } from "../../classes/Condition/Boolean";
+import { ConditionOnField } from "../../classes/Condition/Field";
 import { ConditionBooleanValue } from "../../classes/Condition/Boolean/Value";
 import { ConditionConstellation } from "../../classes/Condition/Constellation";
 import { ConditionNot } from "../../classes/Condition/Not";
 import { ConditionNumber } from "../../classes/Condition/Number";
 import { ConditionOr } from "../../classes/Condition/Or";
+import { ConditionReceiver } from "../../classes/Condition/Receiver";
 import { ConditionStatic } from "../../classes/Condition/Static";
 import { DbObjectChar } from "../../classes/DbObject/Char";
 import { DbObjectConstellation } from "../../classes/DbObject/Constellation";
@@ -22,9 +24,12 @@ import { FeatureDamageSkill } from "../../classes/Feature2/Damage/Skill";
 import { FeatureMultiplier } from "../../classes/Feature2/Multiplier";
 import { FeatureMultiplierTarget } from "../../classes/Feature2/Multiplier/Target";
 import { StatTable } from "../../classes/StatTable";
+import { ConditionLevels } from "../../classes/Condition/Levels";
+import { RECEIVERS } from "../../classes/Team/Receivers";
 import { ValueTable } from "../../classes/ValueTable";
 import { charTables } from "../generated/CharTables";
 import { charTalentTables } from "../generated/CharTalentTables";
+import { percent } from "../Params";
 
 const Talents = new DbObjectTalents({
     attack: {
@@ -155,17 +160,23 @@ const Talents = new DbObjectTalents({
 });
 
 const BurstMaxBonus = 40;
-const A1AtkPercent = 30;
-const C1AtkPercent = 40;
-const C2AtkBase = 200;
-const C2DefReduce = 20;
-const C2NormalBonus = 60;
-const C2ChargedBonus = 90;
-const C2BurstBonus = 120;
-const C4DmgBonus = 10;
-const C6FlamestriderDmg = 200;
-const C6SkillDmg = 500;
+const A1AtkPercent = percent(charTalentTables.Mavuika.a1.p1);
+const C1AtkPercent = percent(charTalentTables.Mavuika.c1.p3);
+const C2AtkBase = charTalentTables.Mavuika.c2.p1;
+const C2DefReduce = percent(charTalentTables.Mavuika.c2.p2);
+const C2NormalBonus = percent(charTalentTables.Mavuika.c2.p3);
+const C2ChargedBonus = percent(charTalentTables.Mavuika.c2.p4);
+const C2BurstBonus = percent(charTalentTables.Mavuika.c2.p5);
+const C4DmgBonus = percent(charTalentTables.Mavuika.c4.p1);
+const C6FlamestriderDmg = percent(charTalentTables.Mavuika.c6.p1);
+const C6SkillDmg = percent(charTalentTables.Mavuika.c6.p2);
 const C6DefReduce = 20;
+
+// Kiongozi and the Leader's Resolve raise the DMG of the current active
+// party member.
+const activeReceiver = new ConditionReceiver({
+    condition: new ConditionOnField(),
+});
 
 export const Mavuika = new DbObjectChar({
     name: 'mavuika',
@@ -560,6 +571,8 @@ export const Mavuika = new DbObjectChar({
     ],
     conditions: [
         new Condition({
+            // Ring of Searing Radiance lowers nearby opponents' DEF.
+            receivers: RECEIVERS.TEAM,
             stats: {
                 enemy_def_reduce: C2DefReduce,
             },
@@ -617,6 +630,22 @@ export const Mavuika = new DbObjectChar({
             subConditions: [
                 new ConditionAscensionChar({ascension: 4}),
             ],
+        }),
+        // The saved Kiongozi assumption stays a plain source control; the
+        // delivered copy below carries the active-receiver check. Mavuika
+        // keeps her own copy above, so teammates are reached with OTHERS.
+        new ConditionLevels({
+            levelSetting: 'mavuika_kiongozi',
+            isHidden: true,
+            receivers: RECEIVERS.OTHERS,
+            stats: [
+                new StatTable('dmg_all', Array.from({length: BurstMaxBonus}, (_, i) => i + 1)),
+            ],
+            condition: new ConditionAnd([
+                new ConditionBoolean({name: 'mavuika_kiongozi'}),
+                new ConditionAscensionChar({ascension: 4}),
+                activeReceiver,
+            ]),
         }),
     ],
     constellation: new DbObjectConstellation([
@@ -683,6 +712,20 @@ export const Mavuika = new DbObjectChar({
                         new ConditionBoolean({name: 'mavuika_kiongozi'}),
                     ],
                 }),
+                // The Leader's Resolve adds to the Kiongozi effect, so it
+                // reaches the same active recipient.
+                new Condition({
+                    isHidden: true,
+                    receivers: RECEIVERS.OTHERS,
+                    stats: {
+                        dmg_all: C4DmgBonus,
+                    },
+                    condition: new ConditionAnd([
+                        new ConditionBoolean({name: 'mavuika_kiongozi'}),
+                        new ConditionAscensionChar({ascension: 4}),
+                        activeReceiver,
+                    ]),
+                }),
             ],
         },
         {
@@ -720,70 +763,5 @@ export const Mavuika = new DbObjectChar({
             ],
         },
     ]),
-    partyData: {
-        conditions: [
-            new Condition({
-                stats: {
-                    enemy_def_reduce: C2DefReduce,
-                },
-                subConditions: [
-                    new ConditionOr([
-                        new ConditionBoolean({name: 'party.mavuika_the_ashen_price'}),
-                        new ConditionBoolean({name: 'party.mavuika_humanitys_name_unfettered'}),
-                    ]),
-                ],
-            }),
-            new ConditionNumber({
-                name: 'party_mavuika_kiongozi',
-                serializeId: 1,
-                title: 'talent_name.mavuika_kiongozi',
-                description: 'talent_descr.mavuika_kiongozi',
-                stat: 'dmg_all',
-                max: BurstMaxBonus,
-                rotation: 'party',
-                info: {ascension: 4},
-                stats: {
-                    text_percent_dmg: 0.2,
-                    text_percent_max: BurstMaxBonus,
-                },
-            }),
-            new ConditionBoolean({
-                name: 'party.mavuika_the_ashen_price',
-                serializeId: 2,
-                title: 'talent_name.mavuika_the_ashen_price',
-                description: 'talent_descr.mavuika_the_ashen_price_2',
-                rotation: 'party',
-                info: {constellation: 2},
-                stats: {
-                    text_percent_def: C2DefReduce,
-                },
-            }),
-            new ConditionBoolean({
-                name: 'mavuika_the_leaders_resolve',
-                serializeId: 3,
-                title: 'talent_name.mavuika_the_leaders_resolve',
-                description: 'talent_descr.mavuika_the_leaders_resolve',
-                rotation: 'party',
-                info: {constellation: 4},
-                stats: {
-                    dmg_all: C4DmgBonus,
-                },
-                subConditions: [
-                    new ConditionBoolean({name: 'party_mavuika_kiongozi'}),
-                ],
-            }),
-            new ConditionBoolean({
-                name: 'party.mavuika_humanitys_name_unfettered',
-                serializeId: 8,
-                title: 'talent_name.mavuika_humanitys_name_unfettered',
-                description: 'talent_descr.mavuika_humanitys_name_unfettered_2',
-                rotation: 'party',
-                info: {constellation: 6},
-                stats: {
-                    text_percent_def: C6DefReduce,
-                    text_percent_dmg2: C6SkillDmg,
-                },
-            }),
-        ],
-    },
+    retiredParty: [[1, 'number'], [2, 'checkbox'], [3, 'checkbox'], [8, 'checkbox']],
 });

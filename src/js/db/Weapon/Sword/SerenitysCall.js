@@ -1,5 +1,3 @@
-import { ConditionAnd } from "../../../classes/Condition/And";
-import { ConditionBoolean } from "../../../classes/Condition/Boolean";
 import { ConditionBooleanRefine } from "../../../classes/Condition/Boolean/Refine";
 import { ConditionBooleanValue } from "../../../classes/Condition/Boolean/Value";
 import { ConditionCalcMoonsign } from "../../../classes/Condition/CalcMoonsign";
@@ -7,6 +5,8 @@ import { ConditionStaticRefine } from "../../../classes/Condition/Static/Refine"
 import { DbObjectWeapon } from "../../../classes/DbObject/Weapon";
 import { StatTable } from "../../../classes/StatTable";
 import { weaponStatTables } from "../../generated/WeaponStatTables";
+import { weaponPassiveTables } from "../../generated/WeaponPassiveTables";
+import { percent } from "../../Params";
 
 export const SerenitysCall = new DbObjectWeapon({
     name: 'serenitys_call',
@@ -17,6 +17,7 @@ export const SerenitysCall = new DbObjectWeapon({
     weapon: 'sword',
     statTable: weaponStatTables.SerenitysCall,
     conditions: [
+        // Calculate moonsign level from party composition
         new ConditionCalcMoonsign({}),
         new ConditionBooleanRefine({
             name: 'weapon_serenitys_call',
@@ -24,20 +25,24 @@ export const SerenitysCall = new DbObjectWeapon({
             title: 'talent_name.weapon_serenitys_call',
             description: 'talent_descr.weapon_serenitys_call_1',
             stats: [
-                new StatTable('hp_percent', [16, 20, 24, 28, 32]),
+                new StatTable('hp_percent', percent(weaponPassiveTables.SerenitysCall.p1)),
             ],
         }),
-        // Moonsign: Ascendant Gleam: the Max HP bonus is increased further.
+        // Additional Max HP when Moonsign level >= 2 (Ascendant Gleam)
         new ConditionStaticRefine({
             title: 'talent_name.weapon_serenitys_call',
             description: 'talent_descr.weapon_serenitys_call_2',
             stats: [
-                new StatTable('hp_percent', [16, 20, 24, 28, 32]),
+                new StatTable('hp_percent', percent(weaponPassiveTables.SerenitysCall.p3)),
             ],
-            condition: new ConditionAnd([
-                new ConditionBoolean({name: 'weapon_serenitys_call'}),
-                new ConditionBooleanValue({setting: 'party_moonsign', cond: 'ge', value: 2}),
-            ]),
+            subConditions: [
+                new ConditionBooleanRefine({name: 'weapon_serenitys_call'}),
+                new ConditionBooleanValue({
+                    setting: 'party_moonsign',
+                    cond: 'ge',
+                    value: 2,
+                }),
+            ],
         }),
     ],
 });

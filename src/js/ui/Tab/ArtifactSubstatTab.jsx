@@ -20,6 +20,7 @@ export class ArtifactSubstatTab extends Tab {
 
         this.id = 'suggestsubstat';
         this.rightRab = false;
+        this.title = 'tab_header.suggest-artifact-substat';
     }
 
     refresh() {
@@ -56,12 +57,12 @@ class ArtifactSubstatView extends React.Component {
     }
 
     dataFeaturesItems() {
-        return Feature2.buildDropdown(this.props.app.currentSet());
+        return Feature2.buildDropdown(this.props.app.view());
     }
 
     dataResults() {
         let results = [];
-        let build = this.props.app.currentSet();
+        let build = this.props.app.view();
 
         let feature = build.getFeatureByName(this.state.feature);
         if (!feature) {

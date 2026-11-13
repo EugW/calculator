@@ -1,6 +1,7 @@
 import { Condition } from '../../classes/Condition'
 import { ConditionAscensionChar } from '../../classes/Condition/Ascension/Char';
 import { ConditionBoolean } from '../../classes/Condition/Boolean'
+import { ConditionBooleanValue } from '../../classes/Condition/Boolean/Value';
 import { ConditionStacks } from '../../classes/Condition/Stacks'
 import { ConditionStatic } from '../../classes/Condition/Static';
 import { DbObjectChar } from "../../classes/DbObject/Char";
@@ -14,10 +15,13 @@ import { FeatureDamagePlungeCollision } from '../../classes/Feature2/Damage/Plun
 import { FeatureDamagePlungeShockWave } from '../../classes/Feature2/Damage/Plunge/ShockWave';
 import { FeatureDamageSkill } from '../../classes/Feature2/Damage/Skill';
 import { FeatureMultiplier } from '../../classes/Feature2/Multiplier';
+import { CHANNELS } from "../../classes/PostEffect/Channels";
 import { PostEffectStatsMastery } from '../../classes/PostEffect/Stats/Mastery';
+import { RECEIVERS } from '../../classes/Team/Receivers';
 import { StatTable } from "../../classes/StatTable"
 import { charTables } from "../generated/CharTables";
 import { charTalentTables } from '../generated/CharTalentTables';
+import { percent } from "../Params";
 
 
 const Talents = new DbObjectTalents({
@@ -178,13 +182,13 @@ const Talents = new DbObjectTalents({
 });
 
 const TalentValues = {
-    A4BonusRatio: 0.1,
-    A4BonusMax: 100,
-    C2Mastery: 50,
-    C4Mastery: 30,
-    C4DendroDmg: 10,
-    C6CritRate: 10,
-    C6CritDmg: 70,
+    A4BonusRatio: percent(charTalentTables.Alhaitham.a4.p1),
+    A4BonusMax: percent(charTalentTables.Alhaitham.a4.p2),
+    C2Mastery: charTalentTables.Alhaitham.c2.p1,
+    C4Mastery: charTalentTables.Alhaitham.c4.p1,
+    C4DendroDmg: percent(charTalentTables.Alhaitham.c4.p3),
+    C6CritRate: percent(charTalentTables.Alhaitham.c6.p1),
+    C6CritDmg: percent(charTalentTables.Alhaitham.c6.p2),
 };
 
 export const Alhaitham = new DbObjectChar({
@@ -480,14 +484,21 @@ export const Alhaitham = new DbObjectChar({
         }),
     ],
     postEffects: [
+        // Game data: Avatar_Alhatham_PermanentSkill_2 (ModifyDamageMixin) reads FIGHT_PROP_ELEMENT_MASTERY (total).
+        // KQM Nahida: same-class EM->DMG bonuses (Yae/Tighnari/Cyno/Dendro Traveler A4) count Nahida A1 (extra EM).
+        // GO reads input.total.eleMas (with a TODO to test with Nahida).
         new PostEffectStatsMastery({
+            reads: CHANNELS.TOTAL,
             percent: new StatTable('dmg_skill_alhaitham', [TalentValues.A4BonusRatio]),
             statCap: new StatTable('', [TalentValues.A4BonusMax]),
             conditions: [
                 new ConditionAscensionChar({ascension: 4}),
             ],
         }),
+        // Game data: Avatar_Alhatham_PermanentSkill_2 (ModifyDamageMixin) reads FIGHT_PROP_ELEMENT_MASTERY (total);
+        // same evidence as dmg_skill_alhaitham above.
         new PostEffectStatsMastery({
+            reads: CHANNELS.TOTAL,
             percent: new StatTable('dmg_burst_alhaitham', [TalentValues.A4BonusRatio]),
             statCap: new StatTable('', [TalentValues.A4BonusMax]),
             conditions: [
@@ -506,6 +517,9 @@ export const Alhaitham = new DbObjectChar({
         },
         {
             conditions: [
+                // Game data: Avatar_Alhatham_Constellation_2 UNIQUE_Alhatham_Constellation_2_Buff writes
+                // Actor_ElemMasteryDelta (premod, no Extra). Conditions write premod: default confirmed, no params.
+                // GO writes premod eleMas.
                 new ConditionStacks({
                     name: 'alhaitham_debate',
                     serializeId: 2,
@@ -529,6 +543,10 @@ export const Alhaitham = new DbObjectChar({
         },
         {
             conditions: [
+                // Game data: Avatar_Alhatham_ElementalBurst UNIQUE_Alhatham_Constellation_4_GainBuff writes
+                // Actor_GrassAddHurtDelta and UNIQUE_Alhatham_Constellation_4_CostBuff writes Actor_ElemMasteryDelta
+                // (both premod, no Extra). Conditions write premod: default confirmed, no params.
+                // GO writes premod dendro_dmg_ and premod eleMas (teamBuff).
                 new ConditionStacks({
                     name: 'alhaitham_elucidation',
                     serializeId: 3,
@@ -541,6 +559,21 @@ export const Alhaitham = new DbObjectChar({
                         new StatTable('dmg_dendro', [TalentValues.C4DendroDmg]),
                     ],
                 }),
+                // Each consumed Mirror raises all other nearby party
+                // members' Mastery; Alhaitham keeps his own Dendro bonus
+                // above.
+                ...[1, 2, 3].map((level) => new Condition({
+                    isHidden: true,
+                    receivers: RECEIVERS.OTHERS,
+                    stats: {
+                        mastery: TalentValues.C4Mastery,
+                    },
+                    condition: new ConditionBooleanValue({
+                        setting: 'alhaitham_elucidation',
+                        cond: 'ge',
+                        value: level,
+                    }),
+                })),
             ],
         },
         {
@@ -554,6 +587,9 @@ export const Alhaitham = new DbObjectChar({
         },
         {
             conditions: [
+                // Game data: Avatar_Alhatham_Constellation_6 UNIQUE_Alhatham_Constellation_6_OverflowPrism_Buff writes
+                // Actor_CriticalDelta and Actor_CriticalHurtDelta (premod, no Extra). Conditions write premod:
+                // default confirmed, no params. GO writes premod critRate_ and critDMG_.
                 new ConditionBoolean({
                     name: 'alhaitham_structuration',
                     serializeId: 4,
@@ -567,22 +603,5 @@ export const Alhaitham = new DbObjectChar({
             ],
         },
     ]),
-    partyData: {
-        conditions: [
-            new ConditionStacks({
-                name: 'party.alhaitham_elucidation',
-                serializeId: 3,
-                rotation: 'party',
-                title: 'talent_name.alhaitham_elucidation',
-                description: 'talent_descr.alhaitham_elucidation',
-                maxStacks: 3,
-                info: {constellation: 4},
-                stats: [
-                    new StatTable('text_value_dendro', [TalentValues.C4DendroDmg]),
-                    new StatTable('text_value_mastery', [TalentValues.C4Mastery]),
-                    new StatTable('mastery', [TalentValues.C4Mastery]),
-                ],
-            }),
-        ],
-    },
+    retiredParty: [[3, 'stacks']],
 });

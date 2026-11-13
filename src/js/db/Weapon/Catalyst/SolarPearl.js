@@ -2,6 +2,8 @@ import { ConditionBooleanRefine } from "../../../classes/Condition/Boolean/Refin
 import { DbObjectWeapon } from "../../../classes/DbObject/Weapon";
 import { StatTable } from "../../../classes/StatTable";
 import { weaponStatTables } from "../../generated/WeaponStatTables";
+import { weaponPassiveTables } from "../../generated/WeaponPassiveTables";
+import { percent } from "../../Params";
 
 export const SolarPearl = new DbObjectWeapon({
     name: 'solar_pearl',
@@ -18,8 +20,8 @@ export const SolarPearl = new DbObjectWeapon({
             title: 'talent_name.weapon_solar_pearl',
             description: 'talent_descr.weapon_solar_pearl_1',
             stats: [
-                new StatTable('dmg_skill', [20, 25, 30, 35, 40]),
-                new StatTable('dmg_burst', [20, 25, 30, 35, 40]),
+                new StatTable('dmg_skill', percent(weaponPassiveTables.SolarPearl.p1)),
+                new StatTable('dmg_burst', percent(weaponPassiveTables.SolarPearl.p1)),
             ],
         }),
         new ConditionBooleanRefine({
@@ -28,7 +30,7 @@ export const SolarPearl = new DbObjectWeapon({
             title: 'talent_name.weapon_solar_pearl',
             description: 'talent_descr.weapon_solar_pearl_2',
             stats: [
-                new StatTable('dmg_normal', [20, 25, 30, 35, 40]),
+                new StatTable('dmg_normal', percent(weaponPassiveTables.SolarPearl.p1)),
             ],
         }),
     ],

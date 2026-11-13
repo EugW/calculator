@@ -1,4 +1,5 @@
 const path = require('path');
+const { createHash } = require('node:crypto');
 const webpack = require('webpack');
 const MiniCssExtractPlugin = require('mini-css-extract-plugin');
 const HtmlWebpackPlugin = require('html-webpack-plugin');
@@ -9,15 +10,18 @@ const TerserPlugin = require("terser-webpack-plugin");
 
 module.exports = (env, argv) => {
     return {
+        // One entry per page: a module shared by two entries of the same page
+        // would be instantiated once per entry, and its classes and symbols
+        // would differ between them (see optimization.splitChunks).
         entry: {
             'app': path.resolve(__dirname, 'src/js/app.js'),
-            'db': path.resolve(__dirname, 'src/js/db.js'),
-            'ui': path.resolve(__dirname, 'src/js/ui.js'),
             'cli': path.resolve(__dirname, 'src/js/cli.js'),
         },
         output: {
             path: path.resolve(__dirname, 'dist'),
-            filename: 'js/[name].js',
+            // The query busts caches of the chunks workers load too; it is
+            // not part of the file name on disk.
+            filename: 'js/[name].js?[contenthash]',
             chunkFilename: 'js/[id]_[chunkhash].js',
             clean: true,
         },
@@ -25,6 +29,8 @@ module.exports = (env, argv) => {
         // (lives in node_modules/.cache, never committed).
         cache: {
             type: 'filesystem',
+            // Worktrees can share node_modules through a junction. Keep their asset caches separate.
+            name: createHash('sha256').update(__dirname).digest('hex').slice(0, 12) + '-' + argv.mode,
             buildDependencies: {
                 config: [__filename],
             },
@@ -35,12 +41,13 @@ module.exports = (env, argv) => {
                 __DEVEL__: JSON.stringify(argv.mode === 'development'),
             }),
             new MiniCssExtractPlugin({
-                filename: 'css/[name].css',
+                filename: 'css/[name].css?[contenthash]',
             }),
             new HtmlWebpackPlugin({
                 filename: 'index.html',
                 scriptLoading: 'blocking',
-                hash: true,
+                // File names carry their content hash (see output.filename).
+                hash: false,
                 inject: false,
                 title: 'Genshin Impact Calculator',
                 template: 'src/index.ejs',
@@ -90,7 +97,13 @@ module.exports = (env, argv) => {
                 },
                 {
                     test: /\.m?jsx?$/,
-                    exclude: /(node_modules|bower_components)/,
+                    exclude: [
+                        /(node_modules|bower_components)/,
+                        // Generated tables are plain data with no JSX, so
+                        // Babel has nothing to transform in them; the talent
+                        // table is also over its 500KB limit for styled output.
+                        /[\\/]src[\\/]js[\\/]db[\\/]generated[\\/]/,
+                    ],
                     use: {
                         loader: 'babel-loader',
                         options: {
@@ -109,6 +122,19 @@ module.exports = (env, argv) => {
             extensions: ['', '.js', '.jsx'],
         },
         optimization: {
+            // The page and every worker import the database. Its modules go
+            // to one chunk, js/db.js, that each of them loads into its own
+            // module graph, so the database is downloaded once.
+            splitChunks: {
+                cacheGroups: {
+                    db: {
+                        test: /[\\/]src[\\/]js[\\/]db[\\/]/,
+                        name: 'db',
+                        chunks: (chunk) => chunk.name !== 'cli',
+                        enforce: true,
+                    },
+                },
+            },
             minimizer: [
                 new CssMinimizerPlugin(),
                 new TerserPlugin({
@@ -130,6 +156,18 @@ module.exports = (env, argv) => {
             client: {
                 overlay: true,
             },
+            // Standalone `npm run serve` (no backend, no nginx): forward
+            // same-origin /back/proxy/enka/... to enka.network/api/...
+            // like the nginx snippet and backend/index.ts do.
+            proxy: [
+                {
+                    context: ['/back/proxy/enka'],
+                    target: 'https://enka.network',
+                    changeOrigin: true,
+                    pathRewrite: { '^/back/proxy/enka': '/api' },
+                    headers: { 'User-Agent': 'GenshinCalc/1.0' },
+                },
+            ],
         },
     };
 };

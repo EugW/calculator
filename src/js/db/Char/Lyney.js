@@ -24,9 +24,11 @@ import { FeatureMultiplier } from "../../classes/Feature2/Multiplier";
 import { FeaturePostEffectValue } from "../../classes/Feature2/PostEffectValue";
 import { PostEffectStatsHP } from "../../classes/PostEffect/Stats/HP";
 import { StatTable } from "../../classes/StatTable";
+import { RECEIVERS } from "../../classes/Team/Receivers";
 import { ValueTable } from "../../classes/ValueTable";
 import { charTables } from "../generated/CharTables";
 import { charTalentTables } from "../generated/CharTalentTables";
+import { percent } from "../Params";
 
 const Talents = new DbObjectTalents({
     attack: {
@@ -138,13 +140,14 @@ const Talents = new DbObjectTalents({
     },
 });
 
-const A1ChargedDmg = 80;
-const A4PyroBonus = 60;
-const A4PyroBonusStack = 20;
+const A1ChargedDmg = percent(charTalentTables.Lyney.a1.p2);
+const A4PyroBonus = percent(charTalentTables.Lyney.a4.p1);
+const A4PyroBonusStack = percent(charTalentTables.Lyney.a4.p2);
 const A4PyroBonusMax = 100;
-const C2CritDmg = 20;
-const C4EnemyResPyro = -20;
-const C6Dmg = 80;
+const C2CritDmg = percent(charTalentTables.Lyney.c2.p1);
+const C2MaxStacks = charTalentTables.Lyney.c2.p3;
+const C4EnemyResPyro = -percent(charTalentTables.Lyney.c4.p1);
+const C6Dmg = percent(charTalentTables.Lyney.c6.p1);
 
 export const Lyney = new DbObjectChar({
     name: 'lyney',
@@ -269,6 +272,11 @@ export const Lyney = new DbObjectChar({
                 }),
             ],
         }),
+        // Grin-Malkin Hat inherited HP display. Game data: the FissionAgent
+        // gadget HP comes from the MaxHPRatio special with no FIGHT_PROP_*
+        // marker (engine-internal, like a heal), so no read channel is
+        // evidenced and the default premod read stays; no ability writes
+        // extra HP, so it agrees with the total GO reads (input.total.hp).
         new FeaturePostEffectValue({
             name: 'lyney_hat_hp',
             category: 'attack',
@@ -289,6 +297,11 @@ export const Lyney = new DbObjectChar({
                     leveling: 'char_skill_attack',
                     values: Talents.get('attack.lyney_pyrotechnic_strike_dmg'),
                 }),
+                // A1 Perilous Performance: flat +80% of ATK (game data:
+                // Bullet_Liney_FissionAgent_EndBoom damagePercentage ADDs
+                // AfterFission_PermanentSkill_1_HurtUp, the flat 80% from
+                // ProudSkill 842101; GO: 80% x input.total.atk). An ordinary
+                // damage multiplier, so it reads total ATK and needs nothing.
                 new FeatureMultiplier({
                     values: new ValueTable([A1ChargedDmg]),
                     source: 'ascension1',
@@ -331,6 +344,10 @@ export const Lyney = new DbObjectChar({
                     leveling: 'char_skill_elemental',
                     values: Talents.get('skill.skill_dmg'),
                 }),
+                // Skill per-stack bonus: game damagePercentage ADDs
+                // LoseHp_Count x LoseHp_ElementalArtDamage_CountRatio onto the
+                // base, an ordinary ATK-scaled hit (GO: input.total.atk), so
+                // it reads total ATK and needs nothing.
                 new FeatureMultiplier({
                     leveling: 'char_skill_elemental',
                     stacksLeveling: 'lyney_surplus_stacks',
@@ -338,6 +355,9 @@ export const Lyney = new DbObjectChar({
                 }),
             ],
         }),
+        // Skill heal: game action HealHP with amountByTargetMaxHPRatio
+        // (engine-internal, no FIGHT_PROP_* marker). Heal scalings read the
+        // total and need nothing.
         new FeatureHeal({
             name: 'lyney_hp_regeneration',
             category: 'skill',
@@ -397,6 +417,11 @@ export const Lyney = new DbObjectChar({
                 new ConditionAscensionChar({ascension: 4}),
             ],
         }),
+        // A4 Conclusive Ovation: flat 60% + 20% per other Pyro member (game
+        // data: Avatar_Liney_PermanentSkill_2 ModifyDamageMixin on
+        // Liney_PermanentSkill_2_BaseDPR/ExtraDPR, stepped by the
+        // same-element count; ProudSkill 842201 [0.6, 0.2]; GO: flat
+        // premod all_dmg_). No stat read; the condition is premod as usual.
         new ConditionStaticLevel({
             title: 'talent_name.lyney_conclusive_ovation',
             description: 'talent_descr.lyney_conclusive_ovation',
@@ -426,12 +451,16 @@ export const Lyney = new DbObjectChar({
         },
         {
             conditions: [
+                // C2 Loquacious Cajoling: flat +20% CRIT DMG per stack (game
+                // data: Avatar_Liney_Constellation_2 Actor_CriticalHurtDelta
+                // from the Liney_CriticalHurt_CriticalHurt special; GO: flat
+                // premod critDMG_). No stat read.
                 new ConditionStacks({
                     name: 'lyney_locquacious_cajoling',
                     serializeId: 3,
                     title: 'talent_name.lyney_loquacious_cajoling',
                     description: 'talent_descr.lyney_loquacious_cajoling',
-                    maxStacks: 3,
+                    maxStacks: C2MaxStacks,
                     stats: [
                         new StatTable('crit_dmg', [C2CritDmg]),
                     ],
@@ -449,9 +478,14 @@ export const Lyney = new DbObjectChar({
         },
         {
             conditions: [
+                // C4 Well-Versed, Well-Rehearsed: flat -20% enemy Pyro RES
+                // (game data: Avatar_Liney_Constellation_4
+                // Actor_FireSubHurtDelta; GO: flat teamBuff premod
+                // pyro_enemyRes_). Enemy-side, no stat read.
                 new ConditionBoolean({
                     name: 'lyney_well_versed_well_rehearsed',
                     serializeId: 4,
+                    receivers: RECEIVERS.TEAM,
                     title: 'talent_name.lyney_well_versed_well_rehearsed',
                     description: 'talent_descr.lyney_well_versed_well_rehearsed',
                     stats: {
@@ -471,6 +505,10 @@ export const Lyney = new DbObjectChar({
         },
         {
             conditions: [
+                // C6 Guarded Smile: flat 80% of a Pyrotechnic Strike (game
+                // data: EndBoom_Constellation_6_DMGRatio, ProudSkill talent
+                // 846 param 0.8). An ordinary damage scaling on the same ATK
+                // base, so it reads total ATK and needs nothing.
                 new ConditionStatic({
                     title: 'talent_name.lyney_guarded_smile',
                     description: 'talent_descr.lyney_guarded_smile',
@@ -481,18 +519,5 @@ export const Lyney = new DbObjectChar({
             ],
         },
     ]),
-    partyData: {
-        conditions: [
-            new ConditionBoolean({
-                name: 'party.lyney_well_versed_well_rehearsed',
-                serializeId: 1,
-                title: 'talent_name.lyney_well_versed_well_rehearsed',
-                description: 'talent_descr.lyney_well_versed_well_rehearsed',
-                info: {constellation: 4},
-                stats: {
-                    enemy_res_pyro: C4EnemyResPyro,
-                },
-            }),
-        ],
-    },
+    retiredParty: [[1, 'checkbox']],
 });

@@ -1,0 +1,5 @@
+category;name;rus;eng
+team_artifacts;equipped_by;Надето на;Equipped by
+team_artifacts;equipped_teammates;Надето на союзниках;Equipped by teammates
+team_artifacts;optimizer_hint;Эти артефакты исключены из подбора. Снимите артефакт с союзника, чтобы сделать его доступным.;These artifacts are excluded from optimization. Unequip an artifact from its teammate to make it available.
+team_artifacts;transfer_hint;Нажмите, чтобы передать артефакт выбранному персонажу.;Click to move this artifact to the viewed character.

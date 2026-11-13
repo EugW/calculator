@@ -2,6 +2,8 @@ import { ArtifactSet } from "../../../classes/ArtifactSet";
 import { ConditionStatic } from "../../../classes/Condition/Static";
 import { ConditionStacks } from "../../../classes/Condition/Stacks";
 import { StatTable } from "../../../classes/StatTable";
+import { artifactSetTables } from "../../generated/ArtifactSetTables";
+import { percent, times } from "../../Params";
 
 export const MarechausseeHunter = new ArtifactSet({
     serializeId: 46,
@@ -21,8 +23,8 @@ export const MarechausseeHunter = new ArtifactSet({
                     description: 'set_descr.marechaussee_hunter_2',
                     settings: {},
                     stats: {
-                        dmg_normal: 15,
-                        dmg_charged: 15,
+                        dmg_normal: percent(artifactSetTables.MarechausseeHunter.pc2.p1),
+                        dmg_charged: percent(artifactSetTables.MarechausseeHunter.pc2.p1),
                     },
                 })
             ],
@@ -35,9 +37,9 @@ export const MarechausseeHunter = new ArtifactSet({
                     serializeId: 33,
                     title: 'set_bonus.marechaussee_hunter_4',
                     description: 'set_descr.marechaussee_hunter_4',
-                    maxStacks: 3,
+                    maxStacks: artifactSetTables.MarechausseeHunter.pc4.p3,
                     stats: [
-                        new StatTable('crit_rate', [12, 24, 36]),
+                        new StatTable('crit_rate', times(percent(artifactSetTables.MarechausseeHunter.pc4.p1), [1, 2, 3])),
                     ],
                 })
             ],

@@ -1,4 +1,5 @@
 import { Condition } from "../Condition";
+import { assumed } from "../Team/Scope";
 import { isMainCharHexerei } from "./Hexerei";
 
 /**
@@ -17,7 +18,8 @@ export class ConditionWitchHomework extends Condition {
             return false;
         }
 
-        result = isMainCharHexerei(settings);
+        // A floating weapon or set has no wielder: the check is met (Team/Legacy).
+        result = assumed(settings, 'wielder') || isMainCharHexerei(settings);
 
         return this.params.invert ? !result : result;
     }

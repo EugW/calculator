@@ -23,7 +23,7 @@ talent_descr;weapon_skyward_harp;При попадании есть %{text_perce
 talent_name;weapon_stringless;Песнь без стрел;Arrowless Song
 talent_descr;weapon_stringless;Увеличивает name{урон элементальных навыков} и name{взрыва стихии} на %{dmg_burst}.;Increases name{Elemental Skill} and name{Elemental Burst DMG} by %{dmg_burst}.
 talent_name;weapon_sharpshooter_oath;Меткий;Precise
-talent_descr;weapon_sharpshooter_oath;Увеличивает урон по слабым местам противников на %{dmg_weak}.<br>Попадание в слабое место включается на вкладке tab{enemy:Противник}.;Increases DMG against weak spots by %{dmg_weak}.<br>Shots to weak spots can be activated at tab{enemy:Enemy} tab.
+talent_descr;weapon_sharpshooter_oath;Увеличивает урон по слабым местам противников на %{dmg_weak}.<br>Попадание в слабое место включается на вкладке tab{team:Противник}.;Increases DMG against weak spots by %{dmg_weak}.<br>Shots to weak spots can be activated at tab{team:Enemy} tab.
 talent_name;weapon_viridescent_hunt;Зелёный ветер;Verdant Wind
 talent_descr;weapon_viridescent_hunt;При попадании name{обычной} или name{заряженной атакой} появляется %{text_percent_chance} шанс создать name{Циклон}, который притягивает к себе врагов и наносит им %{text_percent_dmg} урона каждые 0.5 сек. в течение 4 сек. Может возникнуть раз в %{text_number_cd} сек.;Upon hit, name{Normal} and name{Aimed Shot Attacks} have a %{text_percent_chance} chance to generate a name{Cyclone}, which will continuously attract surrounding opponents, dealing %{text_percent_dmg} of name{ATK} as DMG to these opponents every 0.5s for 4s. This effect can only occur once every %{text_number_cd}s.
 talent_name;weapon_messenger;Шальная почта;Archer's Message

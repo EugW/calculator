@@ -1,6 +1,8 @@
 import { ArtifactSet } from "../../../classes/ArtifactSet";
 import { ConditionBoolean } from "../../../classes/Condition/Boolean";
 import { ConditionStatic } from "../../../classes/Condition/Static";
+import { artifactSetTables } from "../../generated/ArtifactSetTables";
+import { percent } from "../../Params";
 
 export const BloodstainedChivalry = new ArtifactSet({
     serializeId: 5,
@@ -19,7 +21,7 @@ export const BloodstainedChivalry = new ArtifactSet({
                     title: 'set_bonus.bloodstained_chivalry_2',
                     description: 'set_descr.bloodstained_chivalry_2',
                     stats: {
-                        dmg_phys: 25,
+                        dmg_phys: artifactSetTables.BloodstainedChivalry.pc2.dmg_phys,
                     },
                 })
             ],
@@ -33,7 +35,7 @@ export const BloodstainedChivalry = new ArtifactSet({
                     title: 'set_bonus.bloodstained_chivalry_4',
                     description: 'set_descr.bloodstained_chivalry_4',
                     stats: {
-                        dmg_charged: 50,
+                        dmg_charged: percent(artifactSetTables.BloodstainedChivalry.pc4.p2),
                     },
                 }),
             ],

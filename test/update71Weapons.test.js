@@ -2,10 +2,9 @@ import { BuildData } from "../src/js/classes/Build/Data";
 import { CalcObjectWeapon } from "../src/js/classes/CalcObject/Weapon";
 import { Condition } from "../src/js/classes/Condition";
 import { DB } from "../src/js/db/DB";
-import { Weapons as WeaponBuffs } from "../src/js/db/Buffs/Weapons";
-import {
-    HymnofTheMaelstromPartyBuff,
-} from "../src/js/db/Buffs/Weapons/HymnofTheMaelstrom";
+import { LEGACY_BUFF_CONDITIONS } from "../src/js/classes/Legacy/Buffs";
+import { Team } from "../src/js/classes/Team";
+import { makeBuild } from "./support/team";
 import { Lang } from "../src/js/ui/Lang";
 
 global.window = {};
@@ -148,35 +147,28 @@ test('Winters Heavy Heart counts four members and replaces its bonuses during Ra
     const weapon = getWeapon('catalyst', 'WintersHeavyHeart');
     const radiance = getCondition(weapon, 'weapon_winters_heavy_heart_radiance');
     const effect = weapon.getConditions()[1];
-    const party = {
-        char_element: 'cryo',
-        resonance_element_1: 'electro',
-        resonance_element_2: 'cryo',
-        resonance_element_3: 'electro',
-    };
+    const carrier = makeBuild('Charlotte');
+    carrier.setWeapon(weapon);
+    carrier.setWeaponLevels({level: 90, ascension: 6, refine: 1});
+    const team = Team.fromMember(carrier);
+    ['Razor', 'Kaeya', 'Fischl'].forEach((key, index) => team.setMember(index + 1, makeBuild(key)));
 
     expect(radiance.params.title).toBe('talent_name.n11500004');
 
-    let stats = effect.getStats({weapon_refine: 1, ...party});
+    let stats = effect.getStats(carrier.getBuildData().settings);
     expect(stats.get('mastery')).toBe(48);
     expect(stats.get('atk_percent')).toBeCloseTo(9.6);
     expect(stats.get('dmg_stellarconduct')).toBe(0);
 
-    stats = effect.getStats({weapon_refine: 1, weapon_winters_heavy_heart_radiance: true, ...party});
+    carrier.setWeaponSettings({weapon_winters_heavy_heart_radiance: true});
+    stats = effect.getStats(carrier.getBuildData().settings);
     expect(stats.get('mastery')).toBe(80);
     expect(stats.get('atk_percent')).toBe(0);
     expect(stats.get('dmg_stellarconduct')).toBe(24);
     expect(stats.get('dmg_stellarswirl')).toBe(24);
 
-    stats = effect.getStats({
-        weapon_refine: 5,
-        weapon_winters_heavy_heart_radiance: true,
-        char_element: 'cryo',
-        resonance_element_1: 'cryo',
-        resonance_element_2: 'cryo',
-        resonance_element_3: 'electro',
-        resonance_element_4: 'electro',
-    });
+    carrier.setWeaponLevels({level: 90, ascension: 6, refine: 5});
+    stats = effect.getStats(carrier.getBuildData().settings);
     expect(stats.get('mastery')).toBe(160);
     expect(stats.get('atk_percent')).toBe(0);
     expect(stats.get('dmg_stellarconduct')).toBe(48);
@@ -186,11 +178,14 @@ test("Hymn of the Maelstrom models base and boosted Vatsamonga's Vatic Vintage w
     const weapon = getWeapon('catalyst', 'HymnofTheMaelstrom');
     const staticEffect = weapon.getConditions()[0];
     const stacks = getCondition(weapon, 'weapon_hymn_of_the_maelstrom_stacks');
-    const party = WeaponBuffs.getConditions().find(
-        (condition) => condition.getName() === 'weapon_other.weapon_hymn_of_the_maelstrom',
-    );
+    // Party buff is delivered by the weapon now (TEAM post-effects, stack
+    // hymn_of_the_maelstrom); the old Buffs row is retired.
+    const retired = LEGACY_BUFF_CONDITIONS.filter((condition) => {
+        return condition.isRetired && condition.isRetired();
+    });
+    expect(retired.map((cond) => cond.getId()).sort((a, b) => a - b))
+        .toEqual(expect.arrayContaining([74, 75, 76]));
 
-    expect(party).toBe(HymnofTheMaelstromPartyBuff);
     expect(staticEffect.getStats({weapon_refine: 1}).get('healing')).toBe(4);
     expect(staticEffect.getStats({weapon_refine: 5}).get('healing')).toBe(8);
     const r1Description = staticEffect.getDescription(staticEffect.getStats({weapon_refine: 1}));
@@ -201,26 +196,23 @@ test("Hymn of the Maelstrom models base and boosted Vatsamonga's Vatic Vintage w
     expect(stacks.getStats({weapon_refine: 1, weapon_hymn_of_the_maelstrom_mode: 'triumph'}, 3)
         .get('hp_percent')).toBeCloseTo(21);
 
-    expect(party.getStats({
-        'weapon_other.weapon_hymn_of_the_maelstrom': 1,
-        weapon_hymn_of_the_maelstrom_holder_hp: 40999,
-        'weapon_other.weapon_hymn_of_the_maelstrom_mode': 'hymn_3',
-    }).get('atk_percent')).toBeCloseTo(0.999 * 0.4 * 3, 5);
-    expect(party.getStats({
-        'weapon_other.weapon_hymn_of_the_maelstrom': 1,
-        weapon_hymn_of_the_maelstrom_holder_hp: 60000,
-        'weapon_other.weapon_hymn_of_the_maelstrom_mode': 'hymn_3',
-    }).get('atk_percent')).toBe(24);
-    expect(party.getStats({
-        'weapon_other.weapon_hymn_of_the_maelstrom': 1,
-        weapon_hymn_of_the_maelstrom_holder_hp: 60000,
-        'weapon_other.weapon_hymn_of_the_maelstrom_mode': 'triumph_3',
-    }).get('atk_percent')).toBeCloseTo(42);
-    expect(party.getStats({
-        'weapon_other.weapon_hymn_of_the_maelstrom': 5,
-        weapon_hymn_of_the_maelstrom_holder_hp: 150000,
-        'weapon_other.weapon_hymn_of_the_maelstrom_mode': 'triumph_3',
-    }).get('atk_percent')).toBeCloseTo(84);
+    // Delivered ATK (TEAM post-effects) matches the old party numbers
+    // (divided by 100: old party stored percent, new stores decimal).
+    function deliveredAtk(refine, hp, mode) {
+        const data = new BuildData({
+            weapon_refine: refine,
+            weapon_hymn_of_the_maelstrom_stacks: 3,
+            weapon_hymn_of_the_maelstrom_mode: mode,
+        }, {hp_base: hp});
+        data.postEffects = weapon.getPostEffects();
+        data.applyPostEffects();
+        return data.stats.get('atk_percent');
+    }
+
+    expect(deliveredAtk(1, 40999, 'hymn')).toBeCloseTo(0.999 * 0.4 * 3 / 100, 5);
+    expect(deliveredAtk(1, 60000, 'hymn')).toBe(0.24);
+    expect(deliveredAtk(1, 60000, 'triumph')).toBeCloseTo(0.42);
+    expect(deliveredAtk(5, 150000, 'triumph')).toBeCloseTo(0.84);
 
     const activeBase = weapon.getPostEffects().filter((effect) => effect.isActive({
         weapon_hymn_of_the_maelstrom_stacks: 3,
@@ -236,7 +228,7 @@ test("Hymn of the Maelstrom models base and boosted Vatsamonga's Vatic Vintage w
     expect(activeBoosted[0].params.statCap.getValue(5)).toBeCloseTo(84);
 });
 
-test.each([40000, 40999, 45678, 100000])('Hymn self and party ATK scaling agree at %i HP', (hp) => {
+test.each([40000, 40999, 45678, 100000])('Hymn delivered ATK scaling matches the old party numbers at %i HP', (hp) => {
     const weapon = getWeapon('catalyst', 'HymnofTheMaelstrom');
     const data = new BuildData({
         weapon_refine: 1,
@@ -245,21 +237,22 @@ test.each([40000, 40999, 45678, 100000])('Hymn self and party ATK scaling agree 
     }, {hp_base: hp});
     data.postEffects = weapon.getPostEffects();
     data.applyPostEffects();
-    const party = HymnofTheMaelstromPartyBuff.getStats({
-        'weapon_other.weapon_hymn_of_the_maelstrom': 1,
-        weapon_hymn_of_the_maelstrom_holder_hp: hp,
-        'weapon_other.weapon_hymn_of_the_maelstrom_mode': 'triumph_3',
-    });
-    expect(data.stats.get('atk_percent')).toBeCloseTo(party.get('atk_percent') / 100, 5);
+    // Old party formula (R1 triumph 3 stacks), divided by 100 for decimal.
+    const thousands = Math.max(0, hp - 40000) / 1000;
+    const expected = Math.min(8 * 3 * 1.75, thousands * 0.4 * 3 * 1.75) / 100;
+    expect(data.stats.get('atk_percent')).toBeCloseTo(expected, 5);
 });
 
 test('Breezeborne Refrain threshold refreshes one non-stacking party bonus at R1/R5', () => {
     const weapon = getWeapon('bow', 'BreezeborneRefrain');
     const staticEffect = weapon.getConditions()[0];
     const threshold = weapon.getConditions()[2];
-    const party = WeaponBuffs.getConditions().find(
-        (condition) => condition.getName() === 'weapon_other.weapon_breezeborne_refrain',
-    );
+    // Old party row is retired; the threshold now delivers TEAM with stack
+    // breezeborne_refrain.
+    const retired = LEGACY_BUFF_CONDITIONS.filter((condition) => {
+        return condition.isRetired && condition.isRetired() && condition.getId() === 77;
+    });
+    expect(retired).toHaveLength(1);
 
     expect(threshold.params.title).toBe('talent_name.weapon_breezeborne_refrain');
     expect(threshold.getTitle()).toBe("Viper's Ballad");
@@ -271,37 +264,32 @@ test('Breezeborne Refrain threshold refreshes one non-stacking party bonus at R1
         .stats.get('dmg_stellarswirl')).toBe(24);
     expect(threshold.getData({weapon_refine: 1, weapon_breezeborne_refrain_points: 9})
         .stats.get('dmg_stellarswirl')).toBe(24);
-    expect(party.getStats({'weapon_other.weapon_breezeborne_refrain': 5})
-        .get('dmg_stellarconduct')).toBe(48);
-    expect(party.getStats({'weapon_other.weapon_breezeborne_refrain': 5})
-        .get('dmg_stellarswirl')).toBe(48);
+    // Delivered TEAM bonus at R5 (refine 5, 3 points) matches the old party
+    // R5 numbers.
+    expect(threshold.getData({weapon_refine: 5, weapon_breezeborne_refrain_points: 3})
+        .stats.get('dmg_stellarconduct')).toBe(48);
+    expect(threshold.getData({weapon_refine: 5, weapon_breezeborne_refrain_points: 3})
+        .stats.get('dmg_stellarswirl')).toBe(48);
+    expect(threshold.params.receivers).toBe('team');
+    expect(threshold.params.stack).toBe('breezeborne_refrain');
 });
 
-test('new party weapons show R1 refinement text at R0 without applying a buff', () => {
-    const partyConditions = WeaponBuffs.getConditions();
-    const hymn = partyConditions.find(
-        (condition) => condition.getName() === 'weapon_other.weapon_hymn_of_the_maelstrom',
-    );
-    const refrain = partyConditions.find(
-        (condition) => condition.getName() === 'weapon_other.weapon_breezeborne_refrain',
-    );
-
-    const hymnStats = hymn.getStats({});
-    const hymnDescription = hymn.getDescription(hymnStats);
-    expect(hymnStats.get('atk_percent')).toBe(0);
-    expect(hymn.getData({}).stats.get('atk_percent')).toBe(0);
-    expect(hymnDescription).toContain('0.4%');
-    expect(hymnDescription).toContain('8%');
+test('converted party weapons show R1 refinement text at R0 without applying a buff', () => {
+    // Hymn and Breezeborne party rows are retired; their weapon text still
+    // shows R1 numbers at R0 without applying a buff.
+    const weaponHymn = getWeapon('catalyst', 'HymnofTheMaelstrom');
+    const hymnStatic = weaponHymn.getConditions()[0];
+    const hymnStats = hymnStatic.getStats({weapon_refine: 1});
+    const hymnDescription = hymnStatic.getDescription(hymnStats);
     expect(hymnDescription).toContain("Vatsamonga's Vatic Vintage");
-    expect(hymnDescription).toContain('75%');
     expect(hymnDescription).not.toContain('?');
 
-    const refrainStats = refrain.getStats({});
-    const refrainDescription = refrain.getDescription(refrainStats);
+    const weaponRefrain = getWeapon('bow', 'BreezeborneRefrain');
+    const refrainThreshold = weaponRefrain.getConditions()[2];
+    const refrainStats = refrainThreshold.getData({}).stats;
+    const refrainDescription = refrainThreshold.getDescription(refrainStats);
     expect(refrainStats.get('dmg_stellarconduct')).toBe(0);
     expect(refrainStats.get('dmg_stellarswirl')).toBe(0);
-    expect(refrain.getData({}).stats.get('dmg_stellarconduct')).toBe(0);
-    expect(refrain.getData({}).stats.get('dmg_stellarswirl')).toBe(0);
     expect(refrainDescription).toContain('24%');
     expect(refrainDescription).toContain('Hymn of the Pure');
     expect(refrainDescription).toContain('Thus Lied the Viper');
@@ -309,13 +297,9 @@ test('new party weapons show R1 refinement text at R0 without applying a buff', 
     expect(refrainDescription).not.toContain('?');
 });
 
-test('Hymn of the Maelstrom and Breezeborne Refrain use normal condition handling', () => {
-    const wrappers = WeaponBuffs.getConditions().filter((condition) => [
-        'weapon_other.weapon_hymn_of_the_maelstrom',
-        'weapon_other.weapon_breezeborne_refrain',
-    ].includes(condition.getName()));
-    expect(wrappers).toHaveLength(2);
-
-    const controls = Condition.unwrap(wrappers);
-    expect(controls).toHaveLength(4);
+test('Hymn of the Maelstrom and Breezeborne Refrain old IDs stay retired', () => {
+    const retiredIds = LEGACY_BUFF_CONDITIONS
+        .filter((condition) => condition.isRetired && condition.isRetired())
+        .map((condition) => condition.getId());
+    expect(retiredIds).toEqual(expect.arrayContaining([74, 75, 76, 77]));
 });

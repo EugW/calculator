@@ -8,6 +8,9 @@ feature_reaction;stellarswirl_vortex_1_contribution_12;Звёздный вихр
 feature_reaction;stellarswirl_vortex_2_contribution;Звёздный вихрь ур. 2: вклад 60%;Stellar Vortex Lv. 2: Contribution 60%
 feature_reaction;stellarswirl_vortex_2_contribution_2;Звёздный вихрь ур. 2: вклад 30%;Stellar Vortex Lv. 2: Contribution 30%
 feature_reaction;stellarswirl_vortex_2_contribution_12;Звёздный вихрь ур. 2: вклад 5%;Stellar Vortex Lv. 2: Contribution 5%
+feature_reaction;stellarswirl_anemo;Звёздное рассеивание: Анемо;Stellar Swirl: Anemo
+feature_reaction;stellarswirl_vortex_1;Звёздный вихрь ур. 1;Stellar Vortex Lv. 1
+feature_reaction;stellarswirl_vortex_2;Звёздный вихрь ур. 2;Stellar Vortex Lv. 2
 talent_name;radiance_stellarconduct;Сияние - Звёздный проводник;Radiance: Stellar-Conduct
 talent_name;radiance_stellarswirl;Сияние - Звёздное рассеивание;Radiance: Stellar Swirl
 talent_name;stellarswirl_vortex_triggers;Активации Звёздного вихря;Stellar Vortex Triggers

@@ -2,6 +2,7 @@ import { Condition } from "../../classes/Condition";
 import { ConditionAnd } from "../../classes/Condition/And";
 import { ConditionAscensionChar } from "../../classes/Condition/Ascension/Char";
 import { ConditionBoolean } from "../../classes/Condition/Boolean";
+import { ConditionTeam } from "../../classes/Condition/Team";
 import { ConditionBooleanValue } from "../../classes/Condition/Boolean/Value";
 import { ConditionConstellation } from "../../classes/Condition/Constellation";
 import { ConditionNot } from "../../classes/Condition/Not";
@@ -22,17 +23,37 @@ import { FeatureHeal } from "../../classes/Feature2/Heal";
 import { FeatureMultiplier } from "../../classes/Feature2/Multiplier";
 import { FeatureMultiplierWriothesley } from "../../classes/Feature2/Multiplier/Wriothesley";
 import { StatTable } from "../../classes/StatTable";
+import { RECEIVERS } from "../../classes/Team/Receivers";
 import { ValueTable } from "../../classes/ValueTable";
 import { charTables } from "../generated/CharTables";
 import { charTalentTables } from "../generated/CharTalentTables";
+import { percent, plus, times } from "../Params";
 
-const RadianceStellarConductDmg = 30;
-const C1StellarBonus = 50;
+const RadianceStellarConductDmg = percent(charTalentTables.Wriothesley.sp.p4);
+const C1StellarBonus = percent(charTalentTables.Wriothesley.c1.p4);
 const C1RepellingStellarDmg = 'dmg_stellarconduct_wriothesley_c1_repelling';
 const C1LusterStellarDmg = 'dmg_stellarconduct_wriothesley_c1_luster';
-const C6CritRate = 10;
-const C6CritDmg = 80;
-const C6IcicleRatio = 20;
+const C6CritRate = percent(charTalentTables.Wriothesley.c6.p4);
+const C6CritDmg = percent(charTalentTables.Wriothesley.c6.p5);
+const C6IcicleRatio = percent(charTalentTables.Wriothesley.c6.p6);
+const A1ChargedDmg = percent(charTalentTables.Wriothesley.a1.p2);
+const A1Heal = percent(charTalentTables.Wriothesley.a1.p3);
+const C4Heal = percent(plus(charTalentTables.Wriothesley.a1.p3, charTalentTables.Wriothesley.c4.p5));
+const A4AtkBonus = percent(charTalentTables.Wriothesley.a4.p1);
+const A4MaxStacks = charTalentTables.Wriothesley.a4.p2;
+const C2BurstBonus = percent(charTalentTables.Wriothesley.c2.p1);
+const C2LusterBonus = charTalentTables.Wriothesley.c2.p6;
+const C4AtkSpeedSelf = percent(charTalentTables.Wriothesley.c4.p1);
+const C4AtkSpeedTeam = percent(charTalentTables.Wriothesley.c4.p3);
+const C6ChargedCritRate = percent(charTalentTables.Wriothesley.c6.p1);
+const C6ChargedCritDmg = percent(charTalentTables.Wriothesley.c6.p2);
+const RadianceRepelling3Scaling = plus(1, charTalentTables.Wriothesley.sp.p5);
+const C2Repelling3Scaling = plus(charTalentTables.Wriothesley.c2.p4, times(charTalentTables.Wriothesley.sp.p5, -1));
+const RadianceRepelling5Scaling = plus(1, charTalentTables.Wriothesley.sp.p6);
+const C2Repelling5Scaling = plus(charTalentTables.Wriothesley.c2.p5, times(charTalentTables.Wriothesley.sp.p6, -1));
+const C6Repelling5IcicleScaling = times(plus(1, charTalentTables.Wriothesley.sp.p6), charTalentTables.Wriothesley.c6.p6);
+const C2Repelling5IcicleScaling = times(plus(charTalentTables.Wriothesley.c2.p5, times(charTalentTables.Wriothesley.sp.p6, -1)), charTalentTables.Wriothesley.c6.p6);
+const C2LusterIcicleScaling = times(charTalentTables.Wriothesley.c2.p6, charTalentTables.Wriothesley.c6.p6);
 
 const Talents = new DbObjectTalents({
     attack: {
@@ -247,21 +268,21 @@ export const Wriothesley = new DbObjectChar({
                     leveling: 'char_skill_attack',
                     values: Talents.get('attack.normal_hit_3'),
                     scalingValues: Talents.get('skill.wriothesley_enhanced_repelling_fist'),
-                    scalingMultiplier: 0.6,
+                    scalingMultiplier: RadianceRepelling3Scaling,
                     scalingSource: 'radiance',
                 }),
                 new FeatureMultiplierWriothesley({
                     leveling: 'char_skill_attack',
                     values: Talents.get('attack.normal_hit_3'),
                     scalingValues: Talents.get('skill.wriothesley_enhanced_repelling_fist'),
-                    scalingMultiplier: 0.3,
+                    scalingMultiplier: C2Repelling3Scaling,
                     scalingSource: 'constellation2',
                     condition: new ConditionAnd([
                         new ConditionConstellation({constellation: 2}),
                         new ConditionBooleanValue({
                             setting: 'wriothesley_reckoning_for_sin',
                             cond: 'ge',
-                            value: 5,
+                            value: A4MaxStacks,
                         }),
                     ]),
                 }),
@@ -281,21 +302,21 @@ export const Wriothesley = new DbObjectChar({
                     leveling: 'char_skill_attack',
                     values: Talents.get('attack.normal_hit_5'),
                     scalingValues: Talents.get('skill.wriothesley_enhanced_repelling_fist'),
-                    scalingMultiplier: 0.8,
+                    scalingMultiplier: RadianceRepelling5Scaling,
                     scalingSource: 'radiance',
                 }),
                 new FeatureMultiplierWriothesley({
                     leveling: 'char_skill_attack',
                     values: Talents.get('attack.normal_hit_5'),
                     scalingValues: Talents.get('skill.wriothesley_enhanced_repelling_fist'),
-                    scalingMultiplier: 0.4,
+                    scalingMultiplier: C2Repelling5Scaling,
                     scalingSource: 'constellation2',
                     condition: new ConditionAnd([
                         new ConditionConstellation({constellation: 2}),
                         new ConditionBooleanValue({
                             setting: 'wriothesley_reckoning_for_sin',
                             cond: 'ge',
-                            value: 5,
+                            value: A4MaxStacks,
                         }),
                     ]),
                 }),
@@ -318,14 +339,14 @@ export const Wriothesley = new DbObjectChar({
                 new FeatureMultiplier({
                     leveling: 'char_skill_attack',
                     values: Talents.get('attack.charged_hit'),
-                    scalingMultiplier: 0.5,
+                    scalingMultiplier: C2LusterBonus,
                     scalingSource: 'constellation2',
                     condition: new ConditionAnd([
                         new ConditionConstellation({constellation: 2}),
                         new ConditionBooleanValue({
                             setting: 'wriothesley_reckoning_for_sin',
                             cond: 'ge',
-                            value: 5,
+                            value: A4MaxStacks,
                         }),
                     ]),
                 }),
@@ -342,21 +363,21 @@ export const Wriothesley = new DbObjectChar({
                     leveling: 'char_skill_attack',
                     values: Talents.get('attack.normal_hit_5'),
                     scalingValues: Talents.get('skill.wriothesley_enhanced_repelling_fist'),
-                    scalingMultiplier: 0.8 * C6IcicleRatio / 100,
+                    scalingMultiplier: C6Repelling5IcicleScaling,
                     scalingSource: 'constellation6',
                 }),
                 new FeatureMultiplierWriothesley({
                     leveling: 'char_skill_attack',
                     values: Talents.get('attack.normal_hit_5'),
                     scalingValues: Talents.get('skill.wriothesley_enhanced_repelling_fist'),
-                    scalingMultiplier: 0.4 * C6IcicleRatio / 100,
+                    scalingMultiplier: C2Repelling5IcicleScaling,
                     scalingSource: 'constellation2',
                     condition: new ConditionAnd([
                         new ConditionConstellation({constellation: 2}),
                         new ConditionBooleanValue({
                             setting: 'wriothesley_reckoning_for_sin',
                             cond: 'ge',
-                            value: 5,
+                            value: A4MaxStacks,
                         }),
                     ]),
                 }),
@@ -382,14 +403,14 @@ export const Wriothesley = new DbObjectChar({
                 new FeatureMultiplier({
                     leveling: 'char_skill_attack',
                     values: Talents.get('attack.charged_hit'),
-                    scalingMultiplier: 0.5 * C6IcicleRatio / 100,
+                    scalingMultiplier: C2LusterIcicleScaling,
                     scalingSource: 'constellation2',
                     condition: new ConditionAnd([
                         new ConditionConstellation({constellation: 2}),
                         new ConditionBooleanValue({
                             setting: 'wriothesley_reckoning_for_sin',
                             cond: 'ge',
-                            value: 5,
+                            value: A4MaxStacks,
                         }),
                     ]),
                 }),
@@ -407,7 +428,7 @@ export const Wriothesley = new DbObjectChar({
                     scaling: 'hp*',
                     source: 'ascension1',
                     leveling: 'wriothesley_heal_level',
-                    values: new ValueTable([30, 50]),
+                    values: new ValueTable([A1Heal, C4Heal]),
                 }),
             ],
         }),
@@ -460,7 +481,7 @@ export const Wriothesley = new DbObjectChar({
             title: 'talent_name.wriothesley_there_shall_be_a_plea_for_justice',
             description: 'talent_descr.wriothesley_there_shall_be_a_plea_for_justice',
             stats: {
-                dmg_charged_wriothesley: 50,
+                dmg_charged_wriothesley: A1ChargedDmg,
             },
             info: {ascension: 1},
             subConditions: [
@@ -472,9 +493,9 @@ export const Wriothesley = new DbObjectChar({
             serializeId: 2,
             title: 'talent_name.wriothesley_there_shall_be_a_reckoning_for_sin',
             description: 'talent_descr.wriothesley_there_shall_be_a_reckoning_for_sin',
-            maxStacks: 5,
+            maxStacks: A4MaxStacks,
             stats: [
-                new StatTable('atk_percent', [6]),
+                new StatTable('atk_percent', [A4AtkBonus]),
             ],
             info: {ascension: 4},
             subConditions: [
@@ -490,7 +511,7 @@ export const Wriothesley = new DbObjectChar({
                 dmg_stellarconduct: RadianceStellarConductDmg,
             },
             subConditions: [
-                new ConditionBoolean({name: 'polestar_field'}),
+                new ConditionTeam({condition: new ConditionBoolean({name: 'polestar_field'})}),
             ],
         }),
     ],
@@ -538,8 +559,8 @@ export const Wriothesley = new DbObjectChar({
                     levelSetting: 'wriothesley_reckoning_for_sin',
                     fromZero: true,
                     stats: [
-                        new StatTable('text_percent', [40]),
-                        new StatTable('dmg_burst_wriothesley', [0, 40, 80, 120, 160, 200]),
+                        new StatTable('text_percent', [C2BurstBonus]),
+                        new StatTable('dmg_burst_wriothesley', times(percent(charTalentTables.Wriothesley.c2.p1), [0, 1, 2, 3, 4, 5])),
                     ],
                 }),
             ],
@@ -571,16 +592,18 @@ export const Wriothesley = new DbObjectChar({
                     title: 'talent_name.wriothesley_redemption_for_the_suffering_2',
                     description: 'talent_descr.wriothesley_redemption_for_the_suffering_buffed',
                     stats: {
-                        atk_speed_normal: 20,
+                        atk_speed_normal: C4AtkSpeedSelf,
                     },
                 }),
+                // C4, off-field: all of your own party members, Wriothesley included.
                 new ConditionBoolean({
                     name: 'wriothesley_redemption_for_the_suffering_2',
                     serializeId: 4,
+                    receivers: RECEIVERS.TEAM,
                     title: 'talent_name.wriothesley_redemption_for_the_suffering_3',
                     description: 'talent_descr.wriothesley_redemption_for_the_suffering_buffed',
                     stats: {
-                        atk_speed_normal: 10,
+                        atk_speed_normal: C4AtkSpeedTeam,
                     },
                     subConditions: [
                         new ConditionNot([
@@ -605,8 +628,8 @@ export const Wriothesley = new DbObjectChar({
                     title: 'talent_name.wriothesley_esteem_for_the_innocent',
                     description: 'talent_descr.wriothesley_esteem_for_the_innocent_buffed',
                     stats: {
-                        crit_rate_charged_wriothesley: 10,
-                        crit_dmg_charged_wriothesley: 80,
+                        crit_rate_charged_wriothesley: C6ChargedCritRate,
+                        crit_dmg_charged_wriothesley: C6ChargedCritDmg,
                         crit_rate_stellarconduct: C6CritRate,
                         crit_dmg_stellarconduct: C6CritDmg,
                     },
@@ -617,18 +640,5 @@ export const Wriothesley = new DbObjectChar({
             ],
         },
     ]),
-    partyData: {
-        conditions: [
-            new ConditionBoolean({
-                name: 'party.wriothesley_redemption_for_the_suffering_2',
-                serializeId: 1,
-                title: 'talent_name.wriothesley_redemption_for_the_suffering_3',
-                description: 'talent_descr.wriothesley_redemption_for_the_suffering_buffed',
-                info: {constellation: 4},
-                stats: {
-                    atk_speed_normal: 10,
-                },
-            }),
-        ],
-    },
+    retiredParty: [[1, 'checkbox']],
 });

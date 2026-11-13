@@ -11,7 +11,13 @@
  *
  * Soft-skips with a warning when the package or an adapter is unavailable.
  * Requires node --experimental-vm-modules (see `npm run test:gpu`).
+ *
+ * On Windows the device is Vulkan's when the system has a Vulkan loader (see
+ * dawnBackends): the kernel of a real search does not compile on Dawn's
+ * default there. DAWN_BACKEND (d3d12, vulkan, ...) names another.
  */
+import { copyFileSync, existsSync, renameSync, rmSync } from 'node:fs';
+import { dirname, join } from 'node:path';
 import { GPUDeviceContext } from '../../src/js/classes/GPUDeviceContext';
 import { GPUForcedOutcomeOptimizer } from '../../src/js/classes/GPUForcedOutcomeOptimizer';
 import { buildFusedOutcomeRegions } from '../../src/js/classes/ArtifactsSuggest';
@@ -47,18 +53,63 @@ export async function skipWhenNoGPU() {
     return false;
 }
 
-/** A live Dawn device, or null when unavailable. Idempotent per file. */
-export async function realDevice() {
-    if (!await loadWebGPU()) return null;
-    if (!globalThis.navigator?.gpu) {
-        Object.assign(globalThis, webgpu.globals);
-        globalThis.navigator = {gpu: webgpu.create([])};
+/**
+ * The backends to ask Dawn for, in order; '' is its own choice.
+ *
+ * On Windows that choice is D3D12, whose shaders the package can only compile
+ * with FXC (it has no DXC): FXC fails on a kernel of several set variations
+ * of a team rotation, which Vulkan compiles.
+ */
+function dawnBackends() {
+    if (process.env.DAWN_BACKEND) return [process.env.DAWN_BACKEND];
+    return process.platform == 'win32' && vulkanLoaderBesideDawn() ? ['vulkan', ''] : [''];
+}
+
+/**
+ * Dawn loads its DLLs only from beside dawn.node, so the system's Vulkan
+ * loader is copied there once; it finds the drivers wherever it is.
+ *
+ * @returns {boolean} whether Dawn can load Vulkan
+ */
+function vulkanLoaderBesideDawn() {
+    try {
+        const target = join(dirname(require.resolve('webgpu')), 'dist', 'win32-' + process.arch, 'vulkan-1.dll');
+        const source = join(process.env.SystemRoot || 'C:\\Windows', 'System32', 'vulkan-1.dll');
+        if (!existsSync(target) && existsSync(source)) {
+            // Test files run in parallel: none may load half a copy.
+            const partial = target + '.' + process.pid + '.tmp';
+            copyFileSync(source, partial);
+            try {
+                renameSync(partial, target);
+            } catch {
+                rmSync(partial, {force: true});
+            }
+        }
+        return existsSync(target);
+    } catch {
+        return false;
     }
+}
+
+async function requestAdapter() {
     try {
         return await globalThis.navigator.gpu.requestAdapter();
     } catch {
         return null;
     }
+}
+
+/** A live Dawn device, or null when unavailable. Idempotent per file. */
+export async function realDevice() {
+    if (!await loadWebGPU()) return null;
+    if (!globalThis.navigator?.gpu) {
+        Object.assign(globalThis, webgpu.globals);
+        for (const backend of dawnBackends()) {
+            globalThis.navigator = {gpu: webgpu.create(backend ? ['backend=' + backend] : [])};
+            if (await requestAdapter()) break;
+        }
+    }
+    return requestAdapter();
 }
 
 /** Optimizer bound to a real device, or null when unavailable. */

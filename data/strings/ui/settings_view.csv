@@ -3,6 +3,7 @@ settings_view;common;Общие;Common
 settings_view;backup;Резервная копия;Backup
 settings_view;create_backup;Создать резервную копию;Create backup
 settings_view;create_backup_chars;Сохранить персонажей;Save characters
+settings_view;create_backup_teams;Сохранить отряды;Save teams
 settings_view;create_backup_artifacts;Сохранить артефакты;Save artifacts
 settings_view;create_backup_rotations;Сохранить ротации;Save rotations
 settings_view;create_backup_button;Сохранить;Save
@@ -16,6 +17,7 @@ settings_view;success_text;Резервная копия успешно загр
 
 settings_view;restore_title;Восстановление резервной копии полностью заменяет сохранённые данные. Если вы хотите добавить, а не заменить отдельные элементы отметьте их ниже:;Backup replace all your saved data. If you want to add elements (instead of replacement) check them below:
 settings_view;restore_chars;Персонажей;Characters
+settings_view;restore_teams;Отряды;Teams
 settings_view;restore_artifacts;Артефакты;Artifacts
 settings_view;restore_rotations;Ротации;Rotations
 

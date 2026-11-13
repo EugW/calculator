@@ -16,12 +16,14 @@ import { FeatureDamagePlungeShockWave } from "../../classes/Feature2/Damage/Plun
 import { FeatureDamageSkill } from "../../classes/Feature2/Damage/Skill";
 import { FeatureMultiplier } from "../../classes/Feature2/Multiplier";
 import { FeatureMultiplierNeuvilleteCharged } from "../../classes/Feature2/Multiplier/NeuvilleteCharged";
+import { CHANNELS } from "../../classes/PostEffect/Channels";
 import { PostEffectStatsNeuvillette } from "../../classes/PostEffect/Stats/Neuvillette";
 import { StatTable } from "../../classes/StatTable";
 import { ValueTable } from "../../classes/ValueTable";
 import { CHARACTER_MAX_POSSIBLE_HP } from "../Constants";
 import { charTables } from "../generated/CharTables";
 import { charTalentTables } from "../generated/CharTalentTables";
+import { percent, plus, times } from "../Params";
 
 
 const Talents = new DbObjectTalents({
@@ -129,10 +131,11 @@ const Talents = new DbObjectTalents({
     },
 });
 
-const A4HydroBonus = 0.6;
-const A4HydroBonusCap = 30;
-const C2CritDmg = 14;
-const C6Dmg = 10;
+const A4HydroBonus = charTalentTables.Neuvillette.a4.p3;
+const A4HydroBonusCap = percent(times(plus(charTalentTables.Neuvillette.a4.p2, times(charTalentTables.Neuvillette.a4.p1, -1)), charTalentTables.Neuvillette.a4.p3));
+const A4HpThreshold = percent(charTalentTables.Neuvillette.a4.p1);
+const C2CritDmg = percent(charTalentTables.Neuvillette.c2.p1);
+const C6Dmg = percent(charTalentTables.Neuvillette.c6.p1);
 
 export const Neuvillette = new DbObjectChar({
     name: 'neuvillette',
@@ -145,6 +148,15 @@ export const Neuvillette = new DbObjectChar({
     origin: 'fontaine',
     talents: Talents,
     statTable: charTables.Neuvillette,
+    // Talent hits (normal/charged/skill/burst, several scaling 'hp*') read
+    // the total by construction (FeatureDamage* multipliers; the game resolves
+    // them from Max HP at hit time with no FIGHT_PROP read in ExtraAttack /
+    // ElementalArt / ElementalBurst) and need nothing. A1 (Past Draconic
+    // Glories, Avatar_Neuvillette_PermanentSkill_1) only sets the
+    // _ABILITY_Neuvillette_Buff_Level / reaction counters (no Actor_* or
+    // FIGHT_PROP in the ability); the stack multiplier below reads no stat.
+    // GO models the hits from input.total.hp. The C6 extra current below is
+    // the same kind of hit (Talent Neuvillette_Constellation_6 10% Max HP).
     features: [
         new FeatureDamageNormal({
             name: 'normal_hit_1',
@@ -289,6 +301,10 @@ export const Neuvillette = new DbObjectChar({
             ],
         }),
     ],
+    // A1 stacks are a reaction counter (no stat read; game:
+    // Avatar_Neuvillette_PermanentSkill_1 has no Actor_*/FIGHT_PROP) and the
+    // A4 number input is a current-HP counter stored as a stat by
+    // ConditionNumber. Conditions are always premod, right for flat counters.
     conditions: [
         new ConditionStacks({
             name: 'neuvillette_ancient_seas_legacy',
@@ -324,11 +340,22 @@ export const Neuvillette = new DbObjectChar({
         }),
     ],
     postEffects: [
+        // A4 Discipline of the Supreme Arbitration: Hydro DMG from the
+        // current-HP ratio. Game data:
+        // Avatar_Neuvillette_PermanentSkill_2_Calculator sets
+        // _ABILITY_Neuvillette_PermanentSkill_Hp from FIGHT_PROP_CUR_HP /
+        // FIGHT_PROP_MAX_HP (total markers) into HpMinus_Eff, and
+        // Avatar_Neuvillette_PermanentSkill_2_Buff writes
+        // Actor_WaterAddHurtExtraDelta (extra, the default write; GO's
+        // premod: hydro_dmg_ is its guess). KQM Neuvillette has no
+        // EM/ATK/HP/ER buff-chain test. An explicit total read is evidence
+        // even though no ability writes extra HP today.
         new PostEffectStatsNeuvillette({
             from: 'neuvillette_the_high_arbitrators_discipline',
+            reads: CHANNELS.TOTAL,
             percent: new StatTable('dmg_hydro', [A4HydroBonus]),
-            exceed: 30,
-            statCap: new ValueTable([30]),
+            exceed: A4HpThreshold,
+            statCap: new ValueTable([A4HydroBonusCap]),
             conditions: [
                 new ConditionAscensionChar({ascension: 4}),
             ],
@@ -337,6 +364,9 @@ export const Neuvillette = new DbObjectChar({
     constellation: new DbObjectConstellation([
         {
             conditions: [
+                // C1: +1 A1 stack on field + interruption resistance (game:
+                // Avatar_Neuvillette_Constellation_1_EndureUp writes flat
+                // Actor_EndureDelta). Flat, always premod, needs nothing.
                 new ConditionStatic({
                     title: 'talent_name.neuvillette_venerable_institution',
                     description: 'talent_descr.neuvillette_venerable_institution',
@@ -345,6 +375,12 @@ export const Neuvillette = new DbObjectChar({
         },
         {
             conditions: [
+                // C2: +14% CRIT DMG per A1 stack on Equitable Judgment (game:
+                // Avatar_Neuvillette_Constellation_2_Handler ModifyDamageMixin
+                // bonusCriticalHurt = Critical_Ratio x Critical_Layer, Talent
+                // Neuvillette_Constellation_2 param 0.14; no stat read, no
+                // Actor channel, hit-level like Furina's Fanfare bonus).
+                // Flat per-stack toggle into the hit's critDamageBonuses.
                 new ConditionStaticLevel({
                     title: 'talent_name.neuvillette_juridical_exhortation',
                     description: 'talent_descr.neuvillette_juridical_exhortation',
@@ -352,8 +388,8 @@ export const Neuvillette = new DbObjectChar({
                     fromZero: true,
                     stats: [
                         new StatTable('text_percent', [C2CritDmg]),
-                        new StatTable('text_percent_max', [C2CritDmg * 3]),
-                        new StatTable('crit_dmg_neuvillette', [0, C2CritDmg, C2CritDmg * 2, C2CritDmg * 3]),
+                        new StatTable('text_percent_max', [times(C2CritDmg, 3)]),
+                        new StatTable('crit_dmg_neuvillette', times(C2CritDmg, [0, 1, 2, 3])),
                     ],
                 }),
             ],
@@ -369,6 +405,9 @@ export const Neuvillette = new DbObjectChar({
         },
         {
             conditions: [
+                // C4: Sourcewater Droplet on heal (game:
+                // Avatar_Neuvillette_Constellation_4_Handler onHeal, Talent
+                // Neuvillette_Constellation_4 param 4s CD). No stat read.
                 new ConditionStatic({
                     title: 'talent_name.neuvillette_crown_of_commiseration',
                     description: 'talent_descr.neuvillette_crown_of_commiseration',
@@ -386,6 +425,10 @@ export const Neuvillette = new DbObjectChar({
         },
         {
             conditions: [
+                // C6: extra currents (10% Max HP hit above, total by
+                // construction) + HealHP amountByTargetMaxHPRatio (game:
+                // Avatar_Neuvillette_Constellation_6_Absorb; heals scale like
+                // hits and need nothing; not modeled here).
                 new ConditionStatic({
                     title: 'talent_name.neuvillette_wrathful_recompense',
                     description: 'talent_descr.neuvillette_wrathful_recompense',

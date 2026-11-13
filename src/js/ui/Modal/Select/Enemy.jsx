@@ -172,19 +172,13 @@ function EnemyList(props) {
 class EnemySelectItem extends React.PureComponent {
     render() {
         let enemy = this.props.enemy;
+        // Its base RES, as the resistance block reads the enemy's stats.
         let resistances = enemy.getResistances();
-        let settings = {
-            enemy_res_phys: resistances.phys || 0,
-            enemy_res_anemo: resistances.anemo || 0,
-            enemy_res_cryo: resistances.cryo || 0,
-            enemy_res_geo: resistances.geo || 0,
-            enemy_res_hydro: resistances.hydro || 0,
-            enemy_res_pyro: resistances.pyro || 0,
-            enemy_res_electro: resistances.electro || 0,
-            enemy_res_dendro: resistances.dendro || 0,
-        };
-
-        Object.assign(settings, enemy.getSettings());
+        let stats = {};
+        for (const element of Object.keys(resistances)) {
+            stats['enemy_res_' + element] = (resistances[element] || 0) / 100;
+        }
+        let settings = enemy.getSettings();
 
         return (
             <div
@@ -194,7 +188,7 @@ class EnemySelectItem extends React.PureComponent {
                 <EnemyIcon size={60} enemy={enemy} />
                 <div className="info">
                     <div className="name">{lang.get(enemy.getName())}</div>
-                    <ResistanceBlockMini settings={settings} stats={{}}/>
+                    <ResistanceBlockMini settings={settings} stats={stats}/>
                 </div>
             </div>
         );

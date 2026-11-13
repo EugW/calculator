@@ -8,6 +8,7 @@ import { GroupBox } from "../Inputs/GroupBox";
 import { FeatureName } from "../FeatureName";
 import { Lang } from "../../Lang";
 import { MAX_DEPTH, Rotation } from "../../../classes/Rotation";
+import { RotationCompiler } from "../../../classes/RotationCompiler";
 import { Stats } from "../../../classes/Stats";
 import { BlockRemark } from "../TextBlocks";
 
@@ -82,6 +83,7 @@ export class RotationList extends React.Component {
                 id: item.id,
                 item: item,
                 build: this.props.build,
+                warning: this.stepWarnings[item.id],
             };
 
             let isDisabled = parentIsDisabled || item.disabled;
@@ -112,6 +114,10 @@ export class RotationList extends React.Component {
     }
 
     render() {
+        const compiler = new RotationCompiler(this.props.build.team);
+        // Diagnose the editor's exact items: cloning a rotation assigns IDs.
+        compiler.rotation = new Rotation({items: this.props.items});
+        this.stepWarnings = compiler.diagnoseSteps();
         this.featuresCache = [].concat(this.props.featureItems);
         [this.buffer, this.itemsTotal] = this.buildList(this.props.items);
 
@@ -195,7 +201,7 @@ class RotationListItem extends React.Component {
                         className="item-enable control"
                         onClick={() => this.props.onEnable(this.props.item.id)}
                     />
-                    {this.props.item.type !== 'action' && <div
+                    {(this.props.item.type !== 'action' || this.props.item.action == 'switch') && <div
                         className="item-edit control"
                         onClick={() => this.props.onEdit(this.props.item.id)}
                     />}
@@ -209,12 +215,26 @@ class RotationListItem extends React.Component {
     }
 }
 
+/**
+ * The member a hit or a step belongs to: a team's rotation holds every
+ * member's.
+ */
+function MemberIcon(props) {
+    let char = DB.Chars.getById(props.charId);
+    if (!char) {
+        return null;
+    }
+
+    return <div className={'icon sprite sprite-24 sprite-char ' + char.getIcon()} />;
+}
+
 function RotationListFeature(props) {
     let parts = props.item.feature.split('.');
 
     return (
         <div className="rotation-block feature handler">
             <div className="line">
+                <MemberIcon charId={props.item.charId} />
                 <div className="count">x{props.item.count || 1}</div>
                 <div className={'icon gi-stat-element-icon stat-' + props.feature.result.icon}></div>
                 <RotationLineReaction
@@ -259,27 +279,45 @@ function RotationFeatureSubLine(props) {
     );
 }
 
-function RotationLineReaction(props) {
-    if (!props.item.reaction) {
+/**
+ * A hit's reaction as the rotation names it: in the color of the hit's
+ * element when the hit reacts (Quicken is then Aggravate or Spread),
+ * otherwise marked invalid.
+ *
+ * @param {number} reaction the hit's reaction ID
+ * @param {FeatureResult} [result] the hit's result
+ * @returns {{text: string, className: string}|null} null without a reaction
+ */
+export function reactionLabel(reaction, result) {
+    if (!reaction) {
         return null;
     }
 
-    let reactionName = reactionNames[props.item.reaction];
-    let reactionClass = ' invalid';
+    let reactionName = reactionNames[reaction];
+    let reactionClass = 'invalid';
 
-    if (props.feature && props.feature && props.feature.result && props.feature.result.isReacted) {
-        reactionClass = ' text-'+ props.feature.result.icon;
-        if (props.item.reaction == 3) {
-            if (props.feature.result.icon == 'electro') {
+    if (result && result.isReacted) {
+        reactionClass = 'text-'+ result.icon;
+        if (reaction == 3) {
+            if (result.icon == 'electro') {
                 reactionName = 'aggravate';
-            } else if (props.feature.result.icon == 'dendro') {
+            } else if (result.icon == 'dendro') {
                 reactionName = 'spread';
             }
         }
     }
 
+    return {text: lang.get('feature_reaction.'+ reactionName), className: reactionClass};
+}
+
+function RotationLineReaction(props) {
+    let label = reactionLabel(props.item.reaction, props.feature && props.feature.result);
+    if (!label) {
+        return null;
+    }
+
     return (
-        <div className={'reaction' + reactionClass}>{lang.get('feature_reaction.'+ reactionName)}</div>
+        <div className={'reaction ' + label.className}>{label.text}</div>
     );
 }
 
@@ -311,6 +349,7 @@ function RotationListFeatureInvalid(props) {
     return (
         <div className="rotation-block feature handler invalid">
             <div className="line">
+                <MemberIcon charId={props.item.charId} />
                 <div className="count">x{props.item.count || 1}</div>
                 <RotationLineReaction
                     item={props.item}
@@ -326,7 +365,7 @@ function RotationListFeatureInvalid(props) {
 }
 
 function RotationListCondition(props) {
-    let itemData = Rotation.getConditionData(props.item, props.build);
+    let itemData = Rotation.getConditionData(props.item, props.build.team);
     if (!itemData.cond) {
         return (
             <div className="condition handle invalid">???</div>
@@ -338,8 +377,11 @@ function RotationListCondition(props) {
     let mainIcon = itemData.icon;
     let items = [];
 
-    if (itemData.object == 'buffs') {
+    if (itemData.object == 'party') {
         items.push(<div key="team" className="icon icon-team"/>);
+    } else if (props.item.subtype == 'member' && itemData.object != 'char') {
+        // A weapon or a set can be any member's.
+        items.push(<MemberIcon key="member" charId={props.item.charId} />);
     }
 
     if (type == 'checkbox') {
@@ -382,6 +424,10 @@ function RotationListCondition(props) {
     }
 
     valueHtml ||= itemData.cond.getTitle();
+    if (props.item.receiverId) {
+        const receiver = DB.Chars.getById(props.item.receiverId);
+        if (receiver) valueHtml += ' → ' + lang.get(receiver.getName());
+    }
 
     let rotationNumber = itemData.cond.params.rotationNumber;
     if (rotationNumber) {
@@ -399,9 +445,17 @@ function RotationListCondition(props) {
             {items}
             <div className="condition-text">
                 {valueHtml}
+                {props.warning && <RotationStepWarning warning={props.warning}/>}
             </div>
         </div>
     );
+}
+
+export function RotationStepWarning({warning}) {
+    return <div className="rotation-step-warning" role="note">
+        {lang.get('rotation_warning.same_state')}
+        {warning.branches && ' (' + warning.branches.map(branch => lang.get('rotation_warning.branch_' + branch)).join(', ') + ')'}
+    </div>;
 }
 
 function RotationRepeat(props) {
@@ -554,13 +608,15 @@ function getMaxDepth(items) {
 
 function RotationAction(props) {
     let title = 'Unknown action';
-    if (props.item.action === 'disable_artifacts') {
-        title = lang.get('rotation_view.add_artifacts_disable_all');
+    if (props.item.action === 'switch') {
+        let char = DB.Chars.getById(props.item.charId);
+        title = lang.get('rotation_view.switch_text').replace('{x}', char ? lang.get(char.getName()) : '');
     }
 
     return (
         <div className="rotation-block handler compose action">
             <div className="line">
+                {props.item.action === 'switch' ? <MemberIcon charId={props.item.charId} /> : ''}
                 <div className="inner-title">{title}</div>
             </div>
         </div>

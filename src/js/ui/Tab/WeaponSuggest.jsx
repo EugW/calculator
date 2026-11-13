@@ -2,7 +2,6 @@ import React from 'react';
 
 import "../../../css/Components/Tab/WeaponSuggest.css"
 
-import { Condition } from '../../classes/Condition';
 import { ControlsBar, ControlsBarDivider } from '../Components/ControlsBar';
 import { Dropdown } from '../Components/Inputs/Dropdown';
 import { Feature2 } from '../../classes/Feature2';
@@ -142,7 +141,7 @@ export class WeaponSuggestView extends React.Component {
     }
 
     dataFeaturesItems() {
-        return Feature2.buildDropdown(this.props.app.currentSet());
+        return Feature2.buildDropdown(this.props.app.view());
     }
 
     dataWeaponList() {
@@ -252,17 +251,11 @@ export class WeaponSuggestView extends React.Component {
             ascension: data.ascension,
             refine: data.refine,
         });
-        build.setWeaponSettings(settings);
+        // A scenario can describe the enemy (affected by Hydro): that part
+        // is the team's.
+        build.setWeaponSettings(build.team.applyShared(settings));
+        // Set effects read the member's set-bonus profile.
         build.replaceArtifacts(data.artifacts);
-
-        if (this.state.artifactMode == 'generate') {
-            let artConditions = build.getConditions({objects: 'artifacts'});
-            let allSettings = Condition.allConditionsOn(artConditions);
-            if (this.state.generatorSettings.required_sets_settings) {
-                allSettings = Object.assign(allSettings, this.state.generatorSettings.required_sets_settings);
-            }
-            build.setArtifactsSettings(allSettings);
-        }
 
         this.lastBuild = build.getHash();
         this.state.baseFeature = build.getFeatureResultByName(this.state.feature);
@@ -364,7 +357,7 @@ export class WeaponSuggestView extends React.Component {
         this.lastFeature = this.state.feature;
 
         let weaponType = this.getWeaponType();
-        let baseFeature = build.getFeatureResultByName(this.state.feature);
+        let baseFeature = this.props.app.view().getFeatureResultByName(this.state.feature);
 
         this.state.baseFeature = baseFeature;
         this.state.result = [];
@@ -480,7 +473,7 @@ export class WeaponSuggestView extends React.Component {
             ascension: item.ascension,
             refine: item.refine,
         });
-        build.setWeaponSettings(item.settings);
+        build.setWeaponSettings(build.team.applyShared(item.settings));
 
         return build;
     }

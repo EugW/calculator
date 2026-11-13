@@ -1,6 +1,7 @@
 import { Artifact } from "../src/js/classes/Artifact";
 import { ArtifactsSuggest } from "../src/js/classes/ArtifactsSuggest";
 import { CalcSet } from "../src/js/classes/CalcSet";
+import { Team } from "../src/js/classes/Team";
 import { FeatureCompiler } from "../src/js/classes/Feature2/Compiler";
 import {
     CStatIncrease,
@@ -42,7 +43,7 @@ function expectStats(actual, expected) {
 function makeJeanXiphosSuggester() {
     const build = new CalcSet();
     build.setChar(DB.Chars.get('Jean'));
-    build.setEnemy(DB.Enemies.getFirst().getFirst());
+    Team.fromMember(build);
     build.setWeapon(DB.Weapons.get('sword').get('XiphosMoonlight'));
     build.setWeaponSettings({whisper_of_the_jinn: true});
 
@@ -157,6 +158,8 @@ test('constraint-only dependencies stay out of objective liveness but enter the 
     const constraintOnlyStats = [
         'mastery',
         'mastery_base',
+        // Xiphos reads premod EM: EM less its extra lane (PostEffect/Channels).
+        'mastery_extra',
         'recharge',
         'recharge_base',
     ];

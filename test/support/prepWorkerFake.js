@@ -2,6 +2,8 @@ import { createArtifactCandidateHandler } from '../../src/js/classes/ArtifactAct
 
 // The production handler, with the same clone and transfer boundary as a real
 // worker. Gates let tests pause individual candidates without timing guesses.
+// Under jest, structuredClone is Node's: clones are objects of Node's realm,
+// not of the test's, so tests check their types without instanceof.
 export function makeFakePrepWorker({failPrep, beforePrep, beforeGPUResult} = {}) {
     const listeners = {message: [], error: [], messageerror: []};
     let terminated = false;

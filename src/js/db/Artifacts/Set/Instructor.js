@@ -1,6 +1,9 @@
 import { ArtifactSet } from "../../../classes/ArtifactSet";
+import { Condition } from "../../../classes/Condition";
 import { ConditionBoolean } from "../../../classes/Condition/Boolean";
 import { ConditionStatic } from "../../../classes/Condition/Static";
+import { RECEIVERS } from "../../../classes/Team/Receivers";
+import { artifactSetTables } from "../../generated/ArtifactSetTables";
 
 export const Instructor = new ArtifactSet({
     serializeId: 13,
@@ -19,7 +22,7 @@ export const Instructor = new ArtifactSet({
                     title: 'set_bonus.instructor_2',
                     description: 'set_descr.instructor_2',
                     stats: {
-                        mastery: 80,
+                        mastery: artifactSetTables.Instructor.pc2.mastery,
                     },
                 })
             ],
@@ -33,9 +36,15 @@ export const Instructor = new ArtifactSet({
                     title: 'set_bonus.instructor_4',
                     description: 'set_descr.instructor_4',
                     stats: {
-                        text_value: 120,
+                        text_value: artifactSetTables.Instructor.pc4.p2,
                     },
-                })
+                }),
+                new Condition({
+                    receivers: RECEIVERS.TEAM,
+                    stack: 'instructor_4',
+                    condition: new ConditionBoolean({name: 'set.instructor_4'}),
+                    stats: {mastery: artifactSetTables.Instructor.pc4.p2},
+                }),
             ],
         },
     ],

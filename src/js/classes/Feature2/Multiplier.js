@@ -81,6 +81,16 @@ export class FeatureMultiplier {
          * @type {ValueTable}
          */
         this.capValue = data.capValue;
+        /**
+         * @type {string} team members the multiplier is delivered to, see Team/Receivers
+         */
+        this.receivers = data.receivers;
+        /**
+         * @type {string} stack key of a non-stacking multiplier, see Team/Stacking
+         */
+        this.stack = data.stack;
+        /** @type {string} 'team' (default) or 'receiver' */
+        this.stackScope = data.stackScope;
 
         // if (process.env.NODE_ENV !== 'production') {
         //     if (!this.source && !this.leveling) {

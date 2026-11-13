@@ -19,8 +19,10 @@ import { FeatureDamagePlungeShockWave } from "../../classes/Feature2/Damage/Plun
 import { FeatureMultiplier } from "../../classes/Feature2/Multiplier";
 import { FeatureMultiplierYoimiya } from "../../classes/Feature2/Multiplier/Yoimiya";
 import { StatTable } from "../../classes/StatTable";
+import { RECEIVERS } from "../../classes/Team/Receivers";
 import { charTables } from "../generated/CharTables";
 import { charTalentTables } from "../generated/CharTalentTables";
+import { percent } from "../Params";
 
 const Talents = new DbObjectTalents({
     attack: {
@@ -117,6 +119,14 @@ const c6cond = new ConditionAnd([
     new ConditionBoolean({name: 'yoimiya_teika_enshou'}),
     new ConditionConstellation({constellation: 6}),
 ]);
+
+const A1PyroDmg = percent(charTalentTables.Yoimiya.a1.p1);
+const A4AtkBonus = percent(charTalentTables.Yoimiya.a4.p1);
+const A4AtkBonusStack = percent(charTalentTables.Yoimiya.a4.p2);
+const C1AtkBonus = percent(charTalentTables.Yoimiya.c1.p2);
+const C2PyroDmg = percent(charTalentTables.Yoimiya.c2.p1);
+const C6Chance = percent(charTalentTables.Yoimiya.c6.p1);
+const C6Dmg = percent(charTalentTables.Yoimiya.c6.p2);
 
 export const Yoimiya = new DbObjectChar({
     name: 'yoimiya',
@@ -219,7 +229,7 @@ export const Yoimiya = new DbObjectChar({
         }),
         new FeatureDamageMultihit({
             name: 'yoimiya_normal_hit_1',
-            rotationHitCount: 0.5,
+            rotationHitCount: C6Chance / 100,
             rotationHitDescription: 'talent_activation_chance',
             category: 'attack',
             damageType: 'normal',
@@ -230,7 +240,7 @@ export const Yoimiya = new DbObjectChar({
                     multipliers: [
                         new FeatureMultiplierYoimiya({
                             scalingSource: 'constellation6',
-                            scalingMultiplier: 0.6,
+                            scalingMultiplier: C6Dmg / 100,
                             leveling: 'char_skill_attack',
                             values: Talents.get('attack.normal_hit_1'),
                             scalingValues: Talents.get('skill.yoimiya_bonus_dmg'),
@@ -242,14 +252,14 @@ export const Yoimiya = new DbObjectChar({
         }),
         new FeatureDamageNormal({
             name: 'yoimiya_normal_hit_1_1',
-            rotationHitCount: 0.5,
+            rotationHitCount: C6Chance / 100,
             rotationHitDescription: 'talent_activation_chance',
             hits: 2,
             isChild: true,
             multipliers: [
                 new FeatureMultiplierYoimiya({
                     scalingSource: 'constellation6',
-                    scalingMultiplier: 0.6,
+                    scalingMultiplier: C6Dmg / 100,
                     leveling: 'char_skill_attack',
                     values: Talents.get('attack.normal_hit_1'),
                     scalingValues: Talents.get('skill.yoimiya_bonus_dmg'),
@@ -259,12 +269,12 @@ export const Yoimiya = new DbObjectChar({
         }),
         new FeatureDamageNormal({
             name: 'yoimiya_normal_hit_2',
-            rotationHitCount: 0.5,
+            rotationHitCount: C6Chance / 100,
             rotationHitDescription: 'talent_activation_chance',
             multipliers: [
                 new FeatureMultiplierYoimiya({
                     scalingSource: 'constellation6',
-                    scalingMultiplier: 0.6,
+                    scalingMultiplier: C6Dmg / 100,
                     leveling: 'char_skill_attack',
                     values: Talents.get('attack.normal_hit_2'),
                     scalingValues: Talents.get('skill.yoimiya_bonus_dmg'),
@@ -274,12 +284,12 @@ export const Yoimiya = new DbObjectChar({
         }),
         new FeatureDamageNormal({
             name: 'yoimiya_normal_hit_3',
-            rotationHitCount: 0.5,
+            rotationHitCount: C6Chance / 100,
             rotationHitDescription: 'talent_activation_chance',
             multipliers: [
                 new FeatureMultiplierYoimiya({
                     scalingSource: 'constellation6',
-                    scalingMultiplier: 0.6,
+                    scalingMultiplier: C6Dmg / 100,
                     leveling: 'char_skill_attack',
                     values: Talents.get('attack.normal_hit_3'),
                     scalingValues: Talents.get('skill.yoimiya_bonus_dmg'),
@@ -289,7 +299,7 @@ export const Yoimiya = new DbObjectChar({
         }),
         new FeatureDamageMultihit({
             name: 'yoimiya_normal_hit_4',
-            rotationHitCount: 0.5,
+            rotationHitCount: C6Chance / 100,
             rotationHitDescription: 'talent_activation_chance',
             category: 'attack',
             damageType: 'normal',
@@ -300,7 +310,7 @@ export const Yoimiya = new DbObjectChar({
                     multipliers: [
                         new FeatureMultiplierYoimiya({
                             scalingSource: 'constellation6',
-                            scalingMultiplier: 0.6,
+                            scalingMultiplier: C6Dmg / 100,
                             leveling: 'char_skill_attack',
                             values: Talents.get('attack.normal_hit_4'),
                             scalingValues: Talents.get('skill.yoimiya_bonus_dmg'),
@@ -312,14 +322,14 @@ export const Yoimiya = new DbObjectChar({
         }),
         new FeatureDamageNormal({
             name: 'yoimiya_normal_hit_4_1',
-            rotationHitCount: 0.5,
+            rotationHitCount: C6Chance / 100,
             rotationHitDescription: 'talent_activation_chance',
             hits: 2,
             isChild: true,
             multipliers: [
                 new FeatureMultiplierYoimiya({
                     scalingSource: 'constellation6',
-                    scalingMultiplier: 0.6,
+                    scalingMultiplier: C6Dmg / 100,
                     leveling: 'char_skill_attack',
                     values: Talents.get('attack.normal_hit_4'),
                     scalingValues: Talents.get('skill.yoimiya_bonus_dmg'),
@@ -329,12 +339,12 @@ export const Yoimiya = new DbObjectChar({
         }),
         new FeatureDamageNormal({
             name: 'yoimiya_normal_hit_5',
-            rotationHitCount: 0.5,
+            rotationHitCount: C6Chance / 100,
             rotationHitDescription: 'talent_activation_chance',
             multipliers: [
                 new FeatureMultiplierYoimiya({
                     scalingSource: 'constellation6',
-                    scalingMultiplier: 0.6,
+                    scalingMultiplier: C6Dmg / 100,
                     leveling: 'char_skill_attack',
                     values: Talents.get('attack.normal_hit_5'),
                     scalingValues: Talents.get('skill.yoimiya_bonus_dmg'),
@@ -429,22 +439,60 @@ export const Yoimiya = new DbObjectChar({
             maxStacks: 10,
             dropdownClass: 'two-digits',
             stats: [
-                new StatTable('dmg_pyro', [2]),
+                new StatTable('dmg_pyro', [A1PyroDmg]),
             ],
             info: {ascension: 1},
             subConditions: [
                 new ConditionAscensionChar({ascension: 1}),
             ],
         }),
-        new ConditionStatic({
+        // Using Ryuukin Saxifrage increases nearby party members' ATK
+        // (not including Yoimiya herself).
+        new ConditionBoolean({
+            name: 'yoimiya_summer_nights_dawn',
+            serializeId: 5,
             title: 'talent_name.yoimiya_summer_nights_dawn',
             description: 'talent_descr.yoimiya_summer_nights_dawn_1',
             stats: {
-                text_percent: 10,
-                text_percent_2: 1,
+                text_percent: A4AtkBonus,
+                text_percent_2: A4AtkBonusStack,
             },
             info: {ascension: 4},
             subConditions: [
+                new ConditionAscensionChar({ascension: 4}),
+            ],
+        }),
+        new Condition({
+            isHidden: true,
+            receivers: RECEIVERS.OTHERS,
+            stats: {
+                atk_percent: A4AtkBonus,
+            },
+            condition: new ConditionAnd([
+                new ConditionBoolean({name: 'yoimiya_summer_nights_dawn'}),
+                new ConditionAscensionChar({ascension: 4}),
+            ]),
+        }),
+        // A further ATK bonus from the Tricks of the Trouble-Maker stacks
+        // Yoimiya holds when casting Ryuukin Saxifrage: a snapshot assumed
+        // by this stack count.
+        new ConditionStacks({
+            name: 'yoimiya_summer_nights_dawn_stacks',
+            serializeId: 6,
+            receivers: RECEIVERS.OTHERS,
+            title: 'talent_name.yoimiya_summer_nights_dawn',
+            description: 'talent_descr.yoimiya_summer_nights_dawn_3',
+            maxStacks: 10,
+            displayStats: [new StatTable('text_percent_2', [A4AtkBonusStack])],
+            dropdownClass: 'two-digits',
+            info: {ascension: 4},
+            stats: [
+                new StatTable('atk_percent', [A4AtkBonusStack]),
+            ],
+            subConditions: [
+                new ConditionBoolean({
+                    name: 'yoimiya_summer_nights_dawn',
+                }),
                 new ConditionAscensionChar({ascension: 4}),
             ],
         }),
@@ -458,7 +506,7 @@ export const Yoimiya = new DbObjectChar({
                     title: 'talent_name.yoimiya_agate_ryuukin',
                     description: 'talent_descr.yoimiya_agate_ryuukin',
                     stats: {
-                        atk_percent: 20,
+                        atk_percent: C1AtkBonus,
                     },
                 }),
             ],
@@ -471,7 +519,7 @@ export const Yoimiya = new DbObjectChar({
                     title: 'talent_name.yoimiya_a_procession_of_bonfires',
                     description: 'talent_descr.yoimiya_a_procession_of_bonfires',
                     stats: {
-                        dmg_pyro: 25,
+                        dmg_pyro: C2PyroDmg,
                     },
                 }),
             ],
@@ -508,46 +556,12 @@ export const Yoimiya = new DbObjectChar({
                     title: 'talent_name.yoimiya_naganohara_meteor_swarm',
                     description: 'talent_descr.yoimiya_naganohara_meteor_swarm',
                     stats: {
-                        text_percent_chance: 50,
-                        text_percent_dmg: 60,
+                        text_percent_chance: C6Chance,
+                        text_percent_dmg: C6Dmg,
                     }
                 }),
             ],
         },
     ]),
-    partyData: {
-        conditions: [
-            new ConditionBoolean({
-                name: 'party.yoimiya_summer_scorch',
-                serializeId: 1,
-                rotation: 'party',
-                title: 'talent_name.yoimiya_summer_nights_dawn',
-                description: 'talent_descr.yoimiya_summer_nights_dawn_2',
-                info: {ascension: 4},
-                stats: {
-                    atk_percent: 10,
-                    text_percent: 10,
-                },
-            }),
-            new ConditionStacks({
-                name: 'party.yoimiya_summer_scorch_stack',
-                serializeId: 2,
-                rotation: 'party',
-                title: 'talent_name.yoimiya_summer_nights_dawn',
-                description: 'talent_descr.yoimiya_summer_nights_dawn_3',
-                maxStacks: 10,
-                dropdownClass: 'two-digits',
-                info: {ascension: 4},
-                stats: [
-                    new StatTable('atk_percent', [1]),
-                    new StatTable('text_percent_2', [1]),
-                ],
-                subConditions: [
-                    new ConditionBoolean({
-                        name: 'party.yoimiya_summer_scorch',
-                    }),
-                ],
-            }),
-        ],
-    },
+    retiredParty: [[1, 'checkbox'], [2, 'stacks']],
 });

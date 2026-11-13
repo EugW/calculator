@@ -1,5 +1,7 @@
 import { ArtifactSet } from "../../../classes/ArtifactSet";
 import { ConditionStatic } from "../../../classes/Condition/Static";
+import { artifactSetTables } from "../../generated/ArtifactSetTables";
+import { percent } from "../../Params";
 
 export const PrayersForDestiny = new ArtifactSet({
     serializeId: 34,
@@ -19,7 +21,7 @@ export const PrayersForDestiny = new ArtifactSet({
                     title: 'set_bonus.prayers_for_destiny_1',
                     description: 'set_descr.prayers_for_destiny_1',
                     stats: {
-                        text_percent: 40,
+                        text_percent: percent(artifactSetTables.PrayersForDestiny.pc1.p1),
                     },
                 })
             ],

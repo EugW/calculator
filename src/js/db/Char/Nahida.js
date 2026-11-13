@@ -2,12 +2,14 @@ import { Condition } from "../../classes/Condition";
 import { ConditionAnd } from "../../classes/Condition/And";
 import { ConditionAscensionChar } from "../../classes/Condition/Ascension/Char";
 import { ConditionBoolean } from "../../classes/Condition/Boolean";
+import { ConditionOnField } from "../../classes/Condition/Field";
 import { ConditionBooleanValue } from "../../classes/Condition/Boolean/Value";
 import { ConditionCalcElementsNahida } from "../../classes/Condition/CalcElementsNahida";
 import { ConditionConstellation } from "../../classes/Condition/Constellation";
 import { ConditionLevels } from "../../classes/Condition/Levels";
 import { ConditionLevelSelect } from "../../classes/Condition/LevelSelect";
-import { ConditionNumber } from "../../classes/Condition/Number";
+import { ConditionReceiver } from "../../classes/Condition/Receiver";
+import { ConditionRetired } from "../../classes/Condition/Retired";
 import { ConditionStatic } from "../../classes/Condition/Static";
 import { DbObjectChar } from "../../classes/DbObject/Char";
 import { DbObjectConstellation } from "../../classes/DbObject/Constellation";
@@ -21,10 +23,13 @@ import { FeatureMultiplier } from "../../classes/Feature2/Multiplier";
 import { FeaturePostEffectValue } from "../../classes/Feature2/PostEffectValue";
 import { PostEffectStatsMastery } from "../../classes/PostEffect/Stats/Mastery";
 import { PostEffectStatsNahida } from "../../classes/PostEffect/Stats/Nahida";
+import { RECEIVERS } from "../../classes/Team/Receivers";
 import { StatTable } from "../../classes/StatTable";
 import { ValueTable } from "../../classes/ValueTable";
 import { charTables } from "../generated/CharTables";
 import { charTalentTables } from "../generated/CharTalentTables";
+import { percent, times } from "../Params";
+import { CHANNELS } from "../../classes/PostEffect/Channels";
 
 const Talents = new DbObjectTalents({
     attack: {
@@ -151,25 +156,47 @@ const Talents = new DbObjectTalents({
     },
 });
 
-const A1MasteryRatio = 25;
-const A1MasteryCap = 250;
-const A4CritRateBonus = 0.03;
-const A4CritRateBonusCap = 24;
-const A4SkillBonus = 0.1;
-const A4SkillBonusCap = 80;
-const C2CritRate = 20;
+const A1MasteryRatio = percent(charTalentTables.Nahida.a1.p1);
+const A1MasteryCap = charTalentTables.Nahida.a1.p2;
+const A4CritRateBonus = percent(charTalentTables.Nahida.a4.p4);
+const A4CritRateBonusCap = percent(times(charTalentTables.Nahida.a4.p4, charTalentTables.Nahida.a4.p2));
+const A4SkillBonus = percent(charTalentTables.Nahida.a4.p3);
+const A4SkillBonusCap = percent(times(charTalentTables.Nahida.a4.p3, charTalentTables.Nahida.a4.p2));
+const A4BaseMastery = charTalentTables.Nahida.a4.p1;
+const C2CritRate = percent(charTalentTables.Nahida.c2.p1);
 const C2CritDmg = 100;
-const C2LunarCritRate = 10;
-const C2LunarCritDmg = 20;
-const C2DefReduce = 30;
+const C2LunarCritRate = percent(charTalentTables.Nahida.c2.p4);
+const C2LunarCritDmg = percent(charTalentTables.Nahida.c2.p5);
+const C2DefReduce = percent(charTalentTables.Nahida.c2.p2);
+const C4Mastery1 = charTalentTables.Nahida.c4.p1;
+const C4Mastery2 = charTalentTables.Nahida.c4.p2;
+const C4Mastery3 = charTalentTables.Nahida.c4.p3;
+const C4Mastery4 = charTalentTables.Nahida.c4.p4;
+const C6AtkDmg = percent(charTalentTables.Nahida.c6.p1);
+const C6MasteryDmg = percent(charTalentTables.Nahida.c6.p2);
 
+// A1: "The Elemental Mastery of the active character within the field will
+// be increased by 25% of the Elemental Mastery of the party member with the
+// highest Elemental Mastery": the on-field member, Nahida included, from the
+// real team's highest Elemental Mastery (the old model typed it in).
+// Game data: Avatar_Nahida_PermanentSkill_1 (Trigger_PermanentSkill_1) reads
+// FIGHT_PROP_NONEXTRA_ELEMENT_MASTERY (premod) into Team_Max_Mastery, scaled by
+// Mastery_Ratio (ProudSkill 732101: 0.25, cap Mastery_Max 250); the burst gadget's
+// UNIQUE_Nahida_ElementalBurst_Hollow_PermanentSkill_MasterUp writes it as
+// Actor_ElemMasteryExtraDelta (extra). KQM: Key of Khaj-Nisut, Scarlet Sands,
+// Xiphos, Evenstar, Kazuha A4 and Sucrose A4 (extra EM) do not interact with it.
+// Default channels confirmed: premod read of every member, extra write.
 const masteryBuffPost = new PostEffectStatsNahida({
+    receivers: RECEIVERS.TEAM,
     percent: new StatTable('mastery', [A1MasteryRatio / 100]),
     statCap: new ValueTable([A1MasteryCap]),
     conditions: [
         new ConditionAscensionChar({ascension: 1}),
         new ConditionBoolean({name: 'nahida_compassion_illuminated'}),
         new ConditionBoolean({name: 'nahida_illusory_heart'}),
+        new ConditionReceiver({
+            condition: new ConditionOnField(),
+        }),
     ],
 });
 
@@ -295,6 +322,9 @@ export const Nahida = new DbObjectChar({
                     leveling: 'char_skill_elemental',
                     values: Talents.get('skill.nahida_trikarma_purification_dmg'),
                 }),
+                // Game data: Avatar_Nahida_ElementalArt (Nahida_Chain_Normal)
+                // damageExtra Chain_Damage_PerMastery * FIGHT_PROP_ELEMENT_MASTERY
+                // (total). Hits read the total; scaling 'mastery*' needs nothing.
                 new FeatureMultiplier({
                     scaling: 'mastery*',
                     leveling: 'char_skill_elemental',
@@ -310,12 +340,15 @@ export const Nahida = new DbObjectChar({
             multipliers: [
                 new FeatureMultiplier({
                     source: 'constellation6',
-                    values: new ValueTable([200]),
+                    values: new ValueTable([C6AtkDmg]),
                 }),
+                // Game data: Avatar_Nahida_Constellation_6_AttackState damageExtra
+                // Constellation_6_Dmg_PerMastery * FIGHT_PROP_ELEMENT_MASTERY (total).
+                // Hits read the total; scaling 'mastery*' needs nothing.
                 new FeatureMultiplier({
                     scaling: 'mastery*',
                     source: 'constellation6',
-                    values: new ValueTable([400]),
+                    values: new ValueTable([C6MasteryDmg]),
                 }),
             ],
             condition: new ConditionConstellation({constellation: 6}),
@@ -371,16 +404,8 @@ export const Nahida = new DbObjectChar({
                 ]),
             ],
         }),
-        new ConditionNumber({
-            name: 'party_max_mastery',
-            serializeId: 1,
-            max: 1000,
-            loadPartyStat: 'mastery_total',
-            title: 'talent_name.party_max_mastery',
-            conditions: [
-                new ConditionAscensionChar({ascension: 1}),
-            ],
-        }),
+        // The typed-in highest party Elemental Mastery, now read from the team.
+        new ConditionRetired({serializeId: 1, type: 'number'}),
         new ConditionBoolean({
             name: 'nahida_illusory_heart',
             serializeId: 2,
@@ -419,19 +444,22 @@ export const Nahida = new DbObjectChar({
     ],
     postEffects: [
         masteryBuffPost,
+        // A4 CRIT: game data Avatar_Nahida_PermanentSkill_2 reads
+        // FIGHT_PROP_ELEMENT_MASTERY (total); KQM: Sucrose's A4 and her own A1 count.
         new PostEffectStatsMastery({
             percent: new StatTable('crit_rate_nahida', [A4CritRateBonus]),
-            exceed: 200,
-            global: true,
+            exceed: A4BaseMastery,
+            reads: CHANNELS.TOTAL,
             statCap: new StatTable('', [A4CritRateBonusCap]),
             conditions: [
                 new ConditionAscensionChar({ascension: 4}),
             ],
         }),
+        // A4 DMG: same total EM read (Chain_Damage_Up * EffMastery).
         new PostEffectStatsMastery({
             percent: new StatTable('dmg_skill_nahida', [A4SkillBonus]),
-            exceed: 200,
-            global: true,
+            exceed: A4BaseMastery,
+            reads: CHANNELS.TOTAL,
             statCap: new StatTable('', [A4SkillBonusCap]),
             conditions: [
                 new ConditionAscensionChar({ascension: 4}),
@@ -449,7 +477,13 @@ export const Nahida = new DbObjectChar({
         },
         {
             conditions: [
+                // C2: reactions that opponents marked by Nahida's Seeds of
+                // Skandha receive, from any party member. Flat reaction CRIT
+                // (ModifyBeHitDamageMixin, no stat read) and an enemy DEF shred
+                // (Actor_DefenceRatio on the enemy, not a channel): conditions
+                // are premod, needs nothing.
                 new ConditionStatic({
+                    receivers: RECEIVERS.TEAM,
                     title: 'talent_name.nahida_the_root_of_all_fullness',
                     description: 'talent_descr.nahida_the_root_of_all_fullness_1',
                     stats: {
@@ -464,6 +498,7 @@ export const Nahida = new DbObjectChar({
                 new ConditionBoolean({
                     name: 'nahida_the_root_of_all_fullness',
                     serializeId: 5,
+                    receivers: RECEIVERS.TEAM,
                     title: 'talent_name.nahida_the_root_of_all_fullness',
                     description: 'talent_descr.nahida_the_root_of_all_fullness_2',
                     stats: {
@@ -483,6 +518,9 @@ export const Nahida = new DbObjectChar({
         },
         {
             conditions: [
+                // C4: game data Avatar_Nahida_Constellation_4_MasteryUp_Lv1..4 writes
+                // Actor_ElemMasteryDelta (no "Extra": premod); GO writes premod.
+                // Flat conditions are always premod, needs nothing.
                 new ConditionLevelSelect({
                     name: 'weapon.nahida_the_stem_of_manifest_inference',
                     serializeId: 4,
@@ -491,7 +529,7 @@ export const Nahida = new DbObjectChar({
                     description: 'talent_descr.nahida_the_stem_of_manifest_inference',
                     maxStacks: 4,
                     stats: [
-                        new StatTable('mastery', [100, 120, 140, 160]),
+                        new StatTable('mastery', [C4Mastery1, C4Mastery2, C4Mastery3, C4Mastery4]),
                     ],
                 }),
             ],
@@ -503,67 +541,12 @@ export const Nahida = new DbObjectChar({
                     title: 'talent_name.nahida_the_fruit_of_reasons_culmination',
                     description: 'talent_descr.nahida_the_fruit_of_reasons_culmination',
                     stats: {
-                        text_percent_dmg: 200,
-                        text_percent_dmg2: 400,
+                        text_percent_dmg: C6AtkDmg,
+                        text_percent_dmg2: C6MasteryDmg,
                     },
                 }),
             ],
         },
     ]),
-    partyData: {
-        conditions: [
-            new ConditionNumber({
-                name: 'party_max_mastery',
-                serializeId: 1,
-                rotation: 'party',
-                loadPartyStat: 'mastery_total',
-                max: 5000,
-                title: 'talent_name.party_max_mastery',
-            }),
-            new ConditionBoolean({
-                name: 'party.nahida_compassion_illuminated',
-                serializeId: 2,
-                rotation: 'party',
-                title: 'talent_name.nahida_compassion_illuminated',
-                description: 'talent_descr.nahida_compassion_illuminated',
-                info: {ascension: 1},
-            }),
-            new ConditionBoolean({
-                name: 'party.nahida_the_root_of_all_fullness_1',
-                serializeId: 3,
-                rotation: 'party',
-                title: 'talent_name.nahida_the_root_of_all_fullness',
-                description: 'talent_descr.nahida_the_root_of_all_fullness_1',
-                info: {constellation: 2},
-                stats: {
-                    crit_rate_bloom: C2CritRate,
-                    crit_dmg_bloom: C2CritDmg,
-                    crit_rate_burning: C2CritRate,
-                    crit_dmg_burning: C2CritDmg,
-                    crit_rate_lunarbloom: C2LunarCritRate,
-                    crit_dmg_lunarbloom: C2LunarCritDmg,
-                },
-            }),
-            new ConditionBoolean({
-                name: 'party.nahida_the_root_of_all_fullness_2',
-                serializeId: 4,
-                rotation: 'party',
-                title: 'talent_name.nahida_the_root_of_all_fullness',
-                description: 'talent_descr.nahida_the_root_of_all_fullness_2',
-                info: {constellation: 2},
-                stats: {
-                    enemy_def_reduce: C2DefReduce,
-                },
-            }),
-        ],
-        postEffects: [
-            new PostEffectStatsNahida({
-                percent: new StatTable('mastery', [A1MasteryRatio / 100]),
-                statCap: new StatTable('', [A1MasteryCap]),
-                conditions: [
-                    new ConditionBoolean({name: 'party.nahida_compassion_illuminated'}),
-                ],
-            })
-        ],
-    },
+    retiredParty: [[1, 'number'], [2, 'checkbox'], [3, 'checkbox'], [4, 'checkbox']],
 });

@@ -2,10 +2,23 @@ import { CPostEffect } from "../Feature2/Compile/Types/Block";
 import { CConst } from "../Feature2/Compile/Types/Item";
 import { PostEffect, PRIORITIES } from "../PostEffect";
 import { Stats } from "../Stats";
+import { programStatName } from "../Team/EnemyStats";
+import { CHANNELS } from "./Channels";
 
 export class PostEffectSetBonus extends PostEffect {
-    getPriority() {
+    getFixedStage() {
         return PRIORITIES.SET_BONUS;
+    }
+
+    /**
+     * @returns {string} set bonuses are ordinary stats: premod
+     */
+    getWrites() {
+        return CHANNELS.PREMOD;
+    }
+
+    getWriteStats() {
+        return Object.keys(this.params.stats || {});
     }
 
     getData(stats, settings) {
@@ -29,7 +42,7 @@ export class PostEffectSetBonus extends PostEffect {
             });
 
             result.push(new CPostEffect([item], {
-                stat: stat,
+                stat: programStatName(stat),
                 priority: this.getPriority(),
             }));
         }

@@ -1,0 +1,22 @@
+category;name;rus;eng
+legacy;title;Дополнительные эффекты;Additional buffs
+legacy;descr;Эффекты извне четырёх слотов отряда: персонажи без сборки, оружие и комплекты без владельца. Они дают эффекты отряду, но сами ничего не получают, не выходят на поле и не наносят урон. Нажмите на строку, чтобы раскрыть её. Перетащите её, чтобы изменить порядок. Первые три персонажа занимают свободные слоты в составе отряда (резонансы, размер отряда). Один и тот же эффект от персонажа отряда и отсюда не складывается.;Effects from outside the team's four slots: characters with no build, weapons and artifact sets with no wielder. They give the team their effects and nothing else: they receive nothing, are never on field and deal no damage. Click a row to expand it. Drag it to change the order. The first three characters fill the team's free slots for its composition (resonances, party size). The same effect from a team member and from here counts once.
+legacy;add_char;Персонаж;Character
+legacy;add_weapon;Оружие;Weapon
+legacy;add_set;Комплект;Artifact set
+legacy;empty;Здесь пока ничего нет.;Nothing here yet.
+legacy;mark_virtual;без сборки;no build
+legacy;mark_floating;без владельца;no wielder
+legacy;state_party;В составе отряда;In the party
+legacy;state_outside;Вне состава: только эффекты;Outside the party: effects only
+legacy;state_inactive;Не действует: персонаж есть в отряде;No effect: the character is in the team
+legacy;refine;Пробуждение;Refinement
+legacy;talent_attack;Обычная атака;Normal Attack
+legacy;talent_elemental;Элементальный навык;Elemental Skill
+legacy;talent_burst;Взрыв стихии;Elemental Burst
+legacy;stated;Характеристики, которые читают эффекты;Stats its effects read
+legacy;stated_descr;Заданное значение итоговое. Незаданная характеристика равна нулю: сборки нет.;A stated value is final. A stat that is not stated is zero: there is no build.
+legacy;element;Элемент владельца;Wielder's element
+legacy;element_any;Подходящий;Matching
+legacy;no_effects;Не даёт отряду эффектов.;Gives the team no effects.
+legacy;remove;Убрать;Remove

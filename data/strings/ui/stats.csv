@@ -178,8 +178,8 @@ stat;crit_dmg_burst_arlecchino;Восхождение роковой луны;Ba
 
 stat;dmg_normal_elemental;Элементальный урон;Elemental DMG
 stat;enemy_def_reduce;Снижение защиты противника;Enemy DEF reduce
-stat;enemy_def_ignore;Игнорирование защиты;Enemy DEF ignore
-stat;enemy_def_ignore_burst;Игнор. Взр. стихий;Burst DEF ignore
+stat;def_ignore;Игнорирование защиты;DEF ignore
+stat;def_ignore_burst;Игнор. Взр. стихий;Burst DEF ignore
 stat;bond_of_life;Долг жизни;Bond of Life
 
 stat;dmg_normal_pyro;Обычная Пиро птака;Normal Pyro attack

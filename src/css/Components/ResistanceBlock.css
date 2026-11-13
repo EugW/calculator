@@ -29,10 +29,6 @@
     width: 45px;
 }
 
-.resistance-block.multiplier .text {
-    width: 100px;
-}
-
 .resistance-block .green {
     color: #90E800;
 }
@@ -41,8 +37,34 @@
     color: #d64848;
 }
 
-.resistance-block .multi {
-    flex-grow: 1;
-    text-align: right;
-    padding-right: 10px;
+/* The full block: four cells per row, two where the block is narrow. */
+.resistance-block.multiplier {
+    container-type: inline-size;
+}
+
+.resistance-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 4px 12px;
+    padding: 0 4px;
+    font-size: 13px;
+    color: #BEAEA9;
+}
+
+@container (max-width: 380px) {
+    .resistance-grid {
+        grid-template-columns: repeat(2, 1fr);
+    }
+}
+
+.resistance-cell {
+    display: flex;
+    align-items: center;
+    gap: 4px;
+    min-width: 0;
+    white-space: nowrap;
+}
+
+.resistance-cell .multi {
+    margin-left: auto;
 }

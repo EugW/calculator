@@ -1,5 +1,6 @@
 import { ArtifactSet } from "../../../classes/ArtifactSet";
 import { ConditionStatic } from "../../../classes/Condition/Static";
+import { artifactSetTables } from "../../generated/ArtifactSetTables";
 
 export const Adventurer = new ArtifactSet({
     serializeId: 1,
@@ -19,7 +20,7 @@ export const Adventurer = new ArtifactSet({
                     description: 'set_descr.adventurer_2',
                     settings: {},
                     stats: {
-                        hp: 1000,
+                        hp: artifactSetTables.Adventurer.pc2.hp,
                     },
                 })
             ],

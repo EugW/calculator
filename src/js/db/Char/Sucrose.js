@@ -6,7 +6,7 @@ import { ConditionBooleanCharElement } from "../../classes/Condition/Boolean/Cha
 import { ConditionDropdownElement } from "../../classes/Condition/Dropdown/Element";
 import { ConditionHexereiResonance } from "../../classes/Condition/HexereiResonance";
 import { ConditionNot } from "../../classes/Condition/Not";
-import { ConditionNumber } from "../../classes/Condition/Number";
+import { ConditionReceiver } from "../../classes/Condition/Receiver";
 import { ConditionWitchHomework } from "../../classes/Condition/WitchHomework";
 import { ConditionStatic } from "../../classes/Condition/Static";
 import { DbObjectChar } from "../../classes/DbObject/Char";
@@ -20,19 +20,17 @@ import { FeatureDamagePlungeShockWave } from "../../classes/Feature2/Damage/Plun
 import { FeatureDamageSkill } from "../../classes/Feature2/Damage/Skill";
 import { FeatureMultiplier } from "../../classes/Feature2/Multiplier";
 import { FeaturePostEffectValue } from "../../classes/Feature2/PostEffectValue";
-import { PostEffectStats } from "../../classes/PostEffect/Stats";
 import { PostEffectStatsMastery } from "../../classes/PostEffect/Stats/Mastery";
 import { StatTable } from "../../classes/StatTable";
+import { RECEIVERS } from "../../classes/Team/Receivers";
 import { charTables } from "../generated/CharTables";
 import { charTalentTables } from "../generated/CharTalentTables";
+import { percent } from "../Params";
 
 const condWitchHomeworkOn  = new ConditionBoolean({name: 'sucrose_witch_homework'});
 const condWitchHomeworkOff = new ConditionNot([condWitchHomeworkOn]);
-const condPartyWitchHomeworkOn  = new ConditionBoolean({name: 'party.sucrose_witch_homework'});
-const condPartyWitchHomeworkOff = new ConditionNot([condPartyWitchHomeworkOn]);
 
 const condHexereiResonanceOn = new ConditionHexereiResonance({});
-const condIsWitch = new ConditionWitchHomework({});
 
 const Talents = new DbObjectTalents({
     attack: {
@@ -110,6 +108,11 @@ const Talents = new DbObjectTalents({
         ],
     },
 });
+
+const A1Mastery = charTalentTables.Sucrose.a1.p1;
+const A4MasteryRatio = charTalentTables.Sucrose.a4.p1;
+const A4MasteryPercent = percent(charTalentTables.Sucrose.a4.p1);
+const C6DmgBonus = percent(charTalentTables.Sucrose.c6.p1);
 
 export const Sucrose = new DbObjectChar({
     name: 'sucrose',
@@ -253,11 +256,17 @@ export const Sucrose = new DbObjectChar({
                 }),
             ],
         }),
+        // Display copy of A4 (Mollis Favonius): game data
+        // (Avatar_Sucrose_PermanentSkill_NetherWind,
+        // UNIQUE_Avatar_Sucrose_PermanentSkill_NetherWind_Buff) computes
+        // Actor_ElemMasteryExtraDelta (extra) from
+        // FIGHT_PROP_NONEXTRA_ELEMENT_MASTERY (premod EM). Default confirmed,
+        // no params; the value follows the team post-effect below.
         new FeaturePostEffectValue({
             category: 'other',
             name: 'sucrose_mastery_bonus',
             postEffect: new PostEffectStatsMastery({
-                percent: new StatTable('mastery', [0.2]),
+                percent: new StatTable('mastery', [A4MasteryRatio]),
             }),
             condition: new ConditionAscensionChar({ascension: 4}),
         }),
@@ -273,6 +282,7 @@ export const Sucrose = new DbObjectChar({
         new ConditionBoolean({
             name: 'sucrose_small_wind_spirit',
             serializeId: 4,
+            receivers: RECEIVERS.TEAM,
             title: 'talent_name.sucrose_small_wind_spirit',
             condition: new ConditionAnd([
                 condHexereiResonanceOn,
@@ -306,11 +316,32 @@ export const Sucrose = new DbObjectChar({
             },
             info: {hexerei: true},
         }),
+        // Large Wind Spirit blesses nearby Hexerei party members.
+        new Condition({
+            isHidden: true,
+            receivers: RECEIVERS.OTHERS,
+            stats: {
+                dmg_normal: 7.14285,
+                dmg_charged: 7.14285,
+                dmg_plunge: 7.14285,
+                dmg_skill: 7.14285,
+                dmg_burst: 7.14285,
+            },
+            condition: new ConditionAnd([
+                new ConditionBoolean({name: 'sucrose_large_wind_spirit'}),
+                condHexereiResonanceOn,
+                condWitchHomeworkOn,
+                new ConditionReceiver({
+                    condition: new ConditionWitchHomework({}),
+                }),
+            ]),
+        }),
         new ConditionStatic({
+            isHidden: true,
             title: 'talent_name.sucrose_catalyst_conversion',
             description: 'talent_descr.sucrose_catalyst_conversion',
             stats: {
-                text_value: 50,
+                text_value: A1Mastery,
             },
             info: {ascension: 1},
             subConditions: [
@@ -318,13 +349,72 @@ export const Sucrose = new DbObjectChar({
             ],
         }),
         new ConditionStatic({
+            isHidden: true,
             title: 'talent_name.sucrose_mollis_favonius',
             description: 'talent_descr.sucrose_mollis_favonius',
             stats: {
-                text_percent: 20,
+                text_percent: A4MasteryPercent,
             },
             info: {ascension: 4},
             subConditions: [
+                new ConditionAscensionChar({ascension: 4}),
+            ],
+        }),
+        // Each selected Swirl element buffs only matching party members.
+        // A1 Catalyst Conversion: game data
+        // (Avatar_Sucrose_PermanentSkill_Catalysa,
+        // UNIQUE_Avatar_Sucrose_PermanentSkill_Catalysa_{Fire,Water,Ice,Electric})
+        // writes the flat +50 EM as Actor_ElemMasteryDelta (premod, no Extra),
+        // with no stat read. Conditions write premod: default confirmed, no
+        // params. GO writes it under premod.
+        new ConditionDropdownElement({
+            name: 'sucrose_catalyst_conversion',
+            serializeId: 2,
+            receivers: RECEIVERS.OTHERS,
+            title: 'talent_name.sucrose_catalyst_conversion',
+            description: 'talent_descr.sucrose_catalyst_conversion',
+            displayStats: {text_value: A1Mastery},
+            multiple: true,
+            info: {ascension: 1},
+            subConditions: [new ConditionAscensionChar({ascension: 1})],
+            values: ['cryo', 'electro', 'hydro', 'pyro'].map((element, index) => ({
+                value: element,
+                serializeId: index + 1,
+                conditions: [new Condition({
+                    stats: {mastery: A1Mastery},
+                    condition: new ConditionReceiver({
+                        condition: new ConditionBooleanCharElement({element: [element]}),
+                    }),
+                })],
+            })),
+        }),
+        // Skill hits share 20% of Sucrose's Mastery with other party members.
+        new ConditionBoolean({
+            name: 'sucrose_mollis_favonius',
+            serializeId: 6,
+            title: 'talent_name.sucrose_mollis_favonius',
+            description: 'talent_descr.sucrose_mollis_favonius',
+            info: {ascension: 4},
+            displayStats: {text_percent: A4MasteryPercent},
+            subConditions: [
+                new ConditionAscensionChar({ascension: 4}),
+            ],
+        }),
+    ],
+    postEffects: [
+        // A4 Mollis Favonius: game data
+        // (Avatar_Sucrose_PermanentSkill_NetherWind,
+        // UNIQUE_Avatar_Sucrose_PermanentSkill_NetherWind_Buff) computes
+        // Actor_ElemMasteryExtraDelta (extra) from
+        // FIGHT_PROP_NONEXTRA_ELEMENT_MASTERY (premod EM). KQM: flat EM
+        // (Albedo A4, Kazuha C2) counts; Nahida A1 and Key of Khaj-Nisut
+        // extra EM do not. GO reads input.premod.eleMas into teamBuff.total.
+        // Default confirmed, no params.
+        new PostEffectStatsMastery({
+            receivers: RECEIVERS.OTHERS,
+            percent: new StatTable('mastery', [A4MasteryRatio]),
+            conditions: [
+                new ConditionBoolean({name: 'sucrose_mollis_favonius'}),
                 new ConditionAscensionChar({ascension: 4}),
             ],
         }),
@@ -374,9 +464,15 @@ export const Sucrose = new DbObjectChar({
         },
         {
             conditions: [
+                // C6 Chaotic Entropy: game data (UNIQUE_Hurricane_Mix_{Fire,
+                // Water,Ice,Electric}_Enhancement[_Hexenzirkel]) writes the flat
+                // 20% (+8.57142% Hexerei) bonus as Actor_*AddHurtDelta (premod,
+                // no Extra), with no stat read. Conditions write premod:
+                // default confirmed, no params.
                 new ConditionDropdownElement({
                     name: 'sucrose_chaotic_entropy',
                     serializeId: 1,
+                    receivers: RECEIVERS.TEAM,
                     title: 'talent_name.sucrose_chaotic_entropy',
                     description: 'talent_descr.sucrose_chaotic_entropy',
                     hideCondition: [condWitchHomeworkOn],
@@ -386,28 +482,28 @@ export const Sucrose = new DbObjectChar({
                             value: 'cryo',
                             serializeId: 1,
                             conditions: [
-                                new Condition({stats: {dmg_cryo: 20}}),
+                                new Condition({stats: {dmg_cryo: C6DmgBonus}}),
                             ],
                         },
                         {
                             value: 'electro',
                             serializeId: 2,
                             conditions: [
-                                new Condition({stats: {dmg_electro: 20}}),
+                                new Condition({stats: {dmg_electro: C6DmgBonus}}),
                             ],
                         },
                         {
                             value: 'hydro',
                             serializeId: 3,
                             conditions: [
-                                new Condition({stats: {dmg_hydro: 20}}),
+                                new Condition({stats: {dmg_hydro: C6DmgBonus}}),
                             ],
                         },
                         {
                             value: 'pyro',
                             serializeId: 4,
                             conditions: [
-                                new Condition({stats: {dmg_pyro: 20}}),
+                                new Condition({stats: {dmg_pyro: C6DmgBonus}}),
                             ],
                         },
                     ],
@@ -415,6 +511,7 @@ export const Sucrose = new DbObjectChar({
                 new ConditionDropdownElement({
                     name: 'sucrose_chaotic_entropy',
                     serializeId: 1,
+                    receivers: RECEIVERS.TEAM,
                     title: 'talent_name.sucrose_chaotic_entropy',
                     description: 'talent_descr.sucrose_chaotic_entropy_buffed',
                     hideCondition: [condWitchHomeworkOff],
@@ -424,28 +521,54 @@ export const Sucrose = new DbObjectChar({
                             value: 'cryo',
                             serializeId: 1,
                             conditions: [
-                                new Condition({stats: {dmg_cryo: 28.57142}}),
+                                new Condition({stats: {dmg_cryo: C6DmgBonus}}),
+                                // Nearby Hexerei characters gain an additional
+                                // 8.57142% Elemental DMG Bonus.
+                                new Condition({
+                                    stats: {dmg_cryo: 8.57142},
+                                    condition: new ConditionReceiver({
+                                        condition: new ConditionWitchHomework({}),
+                                    }),
+                                }),
                             ],
                         },
                         {
                             value: 'electro',
                             serializeId: 2,
                             conditions: [
-                                new Condition({stats: {dmg_electro: 28.57142}}),
+                                new Condition({stats: {dmg_electro: C6DmgBonus}}),
+                                new Condition({
+                                    stats: {dmg_electro: 8.57142},
+                                    condition: new ConditionReceiver({
+                                        condition: new ConditionWitchHomework({}),
+                                    }),
+                                }),
                             ],
                         },
                         {
                             value: 'hydro',
                             serializeId: 3,
                             conditions: [
-                                new Condition({stats: {dmg_hydro: 28.57142}}),
+                                new Condition({stats: {dmg_hydro: C6DmgBonus}}),
+                                new Condition({
+                                    stats: {dmg_hydro: 8.57142},
+                                    condition: new ConditionReceiver({
+                                        condition: new ConditionWitchHomework({}),
+                                    }),
+                                }),
                             ],
                         },
                         {
                             value: 'pyro',
                             serializeId: 4,
                             conditions: [
-                                new Condition({stats: {dmg_pyro: 28.57142}}),
+                                new Condition({stats: {dmg_pyro: C6DmgBonus}}),
+                                new Condition({
+                                    stats: {dmg_pyro: 8.57142},
+                                    condition: new ConditionReceiver({
+                                        condition: new ConditionWitchHomework({}),
+                                    }),
+                                }),
                             ],
                         },
                     ],
@@ -453,198 +576,5 @@ export const Sucrose = new DbObjectChar({
             ],
         },
     ]),
-    partyData: {
-        loadStats: {
-            stats: ['mastery_total'],
-        },
-        conditions: [
-            new ConditionBoolean({
-                name: 'party.sucrose_witch_homework',
-                serializeId: 8,
-                rotation: 'party',
-                title: 'talent_name.sucrose_sevenfold_transmutation',
-                description: 'talent_descr.sucrose_sevenfold_transmutation',
-                info: {hexerei: true},
-            }),
-            new ConditionBoolean({
-                name: 'party.sucrose_small_wind_spirit',
-                serializeId: 9,
-                rotation: 'party',
-                title: 'talent_name.sucrose_small_wind_spirit',
-                condition: new ConditionAnd([
-                    condHexereiResonanceOn,
-                    condPartyWitchHomeworkOn,
-                ]),
-                hideCondition: [condPartyWitchHomeworkOff],
-                stats: {
-                    dmg_normal: 5.71428,
-                    dmg_charged: 5.71428,
-                    dmg_plunge: 5.71428,
-                    dmg_skill: 5.71428,
-                    dmg_burst: 5.71428,
-                },
-                info: {hexerei: true},
-            }),
-            new ConditionBoolean({
-                name: 'party.sucrose_large_wind_spirit',
-                serializeId: 10,
-                rotation: 'party',
-                title: 'talent_name.sucrose_large_wind_spirit',
-                condition: new ConditionAnd([
-                    condHexereiResonanceOn,
-                    condIsWitch,
-                    condPartyWitchHomeworkOn,
-                ]),
-                hideCondition: [condPartyWitchHomeworkOff],
-                stats: {
-                    dmg_normal: 7.14285,
-                    dmg_charged: 7.14285,
-                    dmg_plunge: 7.14285,
-                    dmg_skill: 7.14285,
-                    dmg_burst: 7.14285,
-                },
-                info: {hexerei: true},
-            }),
-            new ConditionNumber({
-                name: 'sucrose_mastery',
-                title: 'stat.mastery',
-                partyStat: 'mastery_total',
-                serializeId: 1,
-                rotation: 'party',
-                max: 10000,
-            }),
-            new ConditionBoolean({
-                name: 'party.sucrose_catalyst_conversion',
-                serializeId: 2,
-                rotation: 'party',
-                title: 'talent_name.sucrose_catalyst_conversion',
-                description: 'talent_descr.sucrose_catalyst_conversion',
-                info: {ascension: 1},
-                stats: {
-                    text_value: 50,
-                    mastery: 50,
-                },
-                subConditions: [
-                    new ConditionBooleanCharElement({
-                        element: ['pyro', 'hydro', 'cryo', 'electro'],
-                    }),
-                ],
-            }),
-            new ConditionBoolean({
-                name: 'party.sucrose_mollis_favonius',
-                serializeId: 3,
-                rotation: 'party',
-                title: 'talent_name.sucrose_mollis_favonius',
-                description: 'talent_descr.sucrose_mollis_favonius',
-                info: {ascension: 4},
-                stats: {
-                    text_percent: 20,
-                },
-            }),
-            new ConditionDropdownElement({
-                name: 'party.sucrose_chaotic_entropy',
-                serializeId: 4,
-                rotation: 'party',
-                title: 'talent_name.sucrose_chaotic_entropy',
-                description: 'talent_descr.sucrose_chaotic_entropy',
-                hideCondition: [condPartyWitchHomeworkOn],
-                condition: condPartyWitchHomeworkOff,
-                info: {constellation: 6},
-                values: [
-                    {
-                        value: 'cryo',
-                        serializeId: 1,
-                        conditions: [
-                            new Condition({stats: {dmg_cryo: 20}}),
-                        ],
-                    },
-                    {
-                        value: 'electro',
-                        serializeId: 2,
-                        conditions: [
-                            new Condition({stats: {dmg_electro: 20}}),
-                        ],
-                    },
-                    {
-                        value: 'hydro',
-                        serializeId: 3,
-                        conditions: [
-                            new Condition({stats: {dmg_hydro: 20}}),
-                        ],
-                    },
-                    {
-                        value: 'pyro',
-                        serializeId: 4,
-                        conditions: [
-                            new Condition({stats: {dmg_pyro: 20}}),
-                        ],
-                    },
-                ],
-
-            }),
-            new ConditionDropdownElement({
-                name: 'party.sucrose_chaotic_entropy',
-                serializeId: 4,
-                rotation: 'party',
-                title: 'talent_name.sucrose_chaotic_entropy',
-                description: 'talent_descr.sucrose_chaotic_entropy_buffed',
-                hideCondition: [condPartyWitchHomeworkOff],
-                condition: condPartyWitchHomeworkOn,
-                info: {constellation: 6},
-                values: [
-                    {
-                        value: 'cryo',
-                        serializeId: 1,
-                        conditions: [
-                            new Condition({stats: {dmg_cryo: 20}}),
-                            new Condition({
-                                condition: new ConditionWitchHomework({}),
-                                stats: {dmg_cryo: 8.57142},
-                            }),
-                        ],
-                    },
-                    {
-                        value: 'electro',
-                        serializeId: 2,
-                        conditions: [
-                            new Condition({stats: {dmg_electro: 20}}),
-                            new Condition({
-                                condition: new ConditionWitchHomework({}),
-                                stats: {dmg_electro: 8.57142},
-                            }),
-                        ],
-                    },
-                    {
-                        value: 'hydro',
-                        serializeId: 3,
-                        conditions: [
-                            new Condition({stats: {dmg_hydro: 20}}),
-                            new Condition({
-                                condition: new ConditionWitchHomework({}),
-                                stats: {dmg_hydro: 8.57142},
-                            }),
-                        ],
-                    },
-                    {
-                        value: 'pyro',
-                        serializeId: 4,
-                        conditions: [
-                            new Condition({stats: {dmg_pyro: 20}}),
-                            new Condition({
-                                condition: new ConditionWitchHomework({}),
-                                stats: {dmg_pyro: 8.57142},
-                            }),
-                        ],
-                    },
-                ],
-            }),
-        ],
-        postEffects: [
-            new PostEffectStats({
-                from: 'sucrose_mastery',
-                percent: new StatTable('mastery', [0.2]),
-                condition: new ConditionBoolean({name: 'party.sucrose_mollis_favonius'}),
-            }),
-        ],
-    },
+    retiredParty: [[1, 'number'], [2, 'checkbox'], [3, 'checkbox'], [4, 'dropdown'], [8, 'checkbox'], [9, 'checkbox'], [10, 'checkbox']],
 });

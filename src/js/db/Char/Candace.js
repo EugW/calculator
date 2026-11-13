@@ -1,9 +1,10 @@
 import { Condition } from "../../classes/Condition";
+import { ConditionAnd } from "../../classes/Condition/And";
 import { ConditionAscensionChar } from "../../classes/Condition/Ascension/Char";
 import { ConditionBoolean } from "../../classes/Condition/Boolean";
 import { ConditionBooleanWeaponType } from "../../classes/Condition/Boolean/WeaponType";
 import { ConditionConstellation } from "../../classes/Condition/Constellation";
-import { ConditionNumber } from "../../classes/Condition/Number";
+import { ConditionReceiver } from "../../classes/Condition/Receiver";
 import { ConditionStatic } from "../../classes/Condition/Static";
 import { DbObjectChar } from "../../classes/DbObject/Char";
 import { DbObjectConstellation } from "../../classes/DbObject/Constellation";
@@ -19,13 +20,14 @@ import { FeatureMultiplier } from "../../classes/Feature2/Multiplier";
 import { FeatureMultiplierList } from "../../classes/Feature2/Multiplier/List";
 import { FeaturePostEffectValue } from "../../classes/Feature2/PostEffectValue";
 import { FeatureShield } from "../../classes/Feature2/Shield";
-import { PostEffectStats } from "../../classes/PostEffect/Stats";
 import { PostEffectStatsHP } from "../../classes/PostEffect/Stats/HP";
 import { StatTable } from "../../classes/StatTable";
+import { RECEIVERS } from "../../classes/Team/Receivers";
 import { ValueTable } from "../../classes/ValueTable";
-import { CHARACTER_MAX_POSSIBLE_HP } from "../Constants";
+import { CHANNELS } from "../../classes/PostEffect/Channels";
 import { charTables } from "../generated/CharTables";
 import { charTalentTables } from "../generated/CharTalentTables";
+import { percent, times } from "../Params";
 
 const Talents = new DbObjectTalents({
     attack: {
@@ -137,10 +139,17 @@ const Talents = new DbObjectTalents({
 
 const TalentValues = {
     BaseDmgBonus: 20,
-    A4BonusScale: 0.0005,
-    C2HpBonus: 20,
-    C6Damage: 15,
+    A4BonusScale: percent(times(charTalentTables.Candace.a4.p1, 0.001)),
+    C2HpBonus: percent(charTalentTables.Candace.c2.p1),
+    C6Damage: percent(charTalentTables.Candace.c6.p1),
 };
+
+// Sword, Claymore and Polearm wielders of Prayer of the Crimson Crown.
+const meleeReceiver = () => new ConditionReceiver({
+    condition: new ConditionBooleanWeaponType({
+        types: ['sword', 'claymore', 'polearm'],
+    }),
+});
 
 export const Candace = new DbObjectChar({
     name: 'candace',
@@ -153,6 +162,16 @@ export const Candace = new DbObjectChar({
     origin: 'sumeru',
     talents: Talents,
     statTable: charTables.Candace,
+    // Talent HP-scaled hits read the total HP: the game computes them from
+    // FIGHT_PROP_MAX_HP in damageExtra (Elemental_Art_H/L, Elemental_Burst,
+    // Elemental_Burst_AvatarIn, ExtraAvatarInAttack_DMG x FIGHT_PROP_MAX_HP in
+    // Avatar_Candace_ElementalArt_H/L and Avatar_Candace_ElementalBurst).
+    // Damage multipliers with scaling 'hp*' read the total by construction
+    // and need nothing. The skill shield (EliteShieldMixin with
+    // Shield_HP_Ratio/Shield_HP_Delta in Avatar_Candace_ElementalArt_ChargeShield)
+    // names no FIGHT_PROP read; shields scale like hits (total) and need
+    // nothing. GO uses dmgNode/shieldNodeTalent('hp', ...) (total) for all of
+    // these. KQM Candace has no EM/ATK/HP/ER buff-chain test.
     features: [
         new FeatureDamageNormal({
             name: 'normal_hit_1',
@@ -329,10 +348,13 @@ export const Candace = new DbObjectChar({
             ],
             condition: new ConditionConstellation({constellation: 6}),
         }),
+        // Display of the burst A4 post-effect below. It is a post-effect of
+        // its own, so it declares the same total HP read (FIGHT_PROP_MAX_HP).
         new FeaturePostEffectValue({
             category: 'burst',
             name: 'candace_dmg_bonus',
             postEffect: new PostEffectStatsHP({
+                reads: CHANNELS.TOTAL,
                 percent: [
                     new StatTable('text_percent', [TalentValues.A4BonusScale]),
                 ],
@@ -343,14 +365,25 @@ export const Candace = new DbObjectChar({
         }),
     ],
     conditions: [
+        // Prayer of the Crimson Crown reaches every member; Hydro infusion
+        // only Sword, Claymore and Polearm wielders.
         new Condition({
+            receivers: RECEIVERS.TEAM,
+            condition: meleeReceiver(),
             settings: {
                 allowed_infusion_hydro: 1,
             },
         }),
+        // Base 20% NormalAttack elemental DMG: the game adds it with
+        // ModifyDamageMixin damagePercentageRatio Buff_NormalAttack_BaseDMGRatio
+        // (no stat read) in UNIQUE_Candace_ElementalBurst_WaterField_LocalHandler;
+        // GO sums it with the A4 part under teamBuff.premod. A flat toggle
+        // writes premod by construction (conditions cannot write extra yet)
+        // and needs nothing.
         new ConditionBoolean({
             name: 'candace_prayer_of_the_crimson_crown',
             serializeId: 1,
+            receivers: RECEIVERS.TEAM,
             title: 'talent_name.candace_prayer_of_the_crimson_crown',
             description: 'talent_descr.candace_prayer_of_the_crimson_crown',
             stats: {
@@ -362,6 +395,14 @@ export const Candace = new DbObjectChar({
                 dmg_normal_cryo: TalentValues.BaseDmgBonus,
                 dmg_normal_dendro: TalentValues.BaseDmgBonus,
             },
+        }),
+        new Condition({
+            isHidden: true,
+            receivers: RECEIVERS.TEAM,
+            condition: new ConditionAnd([
+                new ConditionBoolean({name: 'candace_prayer_of_the_crimson_crown'}),
+                meleeReceiver(),
+            ]),
             settings: {
                 attack_infusion_hydro: 1,
             },
@@ -384,7 +425,18 @@ export const Candace = new DbObjectChar({
         }),
     ],
     postEffects: [
+        // Burst A4 NormalAttack elemental DMG from Max HP (team, dmg_normal_*).
+        // Game data: UNIQUE_Candace_ElementalBurst_WaterField_LocalHandler
+        // computes ModifyDamageMixin damagePercentageRatio
+        // [Buff_NormalAttack_MaxHP2DMGRatio, FIGHT_PROP_MAX_HP, MUL, 1000, DIV]
+        // gated by Talent_Candace_PermanentSkill_2 (A4, ProudSkill 722201
+        // param 0.005 = 0.5% per 1000 HP; talent text: Celestial Dome of Sand).
+        // FIGHT_PROP_MAX_HP is the total read (md/buff_chains.md), as for
+        // Baizhu, Chevreuse and Columbina; the same number as premod while no
+        // ability writes extra HP. GO reads input.total.hp.
         new PostEffectStatsHP({
+            receivers: RECEIVERS.TEAM,
+            reads: CHANNELS.TOTAL,
             percent: [
                 new StatTable('dmg_normal_anemo', [TalentValues.A4BonusScale]),
                 new StatTable('dmg_normal_geo', [TalentValues.A4BonusScale]),
@@ -411,6 +463,11 @@ export const Candace = new DbObjectChar({
         },
         {
             conditions: [
+                // C2 Max HP +20%: the game writes Actor_MaxHPRatio (no "Extra",
+                // i.e. premod) in UNIQUE_Candace_Constellation_2_MaxHPUp
+                // (Talent Candace_Constellation_2 paramList [0.2, 15]; GO puts it
+                // under premod hp_). Flat conditions are always premod, so this
+                // needs nothing.
                 new ConditionBoolean({
                     name: 'candace_moon_piercing_brilliance',
                     serializeId: 2,
@@ -450,6 +507,10 @@ export const Candace = new DbObjectChar({
         },
         {
             conditions: [
+                // C6 display only (15% Max HP wave): the real hit is
+                // candace_the_overflow_dmg above (game: ExtraAvatarInAttack_DMG x
+                // FIGHT_PROP_MAX_HP, total). text_percent_dmg has no extra lane
+                // and needs nothing.
                 new ConditionStatic({
                     title: 'talent_name.candace_the_overflow',
                     description: 'talent_descr.candace_the_overflow',
@@ -460,84 +521,5 @@ export const Candace = new DbObjectChar({
             ],
         },
     ]),
-    partyData: {
-        loadStats: {
-            stats: ['hp_total'],
-        },
-        conditions: [
-            new Condition({
-                settings: {
-                    allowed_infusion_hydro: 1,
-                },
-                subConditions: [
-                    new ConditionBooleanWeaponType({
-                        types: ['sword', 'claymore', 'polearm'],
-                    }),
-                ],
-            }),
-            new ConditionNumber({
-                name: 'candace_hp_total',
-                title: 'talent_name.stats_total_hp',
-                partyStat: 'hp_total',
-                serializeId: 1,
-                max: CHARACTER_MAX_POSSIBLE_HP,
-            }),
-            new ConditionBoolean({
-                name: 'party.candace_prayer_of_the_crimson_crown',
-                serializeId: 2,
-                rotation: 'party',
-                title: 'talent_name.candace_prayer_of_the_crimson_crown',
-                description: 'talent_descr.candace_prayer_of_the_crimson_crown',
-                stats: {
-                    dmg_normal_anemo: TalentValues.BaseDmgBonus,
-                    dmg_normal_geo: TalentValues.BaseDmgBonus,
-                    dmg_normal_pyro: TalentValues.BaseDmgBonus,
-                    dmg_normal_electro: TalentValues.BaseDmgBonus,
-                    dmg_normal_hydro: TalentValues.BaseDmgBonus,
-                    dmg_normal_cryo: TalentValues.BaseDmgBonus,
-                    dmg_normal_dendro: TalentValues.BaseDmgBonus,
-                },
-            }),
-            new ConditionBoolean({
-                name: 'party.candace_celestial_dome_of_sand',
-                serializeId: 3,
-                rotation: 'party',
-                title: 'talent_name.candace_celestial_dome_of_sand',
-                description: 'talent_descr.candace_celestial_dome_of_sand',
-                info: {ascension: 4},
-                subConditions: [
-                    new ConditionBoolean({name: 'party.candace_prayer_of_the_crimson_crown'}),
-                ],
-            }),
-            new Condition({
-                settings: {
-                    attack_infusion_hydro: 1,
-                },
-                subConditions: [
-                    new ConditionBoolean({name: 'party.candace_prayer_of_the_crimson_crown'}),
-                    new ConditionBooleanWeaponType({
-                        types: ['sword', 'claymore', 'polearm'],
-                    }),
-                ],
-            }),
-        ],
-        postEffects: [
-            new PostEffectStats({
-                from: 'candace_hp_total',
-                percent: [
-                    new StatTable('dmg_normal_anemo', [TalentValues.A4BonusScale]),
-                    new StatTable('dmg_normal_geo', [TalentValues.A4BonusScale]),
-                    new StatTable('dmg_normal_pyro', [TalentValues.A4BonusScale]),
-                    new StatTable('dmg_normal_electro', [TalentValues.A4BonusScale]),
-                    new StatTable('dmg_normal_hydro', [TalentValues.A4BonusScale]),
-                    new StatTable('dmg_normal_cryo', [TalentValues.A4BonusScale]),
-                    new StatTable('dmg_normal_dendro', [TalentValues.A4BonusScale]),
-                ],
-                conditions: [
-                    new ConditionBoolean({name: 'party.candace_prayer_of_the_crimson_crown'}),
-                    new ConditionBoolean({name: 'party.candace_celestial_dome_of_sand'}),
-                ],
-            }),
-        ],
-    },
+    retiredParty: [[1, 'number'], [2, 'checkbox'], [3, 'checkbox']],
 });

@@ -10,6 +10,8 @@ import { ConditionStatic } from "../../classes/Condition/Static";
 import { DbObjectChar } from "../../classes/DbObject/Char";
 import { DbObjectConstellation } from "../../classes/DbObject/Constellation";
 import { DbObjectTalents } from "../../classes/DbObject/Talents";
+import { CHANNELS } from "../../classes/PostEffect/Channels";
+import { RECEIVERS } from "../../classes/Team/Receivers";
 import { FeatureDamageBurst } from "../../classes/Feature2/Damage/Burst";
 import { FeatureDamageCharged } from "../../classes/Feature2/Damage/Charged";
 import { FeatureDamageMultihit } from "../../classes/Feature2/Damage/Multihit";
@@ -24,6 +26,7 @@ import { StatTableConditions } from "../../classes/StatTable/Condition";
 import { ValueTable } from "../../classes/ValueTable";
 import { charTables } from "../generated/CharTables";
 import { charTalentTables } from "../generated/CharTalentTables";
+import { percent, times } from "../Params";
 
 const Talents = new DbObjectTalents({
     attack: {
@@ -77,6 +80,14 @@ const Talents = new DbObjectTalents({
         ],
     },
 });
+
+const A1DmgBonusPerAtk = percent(times(charTalentTables.Varka.a1.p1, 0.001));
+const A1DmgBonusMax = percent(charTalentTables.Varka.a1.p2);
+const A4MaxStacks = charTalentTables.Varka.a4.p3;
+const A4DmgBonus = percent(charTalentTables.Varka.a4.p2);
+const C2Dmg = percent(charTalentTables.Varka.c2.p1);
+const C4DmgBonus = percent(charTalentTables.Varka.c4.p1);
+const C6CritDmg = percent(charTalentTables.Varka.c6.p2);
 
 export const Varka = new DbObjectChar({
     name: 'varka',
@@ -146,7 +157,7 @@ export const Varka = new DbObjectChar({
         new FeatureDamageSkill({
             name: 'varka_when_dawn_breaks_our_journey_shall_take_flight',
             element: 'anemo',
-            multipliers: [new FeatureMultiplier({ source: 'constellation2', values: new StatTable('varka_c2_dmg', [800]) })],
+            multipliers: [new FeatureMultiplier({ source: 'constellation2', values: new StatTable('varka_c2_dmg', [C2Dmg]) })],
             condition: new ConditionConstellation({ constellation: 2 }),
         }),
     ],
@@ -154,7 +165,6 @@ export const Varka = new DbObjectChar({
         new ConditionDropdownElement({
             name: 'party_varka_priority_element',
             serializeId: 4,
-            rotation: 'party',
             title: 'talent_name.varka_dawn_winds_march',
             description: 'talent_descr.varka_dawn_winds_march',
             multiple: false,
@@ -172,12 +182,12 @@ export const Varka = new DbObjectChar({
             serializeId: 2,
             title: 'talent_name.varka_winds_vanguard',
             description: 'talent_descr.varka_winds_vanguard',
-            maxStacks: 4,
+            maxStacks: A4MaxStacks,
             stats: [
-                new StatTable('dmg_normal', [7.5]),
-                new StatTable('dmg_charged', [7.5]),
-                new StatTable('dmg_skill', [7.5]),
-                new StatTableConditions('crit_dmg', [20], [new ConditionConstellation({constellation: 6})]),
+                new StatTable('dmg_normal', [A4DmgBonus]),
+                new StatTable('dmg_charged', [A4DmgBonus]),
+                new StatTable('dmg_skill', [A4DmgBonus]),
+                new StatTableConditions('crit_dmg', [C6CritDmg], [new ConditionConstellation({constellation: 6})]),
             ],
             info: { ascension: 4 },
         }),
@@ -191,11 +201,19 @@ export const Varka = new DbObjectChar({
         }),
     ],
     postEffects: [
+        // A1 Dawn Wind's March (in-game A1, openConfig Varka_PermanentSkill_2):
+        // reads FIGHT_PROP_NONEXTRA_ATTACK (premod ATK; ProudSkill 1282101
+        // [0.10, 0.25]: 10% per 1000 ATK, cap 25%) and writes
+        // Actor_WindAddHurtDelta / Actor_{Fire,Water,Elec,Ice}AddHurtDelta
+        // (no "Extra": premod DMG%). GO reads input.premod.atk into
+        // premod anemo/phec dmg_. The premod read is the default (no reads
+        // param); the premod write is not.
         new PostEffectStatsVarkaAtk({
             levelSetting: 'char_level',
             from: 'atk_total',
-            percent: new StatTable('dmg_anemo', [0.01]),
-            statCap: new ValueTable([25]),
+            writes: CHANNELS.PREMOD,
+            percent: new StatTable('dmg_anemo', [A1DmgBonusPerAtk]),
+            statCap: new ValueTable([A1DmgBonusMax]),
             conditions: [
                 new ConditionAscensionChar({ascension: 1}),
             ],
@@ -232,9 +250,12 @@ export const Varka = new DbObjectChar({
         },
         {
             conditions: [
+                // C4 Freedom of Song: "all nearby party members gain 20% Anemo
+                // + corresponding element for 10s" (manual Swirl assumption).
                 new ConditionDropdownElementWanderer({
                     name: 'varka_freedom_of_song_element',
                     serializeId: 5,
+                    receivers: RECEIVERS.TEAM,
                     title: 'talent_name.varka_for_none_may_take_from_us_our_freedom_of_song',
                     description: 'talent_descr.varka_for_none_may_take_from_us_our_freedom_of_song',
                     multiple: false,
@@ -242,10 +263,10 @@ export const Varka = new DbObjectChar({
                     limit: 1,
                     dropdownClass: 'small select-element-multiple',
                     values: [
-                        { value: 'pyro', serializeId: 1, conditions: [new Condition({ stats: { dmg_pyro: 20, dmg_anemo: 20 } })] },
-                        { value: 'hydro', serializeId: 2, conditions: [new Condition({ stats: { dmg_hydro: 20, dmg_anemo: 20 } })] },
-                        { value: 'electro', serializeId: 3, conditions: [new Condition({ stats: { dmg_electro: 20, dmg_anemo: 20 } })] },
-                        { value: 'cryo', serializeId: 4, conditions: [new Condition({ stats: { dmg_cryo: 20, dmg_anemo: 20 } })] },
+                        { value: 'pyro', serializeId: 1, conditions: [new Condition({ stats: { dmg_pyro: C4DmgBonus, dmg_anemo: C4DmgBonus } })] },
+                        { value: 'hydro', serializeId: 2, conditions: [new Condition({ stats: { dmg_hydro: C4DmgBonus, dmg_anemo: C4DmgBonus } })] },
+                        { value: 'electro', serializeId: 3, conditions: [new Condition({ stats: { dmg_electro: C4DmgBonus, dmg_anemo: C4DmgBonus } })] },
+                        { value: 'cryo', serializeId: 4, conditions: [new Condition({ stats: { dmg_cryo: C4DmgBonus, dmg_anemo: C4DmgBonus } })] },
                     ],
                     info: { constellation: 4 },
                 }),
@@ -269,35 +290,5 @@ export const Varka = new DbObjectChar({
             ],
         },
     ]),
-    partyData: {
-        conditions: [
-            // Witch Homework toggle for party (makes Varka count as Hexerei)
-            new ConditionBoolean({
-                name: 'party.varka_witch_homework',
-                serializeId: 3,
-                rotation: 'party',
-                title: 'talent_name.varka_dawns_return',
-                description: 'talent_descr.varka_dawns_return',
-                info: {hexerei: true},
-            }),
-            new ConditionDropdownElementWanderer({
-                name: 'party.varka_freedom_of_song_element',
-                serializeId: 2,
-                rotation: 'party',
-                title: 'talent_name.varka_for_none_may_take_from_us_our_freedom_of_song',
-                description: 'talent_descr.varka_for_none_may_take_from_us_our_freedom_of_song',
-                multiple: false,
-                hideEmpty: false,
-                limit: 1,
-                dropdownClass: 'small select-element-multiple',
-                values: [
-                    { value: 'pyro', serializeId: 1, conditions: [new Condition({ stats: { dmg_pyro: 20, dmg_anemo: 20 } })] },
-                    { value: 'hydro', serializeId: 2, conditions: [new Condition({ stats: { dmg_hydro: 20, dmg_anemo: 20 } })] },
-                    { value: 'electro', serializeId: 3, conditions: [new Condition({ stats: { dmg_electro: 20, dmg_anemo: 20 } })] },
-                    { value: 'cryo', serializeId: 4, conditions: [new Condition({ stats: { dmg_cryo: 20, dmg_anemo: 20 } })] },
-                ],
-                info: { constellation: 4 },
-            }),
-        ],
-    },
+    retiredParty: [[3, 'checkbox'], [2, 'dropdown']],
 });

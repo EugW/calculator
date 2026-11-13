@@ -2,6 +2,8 @@ import { ConditionBooleanRefine } from "../../../classes/Condition/Boolean/Refin
 import { DbObjectWeapon } from "../../../classes/DbObject/Weapon";
 import { StatTable } from "../../../classes/StatTable";
 import { weaponStatTables } from "../../generated/WeaponStatTables";
+import { weaponPassiveTables } from "../../generated/WeaponPassiveTables";
+import { percent } from "../../Params";
 
 export const PrototypeCrescent = new DbObjectWeapon({
     name: 'prototype_crescent',
@@ -18,8 +20,8 @@ export const PrototypeCrescent = new DbObjectWeapon({
             title: 'talent_name.weapon_prototype_crescent',
             description: 'talent_descr.weapon_prototype_crescent',
             stats: [
-                new StatTable('atk_percent', [36, 45, 54, 63, 72]),
-                new StatTable('move_speed', [10]),
+                new StatTable('atk_percent', percent(weaponPassiveTables.PrototypeCrescent.p2)),
+                new StatTable('move_speed', [percent(weaponPassiveTables.PrototypeCrescent.p1[0])]),
             ],
         }),
     ],

@@ -2,6 +2,7 @@ import { variableName } from "../Helpers";
 import { CBlock } from "../Types";
 import { wgslNumber, wgslStatAccess, wgslVariableName } from "../WGSL";
 import { CConst, CStat } from "./Item";
+import { extraStatName } from "../../../PostEffect/Channels";
 
 
 export class CSum extends CBlock {
@@ -329,7 +330,8 @@ export class CMax extends CBlock {
         let parts = this.compileChildrensWGSL(opts);
 
         if (parts.length > 1) {
-            return 'max(' + parts.join(', ') + ')';
+            // WGSL extrema are binary, unlike JavaScript's variadic Math.max.
+            return parts.reduce((left, right) => 'max(' + left + ', ' + right + ')');
         }
 
         return parts[0];
@@ -353,7 +355,7 @@ export class CMin extends CBlock {
         let parts = this.compileChildrensWGSL(opts);
 
         if (parts.length > 1) {
-            return 'min(' + parts.join(', ') + ')';
+            return parts.reduce((left, right) => 'min(' + left + ', ' + right + ')');
         }
 
         return parts[0];
@@ -498,7 +500,8 @@ export class CPostEffect extends CMulti {
 
     getAssignedStats() {
         if (this.stat) {
-            return [this.stat];
+            // An extra write also adds to the stat's extra lane (PostEffect/Channels).
+            return this.extra ? [this.stat, extraStatName(this.stat)] : [this.stat];
         }
 
         return [];

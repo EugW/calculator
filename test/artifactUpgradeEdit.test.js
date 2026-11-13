@@ -8,6 +8,7 @@ import { Serializer } from '../src/js/classes/Serializer';
 import { Stats } from '../src/js/classes/Stats';
 import { StorageItemArtifacts } from '../src/js/classes/StorageItem/Artifacts';
 import { normalizeArtifactRVFilters } from '../src/js/classes/ArtifactUsefulRV';
+import { availableTeamArtifacts } from '../src/js/classes/ArtifactTeamInventory';
 import { DB } from '../src/js/db/DB';
 
 global.DB = DB;
@@ -44,8 +45,9 @@ const {ArtifactUpgradeModal} = loadUI('../src/js/ui/Modal/ArtifactUpgrade.jsx', 
     '../../classes/ArtifactUpgradePredictor': {
         getArtifactMaxLevel: () => 20, isArtifactUnderleveled: artifact => artifact.getLevel() < 20,
     },
-    '../../classes/WorkerFactory/ArtifactActionPredictor': {
-        WorkerFactoryArtifactActionPredictor: class { dispose() {} },
+    '../../classes/ArtifactTeamInventory': {availableTeamArtifacts},
+    './ArtifactActionBaselineFlow': {
+        ArtifactActionBaselineFlow: class { dispose() {} },
     },
     '../Components/Artifact': {ArtifactListItem},
 });
@@ -80,6 +82,8 @@ function setup({stored = [], equipped = {}} = {}) {
     const app = {
         storage: {artifacts: storage}, getFeature: () => 'normal_attack', showBetaContent: () => false,
         getArtifacts: () => equipped,
+        // The viewed member: a build on its own, so no teammate holds a candidate.
+        currentSet: () => ({getArtifacts: () => equipped}),
         setArtifact: jest.fn(artifact => { equipped[artifact.getSlot()] = artifact; }),
         refresh: jest.fn(() => modal.invalidate()),
     };

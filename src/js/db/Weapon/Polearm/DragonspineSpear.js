@@ -6,6 +6,8 @@ import { FeatureDamage } from "../../../classes/Feature2/Damage";
 import { FeatureMultiplier } from "../../../classes/Feature2/Multiplier";
 import { StatTable } from "../../../classes/StatTable";
 import { weaponStatTables } from "../../generated/WeaponStatTables";
+import { weaponPassiveTables } from "../../generated/WeaponPassiveTables";
+import { percent } from "../../Params";
 
 export const DragonspineSpear = new DbObjectWeapon({
     name: 'dragonspine_spear',
@@ -20,8 +22,8 @@ export const DragonspineSpear = new DbObjectWeapon({
             title: 'talent_name.weapon_frost_burial',
             description: 'talent_descr.weapon_frost_burial_passive',
             stats: [
-                new StatTable('text_percent_chance', [60, 70, 80, 90, 100]),
-                new StatTable('text_percent_dmg', [80, 95, 110, 125, 140]),
+                new StatTable('text_percent_chance', percent(weaponPassiveTables.DragonspineSpear.p1)),
+                new StatTable('text_percent_dmg', percent(weaponPassiveTables.DragonspineSpear.p2)),
             ],
         }),
         new ConditionStaticRefine({
@@ -29,7 +31,7 @@ export const DragonspineSpear = new DbObjectWeapon({
             title: 'talent_name.weapon_frost_burial',
             description: 'talent_descr.weapon_frost_burial',
             stats: [
-                new StatTable('text_percent_dmg', [200, 240, 280, 320, 360]),
+                new StatTable('text_percent_dmg', percent(weaponPassiveTables.DragonspineSpear.p3)),
             ],
             subConditions: [
                 new ConditionEnemyStatus({
@@ -44,7 +46,7 @@ export const DragonspineSpear = new DbObjectWeapon({
             multipliers: [
                 new FeatureMultiplier({
                     leveling: 'weapon_refine',
-                    values: new StatTable('everfrost', [80, 95, 110, 125, 140]),
+                    values: new StatTable('everfrost', percent(weaponPassiveTables.DragonspineSpear.p2)),
                 }),
             ],
             condition: new ConditionNot([
@@ -56,7 +58,7 @@ export const DragonspineSpear = new DbObjectWeapon({
             multipliers: [
                 new FeatureMultiplier({
                     leveling: 'weapon_refine',
-                    values: new StatTable('everfrost', [200, 240, 280, 320, 360]),
+                    values: new StatTable('everfrost', percent(weaponPassiveTables.DragonspineSpear.p3)),
                 }),
             ],
             condition: new ConditionEnemyStatus({status: ['cryo']}),

@@ -2,6 +2,8 @@ import { ConditionStacks } from "../../../classes/Condition/Stacks";
 import { DbObjectWeapon } from "../../../classes/DbObject/Weapon";
 import { StatTable } from "../../../classes/StatTable";
 import { weaponStatTables } from "../../generated/WeaponStatTables";
+import { weaponPassiveTables } from "../../generated/WeaponPassiveTables";
+import { percent } from "../../Params";
 
 export const PrototypeRancour = new DbObjectWeapon({
     name: 'prototype_rancour',
@@ -20,8 +22,8 @@ export const PrototypeRancour = new DbObjectWeapon({
             maxStacks: 4,
             levelSetting: 'weapon_refine',
             stats: [
-                new StatTable('atk_percent', [4, 5, 6, 7, 8]),
-                new StatTable('def_percent', [4, 5, 6, 7, 8]),
+                new StatTable('atk_percent', percent(weaponPassiveTables.PrototypeRancour.p1)),
+                new StatTable('def_percent', percent(weaponPassiveTables.PrototypeRancour.p1)),
             ],
         })
     ],

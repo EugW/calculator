@@ -1,13 +1,17 @@
 import { Condition } from "../../classes/Condition";
+import { ConditionAnd } from "../../classes/Condition/And";
 import { ConditionAscensionChar } from "../../classes/Condition/Ascension/Char";
 import { ConditionBoolean } from "../../classes/Condition/Boolean";
+import { ConditionOnField } from "../../classes/Condition/Field";
 import { ConditionBooleanLevels } from "../../classes/Condition/Boolean/Levels";
+import { ConditionBooleanValue } from "../../classes/Condition/Boolean/Value";
 import { ConditionConstellation } from "../../classes/Condition/Constellation";
 import { ConditionNot } from "../../classes/Condition/Not";
-import { ConditionNumberTalent } from "../../classes/Condition/Number/Talent";
 import { ConditionOr } from "../../classes/Condition/Or";
+import { ConditionReceiver } from "../../classes/Condition/Receiver";
 import { ConditionStacks } from "../../classes/Condition/Stacks";
 import { ConditionStatic } from "../../classes/Condition/Static";
+import { ConditionStaticLevel } from "../../classes/Condition/Static/Level";
 import { DbObjectChar } from "../../classes/DbObject/Char";
 import { DbObjectConstellation } from "../../classes/DbObject/Constellation";
 import { DbObjectTalents } from "../../classes/DbObject/Talents";
@@ -20,9 +24,11 @@ import { FeatureDamageSkill } from "../../classes/Feature2/Damage/Skill";
 import { FeatureHeal } from "../../classes/Feature2/Heal";
 import { FeatureMultiplier } from "../../classes/Feature2/Multiplier";
 import { FeatureMultiplierList } from "../../classes/Feature2/Multiplier/List";
+import { RECEIVERS } from "../../classes/Team/Receivers";
 import { StatTable } from "../../classes/StatTable";
 import { charTables } from "../generated/CharTables";
 import { charTalentTables } from "../generated/CharTalentTables";
+import { percent } from "../Params";
 
 const Talents = new DbObjectTalents({
     attack: {
@@ -133,8 +139,16 @@ const Talents = new DbObjectTalents({
     },
 });
 
-const A1PhysBonus = 10;
-const C6PhysCritDmg = 60;
+const A1PhysBonus = percent(charTalentTables.Mika.a1.p1);
+const A1MaxStacks = charTalentTables.Mika.a1.p2;
+const A4MaxStacks = charTalentTables.Mika.a1.p2 + charTalentTables.Mika.a4.p1;
+const C6MaxStacks = charTalentTables.Mika.a1.p2 + charTalentTables.Mika.a4.p1 + charTalentTables.Mika.c6.p2;
+const C6PhysCritDmg = percent(charTalentTables.Mika.c6.p1);
+
+// Soulwind and Detector reach affected characters on the field.
+const activeReceiver = new ConditionReceiver({
+    condition: new ConditionOnField(),
+});
 
 export const Mika = new DbObjectChar({
     name: 'mika',
@@ -321,6 +335,20 @@ export const Mika = new DbObjectChar({
                 Talents.getAlias('skill.mika_atk_spd_bonus', 'atk_speed_normal'),
             ],
         }),
+        // Soulwind raises the ATK SPD of affected characters on the field;
+        // Mika keeps his own copy above.
+        new ConditionStaticLevel({
+            isHidden: true,
+            receivers: RECEIVERS.OTHERS,
+            levelSetting: 'char_skill_elemental',
+            stats: [
+                Talents.getAlias('skill.mika_atk_spd_bonus', 'atk_speed_normal'),
+            ],
+            condition: new ConditionAnd([
+                new ConditionBoolean({name: 'mika_soulwind'}),
+                activeReceiver,
+            ]),
+        }),
         new ConditionStacks({
             name: 'mika_suppressive_barrage',
             serializeId: 1,
@@ -328,7 +356,7 @@ export const Mika = new DbObjectChar({
             description: 'talent_descr.mika_suppressive_barrage',
             maxStacks: [
                 {
-                    value: 3,
+                    value: A1MaxStacks,
                     condition: [
                         new ConditionNot([
                             new ConditionAscensionChar({ascension: 4}),
@@ -337,7 +365,7 @@ export const Mika = new DbObjectChar({
                     ],
                 },
                 {
-                    value: 4,
+                    value: A4MaxStacks,
                     condition: [
                         new ConditionOr([
                             new ConditionAscensionChar({ascension: 4}),
@@ -346,7 +374,7 @@ export const Mika = new DbObjectChar({
                     ],
                 },
                 {
-                    value: 5,
+                    value: C6MaxStacks,
                     condition: [
                         new ConditionAscensionChar({ascension: 4}),
                         new ConditionConstellation({constellation: 6}),
@@ -361,6 +389,34 @@ export const Mika = new DbObjectChar({
                 new ConditionAscensionChar({ascension: 1}),
             ],
         }),
+        // Detector raises the Physical DMG of affected characters on the
+        // field, one hidden copy per stack; Mika keeps his own copy above.
+        // The fourth and fifth copies need the same ascension and
+        // constellation that raise the stack cap.
+        ...[1, 2, 3, 4, 5].map((level) => new Condition({
+            isHidden: true,
+            receivers: RECEIVERS.OTHERS,
+            stats: {
+                dmg_phys: A1PhysBonus,
+            },
+            condition: new ConditionAnd([
+                new ConditionAscensionChar({ascension: 1}),
+                new ConditionBooleanValue({
+                    setting: 'mika_suppressive_barrage',
+                    cond: 'ge',
+                    value: level,
+                }),
+                ...(level < 4 ? [] : [new ConditionOr([
+                    new ConditionAscensionChar({ascension: 4}),
+                    new ConditionConstellation({constellation: 6}),
+                ])]),
+                ...(level < 5 ? [] : [
+                    new ConditionAscensionChar({ascension: 4}),
+                    new ConditionConstellation({constellation: 6}),
+                ]),
+                activeReceiver,
+            ]),
+        })),
         new ConditionStatic({
             title: 'talent_name.mika_topographical_mapping',
             description: 'talent_descr.mika_topographical_mapping',
@@ -420,61 +476,21 @@ export const Mika = new DbObjectChar({
                         crit_dmg_phys: C6PhysCritDmg,
                     },
                 }),
+                // Soulwind raises active affected characters' Physical CRIT
+                // DMG; Mika keeps his own copy above.
+                new Condition({
+                    isHidden: true,
+                    receivers: RECEIVERS.OTHERS,
+                    stats: {
+                        crit_dmg_phys: C6PhysCritDmg,
+                    },
+                    condition: new ConditionAnd([
+                        new ConditionBoolean({name: 'mika_companions_counsel'}),
+                        activeReceiver,
+                    ]),
+                }),
             ],
         },
     ]),
-    partyData: {
-        loadStats: {
-            settings: ['char_skill_elemental'],
-        },
-        conditions: [
-            new ConditionNumberTalent({
-                name: 'mika_char_skill_elemental',
-                title: 'talent_name.stats_level_skill',
-                partySetting: 'char_skill_elemental',
-                serializeId: 1,
-            }),
-            new ConditionBoolean({
-                name: 'party.mika_constellation_5',
-                serializeId: 2,
-                title: 'talent_name.mika_signal_arrow',
-                description: 'talent_descr.char_constellation_skill',
-                info: {constellation: 5},
-                settings: {
-                    mika_char_skill_elemental_bonus: 3,
-                },
-            }),
-            new ConditionBooleanLevels({
-                name: 'mika_soulwind',
-                serializeId: 3,
-                title: 'talent_name.mika_soulwind',
-                description: 'talent_descr.mika_soulwind',
-                levelSetting: 'mika_char_skill_elemental',
-                stats: [
-                    Talents.getAlias('skill.mika_atk_spd_bonus', 'atk_speed_normal'),
-                ],
-            }),
-            new ConditionStacks({
-                name: 'mika_suppressive_barrage',
-                serializeId: 4,
-                title: 'talent_name.mika_suppressive_barrage',
-                description: 'talent_descr.mika_suppressive_barrage',
-                maxStacks: 5,
-                info: {ascension: 1},
-                stats: [
-                    new StatTable('dmg_phys', [A1PhysBonus]),
-                ],
-            }),
-            new ConditionBoolean({
-                name: 'mika_companions_counsel',
-                serializeId: 5,
-                title: 'talent_name.mika_companions_counsel',
-                description: 'talent_descr.mika_companions_counsel_2',
-                info: {constellation: 6},
-                stats: {
-                    crit_dmg_phys: C6PhysCritDmg,
-                },
-            }),
-        ],
-    },
+    retiredParty: [[1, 'number'], [2, 'checkbox'], [3, 'checkbox'], [4, 'stacks'], [5, 'checkbox']],
 });

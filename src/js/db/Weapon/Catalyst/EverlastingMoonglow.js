@@ -6,6 +6,8 @@ import { FeatureMultiplierTarget } from "../../../classes/Feature2/Multiplier/Ta
 import { StatTable } from "../../../classes/StatTable";
 import { ValueTable } from "../../../classes/ValueTable";
 import { weaponStatTables } from "../../generated/WeaponStatTables";
+import { weaponPassiveTables } from "../../generated/WeaponPassiveTables";
+import { percent } from "../../Params";
 
 export const EverlastingMoonglow = new DbObjectWeapon({
     name: 'everlasting_moonglow',
@@ -20,8 +22,8 @@ export const EverlastingMoonglow = new DbObjectWeapon({
             title: 'talent_name.weapon_everlasting_moonglow',
             description: 'talent_descr.weapon_everlasting_moonglow_1',
             stats: [
-                new StatTable('healing', [10, 12.5, 15, 17.5, 20]),
-                new StatTable('normal_base_hp_percent', [1, 1.5, 2, 2.5, 3]),
+                new StatTable('healing', weaponPassiveTables.EverlastingMoonglow.healing),
+                new StatTable('normal_base_hp_percent', percent(weaponPassiveTables.EverlastingMoonglow.p2)),
             ],
         }),
         new ConditionStatic({
@@ -34,7 +36,7 @@ export const EverlastingMoonglow = new DbObjectWeapon({
             scaling: 'hp*',
             leveling: 'weapon_refine',
             source: 'weapon',
-            values: new ValueTable([1, 1.5, 2, 2.5, 3]),
+            values: new ValueTable(percent(weaponPassiveTables.EverlastingMoonglow.p2)),
             target: new FeatureMultiplierTarget({
                 damageTypes: ['normal'],
             }),

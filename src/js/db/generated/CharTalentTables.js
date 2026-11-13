@@ -44,6 +44,57 @@ export const charTalentTables = {
 			// Energy Cost
 			p4: [50],
 		},
+		// Modular Efficiency Protocol
+		// Aino_PermanentSkill_1 -> Avatar_Aino_ElementalBurst
+		a1: {
+			// Burst_Moon2_ElemMasteryDelta
+			p1: 60,
+			// Burst_Moon2_Dur
+			p2: 15,
+		},
+		// Structured Power Booster
+		// Aino_PermanentSkill_2 -> Avatar_Aino_ElementalBurst_Gadget, Avatar_Aino_ElementalBurst_ConsExtra_Bullet
+		a4: {
+			// Avatar_Aino_ElementalBurst_Gadget.MASTERY_Ratio
+			// Avatar_Aino_ElementalBurst_ConsExtra_Bullet.MASTERY_Ratio
+			p1: 0.5,
+		},
+		// The Theory of Ash—Field Equilibrium
+		// Aino_Constellation_1 -> Avatar_Aino_Constellation_1
+		c1: {
+			// ElemMasteryDelta
+			p1: 80,
+			// Buff_Dur
+			p2: 15,
+		},
+		// The Principle of Transference in Gear Differentials
+		// Aino_Constellation_2 -> Avatar_Aino_ElementalBurst_Gadget, Avatar_Aino_ElementalBurst_ConsExtra_Bullet
+		c2: {
+			// Avatar_Aino_ElementalBurst_ConsExtra_Bullet.Attack_Cons_Ratio
+			p1: 0.25,
+			// Avatar_Aino_ElementalBurst_ConsExtra_Bullet.MASTERY_Cons_Ratio
+			p2: 1,
+			// Avatar_Aino_ElementalBurst_Gadget.Constellation_2_Cd
+			p3: 5,
+		},
+		// Butter and Cats and the Law of Energy Supply
+		// Aino_Constellation_4 -> Avatar_Aino_Constellation_4
+		c4: {
+			// Element_Recover
+			p1: 10,
+			// EnergyRecover_Cd
+			p2: 10,
+		},
+		// The Burden of Creative Genius
+		// Aino_Constellation_6 -> Avatar_Aino_Constellation_6
+		c6: {
+			// Ratio
+			p1: 0.15,
+			// MoonPhase_Ratio
+			p2: 0.2,
+			// Constellation_6_Dura
+			p3: 15,
+		},
 	},
 	Albedo: {
 		s1_id: 10386,
@@ -92,6 +143,101 @@ export const charTalentTables = {
 			p3: [12],
 			// Energy Cost
 			p4: [40],
+		},
+		// Calcite Might
+		// Albedo_PermanentSkill_1 -> SkillObj_Albedo_FuriousMonolith_Field, Avatar_Albedo_Hexenzirkel_PermanentSkill_1
+		a1: {
+			p1: 0.5,
+			p2: 0.25,
+			// Ratio
+			p3: 2.4,
+		},
+		// Homuncular Nature
+		// Albedo_PermanentSkill_2 -> Avatar_Albedo_AlchemicalBreakOut, Avatar_Albedo_HexenzirkelSkill
+		a4: {
+			// Avatar_Albedo_AlchemicalBreakOut.ElemMasteryDelta
+			// Avatar_Albedo_HexenzirkelSkill.ElemMasteryDelta
+			p1: 125,
+			// Avatar_Albedo_AlchemicalBreakOut.ElemMasteryUpTime
+			// Avatar_Albedo_HexenzirkelSkill.ElemMasteryUpTime
+			p2: 10,
+		},
+		// Flash of Genius
+		a0: {
+			p1: 0.1,
+			p2: 2,
+		},
+		// Witch's Eve Rite: Book of Blinding Light
+		// Albedo_Hexenzirkel_1 ->
+		//     Avatar_Albedo_HexenzirkelSkill
+		//     Avatar_Albedo_HexenzirkelSkill_GadgetDetect
+		//     Avatar_Albedo_Hexenzirkel_PermanentSkill_1
+		//     SkillObj_Albedo_FuriousMonolith_Hexenzirkel
+		//     SkillObj_Albedo_FuriousMonolith_Field
+		//     Avatar_Albedo_AlchemicalBreakOut
+		//     Avatar_Albedo_FullRockAlchemist
+		//     Avatar_Albedo_FullRockAlchemist_Custom
+		sp: {
+			// Ratio_OG
+			p1: 0.04,
+			// Ratio_OG_Max
+			p2: 0.12,
+			// Ratio_NG
+			p3: 0.1,
+			// Ratio_NG_Max
+			p4: 0.3,
+			// Ratio_OG_Duration
+			p5: 20,
+			// Ratio_NG_Duration
+			p6: 20,
+		},
+		// Flower of Eden
+		// Albedo_Constellation_1 ->
+		//     Avatar_Albedo_Hexenzirkel_Talent_1_Flag
+		//     SkillObj_Albedo_FuriousMonolith_Field
+		//     Avatar_Albedo_HexenzirkelSkill
+		c1: {
+			// SkillObj_Albedo_FuriousMonolith_Field.BloomEnergy
+			p1: 1.2,
+			// Avatar_Albedo_HexenzirkelSkill.DefenceRatio
+			p2: 0.5,
+			// Avatar_Albedo_HexenzirkelSkill.Duration
+			p3: 20,
+		},
+		// Opening of Phanerozoic
+		// Albedo_Constellation_2 ->
+		//     Avatar_Albedo_Hexenzirkel_Talent_2_Flag
+		//     SkillObj_Albedo_FuriousMonolith_Field
+		//     SkillObj_Albedo_FuriousMonolith_FullBloom
+		//     Avatar_Albedo_AlchemicalBreakOut
+		//     SkillObj_Albedo_FuriousMonolith_Hexenzirkel
+		//     Avatar_Albedo_HexenzirkelSkill
+		c2: {
+			// SkillObj_Albedo_FuriousMonolith_FullBloom.DEF2ATK_Ratio
+			// Avatar_Albedo_AlchemicalBreakOut.DEF2ATK_Ratio
+			p1: 0.3,
+			// Avatar_Albedo_HexenzirkelSkill.Talent_2_Ratio
+			p2: 3,
+		},
+		// Descent of Divinity
+		// Albedo_Constellation_4 -> SkillObj_Albedo_FuriousMonolith_Field, SkillObj_Albedo_FuriousMonolith_Hexenzirkel
+		c4: {
+			p1: 0.3,
+			// Talent_4_Dur
+			p2: 3,
+			// Talent_4_Ratio
+			p3: 0.3,
+		},
+		// Dust of Purification
+		// Albedo_Constellation_6 ->
+		//     SkillObj_Albedo_FuriousMonolith_Field
+		//     SkillObj_Albedo_FuriousMonolith_Hexenzirkel
+		//     Avatar_Albedo_Hexenzirkel_Talent_6
+		c6: {
+			// Talent_6_Dur
+			p1: 20,
+			// Talent_6_Ratio
+			p2: 2.5,
 		},
 	},
 	Alhaitham: {
@@ -166,6 +312,68 @@ export const charTalentTables = {
 			// Energy Cost
 			p8: [70],
 		},
+		// Four-Causal Correction
+		// Alhatham_PermanentSkill_1 -> Avatar_Alhatham_PermanentSkill_1
+		a1: {
+			// PermanentSkill_1_CD
+			p1: 12,
+		},
+		// Mysteries Laid Bare
+		// Alhatham_PermanentSkill_2 -> Avatar_Alhatham_PermanentSkill_2
+		a4: {
+			// PermanentSkill_2_MASTERY2DMGRatio
+			p1: 0.001,
+			// PermanentSkill_2_MaxDMGRatio
+			p2: 1,
+		},
+		// Intuition
+		// Alhatham_Constellation_1 -> Avatar_Alhatham_Constellation_1
+		c1: {
+			// Constellation_1_CD_Delta
+			p1: 1.2,
+			// Constellation_1_CD
+			p2: 1,
+		},
+		// Debate
+		// Alhatham_Constellation_2 ->
+		//     Avatar_Alhatham_Constellation_2
+		//     Avatar_Alhatham_ElementalArt_SkillStart
+		//     Avatar_Alhatham_ElementalBurst
+		//     Avatar_Alhatham_PermanentSkill_1
+		c2: {
+			// Constellation_2_ElemMasteryDelta
+			p1: 50,
+			// Constellation_2_BuffDuration
+			p2: 8,
+			// Constellation_2_MaxStack
+			p3: 4,
+		},
+		// Elucidation
+		// Alhatham_Constellation_4 -> Avatar_Alhatham_ElementalBurst
+		c4: {
+			// Constellation_4_CostBuff_Mastery
+			p1: 30,
+			// Constellation_4_CostBuff_Duration
+			p2: 15,
+			// Constellation_4_GainBuff_GrassAddHurtDelta
+			p3: 0.1,
+			// Constellation_4_GainBuff_Duration
+			p4: 15,
+		},
+		// Structuration
+		// Alhatham_Constellation_6 ->
+		//     Avatar_Alhatham_Constellation_6
+		//     Avatar_Alhatham_ElementalArt_SkillStart
+		//     Avatar_Alhatham_ElementalBurst
+		//     Avatar_Alhatham_PermanentSkill_1
+		c6: {
+			// Constellation_6_CriticalDelta
+			p1: 0.1,
+			// Constellation_6_CriticalHurtDelta
+			p2: 0.7,
+			// Constellation_6_Duration
+			p3: 6,
+		},
 	},
 	Aloy: {
 		s1_id: 10621,
@@ -223,6 +431,20 @@ export const charTalentTables = {
 			// Energy Cost
 			p3: [40],
 		},
+		// Combat Override
+		// Aloy_PermanentSkill_1 -> Avatar_Aloy_Coil_Handler
+		a1: {
+			// Aloy_Coil_AttackRatio
+			p1: 0.08,
+			// Aloy_Coil_BuffDuration
+			p2: 10,
+		},
+		// Strong Strike
+		// Aloy_PermanentSkill_2 -> Avatar_Aloy_Coil_Handler
+		a4: {
+			// Aloy_CoilBurst_IceAttackDelta
+			p1: 0.035,
+		},
 	},
 	Alyosha: {
 		s1_id: 11481,
@@ -276,6 +498,52 @@ export const charTalentTables = {
 			// Energy Cost
 			p5: [70],
 		},
+		// Awakened by the Baying Hounds
+		// Alyosha_PermanentSkill_1 -> Avatar_Alyosha_PermanentSkill_1_HealHP, Skillobj_Alyosha_ElementalBurst_Material
+		a1: {
+			// PermanentSkill_1_Heal_AttackRatio
+			p1: 1.2,
+		},
+		// Suffer the Winter Wheat Will
+		// Alyosha_PermanentSkill_2 -> Avatar_Alyosha_PermanentSkill_2
+		a4: {
+			// Charge_To_SkillBurst_Damage
+			p1: 0.0035,
+			// MaxCharge (paramRatio -0.99)
+			p2: 200,
+		},
+		// Into the Fray
+		// Alyosha_PermanentSkill_3 -> Avatar_Alyosha_Passive_LockTag
+		a0: {
+			// StarConduct_DamageUp
+			p1: 0.2,
+		},
+		// Frostvale Thunderclap
+		// Alyosha_Constellation_1 -> Avatar_Alyosha_Constellation_1_Energy_Recover
+		c1: {
+			// Constellation_1_Energy_Recover_Value
+			p1: 15,
+			// Constellation_1_Energy_Recover_Interval
+			p2: 18,
+		},
+		// Howl From Afar
+		// Alyosha_Constellation_2 -> Skillobj_Alyosha_ElementalBurst_Material
+		c2: {
+			// Dura, also fed by s3.p3
+			p1: 6,
+		},
+		// Harvest the Spoils
+		// Alyosha_Constellation_4 -> Avatar_Alyosha_Talent_HealHP, Skillobj_Alyosha_ElementalBurst_Material
+		c4: {
+			// Constellation_4_Heal_AttackRatio
+			p1: 0.6,
+		},
+		// Standard Reclaimed
+		// Alyosha_Constellation_6 -> Avatar_Alyosha_Passive_LockTag
+		c6: {
+			// Constellation_6_Buff_Stack2_ElemMastery
+			p1: 100,
+		},
 	},
 	Amber: {
 		s1_id: 10041,
@@ -322,6 +590,50 @@ export const charTalentTables = {
 			p2: [12],
 			// Energy Cost
 			p3: [40],
+		},
+		// Every Arrow Finds Its Target
+		// Ambor_Talent_215 -> Avatar_Ambor_ArrowRain_Alert, Avatar_Ambor_ArrowRainField
+		a1: {
+			// Ambor_Talent_215_P1_Critical_Extra
+			p1: 0.1,
+			// Ambor_Talent_215_P2_Range_Extra
+			p2: 0.3,
+		},
+		// Precise Shot
+		// Ambor_Talent_214 -> Ambor_AimingArrow_WithoutFire_Material, Test_ShootAimingArrow_Fire_Fx
+		a4: {
+			// Ambor_AimingArrow_WithoutFire_Material.Ambor_Talent_214_HitHeadAttackUp
+			// Test_ShootAimingArrow_Fire_Fx.Ambor_Talent_214_HitHeadAttackUp
+			p1: 0.15,
+			// Ambor_AimingArrow_WithoutFire_Material.Ambor_Talent_214_HitHeadAttackUpTimer
+			// Test_ShootAimingArrow_Fire_Fx.Ambor_Talent_214_HitHeadAttackUpTimer
+			p2: 10,
+		},
+		// One Arrow to Rule Them All
+		// Ambor_Talent_212 ->
+		//     Avatar_Ambor_ShootArrow_Aiming
+		//     Ambor_Talent212_DoubleArrow
+		//     Ambor_Talent212_DoubleArrow_WithoutFire_Material
+		c1: {
+			// Ambor_Talent212_DoubleArrow.Ambor_Talent212_P1_Damage_Percentage
+			// Ambor_Talent212_DoubleArrow_WithoutFire_Material.Ambor_Talent212_P1_Damage_Percentage
+			p1: 0.2,
+		},
+		// Bunny Triggered
+		// Ambor_Talent_213 -> Test_ShootAimingArrow_Fire_Fx, Avatar_Ambor_BlowUpByTrigger
+		c2: {
+			// Ambor_Talent213_P1_Damage_Percentage
+			p1: 2,
+		},
+		// Wildfire
+		// Ambor_Talent_216 -> Avatar_Ambor_ArrowRain
+		c6: {
+			// Ambor_Talent_216_P1_MoveSpeedUp
+			p1: 0.15,
+			// Ambor_Talent_216_P2_AttackUp
+			p2: 0.15,
+			// Ambor_Talent_216_P3_BuffTimer
+			p3: 10,
 		},
 	},
 	Arlecchino: {
@@ -378,6 +690,77 @@ export const charTalentTables = {
 			// Energy Cost
 			p6: [60],
 		},
+		// Agony Alone May Be Repaid
+		// Arlecchino_PermanentSkill_1 -> Avatar_Arlecchino_HPDebtsMark, Avatar_Arlecchino_ExtraAttack
+		a1: {
+			p1: 5,
+			p2: 0.65,
+			// Avatar_Arlecchino_ExtraAttack.HpDebts_Level_2_Ratio
+			// Avatar_Arlecchino_HPDebtsMark.HpDebts_KillEnemy_Ratio
+			p3: 1.3,
+		},
+		// Strength Alone Can Defend
+		// Arlecchino_PermanentSkill_2 -> Avatar_Arlecchino_PermanentSkill_2
+		a4: {
+			// Base_Attack
+			p1: 1000,
+			// PermanentSkill_2_SubHurt_Ratio
+			p2: 0.01,
+			p3: 0.2,
+			// Max_Attack
+			p4: 2000,
+		},
+		// The Balemoon Alone May Know
+		// Arlecchino_PermanentSkill_3 -> Avatar_Arlecchino_HealToHpDebts, Avatar_Arlecchino_PermanentSkill_3_Limbo_Trigger
+		a0: {
+			// Avatar_Arlecchino_HealToHpDebts.Arlecchino_HealToHpDebts_FireHurt_Factor
+			p1: 0.4,
+			// Avatar_Arlecchino_PermanentSkill_3_Limbo_Trigger.HealHpRatio
+			p2: 2,
+			p3: 60,
+		},
+		// "All Reprisals and Arrears, Mine to Bear..."
+		// Arlecchino_Constellation_1 -> Avatar_Arlecchino_HealToHpDebts
+		c1: {
+			// Constellation_1_Ratio
+			p1: 1,
+		},
+		// "All Rewards and Retribution, Mine to Bestow..."
+		// Arlecchino_Constellation_2 -> Avatar_Arlecchino_HPDebtsMark, Avatar_Arlecchino_ExtraAttack
+		c2: {
+			// Constellation_2_Ratio
+			p1: 9,
+			// Arlecchino_Constellation_2_CD
+			p2: 10,
+			// Constellation_2_SubHurt_Ratio
+			p3: 0.2,
+			// Constellation_2_SubHurt_Duration
+			p4: 15,
+		},
+		// "You Shall Love and Protect Each Other Henceforth..."
+		// Arlecchino_Constellation_4 -> Avatar_Arlecchino_ExtraAttack
+		c4: {
+			// Constellation_4_ReduceBurstCD_Delta
+			p1: 2,
+			// Constellation_4_ReviveEnergy
+			p2: 15,
+			// Arlecchino_Constellation_4_CD
+			p3: 10,
+		},
+		// "From This Day On, We Shall Delight in New Life Together."
+		// Arlecchino_Constellation_6 -> Avatar_Arlecchino_ElementalArt
+		c6: {
+			// Constellation_6_CriticalDelta
+			p1: 0.1,
+			// Constellation_6_CriticalHurtDelta
+			p2: 0.7,
+			// Constellation_6_Duration
+			p3: 20,
+			// Constellation_6_CD
+			p4: 15,
+			// Constellation_6_Buff_Ratio
+			p5: 7,
+		},
 	},
 	Ayaka: {
 		s1_id: 10024,
@@ -431,6 +814,60 @@ export const charTalentTables = {
 			p4: [20],
 			// Energy Cost
 			p5: [80],
+		},
+		// Amatsumi Kunitsumi Sanctification
+		// Ayaka_PermanentSkill_1 -> Avatar_Ayaka_Talent_IceDance
+		a1: {
+			// IceDance_AttackUp_Ratio
+			p1: 0.3,
+			// IceDance_AttackUp_Duration
+			p2: 6,
+		},
+		// Kanten Senmyou Blessing
+		// Ayaka_PermanentSkill_2 -> Avatar_Ayaka_PermanentSkill_2
+		a4: {
+			// ReviveStaminaValue
+			p1: 10,
+			// Actor_IceAddHurtDelta
+			p2: 0.18,
+			// IceAddHurt_Duration
+			p3: 10,
+		},
+		// Fruits of Shinsa
+		a0: {
+			p1: 0.1,
+			p2: 2,
+		},
+		// Snowswept Sakura
+		// Ayaka_Constellation_1 -> Avatar_Ayaka_Constellation_1
+		c1: {
+			// Constellation_1_Chance
+			p1: 0.5,
+			// cdDelta (subtracted)
+			p2: 0.3,
+			// ReduceElementalArt_CD
+			p3: 0.1,
+		},
+		// Blizzard Blade Seki no To
+		// Ayaka_Constellation_2 -> Avatar_Ayaka_FrozenWindmill
+		c2: {
+			p1: 0.2,
+		},
+		// Ebb and Flow
+		// Ayaka_Constellation_4 -> Avatar_Ayaka_Constellation_4
+		c4: {
+			// Constellation_4_DefenceDown_Ratio (subtracted)
+			p1: 0.3,
+			// Constellation_4_Duration
+			p2: 6,
+		},
+		// Dance of Suigetsu
+		// Ayaka_Constellation_6 -> Avatar_Ayaka_Constellation_6, Avatar_Ayaka_ExtraAttack_Damage_Gadget
+		c6: {
+			// Constellation_6_Period
+			p1: 10,
+			// Constellation_6_DamagePercentageRatio
+			p2: 2.98,
 		},
 	},
 	Ayato: {
@@ -489,6 +926,55 @@ export const charTalentTables = {
 			// Energy Cost
 			p5: [80],
 		},
+		// Kamisato Art: Mine Wo Matoishi Kiyotaki
+		// Ayato_PermanentSkill_1 -> Avatar_Ayato_ElementalArt_Gadget
+		a1: {
+			// AddLevel_Create
+			p1: 2,
+			// AddLevel_Break
+			p2: 5,
+		},
+		// Kamisato Art: Michiyuku Hagetsu
+		// Ayato_PermanentSkill_2 -> Avatar_Ayato_PermanentSkill_2_ReviveEnergy
+		a4: {
+			// TriggerRatio
+			p1: 0.5,
+			// Interval
+			p2: 1,
+			// Energy
+			p3: 2,
+		},
+		// Kyouka Fuushi
+		// Ayato_Constellation_1 -> Avatar_Ayato_Talent1_DamageUp
+		c1: {
+			// HPRatio
+			p1: 0.5,
+			// DamageUp
+			p2: 0.4,
+		},
+		// World Source
+		// Ayato_Constellation_2 -> Avatar_Ayato_KendoPose_Buff
+		c2: {
+			// MaxKendoBuffLevel
+			p1: 1,
+			// Tlant2_MaxHPRatio
+			p2: 0.5,
+		},
+		// Endless Flow
+		// Ayato_Constellation_4 -> Avatar_Ayato_ElementalBurst, Avatar_Ayato_Talent4
+		c4: {
+			// AttackSpeed
+			p1: 0.15,
+			// Talent4_Time
+			p2: 15,
+		},
+		// Boundless Origin
+		// Ayato_Constellation_6 -> Avatar_Ayato_KendoPose, Avatar_Ayato_Talent6, Avatar_Ayato_NormalAttack_DamageHandler
+		c6: {
+			// SPAttack04
+			// SPAttack05
+			p1: 4.5,
+		},
 	},
 	Baizhu: {
 		s1_id: 10821,
@@ -544,6 +1030,71 @@ export const charTalentTables = {
 			// Energy Cost
 			p10: [80],
 		},
+		// Five Fortunes Forever
+		// Baizhuer_PermanentSkill_1 -> Avatar_Baizhuer_PermanentSkill_1
+		a1: {
+			// HPRatio
+			p1: 0.5,
+			// HealUp
+			p2: 0.2,
+			// GrassUp
+			p3: 0.25,
+		},
+		// All Things Are of the Earth
+		// Baizhuer_PermanentSkill_2 -> Avatar_Baizhuer_Heal_ControlAbiilty
+		a4: {
+			// Dura
+			p1: 6,
+			// TransRatio1
+			p2: 0.02,
+			// TransRatio2
+			p3: 0.008,
+			// MaxHP
+			p4: 50000,
+			// TransRatio3
+			p5: 0.007,
+		},
+		// Herbal Nourishment
+		// Baizhuer_LifeSkill -> Avatar_Baizhuer_HealWhenGather
+		a0: {
+			// CasterHPRatio
+			p1: 0.025,
+		},
+		// Incisive Discernment
+		// Baizhuer_Constellation_2 ->
+		//     Avatar_Baizhuer_Constellation_2
+		//     Avatar_Baizhuer_ElementalArt_Bullet_03_Material
+		//     Avatar_Baizhuer_Heal_ControlAbiilty
+		c2: {
+			// Avatar_Baizhuer_Constellation_2.TalentJumpTime
+			p1: 1,
+			// Avatar_Baizhuer_ElementalArt_Bullet_03_Material.Damage_Ratio
+			p2: 2.5,
+			// Avatar_Baizhuer_Heal_ControlAbiilty.Talent_Ratio
+			p3: 0.2,
+			// Avatar_Baizhuer_Constellation_2.Trigger_CD
+			p4: 5,
+		},
+		// Ancient Art of Perception
+		// Baizhuer_Constellation_4 -> Avatar_Baizhuer_ElementalBurst
+		c4: {
+			// Talent4_Value
+			p1: 80,
+			// Talent4_Time
+			p2: 15,
+		},
+		// Elimination of Malicious Qi
+		// Baizhuer_Constellation_6 ->
+		//     Avatar_Baizhuer_ElementalArt_Bullet_01_Material
+		//     Avatar_Baizhuer_ElementalArt_Bullet_03_Material
+		//     Avatar_Baizhuer_ElementalBurst_Bullet_Material
+		c6: {
+			// Avatar_Baizhuer_ElementalArt_Bullet_01_Material.Chance
+			// Avatar_Baizhuer_ElementalArt_Bullet_03_Material.Chance
+			p1: 1,
+			// Avatar_Baizhuer_ElementalBurst_Bullet_Material.HPRate
+			p2: 0.08,
+		},
 	},
 	Barbara: {
 		s1_id: 10070,
@@ -594,6 +1145,17 @@ export const charTalentTables = {
 			p3: [20],
 			// Energy Cost
 			p4: [80],
+		},
+		// Glorious Season
+		// Barbara_PermanentSkill_1 -> Avatar_Barbara_WetShiled_Heal
+		a1: {
+			p1: 0.12,
+		},
+		// Encore
+		// Barbara_PermanentSkill_2 -> Barbara_Eff_WetShiled, Avatar_Barbara_WetShiled
+		a4: {
+			p1: 1,
+			p2: 5,
 		},
 	},
 	Beidou: {
@@ -651,6 +1213,54 @@ export const charTalentTables = {
 			p5: [20],
 			// Energy Cost
 			p6: [80],
+		},
+		// Retribution
+		// Beidou_PermanentSkill_1 -> Avatar_Beidou_ThunderCounter_Handler
+		a1: {
+			p1: 2,
+		},
+		// Lightning Storm
+		// Beidou_PermanentSkill_2 -> Avatar_Beidou_ProudSkill_FlashSlash
+		a4: {
+			// ProudSkill_FlashSlash_AttackUpRatio
+			// ProudSkill_FlashSlash_AttackSpeedRatio
+			p1: 0.15,
+		},
+		// Polaris
+		// Beidou_PermanentSkill_3 -> Avatar_Beidou_PermanentSkill_New
+		sp: {
+			// ReduceTime
+			p1: 4,
+			// Energy
+			p2: 8,
+			// CD_Timer
+			p3: 15,
+		},
+		// Sea Beast's Scourge
+		// Beidou_Constellation_1 -> Avatar_Beidou_ThunderShield_Gadget
+		c1: {
+			// ShieldHP
+			p1: 0.16,
+		},
+		// Stunning Revenge
+		// Beidou_Constellation_4 -> Avatar_Beidou_Talent_ElectricAdd
+		c4: {
+			// Rate
+			p1: 0.2,
+			// Time
+			p2: 10,
+			// CDTime
+			p3: 0.1,
+		},
+		// Bane of Evil
+		// Beidou_Constellation_6 -> Avatar_Beidou_ThunderShield_Gadget
+		c6: {
+			// ElectricDown (subtracted)
+			p1: 0.15,
+			// IceDown (subtracted)
+			p2: 0.15,
+			// MasteryUp
+			p3: 200,
 		},
 	},
 	Bennett: {
@@ -717,6 +1327,32 @@ export const charTalentTables = {
 			// Energy Cost
 			p7: [60],
 		},
+		// Grand Expectation
+		// Bennett_Constellation_1 -> Avatar_Bennett_ElementalBurst_Gadget
+		c1: {
+			// AttackUpRatio, also fed by s3.p4
+			p1: 0.2,
+		},
+		// Impasse Conqueror
+		// Bennett_Constellation_2 -> Avatar_Bennett_Talent_Capacitor
+		c2: {
+			// HPRatio
+			p1: 0.7,
+			// Rate
+			p2: 0.3,
+		},
+		// Unexpected Odyssey
+		// Bennett_Constellation_4 -> Avatar_Bennett_ElementalArt_Strike02_03
+		c4: {
+			// Ratio_Of_Strike02_02
+			p1: 1.35,
+		},
+		// Fire Ventures With Me
+		// Bennett_Constellation_6 -> Avatar_Bennett_ElementalBurst_Gadget
+		c6: {
+			// FireUp
+			p1: 0.15,
+		},
 	},
 	Candace: {
 		s1_id: 10721,
@@ -773,6 +1409,34 @@ export const charTalentTables = {
 			p6: [15],
 			// Energy Cost
 			p7: [60],
+		},
+		// Celestial Dome of Sand
+		// Candace_PermanentSkill_2 -> Avatar_Candace_ElementalBurst
+		a4: {
+			// Buff_NormalAttack_MaxHP2DMGRatio
+			p1: 0.005,
+		},
+		// Returning Heiress of the Scarlet Sands
+		// Candace_Constellation_1 -> Avatar_Candace_ElementalBurst
+		c1: {
+			// Buff_LifeTime, also fed by s3.p2
+			p1: 3,
+		},
+		// Moon-Piercing Brilliance
+		// Candace_Constellation_2 -> Avatar_Candace_ElementalArt_H
+		c2: {
+			// MaxHPUp_Ratio
+			p1: 0.2,
+			// MaxHPUp_Time
+			p2: 15,
+		},
+		// The Overflow
+		// Candace_Constellation_6 -> Avatar_Candace_ElementalBurst
+		c6: {
+			// ExtraAvatarInAttack_DMG
+			p1: 0.15,
+			// ExtraAvatarInAttack_CD
+			p2: 2.3,
 		},
 	},
 	Charlotte: {
@@ -843,6 +1507,69 @@ export const charTalentTables = {
 			// Energy Cost
 			p9: [80],
 		},
+		// Moment of Impact
+		// Charlotte_PermanentSkill_1 -> Avatar_Charlotte_PermanentSkill_1
+		a1: {
+			// Art_CD
+			p1: 2,
+			// TimeLimit
+			p2: 12,
+			// Count
+			p3: 4,
+		},
+		// Diversified Investigation
+		// Charlotte_PermanentSkill_2 -> Avatar_Charlotte_PermanentSkill_2
+		a4: {
+			// HealAddDelta_P1
+			p1: 0.05,
+			// IceAddHurtDelta_P2
+			p2: 0.05,
+		},
+		// A Need to Verify Facts
+		// Charlotte_Constellation_1 -> Avatar_Charlotte_Constellation_Extra_Hot
+		c1: {
+			// Constellation_AddExtraHot_InterVal
+			p1: 2,
+			// Constellation_ExtraHot_HealRatio
+			p2: 0.8,
+			// Constellation_AddExtraHot_Dura
+			p3: 6,
+		},
+		// A Duty to Pursue Truth
+		// Charlotte_Constellation_2 -> Avatar_Charlotte_Constellation_ElementalArt_AddAtkUp
+		c2: {
+			// Ratio_Lv1
+			p1: 0.1,
+			// Ratio_Lv2
+			p2: 0.2,
+			// Ratio_Lv3
+			p3: 0.3,
+			// Dura
+			p4: 12,
+		},
+		// A Responsibility to Oversee
+		// Charlotte_Constellation_4 -> Avatar_Charlotte_Constellation_ReviveElemEnergy
+		c4: {
+			// Burst_DamageUp
+			p1: 0.1,
+			p2: 2,
+			// CDTime
+			p3: 20,
+			// MaxCount
+			p4: 5,
+		},
+		// A Summation of Interest
+		// Charlotte_Constellation_6 ->
+		//     Avatar_Charlotte_Constellation_ExtraCamera_Gadget
+		//     Avatar_Charlotte_ElementalArtHold_RayCast
+		c6: {
+			// Avatar_Charlotte_Constellation_ExtraCamera_Gadget.Constellation_ExtraCameraDamage
+			p1: 1.8,
+			// Avatar_Charlotte_Constellation_ExtraCamera_Gadget.ExtraCamera_HealRatio
+			p2: 0.42,
+			// Avatar_Charlotte_ElementalArtHold_RayCast.Trigger_CD
+			p3: 6,
+		},
 	},
 	Chasca: {
 		s1_id: 11041,
@@ -893,6 +1620,89 @@ export const charTalentTables = {
 			p4: [15],
 			// Energy Cost
 			p5: [60],
+		},
+		// Bullet Trick
+		// Chasca_PermanentSkill_1 -> Avatar_Chasca_MultiAimAttack, Avatar_Chasca_MultiAimAttack_Shoot
+		a1: {
+			// Chasca_PermanentSkill_1_Chance1
+			p1: 0.333,
+			// Chasca_PermanentSkill_1_Chance2
+			p2: 0.667,
+			// Chasca_PermanentSkill_1_Chance3
+			p3: 1,
+			// Chasca_PermanentSkill_1_AddHurt_1
+			p4: 0.15,
+			// Chasca_PermanentSkill_1_AddHurt_2
+			p5: 0.35,
+			// Chasca_PermanentSkill_1_AddHurt_3
+			p6: 0.65,
+		},
+		// Intent to Cover
+		// Chasca_PermanentSkill_2 -> Avatar_Chasca_ElementalArt_HoverAir
+		a4: {
+			// NyxInstant_Shoot_DamageRatio
+			p1: 1.5,
+		},
+		// Mediation's True Meaning
+		// Chasca_PermanentSkill_4 -> Avatar_Chasca_PermanentSkill_4
+		a0_2: {
+			// Phlogiston
+			p1: 25,
+			// CD
+			p2: 12,
+		},
+		// Cylinder, the Restless Roulette
+		// Chasca_Constellation_1 -> Avatar_Chasca_MultiAimAttack, Avatar_Chasca_ElementalArt_HoverAir
+		c1: {
+			// Avatar_Chasca_MultiAimAttack.Chasca_PermanentSkill_1_ExtraChance_Constellation_1
+			p1: 0.333,
+			// Avatar_Chasca_ElementalArt_HoverAir.CostNyxValueRatio_Constellation_1
+			p2: -0.3,
+		},
+		// Muzzle, the Searing Smoke
+		// Chasca_Constellation_2 ->
+		//     Avatar_Chasca_MultiAimAttack
+		//     Avatar_Chasca_MultiAimAttack_Shoot
+		//     Avatar_Chasca_MultiAimAttack_Shoot_Enhanced
+		//     SkillObj_Chasca_MultiAimBullet_Wind
+		//     SkillObj_Chasca_MultiAimBullet_Fire
+		//     SkillObj_Chasca_MultiAimBullet_Elec
+		//     SkillObj_Chasca_MultiAimBullet_Water
+		//     SkillObj_Chasca_MultiAimBullet_Ice
+		c2: {
+			// SkillObj_Chasca_MultiAimBullet_Wind.Chasca_Constellation_2_Wind
+			// SkillObj_Chasca_MultiAimBullet_Fire.Chasca_Constellation_2_Fire
+			// SkillObj_Chasca_MultiAimBullet_Elec.Chasca_Constellation_2_Elec
+			// SkillObj_Chasca_MultiAimBullet_Water.Chasca_Constellation_2_Water
+			// SkillObj_Chasca_MultiAimBullet_Ice.Chasca_Constellation_2_Ice
+			p1: 4,
+		},
+		// Sparks, the Sudden Shot
+		// Chasca_Constellation_4 ->
+		//     Avatar_Chasca_ElementalBurst
+		//     Bullet_Chasca_ElementalBurst_ChildBullet_Fire
+		//     Bullet_Chasca_ElementalBurst_ChildBullet_Elec
+		//     Bullet_Chasca_ElementalBurst_ChildBullet_Water
+		//     Bullet_Chasca_ElementalBurst_ChildBullet_Ice
+		c4: {
+			// Bullet_Chasca_ElementalBurst_ChildBullet_Fire.Chasca_Constellation_4_ReviveEnergy
+			// Bullet_Chasca_ElementalBurst_ChildBullet_Elec.Chasca_Constellation_4_ReviveEnergy
+			// Bullet_Chasca_ElementalBurst_ChildBullet_Water.Chasca_Constellation_4_ReviveEnergy
+			// Bullet_Chasca_ElementalBurst_ChildBullet_Ice.Chasca_Constellation_4_ReviveEnergy
+			p1: 1.5,
+			// Avatar_Chasca_ElementalBurst.Chasca_Constellation_4_TriggerCount
+			p2: 1,
+		},
+		// Showdown, the Glory of Battle
+		// Chasca_Constellation_6 ->
+		//     Avatar_Chasca_MultiAimAttack_Shoot_Enhanced
+		//     Avatar_Chasca_MultiAimAttack
+		//     Avatar_Chasca_MultiAimAttack_Shoot
+		c6: {
+			// Avatar_Chasca_MultiAimAttack_Shoot.Chasca_Constellation_6_Duration
+			p1: 3,
+			// Avatar_Chasca_MultiAimAttack_Shoot_Enhanced.Chasca_Constellation_6_bonusCriticalHurt
+			p2: 1.2,
 		},
 	},
 	Chevreuse: {
@@ -951,6 +1761,66 @@ export const charTalentTables = {
 			// Energy Cost
 			p4: [60],
 		},
+		// Vanguard's Coordinated Tactics
+		// Chevreuse_PermanentSkill_1 -> Avatar_Chevreuse_Buff
+		a1: {
+			// DefenceDown (subtracted)
+			p1: 0.4,
+			// Dura1
+			p2: 6,
+		},
+		// Vertical Force Coordination
+		// Chevreuse_PermanentSkill_2 -> Avatar_Chevreuse_ElementalArt_Shoot
+		a4: {
+			// DamageUpRatio
+			p1: 0.01,
+			// Dura2
+			p2: 30,
+			// MaxDamageUp
+			p3: 0.4,
+		},
+		// Stable Front Line's Resolve
+		// Chevreuse_Constellation_1 -> Avatar_Chevreuse_Buff
+		c1: {
+			// Energy
+			p1: 6,
+			// CD_Time
+			p2: 10,
+		},
+		// Sniper Induced Explosion
+		// Chevreuse_Constellation_2 ->
+		//     Skillobj_Chevreuse_ElementalArt_Bullet1_Material
+		//     Skillobj_Chevreuse_ElementalArt_Bullet2_Material
+		//     Avatar_Chevreuse_ExtraBomb
+		//     SkillObj_Chevreuse_ExtraBomb_Material
+		c2: {
+			// SkillObj_Chevreuse_ExtraBomb_Material.BombDamage
+			p1: 1.2,
+			// Avatar_Chevreuse_ExtraBomb.CD_Time
+			p2: 10,
+		},
+		// The Secret to Rapid-Fire Multishots
+		// Chevreuse_Constellation_4 -> Avatar_Chevreuse_ElementalArt_Shoot, Avatar_Chevreuse_ElementalBurst
+		c4: {
+			// TalentDura
+			p1: 6,
+			// Chance
+			p2: 2,
+		},
+		// In Pursuit of Ending Evil
+		// Chevreuse_Constellation_6 -> Avatar_Chevreuse_ElementalArt
+		c6: {
+			// Middle_Time
+			p1: 12,
+			// HPRatio
+			p2: 0.1,
+			// AttackUp
+			p3: 0.2,
+			// AttDura
+			p4: 8,
+			// MaxStack
+			p5: 3,
+		},
 	},
 	Chiori: {
 		s1_id: 10941,
@@ -1006,6 +1876,77 @@ export const charTalentTables = {
 			// Energy Cost
 			p4: [50],
 		},
+		// Tailor-Made
+		// Chiori_PermanentSkill_1 -> Avatar_Chiori_ElementalArt_Blink, Avatar_Chiori_ElementalArt_JumpSwitch
+		a1: {
+			// Avatar_Chiori_ElementalArt_JumpSwitch.AfterChangeAvatar_Attack_Factor
+			p1: 1,
+			// Avatar_Chiori_ElementalArt_JumpSwitch.AttackDetect_Dur
+			p2: 8,
+			// Avatar_Chiori_ElementalArt_JumpSwitch.Chiori_AfterChangeAvatar_Attack_CD
+			p3: 2,
+			// Avatar_Chiori_ElementalArt_JumpSwitch.Chiori_AfterChangeAvatar_MaxHitNum
+			p4: 2,
+			// Avatar_Chiori_ElementalArt_Blink.Rock_Time
+			p5: 5,
+		},
+		// The Finishing Touch
+		// Chiori_PermanentSkill_2 -> Avatar_Chiori_PermanentSkill_2_OnCreateRockGadget
+		a4: {
+			// PermanentSkill_2_RockAddHurt
+			p1: 0.2,
+			// PermanentSkill_2_Dura
+			p2: 20,
+		},
+		// Six Paths of Sage Silkcraft
+		// Chiori_Constellation_1 ->
+		//     Avatar_Chiori_ElementalArt_PutTurret
+		//     SkillObj_Chiori_ElementalArt_Turret
+		//     SkillObj_Chiori_ElementalArt_RockGadget_Turret
+		c1: {
+			p1: 0.5,
+		},
+		// In Five Colors Dyed
+		// Chiori_Constellation_4 ->
+		//     Avatar_Chiori_Constellation_4_ElementalBurst_AddDoll
+		//     Avatar_Chiori_ElementalBurst
+		//     SkillObj_Chiori_Turret_Constellation
+		c2: {
+			// Avatar_Chiori_Constellation_4_ElementalBurst_AddDoll.Chiori_Constellation_4_Tick
+			p1: 3,
+			// Avatar_Chiori_Constellation_4_ElementalBurst_AddDoll.Chiori_Constellation_4_Dur
+			p2: 10,
+			// SkillObj_Chiori_Turret_Constellation.Turret_Constellation_Ratio
+			p3: 1.7,
+			// SkillObj_Chiori_Turret_Constellation.Constellation_Turret_LifeTime
+			p4: 3,
+		},
+		// A Tailor's Three Courtesies
+		// Chiori_Constellation_2 ->
+		//     Avatar_Chiori_ElementalArt_Blink
+		//     Avatar_Chiori_ElementalArt_JumpSwitch
+		//     Avatar_Chiori_Constellation_2_AttackLanded_CreateDoll
+		c4: {
+			// Chiori_Constellation_2_Dur
+			p1: 8,
+			// Chiori_Constellation_2_AttackCd
+			p2: 1,
+			// Chiori_Constellation_2_MaxCount
+			p3: 3,
+			// Chiori_Constellation_2_Cd
+			p4: 15,
+		},
+		// Sole Principle Pursuit
+		// Chiori_Constellation_6 ->
+		//     Avatar_Chiori_Constellation_6_Strengthen
+		//     Avatar_Chiori_ElementalArt_Blink
+		//     Avatar_Chiori_ElementalArt_JumpSwitch
+		c6: {
+			// Chiori_Constellation_6_ReduceCD
+			p1: 12,
+			// Chiori_Constellation_6_DefRatio
+			p2: 2.35,
+		},
 	},
 	Chongyun: {
 		s1_id: 10401,
@@ -1052,6 +1993,48 @@ export const charTalentTables = {
 			p2: [12],
 			// Energy Cost
 			p3: [40],
+		},
+		// Steady Breathing
+		// Chongyun_Talent_364 -> Avatar_Chongyun_IceCrystal
+		a1: {
+			// OverallSpeedRatio
+			p1: 0.08,
+		},
+		// Rimechaser Blade
+		// Chongyun_Talent_21 -> Avatar_Chongyun_IceCrystal, Avatar_Chongyun_IceCrystal_Dummy
+		a4: {
+			// ElementalArt_Damage_Percentage
+			p1: 1,
+			// IceSubHurtDelta
+			p2: -0.1,
+			// IceSubHurtDuration
+			p3: 8,
+		},
+		// Ice Unleashed
+		// Chongyun_Talent_361 -> Avatar_Chongyun_IceBlade, ChongyunTest_TestBlade_Hit
+		c1: {
+			// Chongyun_Talent_IceBlades_Damage
+			p1: 0.5,
+		},
+		// Atmospheric Revolution
+		// Chongyun_Talent_362 -> Avatar_Chongyun_IceCrystal
+		c2: {
+			// SkillCDMinusRatio
+			p1: 0.15,
+		},
+		// Frozen Skies
+		// Chongyun_Talent_22 -> Avatar_Chongyun_HitReviveElemEnergy
+		c4: {
+			// baseEnergy
+			p1: 1,
+			// duration
+			p2: 2,
+		},
+		// Rally of Four Blades
+		// Chongyun_Talent_366 -> Avatar_Chongyun_SoulUnleash_Initiate, Avatar_Chongyun_SoulUnleash_Quadra_Damage
+		c6: {
+			// damagePercentage
+			p1: 0.15,
 		},
 	},
 	Citlali: {
@@ -1107,6 +2090,98 @@ export const charTalentTables = {
 			p5: [15],
 			// Energy Cost
 			p6: [60],
+		},
+		// Mamaloaco's Frigid Rain
+		// Citlali_PermanentSkill_1 -> Avatar_Citlali_PermanentSkill_1
+		a1: {
+			// P1_Nyx
+			p1: 16,
+			// P1CD
+			p2: 8,
+			// DefenceDown
+			p3: 0.2,
+			// Dura
+			p4: 12,
+		},
+		// Itzpapalotl's Star Garments
+		// Citlali_PermanentSkill_2 ->
+		//     Avatar_Citlali_ElementalArt_Handler
+		//     Skillobj_Citlali_ElementalBurst_Gadget1_Material
+		//     Avatar_Citlali_NyxInstant
+		a4: {
+			// Avatar_Citlali_ElementalArt_Handler.Ratio1
+			p1: 0.9,
+			// Skillobj_Citlali_ElementalBurst_Gadget1_Material.Ratio2
+			p2: 12,
+			// Avatar_Citlali_NyxInstant.Value
+			p3: 4,
+		},
+		// Night Realm's Gift: Smoke, Mirrors, and the Flowing Winds
+		// Citlali_PermanentSkill_3 -> Avatar_Citlali_Ransu, Avatar_Citlali_ExtraAttack
+		a0: {
+			// Avatar_Citlali_Ransu.JumpStamina
+			p1: 75,
+			// Avatar_Citlali_Ransu.JumpRansu
+			p2: 5,
+			// Avatar_Citlali_ExtraAttack.AirExtraAttackRansu
+			p3: 20,
+		},
+		// Radiant Blades of Centzon Mimixcoah
+		// Citlali_Constellation_1 ->
+		//     Avatar_Citlali_Talent1
+		//     Avatar_Citlali_ElementalArt_Handler
+		//     Avatar_Citlali_PermanentSkill_1
+		//     Avatar_Citlali_Ransu
+		//     Avatar_Citlali_ExtraAttack
+		c1: {
+			// Avatar_Citlali_Talent1.DamageExtra_Ratio_Talent
+			p1: 2,
+			// Avatar_Citlali_Talent1.Start_Times_Talent
+			p2: 10,
+			// Avatar_Citlali_PermanentSkill_1.Add_Times
+			p3: 3,
+			// Avatar_Citlali_PermanentSkill_1.Talent1CD
+			p4: 8,
+			// Avatar_Citlali_Ransu.RansuRatio (subtracted)
+			// Avatar_Citlali_ExtraAttack.RansuRatio (subtracted)
+			p5: 0.45,
+		},
+		// Heart Devourer's Travail
+		// Citlali_Constellation_2 -> Avatar_Citlali_ElementalArt_Handler, Avatar_Citlali_PermanentSkill_1
+		c2: {
+			// Avatar_Citlali_ElementalArt_Handler.Talent_SelfMastery
+			p1: 125,
+			// Avatar_Citlali_ElementalArt_Handler.Talent_Mastery
+			p2: 250,
+			// Avatar_Citlali_ElementalArt_Handler.Talent_Ratio
+			p3: 1,
+			// Avatar_Citlali_PermanentSkill_1.DefenceDown_Talent
+			p4: 0.2,
+			p5: 12,
+		},
+		// Death Defier's Spirit Skull
+		// Citlali_Constellation_4 -> Avatar_Citlali_Talent4, Skillobj_Citlali_ElementalBurst_Gadget3_Material
+		c4: {
+			// Skillobj_Citlali_ElementalBurst_Gadget3_Material.Talent_Damage
+			p1: 18,
+			// Skillobj_Citlali_ElementalBurst_Gadget3_Material.Talent_Nyx
+			p2: 16,
+			// Skillobj_Citlali_ElementalBurst_Gadget3_Material.Talent_Energy
+			p3: 8,
+			// Avatar_Citlali_Talent4.TriggerCD
+			p4: 8,
+		},
+		// Teoiztac's Secret Pact
+		// Citlali_Constellation_6 -> Avatar_Citlali_ElementalArt_Handler
+		c6: {
+			// Talent6_Ratio_Fire
+			p1: 0.015,
+			// Talent6_Ratio_Water
+			p2: 0.015,
+			// Talent6_Ratio_Self
+			p3: 0.025,
+			// MaxNyx
+			p4: 40,
 		},
 	},
 	Clorinde: {
@@ -1179,6 +2254,72 @@ export const charTalentTables = {
 			// Energy Cost
 			p4: [60],
 		},
+		// Dark-Shattering Flame
+		// Clorinde_PermanentSkill_1 -> Avatar_Clorinde_Talent_PassiveSkill
+		a1: {
+			// Clorinde_PermanentSkill_1_BuffTime
+			p1: 15,
+			// Clorinde_PermanentSkill_1_DamageExtra_Max
+			p2: 1800,
+			// Clorinde_PermanentSkill_1_AttackTo_DamageExtra_Ratio
+			p3: 0.2,
+		},
+		// Lawful Remuneration
+		// Clorinde_PermanentSkill_2 -> Avatar_Clorinde_Talent_PassiveSkill, Avatar_Clorinde_ElementalArt_Activate
+		a4: {
+			// Avatar_Clorinde_ElementalArt_Activate.SwitchHealToHPDebts_PermanentSkill_2_Ratio
+			p1: 1,
+			// Avatar_Clorinde_Talent_PassiveSkill.Clorinde_PermanentSkill_2_MaxHpCap
+			p2: 1,
+			// Avatar_Clorinde_Talent_PassiveSkill.Clorinde_PermanentSkill_2_DebtTo_CritRatio
+			p3: 0.1,
+			// Avatar_Clorinde_Talent_PassiveSkill.Clorinde_PermanentSkill_2_BuffTime
+			p4: 15,
+		},
+		// "From This Day, I Pass the Candle's Shadow-Veil"
+		// Clorinde_Constellation_1 -> Avatar_Clorinde_Constellation_PassiveSkill, Avatar_Clorinde_Constellation_1_Gadget
+		c1: {
+			// Avatar_Clorinde_Constellation_PassiveSkill.Clorinde_Constellation_1_Trigger_Chance
+			p1: 0.5,
+			// Avatar_Clorinde_Constellation_1_Gadget.Clorinde_Constellation_1_Trigger_DMG
+			p2: 0.3,
+			// Avatar_Clorinde_Constellation_PassiveSkill.Clorinde_Constellation_1_Internal_CD
+			p3: 1.2,
+		},
+		// "Now, As We Face the Perils of the Long Night"
+		// Clorinde_Constellation_2 -> Avatar_Clorinde_Talent_PassiveSkill
+		c2: {
+			// Clorinde_Constellation_2_DamageExtra_Max
+			p1: 2700,
+			// Clorinde_Constellation_2_AttackTo_DamageExtra_Ratio
+			p2: 0.3,
+		},
+		// "To Enshrine Tears, Life, and Love"
+		// Clorinde_Constellation_4 -> Avatar_Clorinde_ElementalBurst_Activate
+		c4: {
+			// Clorinde_Constellation_4_DMG_Multiplier
+			p1: 0.02,
+			// Clorinde_Constellation_4_Max
+			p2: 2,
+		},
+		// "And So Shall I Never Despair"
+		// Clorinde_Constellation_6 -> Avatar_Clorinde_Constellation_PassiveSkill, Avatar_Clorinde_ElementalArt_Dodge
+		c6: {
+			// Clorinde_Constellation_6_CritChance
+			p1: 0.1,
+			// Clorinde_Constellation_6_CritHurt
+			p2: 0.7,
+			// Clorinde_Constellation_6_Endure_Time
+			p3: 1,
+			// Clorinde_Constellation_6_DamageReduce
+			p4: 0.8,
+			// Clorinde_Constellation_6_Trigger_DMG
+			p5: 2,
+			// Clorinde_Constellation_6_Trigger_Count
+			p6: 6,
+			// Clorinde_Constellation_6_BuffTime
+			p7: 12,
+		},
 	},
 	Collei: {
 		s1_id: 10671,
@@ -1221,6 +2362,52 @@ export const charTalentTables = {
 			p4: [15],
 			// Energy Cost
 			p5: [60],
+		},
+		// Floral Sidewinder
+		// Collei_PermanentSkill_1 -> Bullet_Collei_ElementalArt_Bullet, SkillObj_Collei_ElementalArt_Dummy
+		a1: {
+			// Attack_Interval
+			p1: 1.5,
+			// Elemental_Art_Auto
+			p2: 0.4,
+			// Life_Time
+			p3: 3,
+		},
+		// The Languid Wood
+		// Collei_PermanentSkill_2 -> SkillObj_Collei_ElementalBurst_Dummy
+		a4: {
+			// addDuration
+			p1: 1,
+			// maxStack
+			p2: 3,
+		},
+		// Deepwood Patrol
+		// Collei_Constellation_1 -> Avatar_Collei_Constellation_1
+		c1: {
+			// Collei_Talent_ChargeEfficiencyUp
+			p1: 0.2,
+		},
+		// Through Hill and Copse
+		// Collei_Constellation_2 -> SkillObj_Collei_ElementalArt_Dummy, Bullet_Collei_ElementalArt_Bullet
+		c2: {
+			// DelayDie_Time
+			p1: 3,
+			p2: 0.4,
+			p3: 3,
+		},
+		// Gift of the Woods
+		// Collei_Constellation_4 -> Avatar_Collei_ElementalBurst
+		c4: {
+			// Talent_ElemMasteryDelta
+			p1: 60,
+			// Talent_Buff_Time
+			p2: 12,
+		},
+		// Forest of Falling Arrows
+		// Collei_Constellation_6 -> Bullet_Collei_ElementalArt_Bullet, SkillObj_Collei_ElementalBurst_Dummy_Cat_Talent
+		c6: {
+			// Elemental_Burst_DMG_Talent
+			p1: 2,
 		},
 	},
 	Columbina: {
@@ -1276,6 +2463,95 @@ export const charTalentTables = {
 			p4: [15],
 			// Energy Cost
 			p5: [60],
+		},
+		// Lunacy's Lure
+		// Columbina_PermanentSkill_1 -> Avatar_Columbina_PermanentSkill_1
+		a1: {
+			// Critical_Ratio
+			p1: 0.05,
+			// Timer
+			p2: 10,
+		},
+		// Moonsign Benediction: Moonlight, Lent Unto You
+		// Columbina_PermanentSkill_3 -> Avatar_Columbina_PermanentSkill_3
+		a0: {
+			// MaxHp_TransRatio
+			p1: 0.002,
+			// Max_Ratio
+			p2: 0.07,
+		},
+		// Radiance Over Blossoms and Peaks
+		// Columbina_Constellation_1 -> Avatar_Columbina_Constellation_1
+		c1: {
+			// EnergyValue
+			p1: 6,
+			// EndureRatio
+			p2: 0.3,
+			// EndureDuration
+			p3: 8,
+			// ShieldHpRatio
+			p4: 0.12,
+			// ShieldDuration
+			p5: 8,
+			// CD_Timer
+			p6: 15,
+			// MoonReaction_RareRatio, also fed by c2.p7, c3.p1, c4.p6, c5.p1, c6.p3
+			p7: 0.015,
+		},
+		// Not in Lone Splendor
+		// Columbina_Constellation_2 -> Avatar_Columbina_Constellation_2, Avatar_Columbina_Constellation_1
+		c2: {
+			// Avatar_Columbina_Constellation_2.Add_Ratio
+			p1: 0.34,
+			// Avatar_Columbina_Constellation_2.MaxHp_Ratio
+			p2: 0.4,
+			// Avatar_Columbina_Constellation_2.Buff_Duration
+			p3: 8,
+			// Avatar_Columbina_Constellation_2.Attack_ByMaxHpRatio
+			p4: 0.01,
+			// Avatar_Columbina_Constellation_2.Mastery_ByMaxHpRatio
+			p5: 0.0035,
+			// Avatar_Columbina_Constellation_2.Defence_ByMaxHpRatio
+			p6: 0.01,
+			// Avatar_Columbina_Constellation_1.MoonReaction_RareRatio, also fed by c1.p7, c3.p1, c4.p6, c5.p1, c6.p3
+			p7: 0.07,
+		},
+		// Dreamlike Glow Across Tranquil Waters
+		// Columbina_Constellation_3 -> Avatar_Columbina_Constellation_1
+		c3: {
+			// MoonReaction_RareRatio, also fed by c1.p7, c2.p7, c4.p6, c5.p1, c6.p3
+			p1: 0.015,
+		},
+		// Cloudveiled Ridges in Floral Mists
+		// Columbina_Constellation_4 -> Avatar_Columbina_Constellation_4, Avatar_Columbina_Constellation_1
+		c4: {
+			// Avatar_Columbina_Constellation_4.Energy_Vlaue
+			p1: 4,
+			// Avatar_Columbina_Constellation_4.MoonShock_HpRatio
+			p2: 0.125,
+			// Avatar_Columbina_Constellation_4.MoonOvergrow_HpRatio
+			p3: 0.025,
+			// Avatar_Columbina_Constellation_4.MoonCrtstalize_HpRatio
+			p4: 0.125,
+			// Avatar_Columbina_Constellation_4.CD_Timer
+			p5: 15,
+			// Avatar_Columbina_Constellation_1.MoonReaction_RareRatio, also fed by c1.p7, c2.p7, c3.p1, c5.p1, c6.p3
+			p6: 0.015,
+		},
+		// Silence Tending One Lone Song
+		// Columbina_Constellation_5 -> Avatar_Columbina_Constellation_1
+		c5: {
+			// MoonReaction_RareRatio, also fed by c1.p7, c2.p7, c3.p1, c4.p6, c6.p3
+			p1: 0.015,
+		},
+		// Through Darkness Led by Moonlight
+		// Columbina_Constellation_6 -> Avatar_Columbina_ElementalBurst_MoonField, Avatar_Columbina_Constellation_1
+		c6: {
+			p1: 0,
+			// Avatar_Columbina_ElementalBurst_MoonField.Constellation_6_Timer
+			p2: 8,
+			// Avatar_Columbina_Constellation_1.MoonReaction_RareRatio, also fed by c1.p7, c2.p7, c3.p1, c4.p6, c5.p1
+			p3: 0.07,
 		},
 	},
 	Cyno: {
@@ -1348,6 +2624,95 @@ export const charTalentTables = {
 			// Energy Cost
 			p15: [80],
 		},
+		// Featherfall Judgment
+		// Cyno_PermanentSkill_1 ->
+		//     Cyno_ElementalArt_Click_BurstMode
+		//     Avatar_Cyno_BurstMode_ElementalArt_Onstart
+		//     Avatar_Cyno_ElementalBurst_JackalMode
+		//     Avatar_Cyno_ElementalBurst
+		//     Cyno_ElementalArt_Blade_Hit
+		//     Cyno_Constellation_6_Blade
+		a1: {
+			// Avatar_Cyno_BurstMode_ElementalArt_Onstart.ElementalArt_BurstMode_MuyaRatio
+			p1: 0.35,
+			// Cyno_ElementalArt_Blade_Hit.Cyno_ElementalArt_Blade
+			// Cyno_Constellation_6_Blade.Cyno_ElementalArt_Blade
+			p2: 1,
+			// Cyno_ElementalArt_Blade_Hit.Cyno_ElementalArt_StarBlade
+			p3: 2,
+		},
+		// Authority Over the Nine Bows
+		// Cyno_PermanentSkill_2 ->
+		//     Avatar_Cyno_Attack_DamageHandler
+		//     Cyno_ElementalArt_Blade_Hit
+		//     Cyno_Constellation_6_Blade
+		a4: {
+			// Avatar_Cyno_Attack_DamageHandler.Cyno_PermanentSkill_2_Ratio_BurstModeNormalAttack
+			p1: 1.5,
+			// Cyno_ElementalArt_Blade_Hit.Cyno_PermanentSkill_2_Ratio_ElementalArt_Blade
+			// Cyno_Constellation_6_Blade.Cyno_PermanentSkill_2_Ratio_ElementalArt_Blade
+			p2: 2.5,
+			// Cyno_ElementalArt_Blade_Hit.Cyno_PermanentSkill_2_Ratio_ElementalArt_StarBlade
+			p3: 6,
+		},
+		// Ordinance: Unceasing Vigil
+		// Cyno_Constellation_1 ->
+		//     Avatar_Cyno_Constellation_1_AttackRatio
+		//     Cyno_ElementalArt_Click
+		//     Avatar_Cyno_ElementalBurst
+		//     Avatar_Cyno_ElementalBurst_JackalMode
+		c1: {
+			// Cyno_Constellation_1_AtkRatio
+			p1: 0.2,
+			// Cyno_Constellation_1_Duration
+			p2: 10,
+			// Cyno_Constellation_1_MasteryUp_New
+			p3: 200,
+		},
+		// Ceremony: Homecoming of Spirits
+		// Cyno_Constellation_2 -> Avatar_Cyno_Constellation_1_AttackRatio, Avatar_Cyno_Constellation_2_BuffElecAddHurt
+		c2: {
+			// Cyno_Constellation_2_ElecAddHurtDelta
+			p1: 0.1,
+			// Cyno_Constellation_2_BuffTime
+			p2: 4,
+			// Cyno_Constellation_2_MaxLevel
+			p3: 5,
+			// Cyno_Constellation_2_CD
+			p4: 0.1,
+			// Cyno_Constellation_2_NewStarDamageRatio
+			p5: 0.16,
+		},
+		// Austerity: Forbidding Guard
+		// Cyno_Constellation_4 -> Avatar_Cyno_Constellation_4_ReviveEnergy
+		c4: {
+			// Cyno_Constellation_4_ReviveElemEnergyValue
+			p1: 3,
+			// Cyno_Constellation_4_MaxCount
+			p2: 5,
+			// Cyno_ReviveEnergy_New
+			p3: 20,
+			// Cyno_ReviveEnergy_CD_New
+			p4: 18,
+		},
+		// Raiment: Just Scales
+		// Cyno_Constellation_6 ->
+		//     Avatar_Cyno_Constellation_6
+		//     Avatar_Cyno_ElementalBurst
+		//     Avatar_Cyno_BurstMode_ElementalArt_Onstart
+		c6: {
+			// Avatar_Cyno_Constellation_6.Cyno_Constellation_6_Layer
+			// Avatar_Cyno_BurstMode_ElementalArt_Onstart.Cyno_Constellation_6_Layer
+			// Avatar_Cyno_ElementalBurst.Cyno_Constellation_6_Layer
+			p1: 4,
+			// Avatar_Cyno_Constellation_6.Cyno_Constellation_6_Duration
+			// Avatar_Cyno_BurstMode_ElementalArt_Onstart.Cyno_Constellation_6_LayerMax
+			p2: 8,
+			// Avatar_Cyno_Constellation_6.Cyno_Constellation_6_LayerMax
+			p3: 8,
+			// Avatar_Cyno_Constellation_6.Cyno_Constellation_6_Layer_CD
+			p4: 0.4,
+		},
 	},
 	Dahlia: {
 		s1_id: 11151,
@@ -1396,6 +2761,46 @@ export const charTalentTables = {
 			p5: [60],
 			// CD
 			p6: [15],
+		},
+		// The Wind's Gentle Grace
+		// Dahlia_PermanentSkill_1 -> Avatar_Dahlia_ElementalBurst
+		a1: {
+			// FreezeAddBuff_Timer
+			p1: 8,
+		},
+		// Prayer of Well-Wrought Joy
+		// Dahlia_PermanentSkill_2 -> Avatar_Dahlia_PermanentSkill_2
+		a4: {
+			// HpToSpeed_Ratio
+			p1: 0.000005,
+			// MaxAttackSpeed
+			p2: 0.2,
+		},
+		// Infallible Procession
+		// Dahlia_Constellation_1 -> Avatar_Dahlia_Constellation_1
+		c1: {
+			// EnergyValue
+			p1: 2.5,
+		},
+		// Revelation of Mercy
+		// Dahlia_Constellation_2 -> Avatar_Dahlia_Constellation_2
+		c2: {
+			// ShieldMinusRatio
+			p1: 0.25,
+			// Buff_Timer
+			p2: 12,
+		},
+		// Collect of the Assembly
+		// Dahlia_Constellation_4 -> Avatar_Dahlia_Constellation_4
+		c4: {
+			// Extra_BurstTimer
+			p1: 3,
+		},
+		// You Shall Go Out With Joy
+		// Dahlia_Constellation_6 -> Avatar_Dahlia_Constellation_6
+		c6: {
+			// Extra_AtkSpeedRatio
+			p1: 0.1,
 		},
 	},
 	Dehya: {
@@ -1460,6 +2865,90 @@ export const charTalentTables = {
 			// Energy Cost
 			p7: [70],
 		},
+		// Unstinting Succor
+		// Dehya_PermanentSkill_1 ->
+		//     Avatar_Dehya_ElementalArt_Insert
+		//     Avatar_Dehya_ElementalArt_Recycle
+		//     Avatar_Dehya_ElementalBurst
+		//     Avatar_Dehya_PermanentSkill_1_A
+		//     Avatar_Dehya_PermanentSkill_1_B
+		a1: {
+			// Avatar_Dehya_PermanentSkill_1_A.Loan_Reduce_Ratio
+			p1: 0.6,
+			// Avatar_Dehya_PermanentSkill_1_A.Time
+			p2: 6,
+			// Avatar_Dehya_PermanentSkill_1_A.Trigger_CD
+			p3: 2,
+			// Avatar_Dehya_PermanentSkill_1_B.EndureUp_Time
+			p4: 9,
+			// Avatar_Dehya_PermanentSkill_1_B.Trigger_CD
+			p5: 18,
+		},
+		// Stalwart and True
+		// Dehya_PermanentSkill_2 -> Avatar_Dehya_PermanentSkill_2
+		a4: {
+			// LimitHp_Ratio
+			p1: 0.4,
+			// TimelyHp_Ratio
+			p2: 0.2,
+			// HotHp_Ratio
+			p3: 0.06,
+			// Hot_Interval
+			p4: 2,
+			// Hot_Duration
+			p5: 10,
+			// CD_Time
+			p6: 20,
+		},
+		// The Sunlit Way
+		// Dehya_Talent_RunningInTheSun -> Avatar_Dehya_Talent_RunningInTheSun
+		a0: {
+			// Avatar_Dehya_Talent_RunningInTheSun_Speed
+			p1: 0.1,
+		},
+		// The Flame Incandescent
+		// Dehya_Constellation_1 -> Avatar_Dehya_Constellation_1
+		c1: {
+			// Hp_Ratio
+			p1: 0.2,
+			// HpToDamage_Art
+			p2: 0.036,
+			// HpToDamage_Burst
+			p3: 0.06,
+		},
+		// The Sand-Blades Glittering
+		// Dehya_Constellation_2 ->
+		//     Gadget_Dehya_ElementalArt_Grave
+		//     Avatar_Dehya_ElementalArt_Recycle
+		//     Avatar_Dehya_Constellation_2
+		c2: {
+			// Avatar_Dehya_ElementalArt_Recycle.Constellation_2_Prolong
+			p1: 6,
+			// Avatar_Dehya_Constellation_2.DamageUp_Ratio
+			p2: 0.5,
+		},
+		// An Oath Abiding
+		// Dehya_Constellation_4 -> Avatar_Dehya_Constellation_4
+		c4: {
+			// Revive_Energy
+			p1: 1.5,
+			// Heal_Ratio
+			p2: 0.025,
+			// CD_Time
+			p3: 0.2,
+		},
+		// The Burning Claws Cleaving
+		// Dehya_Constellation_6 -> Avatar_Dehya_Constellation_6, Avatar_Dehya_ElementalBurst
+		c6: {
+			// Crit_Up
+			p1: 0.1,
+			// CritHurt_Up
+			p2: 0.15,
+			// Timer_Prolong
+			p3: 0.5,
+			// Max_Level
+			p4: 4,
+		},
 	},
 	Diluc: {
 		s1_id: 10160,
@@ -1512,6 +3001,63 @@ export const charTalentTables = {
 			p5: [8],
 			// Energy Cost
 			p6: [40],
+		},
+		// Relentless
+		// Diluc_PermanentSkill_1 -> Avatar_Diluc_ExtraAttack
+		a1: {
+			p1: 0.5,
+			// Max_Dura, also fed by s1.p8
+			p2: 3,
+		},
+		// Blessing of Phoenix
+		// Diluc_PermanentSkill_2 -> Avatar_Diluc_Fire_Enhancement
+		a4: {
+			// Dura
+			p1: 4,
+			// FireUp
+			p2: 0.2,
+		},
+		// Conviction
+		// Diluc_Talent_1 -> Avatar_Diluc_GiantKiller
+		c1: {
+			// Rate
+			p1: 0.15,
+		},
+		// Searing Ember
+		// Diluc_Talent_2 -> Avatar_Diluc_FireHowl
+		c2: {
+			// AttackRate
+			p1: 0.1,
+			// SpeedRate
+			p2: 0.05,
+			// Time
+			p3: 10,
+			// maxStackCount
+			p4: 3,
+			// CDTime
+			p5: 1.5,
+		},
+		// Flowing Flame
+		// Diluc_Talent_4 -> Avatar_Diluc_NextFireBlade1, Avatar_Diluc_NextFireBlade2
+		c4: {
+			// Avatar_Diluc_NextFireBlade1.Rate
+			// Avatar_Diluc_NextFireBlade2.Rate
+			p1: 0.4,
+		},
+		// Flaming Sword, Nemesis of the Dark
+		// Diluc_Talent_6 ->
+		//     Avatar_Diluc_AfterFireBlade
+		//     Avatar_Diluc_Fire_BladeSet1
+		//     Avatar_Diluc_Fire_BladeSet2
+		//     Avatar_Diluc_Fire_BladeSet3
+		//     Avatar_Diluc_Fire_Blade
+		c6: {
+			// Dura
+			p1: 6,
+			// AtkSpeed
+			p2: 0.3,
+			// Rate
+			p3: 0.3,
 		},
 	},
 	Diona: {
@@ -1570,6 +3116,60 @@ export const charTalentTables = {
 			// Energy Cost
 			p6: [80],
 		},
+		// Cat's Tail Secret Menu
+		// Diona_PermanentSkill_1 -> Avatar_Diona_ElementalArt_Shield
+		a1: {
+			// Diona_Speed
+			p1: 0.1,
+			// Diona_CostStaminaDelta
+			p2: -0.1,
+		},
+		// Drunkards' Farce
+		// Diona_PermanentSkill_2 -> Avatar_Diona_IceWine_Fog
+		a4: {
+			// Diona_Talent_AttackRatio
+			p1: -0.1,
+			// AttackDown_Duration
+			p2: 15,
+		},
+		// Choice Treasures
+		// Diona_PermanentSkill_3 -> Avatar_Diona_PermanentSkill_3
+		sp: {
+			// Diona_PermanentSkill_3_BuffDur
+			p1: 20,
+			// Diona_PermanentSkill_3_BuffCD
+			p2: 3.5,
+		},
+		// A Lingering Flavor
+		// Diona_Constellation_1 -> Avatar_Diona_IceWine_Fog
+		c1: {
+			// Talent_ReviveElemEnergyRatio
+			p1: 15,
+		},
+		// Shaken, Not Purred
+		// Diona_Constellation_2 -> Avatar_Diona_ElementalArt_Shield
+		c2: {
+			// Constellation_AttackUp_Ratio
+			p1: 0.15,
+			// Talent_Shield_Enchanted_Ratio
+			p2: 0.15,
+			// Talent_Teammate_Shield_Ratio
+			p3: 0.5,
+			// Constellation_Shield_Duration
+			p4: 5,
+		},
+		// Cat's Tail Closing Time
+		// Diona_Constellation_6 -> Avatar_Diona_IceWine_Fog, Avatar_Diona_ElementalArt_Shield
+		c6: {
+			// Avatar_Diona_IceWine_Fog.Diona_Talent_HealedAddDelta
+			p1: 0.3,
+			// Avatar_Diona_IceWine_Fog.Diona_Talent_ElemMastery
+			p2: 200,
+			// Avatar_Diona_ElementalArt_Shield.Constellation_6_MaxHP_Ratio
+			p3: 0.25,
+			// Avatar_Diona_IceWine_Fog.Constellation_6_StarDamageUp_Ratio
+			p4: 0.4,
+		},
 	},
 	Dori: {
 		s1_id: 10681,
@@ -1622,6 +3222,44 @@ export const charTalentTables = {
 			p6: [20],
 			// Energy Cost
 			p7: [80],
+		},
+		// An Eye for Gold
+		// Dori_PermanentSkill_1 -> Avatar_Dori_ChargingStation
+		a1: {
+			// Art_CD
+			p1: 1,
+			// PermanentSkill_1_CD
+			p2: 3,
+		},
+		// Compound Interest
+		// Dori_PermanentSkill_2 -> Avatar_Dori_ElementalArt_Bullet_Material, Avatar_Dori_ElementalArt_SubBullet_Material
+		a4: {
+			// Avatar_Dori_ElementalArt_Bullet_Material.ReviveEnergy_Ratio
+			// Avatar_Dori_ElementalArt_SubBullet_Material.ReviveEnergy_Ratio
+			p1: 5,
+			p2: 15,
+		},
+		// Special Franchise
+		// Dori_Constellation_2 -> Avatar_Dori_ChargingStation, Avatar_Dori_ElementalArt_Constellation_Bullet_Material
+		c2: {
+			// ElementalArt_Bullet_Damage
+			p1: 0.5,
+		},
+		// Discretionary Supplement
+		// Dori_Constellation_4 -> Avatar_Dori_ChargingStation
+		c4: {
+			// Dori_Constellation_HealedAddDelta
+			p1: 0.5,
+			// Dori_Constellation_ChargeEfficiencyDelta
+			p2: 0.3,
+		},
+		// Sprinkling Weight
+		// Dori_Constellation_6 -> Avatar_Dori_Constellation_6
+		c6: {
+			// Duration
+			p1: 3,
+			// HealHP_OnHittingOthers
+			p2: 0.04,
 		},
 	},
 	Durin: {
@@ -1690,6 +3328,84 @@ export const charTalentTables = {
 			// Energy Cost
 			p12: [70],
 		},
+		// Light Manifest of the Divine Calculus
+		// Durin_PermanentSkill_1 -> Avatar_Durin_PermanentSkill_1
+		a1: {
+			// Permanent_1_White_SubRatio
+			p1: 0.2,
+			// Permanent_1_White_SubDuration
+			p2: 6,
+			// Permanent_1_Black_ReactionRatio
+			p3: 0.4,
+			p4: 0.4,
+		},
+		// Chaos Formed Like the Night
+		// Durin_PermanentSkill_2 ->
+		//     Avatar_Durin_ElementalArt_White
+		//     Avatar_Durin_ElementalArt_Black
+		//     Avatar_Durin_PermanentSkill_2
+		a4: {
+			// Permanent_2_DamageRatio
+			p1: 0.03,
+			// Permanent_2_DamageRatio_MaxValue
+			p2: 0.75,
+			// Permanent_2_DamageRatio_Count
+			p3: 10,
+		},
+		// Witch's Eve Rite: Ode to Ascension
+		// Durin_Hexenzirkel_1 -> Avatar_Durin_PermanentSkill_1
+		sp: {
+			// Hexenzirkel_1_ExtraRate
+			p1: 0.75,
+		},
+		// Adamah's Redemption
+		// Durin_Constellation_1 -> Avatar_Durin_Talent_1
+		c1: {
+			p1: 0,
+			// Talent_1_DamageExtra_Count
+			p2: 20,
+			// Talent_1_Duration
+			p3: 20,
+			// Talent_1_DamageExtra_White_CostCount
+			p4: 1,
+			// Talent_1_DamageExtra_White_Ratio
+			p5: 0.6,
+			// Talent_1_DamageExtra_Black_CostCount
+			p6: 2,
+			// Talent_1_DamageExtra_Black_Ratio
+			p7: 1.5,
+		},
+		// Unground Visions
+		// Durin_Constellation_2 -> Avatar_Durin_Talent_2
+		c2: {
+			// Talent_2_BuffDuation
+			p1: 20,
+			// Talent_2_DamageUpDuation
+			p2: 6,
+			// Talent_2_DamageUpRatio
+			p3: 0.5,
+		},
+		// Emanare's Source
+		// Durin_Constellation_4 -> Avatar_Durin_Talent_4, Avatar_Durin_Talent_1
+		c4: {
+			p1: 20,
+			// Avatar_Durin_Talent_1.Talent_4_RandomValue
+			p2: 0.3,
+			// Avatar_Durin_Talent_4.Talent_4_Ratio
+			p3: 0.4,
+		},
+		// Dual Birth
+		// Durin_Constellation_6 -> Avatar_Durin_Talent_6, Avatar_Durin_Burst_BlackDragon, Avatar_Durin_Burst_WhiteDragon
+		c6: {
+			// Talent_6_IgnoreDefense_Ratio
+			p1: 0.3,
+			// Talent_6_DefenseDown_Ratio
+			p2: 0.3,
+			// Talent_6_DefenseDown_Duration
+			p3: 6,
+			// Talent_6_IgnoreDefense_Ratio_Add
+			p4: 0.4,
+		},
 	},
 	Emilie: {
 		s1_id: 10991,
@@ -1740,6 +3456,63 @@ export const charTalentTables = {
 			p3: [13.5],
 			// Energy Cost
 			p4: [50],
+		},
+		// Lingering Fragrance
+		// Emilie_PermanentSkill_1 -> SkillObj_Emilie_ArtGadget, SkillObj_Emilie_ArtGadget_Collect
+		a1: {
+			// Damage4
+			p1: 6,
+		},
+		// Rectification
+		// Emilie_PermanentSkill_2 -> Avatar_Emilie_PermanentSkill_2
+		a4: {
+			// Ratio
+			p1: 0.15,
+			// MaxRatio
+			p2: 0.36,
+		},
+		// Headspace Capture
+		// Emilie_PermanentSkill_3 -> SkillObj_Emilie_ResistBurning
+		a0: {
+			// Reduce
+			p1: 0.85,
+		},
+		// Light Fragrance Leaching
+		// Emilie_Constellation_1 -> Avatar_Emilie_Talent1
+		c1: {
+			// CDTime
+			p1: 2.9,
+			// Ratio
+			p2: 0.2,
+		},
+		// Lakelight Top Note
+		// Emilie_Constellation_2 -> Avatar_Emilie_Talent2
+		c2: {
+			// Ratio
+			p1: 0.3,
+			// Dura
+			p2: 10,
+		},
+		// Lumidouce Heart Note
+		// Emilie_Constellation_4 -> Avatar_Emilie_ElementalBurst, SkillObj_Emilie_BurstGadget
+		c4: {
+			// Avatar_Emilie_ElementalBurst.Talent4
+			// SkillObj_Emilie_BurstGadget.Talent4
+			p1: 2,
+			// SkillObj_Emilie_BurstGadget.Less_Interval
+			p2: 0.3,
+		},
+		// Marcotte Sillage
+		// Emilie_Constellation_6 -> Avatar_Emilie_Talent6
+		c6: {
+			// Dura
+			p1: 5,
+			// Times
+			p2: 4,
+			// Talent6Ratio
+			p3: 3,
+			// CDTime
+			p4: 12,
 		},
 	},
 	Escoffier: {
@@ -1793,6 +3566,61 @@ export const charTalentTables = {
 			p4: [15],
 			// Energy Cost
 			p5: [60],
+		},
+		// Better to Salivate Than Medicate
+		// Escoffier_PermanentSkill_1 -> Avatar_Escoffier_ElementalBurst
+		a1: {
+			// Escoffier_HealHP_Hot_Ratio
+			p1: 1.3824,
+			// Dur
+			p2: 9,
+		},
+		// Inspiration-Immersed Seasoning
+		// Escoffier_PermanentSkill_2 -> Avatar_Escoffier_PermanentSkill_2_SubHurtDelta, Avatar_Escoffier_Constellation_1
+		a4: {
+			// AddHurtDelta_Level01
+			p1: 0.05,
+			// AddHurtDelta_Level02
+			p2: 0.1,
+			// AddHurtDelta_Level03
+			p3: 0.15,
+			// AddHurtDelta_Level04
+			p4: 0.55,
+			// Dura
+			p5: 12,
+		},
+		// Pre-Dinner Dance for Your Taste Buds
+		// Escoffier_Constellation_1 -> Avatar_Escoffier_Constellation_1
+		c1: {
+			// CriticalHurtDelta
+			p1: 0.6,
+			// Dura
+			p2: 15,
+		},
+		// Fresh, Fragrant Stew Is an Art
+		// Escoffier_Constellation_2 -> Avatar_Escoffier_Constellation_2
+		c2: {
+			// EDamageExtra_Buff_Time
+			p1: 15,
+			// AttackExtraRatio
+			p2: 2.4,
+			// Escoffier_Constellation_MaxCount
+			p3: 5,
+		},
+		// Secret Rosemary Recipe
+		// Escoffier_Constellation_4 -> Avatar_Escoffier_ElementalBurst
+		c4: {
+			p1: 6,
+			p2: 2,
+			p3: 7,
+		},
+		// Tea Parties Bursting With Color
+		// Escoffier_Constellation_6 -> Avatar_Escoffier_ElementalArt, Bullet_Escoffier_ElementalArt_Attacker_02
+		c6: {
+			// ElementalArt_BigBullet_Damage
+			p1: 5,
+			p2: 0.5,
+			p3: 6,
 		},
 	},
 	Eula: {
@@ -1861,6 +3689,36 @@ export const charTalentTables = {
 			// Energy Cost
 			p6: [80],
 		},
+		// Roiling Rime
+		// Eula_PermanentSkill_1 -> Avatar_Eula_ElementalArt_ExtraAttack_2
+		a1: {
+			// PermanentSkill_1_Judgment_Ratio
+			p1: 0.5,
+		},
+		// Tidal Illusion
+		// Eula_Constellation_1 -> Avatar_Eula_ElementalArt
+		c1: {
+			// Eula_Constellation_2_PhysicalAddHurtDelta
+			p1: 0.3,
+			// PhysicalAddHurt_BaseDuration
+			p2: 6,
+			// PhysicalAddHurt_MaxDuration
+			p3: 18,
+		},
+		// The Obstinacy of One's Inferiors
+		// Eula_Constellation_4 -> Avatar_Eula_ElementalBurst
+		c4: {
+			// Eula_Constellation_4_DamagePercentage
+			p1: 0.25,
+		},
+		// Noble Obligation
+		// Eula_Constellation_6 -> Avatar_Eula_ElementalBurst_Judgment, Avatar_Eula_ElementalBurst
+		c6: {
+			// Avatar_Eula_ElementalBurst_Judgment.Eula_Constellation_6_DamoclesSword_Ratio
+			p1: 5,
+			// Avatar_Eula_ElementalBurst.Chance
+			p2: 0.5,
+		},
 	},
 	Faruzan: {
 		s1_id: 10761,
@@ -1914,6 +3772,58 @@ export const charTalentTables = {
 			// Energy Cost
 			p8: [80],
 		},
+		// Impetuous Flow
+		// Faruzan_PermanentSkill_1 ->
+		//     Avatar_Faruzan_ShootArrow_Aiming
+		//     Avatar_Faruzan_ShootAimingArrow_Charge
+		//     Faruzan_WindSubHurtDown_Controller
+		a1: {
+			// Avatar_Faruzan_ShootArrow_Aiming.Faruzan_AimShoot_Enchanted_Ratio (subtracted)
+			// Avatar_Faruzan_ShootAimingArrow_Charge.Faruzan_AimShoot_Enchanted_Ratio (subtracted)
+			p1: 0.6,
+		},
+		// Lost Wisdom of the Seven Caverns
+		// Faruzan_PermanentSkill_2 -> Avatar_Faruzan_PermanentSkill2_WindDamageExtraUp
+		a4: {
+			// ExtraDamageRatio
+			p1: 0.32,
+			// ExtraDamage_CD
+			p2: 0.8,
+			p3: 4,
+		},
+		// Truth by Any Means
+		// Faruzan_Constellation_1 -> Avatar_Faruzan_Elemental_Art, Avatar_Faruzan_ShootArrow_Aiming
+		c1: {
+			// Avatar_Faruzan_Elemental_Art.Faruzan_HurricaneArrow_MaxCount
+			// Avatar_Faruzan_ShootArrow_Aiming.Faruzan_HurricaneArrow_MaxCount
+			p1: 1,
+		},
+		// Overzealous Intellect
+		// Faruzan_Constellation_2 -> Faruzan_ElementalBurst_Gadget
+		c2: {
+			// Faruzan_ElementalBurst_Gadget_Duration
+			p1: 6,
+		},
+		// Divine Comprehension
+		// Faruzan_Constellation_4 -> Avatar_Faruzan_Constellation4_ReviveEnergy
+		c4: {
+			// ReviveEnergyBaseValue
+			p1: 2,
+			// ReviveEnergyExtraValue
+			p2: 0.5,
+			// ReviveEnergyExtraMaxValue
+			p3: 2,
+		},
+		// The Wondrous Path of Truth
+		// Faruzan_Constellation_6 ->
+		//     Faruzan_ElementalBurst_Gadget_Controller
+		//     Avatar_Faruzan_PermanentSkill2_WindDamageExtraUp
+		c6: {
+			// CriticalHurtUpRatio
+			p1: 0.4,
+			// AutoHurricaneArrow_CD_Duration
+			p2: 3,
+		},
 	},
 	Fischl: {
 		s1_id: 10311,
@@ -1958,6 +3868,83 @@ export const charTalentTables = {
 			p5: [15],
 			// Energy Cost
 			p6: [60],
+		},
+		// Stellar Predator
+		// Fischl_ProudSkill_21 ->
+		//     Avatar_Fischl_ExtraAttack_Element_FindCrow
+		//     Avatar_Fischl_ExtraAttack_Element_Hit
+		//     Avatar_Fischl_Skill_S_Crow_Handle
+		//     Avatar_Fischl_Talent_ExteaAttackThunder_Hit
+		a1: {
+			// AS_Fischl_ProudSkill_21_AttackRatio_ExteaAttackThunder
+			p1: 1.527,
+		},
+		// Undone Be Thy Sinful Hex
+		// Fischl_ProudSkill_22 -> Avatar_Fischl_Skill_S_Crow_Handle, Avatar_Fischl_ProudSkill_ElementReactionAttackThunder
+		a4: {
+			// AS_Fischl_ProudSkill_22_ElementReactionAttack_AttackRatio
+			p1: 0.8,
+		},
+		// Witch's Eve Rite: Phantasmal Nocturne
+		// Fischl_Hexenzirkel_1 ->
+		//     Avatar_Fischl_HexenzirkelSkill
+		//     Avatar_Fischl_Skill_S_Crow_Handle
+		//     Avatar_Fischl_PressShoot
+		sp: {
+			// Avatar_Fischl_HexenzirkelSkill.Explode_Dura
+			p1: 10,
+			// Avatar_Fischl_HexenzirkelSkill.AttackRatio
+			// Avatar_Fischl_Skill_S_Crow_Handle.AttackRatio
+			// Avatar_Fischl_PressShoot.AttackRatio
+			p2: 0.225,
+			// Avatar_Fischl_HexenzirkelSkill.Shock_Dura
+			p3: 10,
+			// Avatar_Fischl_HexenzirkelSkill.Mastery
+			// Avatar_Fischl_Skill_S_Crow_Handle.Mastery
+			// Avatar_Fischl_PressShoot.Mastery
+			p4: 90,
+		},
+		// Gaze of the Deep
+		// Fischl_Talent_331 ->
+		//     Avatar_Fischl_Talent_A_Show
+		//     Avatar_Fischl_ElectricalCrow_Crow_Attack
+		//     Avatar_Fischl_Talent_A_NormalAttack_Hit
+		c1: {
+			// AS_Fischl_Talent_331_Damage_AttackRatio
+			p1: 0.22,
+		},
+		// Devourer of All Sins
+		// Fischl_Talent_332 -> Ability_Fischl_Skill_S_CrowSummon, Ability_Fischl_Skill_S_ControlCrow_Show
+		c2: {
+			// AS_Fischl_Talent_332_Damage_AttackRatio
+			p1: 2,
+		},
+		// Her Pilgrimage of Bleak
+		// Fischl_Talent_334 -> Ability_Fischl_Skill_E_CrowQueen
+		c4: {
+			// AS_Fischl_Talent_334_OnceDamage_AttackRatio
+			p1: 2.22,
+			// AS_Fischl_Talent_334_HealHp_MaxHpRatio
+			p2: 0.2,
+		},
+		// Evernight Raven
+		// Fischl_Talent_336 ->
+		//     Avatar_Fischl_Skill_S_Crow_Handle
+		//     Avatar_Fischl_Talent_D_Crow_NormalAttack_01
+		//     Avatar_Fischl_CrowSummon_Init
+		//     Ability_Fischl_Skill_S_CrowSummon
+		//     Avatar_Fischl_PressShoot
+		c6: {
+			// Avatar_Fischl_Talent_D_Crow_NormalAttack_01.AS_Fischl_Talent_336_AttackRatio_AssistAttack
+			p1: 0.3,
+			// Avatar_Fischl_CrowSummon_Init.AS_Fischl_Talent_Skill_S_TimeUp
+			// Ability_Fischl_Skill_S_CrowSummon.AS_Fischl_Talent_Skill_S_TimeUp
+			p2: 2,
+			// Avatar_Fischl_Skill_S_Crow_Handle.BuffRatio
+			// Avatar_Fischl_PressShoot.BuffRatio
+			p3: 1,
+			// Avatar_Fischl_Skill_S_Crow_Handle.Dura
+			p4: 10,
 		},
 	},
 	Flins: {
@@ -2026,6 +4013,69 @@ export const charTalentTables = {
 			// Thunderous Symphony Energy Cost
 			p8: [30],
 		},
+		// Symphony of Winter
+		// Flins_PermanentSkill_1 ->
+		//     Avatar_Flins_ElementalArt_Q
+		//     Avatar_Flins_ElementalBurst_Attack
+		//     Avatar_Flins_MoonPhase
+		a1: {
+			// Ratio
+			p1: 0.2,
+		},
+		// Whispering Flame
+		// Flins_PermanentSkill_2 -> Avatar_Flins_PermanentSkill_2
+		a4: {
+			// Ratio
+			p1: 0.08,
+			// MaxMastery
+			p2: 160,
+		},
+		// Moonsign Benediction: Old World Secrets
+		// Flins_PermanentSkill_3 -> Avatar_Flins_PermanentSkill_3
+		a0: {
+			// AttackTransferRatio
+			p1: 0.007,
+			// MaxTransRatio
+			p2: 0.14,
+		},
+		// Part the Veil of Snow
+		// Flins_Constellation_1 -> Avatar_Flins_ElementalArt, Avatar_Flins_ElementalArt_Extra, Avatar_Flins_Shock_Energy
+		c1: {
+			// Energy
+			p1: 8,
+			// Trigger_CD
+			p2: 5.5,
+		},
+		// The Devil's Wall
+		// Flins_Constellation_2 -> Avatar_Flins_Talent_MoonShockAttack
+		c2: {
+			// Talent_Damage
+			p1: 0.5,
+			// Talent_Dura
+			p2: 6,
+			// ElecDown
+			p3: 0.25,
+			// Down_Dura
+			p4: 7,
+		},
+		// Night on Bald Mountain
+		// Flins_Constellation_4 -> Avatar_Flins_PermanentSkill_3, Avatar_Flins_PermanentSkill_2
+		c4: {
+			// Avatar_Flins_PermanentSkill_3.AttackUp
+			p1: 0.2,
+			// Avatar_Flins_PermanentSkill_2.Ratio2
+			p2: 0.1,
+			// Avatar_Flins_PermanentSkill_2.MaxMastery2
+			p3: 220,
+		},
+		// Songs and Dances of Death
+		// Flins_Constellation_6 -> Avatar_Flins_Talent6
+		c6: {
+			// Ratio
+			p1: 0.35,
+			// Team_Ratio
+			p2: 0.1,
+		},
 	},
 	Freminet: {
 		s1_id: 10851,
@@ -2092,6 +4142,63 @@ export const charTalentTables = {
 			p3: [15],
 			// Energy Cost
 			p4: [60],
+		},
+		// Saturation Deep Dive
+		// Freminet_PermanentSkill_1 -> Avatar_Freminet_ElementalArt_2
+		a1: {
+			// ReduceCD
+			p1: 1,
+		},
+		// Parallel Condensers
+		// Freminet_PermanentSkill_2 -> Avatar_Freminet_PermanentSkill_2
+		a4: {
+			// Rate
+			p1: 0.4,
+			// Time
+			p2: 5,
+		},
+		// Dreams of the Foamy Deep
+		// Freminet_Constellation_1 ->
+		//     Avatar_Freminet_ElementalArt_2
+		//     SkillObj_Freminet_ElementalArt_SecondAttack
+		//     Avatar_Freminet_ElementalArt_3
+		c1: {
+			// Avatar_Freminet_ElementalArt_2.Crit
+			// SkillObj_Freminet_ElementalArt_SecondAttack.Crit
+			// Avatar_Freminet_ElementalArt_3.Crit
+			p1: 0.15,
+		},
+		// Penguins and the Land of Plenty
+		// Freminet_Constellation_2 -> Avatar_Freminet_ElementalArt_2, Avatar_Freminet_ElementalArt_3
+		c2: {
+			// Avatar_Freminet_ElementalArt_2.ReviveEnergy
+			p1: 2,
+			// Avatar_Freminet_ElementalArt_3.ReviveEnergy
+			p2: 3,
+		},
+		// Dance of the Snowy Moon and Flute
+		// Freminet_Constellation_4 -> Avatar_Freminet_Constellation_4
+		c4: {
+			// AttackUp
+			p1: 0.09,
+			// Dura
+			p2: 6,
+			// Stack
+			p3: 2,
+			// CD_Time
+			p4: 0.3,
+		},
+		// Moment of Waking and Resolve
+		// Freminet_Constellation_6 -> Avatar_Freminet_Constellation_6
+		c6: {
+			// Up
+			p1: 0.12,
+			// Dura
+			p2: 6,
+			// Stack
+			p3: 3,
+			// CD_Time
+			p4: 0.3,
 		},
 	},
 	Furina: {
@@ -2164,6 +4271,75 @@ export const charTalentTables = {
 			// Energy Cost
 			p8: [60],
 		},
+		// Endless Waltz
+		// Furina_PermanentSkill_1 -> Avatar_Furina_PermanentSkill_1
+		a1: {
+			// PermanentSkill_1_HealTime
+			p1: 4,
+			// PermanentSkill_1_HealInterval
+			p2: 2,
+			// PermanentSkill_1_HealHPRatio
+			p3: 0.02,
+		},
+		// Unheard Confession
+		// Furina_PermanentSkill_2 -> Avatar_Furina_PermanentSkill_2, Furina_GoddessStatue
+		a4: {
+			// MaxHP2DMGRatio
+			p1: 0.007,
+			// DMGRatio_Max
+			p2: 0.28,
+			// MaxHP2HealIntervalRatio
+			p3: 0.004,
+			// HealIntervalRatio_Max
+			p4: 0.16,
+		},
+		// "Love Is a Rebellious Bird That None Can Tame"
+		// Furina_Constellation_1 -> Avatar_Furina_ElementalBurst
+		c1: {
+			// AvatarChangeHP_MinCount
+			p1: 150,
+			// AvatarChangeHP_MaxCount, also fed by s3.p4
+			p2: 100,
+		},
+		// "A Woman Adapts Like Duckweed in Water"
+		// Furina_Constellation_6 -> Avatar_Furina_ElementalBurst
+		c2: {
+			p1: -0.714286,
+			// OverflowCount2MaxHPRatio
+			p2: 0.0035,
+			// AvatarChangeHP_MaxCount_Overflow
+			p3: 400,
+			p4: 2.5,
+			p5: 1.4,
+		},
+		// "They Know Not Life, Who Dwelt in the Netherworld Not!"
+		// Furina_Constellation_4 -> Avatar_Furina_Constellation_4
+		c4: {
+			// ReviveEnergy
+			p1: 4,
+			// Furina_Constellation_4_CD
+			p2: 5,
+		},
+		// "Hear Me — Let Us Raise the Chalice of Love!"
+		// Furina_Constellation_2 -> Avatar_Furina_Constellation_2, Avatar_Furina_ElementalArt
+		c6: {
+			// Furina_Constellation_2_BuffDuration
+			p1: 10,
+			// Furina_Constellation_2_HP2DMGRatio
+			p2: 0.18,
+			// Furina_Constellation_2_HotInterval
+			p3: 1,
+			// Furina_Constellation_2_HealHP
+			p4: 0.04,
+			// Furina_Constellation_2_HotTime
+			p5: 2.9,
+			// PreAttack_LoseHP
+			p6: 0.01,
+			// PreAttack_LoseHP_DMGExtraHPRatio
+			p7: 0.25,
+			// Furina_Constellation_2_MaxStrikeCount
+			p8: 6,
+		},
 	},
 	Gaming: {
 		s1_id: 10921,
@@ -2212,6 +4388,52 @@ export const charTalentTables = {
 			p4: [15],
 			// Energy Cost
 			p5: [60],
+		},
+		// Dance of Amity
+		// Gaming_PermanentSkill_1 -> Avatar_Gaming_ElementalArt
+		a1: {
+			// Gaming_PermanentSkill_1_Heal_Duration
+			p1: 1,
+			// Gaming_PermanentSkill_1_Heal_HP
+			p2: 0.015,
+		},
+		// Air of Prosperity
+		// Gaming_PermanentSkill_2 -> Avatar_Gaming_PermanentSkill_2
+		a4: {
+			// Gaming_PermanentSkill_2_HP_Threshold
+			p1: 0.5,
+			// Gaming_PermanentSkill_2_HealedAddDelta
+			p2: 0.2,
+			// Gaming_ElementalArt_Damage_Ratio
+			p3: 0.2,
+		},
+		// Bringer of Blessing
+		// Gaming_Constellation_1 -> Avatar_Gaming_ElementalArt
+		c1: {
+			// Gaming_Constellation_1_Heal_HP
+			p1: 0.15,
+		},
+		// Plum Blossoms Underfoot
+		// Gaming_Constellation_2 -> Avatar_Gaming_Constellation_2
+		c2: {
+			// Gaming_Constellation_2_Buff_AttackRatio
+			p1: 0.2,
+			// Gaming_Constellation_2_Buff_Duration
+			p2: 5,
+		},
+		// Soar Across Mountains
+		// Gaming_Constellation_4 -> Avatar_Gaming_ElementalArt
+		c4: {
+			// Gaming_Constellation_4_ReviveEnergy
+			p1: 2,
+		},
+		// To Tame All Beasts
+		// Gaming_Constellation_6 -> Avatar_Gaming_FallingAnthem
+		c6: {
+			// Gaming_SpecialFallingAttack_BonusCritical
+			p1: 0.2,
+			// Gaming_SpecialFallingAttack_BonusCriticalHurt
+			p2: 0.4,
 		},
 	},
 	Ganyu: {
@@ -2266,6 +4488,34 @@ export const charTalentTables = {
 			// Energy Cost
 			p4: [60],
 		},
+		// Undivided Heart
+		// Ganyu_PermanentSkill_1 ->
+		//     Bullet_Ganyu_ShootArrow_WithIce_BeforeFission
+		//     Avatar_Ganyu_EnchantedFission
+		//     Bullet_Ganyu_ShootArrow_WithIce_AfterFission
+		a1: {
+			// Avatar_Ganyu_EnchantedFission.EnchantedFission_Timer
+			p1: 5,
+			// Bullet_Ganyu_ShootArrow_WithIce_BeforeFission.FissionBonusCritical
+			// Bullet_Ganyu_ShootArrow_WithIce_AfterFission.FissionBonusCritical
+			p2: 0.2,
+		},
+		// Harmony Between Heaven and Earth
+		// Ganyu_PermanentSkill_2 -> SkillObj_Ganyu_UnbreakableIce_Dummy
+		a4: {
+			// Ganyu_IceAdd
+			p1: 0.2,
+		},
+		// Dew-Drinker
+		// Ganyu_Constellation_1 -> Bullet_Ganyu_ShootArrow_WithIce_BeforeFission, Avatar_Ganyu_Fission_GainEnergy
+		c1: {
+			// Bullet_Ganyu_ShootArrow_WithIce_BeforeFission.Ganyu_IceSubHurt
+			p1: -0.15,
+			// Bullet_Ganyu_ShootArrow_WithIce_BeforeFission.Ganyu_IceSubHurtTime
+			p2: 6,
+			// Avatar_Ganyu_Fission_GainEnergy.Ganyu_Fission_GainEnergy
+			p3: 2,
+		},
 	},
 	Gorou: {
 		s1_id: 10551,
@@ -2314,6 +4564,67 @@ export const charTalentTables = {
 			p4: [20],
 			// Energy Cost
 			p5: [80],
+		},
+		// Heedless of the Wind and Weather
+		// Gorou_PermanentSkill_1 -> Avatar_Gorou_ElementalBurst
+		a1: {
+			// Gorou_PermanentSkill_1_DefenceRatio
+			p1: 0.25,
+			// Gorou_PermanentSkill_1_Duration
+			p2: 12,
+		},
+		// A Favor Repaid
+		// Gorou_PermanentSkill_2 ->
+		//     Avatar_Gorou_ElementalArt_SkillHoldCharge
+		//     Avatar_Gorou_ElementalArt
+		//     SkillObj_Gorou_FieldLand_LogicHanler
+		//     SkillObj_Gorou_BurstFieldLand
+		a4: {
+			// Avatar_Gorou_ElementalArt_SkillHoldCharge.Gorou_PermanentSkill_2_ArtRatio
+			// Avatar_Gorou_ElementalArt.Gorou_PermanentSkill_2_ArtRatio
+			// SkillObj_Gorou_FieldLand_LogicHanler.Gorou_PermanentSkill_2_ArtRatio
+			p1: 1.56,
+			// SkillObj_Gorou_BurstFieldLand.Gorou_PermanentSkill_2_BurstRatio
+			p2: 0.156,
+		},
+		// Rushing Hound: Swift as the Wind
+		// Gorou_Constellation_1 -> SkillObj_Gorou_FieldLand_LogicHanler, SkillObj_Gorou_BurstFieldLand_Halo
+		c1: {
+			// SkillObj_Gorou_FieldLand_LogicHanler.Gorou_Constellation_1_ReduceColdDown
+			// SkillObj_Gorou_BurstFieldLand_Halo.Gorou_Constellation_1_ReduceColdDown
+			p1: -2,
+			// SkillObj_Gorou_FieldLand_LogicHanler.Gorou_Constellation_1_ReduceColdDown_CD
+			// SkillObj_Gorou_BurstFieldLand_Halo.Gorou_Constellation_1_ReduceColdDown_CD
+			p2: 10,
+		},
+		// Lapping Hound: Warm as Water
+		// Gorou_Constellation_4 -> SkillObj_Gorou_BurstFieldLand_Halo
+		c4: {
+			// Constellation_4_HealRatio
+			p1: 0.5,
+		},
+		// Valiant Hound: Mountainous Fealty
+		// Gorou_Constellation_6 ->
+		//     Avatar_Gorou_ElementalBurst
+		//     Avatar_Gorou_ElementalArt
+		//     Avatar_Gorou_ElementalArt_SkillHoldCharge
+		c6: {
+			// Avatar_Gorou_ElementalBurst.Gorou_Constellation_6_CriticalHurt_Layer1
+			// Avatar_Gorou_ElementalArt.Gorou_Constellation_6_CriticalHurt_Layer1
+			// Avatar_Gorou_ElementalArt_SkillHoldCharge.Gorou_Constellation_6_CriticalHurt_Layer1
+			p1: 0.1,
+			// Avatar_Gorou_ElementalBurst.Gorou_Constellation_6_CriticalHurt_Layer2
+			// Avatar_Gorou_ElementalArt.Gorou_Constellation_6_CriticalHurt_Layer2
+			// Avatar_Gorou_ElementalArt_SkillHoldCharge.Gorou_Constellation_6_CriticalHurt_Layer2
+			p2: 0.2,
+			// Avatar_Gorou_ElementalBurst.Gorou_Constellation_6_CriticalHurt_Layer3
+			// Avatar_Gorou_ElementalArt.Gorou_Constellation_6_CriticalHurt_Layer3
+			// Avatar_Gorou_ElementalArt_SkillHoldCharge.Gorou_Constellation_6_CriticalHurt_Layer3
+			p3: 0.4,
+			// Avatar_Gorou_ElementalBurst.Gorou_Constellation_6_Duration
+			// Avatar_Gorou_ElementalArt.Gorou_Constellation_6_Duration
+			// Avatar_Gorou_ElementalArt_SkillHoldCharge.Gorou_Constellation_6_Duration
+			p4: 12,
 		},
 	},
 	Heizou: {
@@ -2367,6 +4678,41 @@ export const charTalentTables = {
 			p3: [12],
 			// Energy Cost
 			p4: [40],
+		},
+		// Penetrative Reasoning
+		// Heizo_PermanentSkill_2 -> Avatar_Heizo_ElementalArt_Handler
+		a4: {
+			// Heizo_ElementalArt_TeamBuff_Duration
+			p1: 10,
+			// Heizo_ElementalArt_TeamBuff_ElemMastery
+			p2: 80,
+		},
+		// Named Juvenile Casebook
+		// Heizo_Constellation_1 -> Avatar_Heizo_ElementalArt_Handler
+		c1: {
+			// Heizo_Buff_AttackSpeed_Duration
+			p1: 5,
+			// Heizo_Buff_AttackSpeed_Ratio
+			p2: 0.15,
+			// Heizo_Buff_AttackSpeed_CD
+			p3: 10,
+		},
+		// Tome of Lies
+		// Heizo_Constellation_4 -> Avatar_Heizo_ElementalBurst_WindHole, Avatar_Heizo_ElementalBurst_Strike
+		c4: {
+			// Heizo_ElementalBurst_ReviveEnergy_Base
+			p1: 9,
+			// Heizo_ElementalBurst_ReviveEnergy_Extra
+			p2: 1.5,
+		},
+		// Curious Casefiles
+		// Heizo_Constellation_6 -> Avatar_Heizo_ElementalArt_Strike, Avatar_Heizo_ElementalArt_Strike_Max
+		c6: {
+			// Avatar_Heizo_ElementalArt_Strike.Heizo_ElementalArt_ExtraCritRate
+			// Avatar_Heizo_ElementalArt_Strike_Max.Heizo_ElementalArt_ExtraCritRate
+			p1: 0.04,
+			// Avatar_Heizo_ElementalArt_Strike_Max.Heizo_ElementalArt_ExtraCritHurt
+			p2: 0.32,
 		},
 	},
 	Hutao: {
@@ -2427,6 +4773,48 @@ export const charTalentTables = {
 			// Energy Cost
 			p6: [60],
 		},
+		// Flutter By
+		// Hutao_PermanentSkill_1 -> Avatar_Hutao_CrimsonPlum
+		a1: {
+			// CrimsonPlum_PermanentSkill_CriticalUp_CriticalDelta
+			p1: 0.12,
+			// CrimsonPlum_PermanentSkill_CriticalUp_Duration
+			p2: 8,
+		},
+		// Sanguine Rouge
+		// Hutao_PermanentSkill_2 -> Avatar_Hutao_PermanentSkill_2
+		a4: {
+			// Hutao_PermanentSkill_2_HPRatio
+			p1: 0.5,
+			// Hutao_PermanentSkill_2_FireAddHurtDelta
+			p2: 0.33,
+		},
+		// Ominous Rainfall
+		// Hutao_Constellation_2 -> Avatar_Hutao_CrimsonPlum
+		c2: {
+			// CrimsonPlum_Debuff_Constellation_LifeBonus_Factor
+			p1: 0.1,
+		},
+		// Garden of Eternal Rest
+		// Hutao_Constellation_4 -> Avatar_Hutao_CrimsonPlum
+		c4: {
+			// CrimsonPlum_Debuff_Constellation_Kill_Critical_Delta
+			p1: 0.12,
+			// CrimsonPlum_Debuff_Constellation_Kill_Duration
+			p2: 15,
+		},
+		// Butterfly's Embrace
+		// Hutao_Constellation_6 -> Avatar_Hutao_Constellation_Limbo, Avatar_Hutao_Constellation_Limbo_Trigger
+		c6: {
+			// Avatar_Hutao_Constellation_Limbo.Hutao_Constellation_Limbo_HPRatio
+			p1: 0.25,
+			// Avatar_Hutao_Constellation_Limbo_Trigger.Hutao_Constellation_Limbo_Trigger_Duration
+			p2: 10,
+			// Avatar_Hutao_Constellation_Limbo_Trigger.Hutao_Constellation_Limbo_Trigger_SubHurtDelta
+			p3: 2,
+			// Avatar_Hutao_Constellation_Limbo_Trigger.Hutao_Constellation_Limbo_Trigger_CriticalDelta
+			p4: 1,
+		},
 	},
 	Iansan: {
 		s1_id: 11101,
@@ -2478,6 +4866,77 @@ export const charTalentTables = {
 			// Energy Cost
 			p8: [70],
 		},
+		// Enhanced Resistance Training
+		// Iansan_PermanentSkill_1 -> Avatar_Iansan_PermanentSkill_1
+		a1: {
+			// AttackUpRatio
+			p1: 0.2,
+			// MileageRecoverExtra
+			p2: 1,
+			// Duration
+			p3: 15,
+			// MileageRecoverExtra_02
+			p4: 3,
+			// MileageRecoverExtra_02_CD
+			p5: 2.8,
+		},
+		// Kinetic Energy Gradient Test
+		// Iansan_PermanentSkill_2 -> Avatar_Iansan_PermanentSkill_2
+		a4: {
+			// BuffDuration
+			p1: 10,
+			// HealAttackRatio
+			p2: 0.6,
+			// HealCD
+			p3: 2.8,
+		},
+		// Caloric Balancing Plan
+		// Iansan_PermanentSkill_4 -> Avatar_Iansan_PermanentSkill_4
+		a0_2: {
+			// PhlogistonRate
+			p1: 0.5,
+			// PhlogistonRecover
+			p2: 10,
+			// CD
+			p3: 10,
+		},
+		// Starting's Never Easy
+		// Iansan_Constellation_1 -> Avatar_Iansan_Constellation_1
+		c1: {
+			// NyxReduceValue
+			p1: 6,
+			// EnergyRecover
+			p2: 15,
+			// EnergyRecoverCD
+			p3: 18,
+		},
+		// Laziness is the Enemy!
+		// Iansan_Constellation_2 ->
+		//     Avatar_Iansan_Constellation_2
+		//     Avatar_Iansan_PermanentSkill_1
+		//     Avatar_Iansan_ElementalBurst
+		c2: {
+			// AttackUpRatio_C2
+			p1: 0.3,
+		},
+		// Slow and Steady Wins the Race
+		// Iansan_Constellation_4 -> Avatar_Iansan_Constellation_4, Avatar_Iansan_NyxCycle
+		c4: {
+			// Avatar_Iansan_Constellation_4.NyxRecoverExtra_01
+			p1: 4,
+			// Avatar_Iansan_NyxCycle.OverflowNyxRecoverExtra_Ratio_C4
+			p2: 0.5,
+		},
+		// Teachings of the Collective of Plenty
+		// Iansan_Constellation_6 -> Avatar_Iansan_Constellation_6, Avatar_Iansan_ElementalBurst
+		c6: {
+			// Avatar_Iansan_ElementalBurst.BuffDuration, also fed by s3.p6
+			p1: 3,
+			// Avatar_Iansan_Constellation_6.Duration
+			p2: 3,
+			// Avatar_Iansan_Constellation_6.DamageUp
+			p3: 0.25,
+		},
 	},
 	Ifa: {
 		s1_id: 11131,
@@ -2522,6 +4981,77 @@ export const charTalentTables = {
 			p3: [15],
 			// Energy Cost
 			p4: [60],
+		},
+		// Field Medic's Vision
+		// Ifa_PermanentSkill_1 -> Avatar_Ifa_PermanentSkill_1
+		a1: {
+			// NyxCVR
+			p1: 1,
+			p2: 1,
+			p3: 150,
+			// Permanent_1_ElemReactDelta
+			p4: 0.015,
+			// Permanent_1_ElemReactDelta_Star
+			p5: 0.0024,
+		},
+		// Mutual Aid Agreement
+		// Ifa_PermanentSkill_2 -> Avatar_Ifa_PermanentSkill_2
+		a4: {
+			// Permanent_2_MasteryDelta
+			p1: 80,
+			// Permanent_2_Duration
+			p2: 10,
+		},
+		// Tactical Warm Compress Bandaging
+		// Ifa_PermanentSkill_4 -> Avatar_Ifa_PermanentSkill_4
+		a0_2: {
+			// PermanentSkill_4_LimitHpRatio
+			p1: 0.4,
+			// PermanentSkill_4_PhlogistonCost
+			p2: 10,
+			// PermanentSkill_4_HealAmount
+			p3: 0.4,
+			// PermanentSkill_4_HealCD
+			p4: 10,
+		},
+		// Vitiferous Elixir's Concoction
+		// Ifa_Constellation_1 -> Avatar_Ifa_DropBall
+		c1: {
+			// Talent_1_EnergyRecover
+			p1: 6,
+			// Talent_1_EnergyRecoverCD
+			p2: 8,
+		},
+		// Guiding Spirit of Ballistic Prayer
+		// Ifa_Constellation_2 -> Avatar_Ifa_PermanentSkill_1
+		c2: {
+			// Talent_2_NyxLimit
+			p1: 60,
+			// Talent_2_NyxCVR
+			p2: 4,
+			// Ifa_CharmerCount_AddMaxValue
+			p3: 50,
+		},
+		// Decayed Vessel's Permutation
+		// Ifa_Constellation_4 -> Avatar_Ifa_ElementalBurst_Bullet, Avatar_Ifa_Talent_4
+		c4: {
+			// Talent_4_MasteryBuffDelta
+			p1: 100,
+			// Talent_4_MasteryBuffDuration
+			p2: 15,
+		},
+		// Oath on a Feathered Knot
+		// Ifa_Constellation_6 ->
+		//     Avatar_Ifa_HoverAttack_Charge_TriggerBullet
+		//     Avatar_Ifa_HoverAttack_Talent_6_Bullet_01
+		//     Avatar_Ifa_HoverAir
+		//     Avatar_Ifa_PermanentSkill_4
+		c6: {
+			// Avatar_Ifa_HoverAttack_Talent_6_Bullet_01.ElementalArt_Talent_6_Bullet_Damage
+			p1: 1.2,
+			// Avatar_Ifa_HoverAir.CostNyxValueRatio_Constellation_6
+			// Avatar_Ifa_PermanentSkill_4.CostNyxValueRatio_Constellation_6
+			p2: -0.2,
 		},
 	},
 	Illuga: {
@@ -2582,6 +5112,82 @@ export const charTalentTables = {
 			// Energy Cost
 			p9: [60],
 		},
+		// Torchforger's Covenant
+		// Illuga_PermanentSkill_1 -> Avatar_Illuga_PermanentSkill_1
+		a1: {
+			// Rock_Critical
+			p1: 0.05,
+			// Rock_CriticalHurt
+			p2: 0.1,
+			// MoonCrystallizeWater_Critical
+			p3: 0.05,
+			// MoonCrystallizeWater_CriticalHurt
+			p4: 0.1,
+			// Mastery
+			p5: 50,
+			// Duration
+			p6: 20,
+		},
+		// Demonhunter's Dusk
+		// Illuga_PermanentSkill_2 -> Avatar_Illuga_ElementalBurst
+		a4: {
+			// Illuga_PermanentSkill_2_DamageExtra_Num_1
+			p1: 0.07,
+			// Illuga_PermanentSkill_2_DamageExtra_Num_2
+			p2: 0.14,
+			// Illuga_PermanentSkill_2_DamageExtra_Num_3
+			p3: 0.24,
+			// Illuga_PermanentSkill_2_DamageExtra_Num_1_Moon
+			p4: 0.48,
+			// Illuga_PermanentSkill_2_DamageExtra_Num_2_Moon
+			p5: 0.96,
+			// Illuga_PermanentSkill_2_DamageExtra_Num_3_Moon
+			p6: 1.6,
+		},
+		// Night Warden's Stride
+		// Illuga_PermanentSkill_3 -> Avatar_Illuga_Talent_RunningInTheNight
+		a0_2: {
+			// Avatar_Illuga_Talent_RunningInTheNight_Speed
+			p1: 0.1,
+		},
+		// Vigilant Sentinel
+		// Illuga_Constellation_1 -> Avatar_Illuga_Constellation_1
+		c1: {
+			// EnergyValue
+			p1: 12,
+			// CD
+			p2: 15,
+		},
+		// Elk With Fanged Antlers
+		// Illuga_Constellation_2 -> Avatar_Illuga_ElementalBurst, Illuga_Constellation_6_Bullet
+		c2: {
+			// Constellation_2_Bullet_Damage
+			p1: 4,
+			// Constellation_2_Bullet_Damage_Defense
+			p2: 2,
+		},
+		// Solarhunting Wolf
+		// Illuga_Constellation_4 -> Avatar_Illuga_ElementalBurst
+		c4: {
+			// Illuga_Constellation_4_DefenseAddRatio
+			p1: 200,
+		},
+		// Nightmare Orioles
+		// Illuga_Constellation_6 -> Avatar_Illuga_PermanentSkill_1
+		c6: {
+			// Constellation_6_Rock_Critical
+			p1: 0.1,
+			// Constellation_6_Rock_CriticalHurt
+			p2: 0.3,
+			// Constellation_6_MoonCrystallizeWater_Critical
+			p3: 0.1,
+			// Constellation_6_MoonCrystallizeWater_CriticalHurt
+			p4: 0.3,
+			// Constellation_6_Mastery
+			p5: 80,
+			// Constellation_6_Duration
+			p6: 20,
+		},
 	},
 	Ineffa: {
 		s1_id: 11161,
@@ -2632,6 +5238,64 @@ export const charTalentTables = {
 			p2: [15],
 			// Energy Cost
 			p3: [60],
+		},
+		// Overclocking Circuit
+		// Ineffa_PermanentSkill_1 -> Avatar_Ineffa_ElementalArt_Relay_MoveController
+		a1: {
+			// AttackRatioP1
+			p1: 0.65,
+			p2: 3.5,
+		},
+		// Panoramic Permutation Protocol
+		// Ineffa_PermanentSkill_2 -> Avatar_Ineffa_PermanentSkill_2
+		a4: {
+			// MasteryRatio
+			p1: 0.06,
+			// Duration
+			p2: 20,
+		},
+		// Moonsign Benediction: Assemblage Hub
+		// Ineffa_PermanentSkill_3 -> Avatar_Ineffa_ElementalBurst
+		a0: {
+			// AttackTransferRatio
+			p1: 0.007,
+			// MaxTransRatio
+			p2: 0.14,
+		},
+		// Rectifying Processor
+		// Ineffa_Constellation_1 -> Avatar_Ineffa_ElementalArt
+		c1: {
+			// TransferRatio
+			p1: 0.025,
+			// MaxReactionUp
+			p2: 0.5,
+			// Talent_1_Duration
+			p3: 20,
+		},
+		// Support Cleaning Module
+		// Ineffa_Constellation_2 ->
+		//     Avatar_Ineffa_Burst_Bullet
+		//     Avatar_Ineffa_ElementalBurst
+		//     Avatar_Ineffa_Burst_T2_Attacker
+		c2: {
+			// T2AttackRatio
+			p1: 3,
+		},
+		// The Edictless Path
+		// Ineffa_Constellation_4 -> Avatar_Ineffa_T4
+		c4: {
+			// ElemRevive
+			p1: 5,
+			// CD
+			p2: 4,
+		},
+		// A Dawning Morn for You
+		// Ineffa_Constellation_6 -> Ineffa_Talent_6
+		c6: {
+			// T6AttackRatio
+			p1: 1.35,
+			// T6CD
+			p2: 3.5,
 		},
 	},
 	Itto: {
@@ -2685,6 +5349,51 @@ export const charTalentTables = {
 			p5: [18],
 			// Energy Cost
 			p6: [70],
+		},
+		// Bloodline of the Crimson Oni
+		// Itto_PermanentSkill_2 -> Avatar_Itto_PermanentSkill_2
+		a4: {
+			// Defence_Ratio
+			p1: 0.35,
+		},
+		// Stay a While and Listen Up
+		// Itto_Constellation_1 -> Avatar_Itto_Constellation_1
+		c1: {
+			// Revive_Instant
+			p1: 2,
+			// Revive_Delay
+			p2: 1,
+			// Revive_Hot
+			p3: 0.5,
+			// Revive_Hot_Time
+			p4: 3,
+		},
+		// Gather 'Round, It's a Brawl!
+		// Itto_Constellation_2 -> Avatar_Itto_Constellation_2
+		c2: {
+			// ReduceCD_Minus
+			p1: 1.5,
+			// Revive_Energy
+			p2: 6,
+		},
+		// Jailhouse Bread and Butter
+		// Itto_Constellation_4 -> Avatar_Itto_Constellation_4, Avatar_Itto_ElementalBurst
+		c4: {
+			// Def_Ratio
+			p1: 0.2,
+			// Atk_Ratio
+			p2: 0.2,
+			// Buff_Duration
+			p3: 10,
+		},
+		// Arataki Itto, Present!
+		// Itto_Constellation_6 -> Avatar_Itto_Constellation_6, Avatar_Itto_Symbol_Cost, Avatar_Itto_ExtraAttack
+		c6: {
+			// Avatar_Itto_Constellation_6.CritDamage_Ratio
+			p1: 0.7,
+			// Avatar_Itto_Symbol_Cost.Cost_Ratio
+			// Avatar_Itto_ExtraAttack.Cost_Ratio
+			p2: 0.5,
 		},
 	},
 	Jahoda: {
@@ -2743,6 +5452,46 @@ export const charTalentTables = {
 			// Energy Cost
 			p9: [70],
 		},
+		// Plan to Get Paid
+		// Jahoda_PermanentSkill_1 -> Avatar_Jahoda_PermanentSkill_1, Avatar_Jahoda_ElementalBurst
+		a1: {
+			// Fire_DPRatio
+			p1: 1.3,
+			// Water_HealRatio
+			p2: 1.2,
+			// Ice_BulletIntervalRatio
+			p3: -0.1,
+		},
+		// Sweet Berry Bounty
+		// Jahoda_PermanentSkill_2 -> Avatar_Jahoda_ElementalBurst
+		a4: {
+			// PermanentSkill_2_ElemMasteryDelta
+			p1: 100,
+			// PermanentSkill_2_ElemMasteryUpTime
+			p2: 6,
+		},
+		// One More Flask!
+		// Jahoda_Constellation_1 -> Avatar_Jahoda_ElementalArt_Second_Attack, Bullet_Jahoda_ElementalArt_Attack
+		c1: {
+			// ExtraBulletChance
+			p1: 0.5,
+		},
+		// Wild Berry Amid the Dust
+		// Jahoda_Constellation_4 -> Avatar_Jahoda_ElementalBurst
+		c4: {
+			// Constellation_4_ReviveEnergy
+			p1: 4,
+		},
+		// The Littlest Luck
+		// Jahoda_Constellation_6 -> Avatar_Jahoda_ElementalArt_Second_Attack
+		c6: {
+			// Constellation_6_Crit
+			p1: 0.05,
+			// Constellation_6_CritHurt
+			p2: 0.4,
+			// Constellation_6_Duration
+			p3: 20,
+		},
 	},
 	Jean: {
 		s1_id: 10031,
@@ -2798,6 +5547,48 @@ export const charTalentTables = {
 			// Energy Cost
 			p8: [80],
 		},
+		// Wind Companion
+		// Qin_ProudSkill_Private1 -> Avatar_Qin_AttackCritic
+		a1: {
+			// Chance
+			p1: 0.5,
+			// HealByAttack
+			p2: 0.15,
+		},
+		// Let the Wind Lead
+		// Qin_ProudSkill_Private2 -> Avatar_Qin_DandelionWind
+		a4: {
+			// Rate
+			p1: 16,
+		},
+		// Spiraling Tempest
+		// Qin_Talent_1 -> Avatar_Qin_VortexSmash
+		c1: {
+			// DamageRate
+			p1: 0.4,
+		},
+		// People's Aegis
+		// Qin_Talent_2 -> Avatar_Qin_TeamSpeedWhenGetElementBall
+		c2: {
+			// AtkSpeed
+			p1: 0.15,
+			// Speed
+			p2: 0.15,
+			// Time
+			p3: 15,
+		},
+		// Lands of Dandelion
+		// Qin_Talent_4 -> Avatar_Qin_DandelionWind_Heal
+		c4: {
+			// WindHurt (subtracted)
+			p1: 0.4,
+		},
+		// Lion's Fang, Fair Protector of Mondstadt
+		// Qin_Talent_6 -> Avatar_Qin_DandelionWind_Heal
+		c6: {
+			// LessHurt
+			p1: 0.35,
+		},
 	},
 	Kachina: {
 		s1_id: 11001,
@@ -2844,6 +5635,64 @@ export const charTalentTables = {
 			p3: [18],
 			// Energy Cost
 			p4: [70],
+		},
+		// Mountain Echoes
+		// Kachina_PermanentSkill_1 -> Avatar_Kachina_PermanentSkill_1
+		a1: {
+			// DamageUp_Ratio
+			p1: 0.2,
+			// Timer
+			p2: 12,
+		},
+		// The Weight of Stone
+		// Kachina_PermanentSkill_2 -> Avatar_Kachina_PermanentSkill_2
+		a4: {
+			// Defence_Ratio
+			p1: 0.2,
+		},
+		// Boon of Crystal Flame
+		// Kachina_PermanentSkill_4 -> Avatar_Kachina_PermanentSkill_4, Avatar_Kachina_PermanentSkill_4_Collect
+		a0_2: {
+			// Stamina
+			p1: 20,
+		},
+		// Shards Are Gems Too
+		// Kachina_Constellation_1 ->
+		//     Avatar_Kachina_ElementalArt
+		//     Avatar_Kachina_ElementalBurst
+		//     Avatar_Kachina_NyxSwitch
+		//     Avatar_Kachina_Constellation_1
+		c1: {
+			// ReviveEnergy
+			p1: 3,
+			// CD_Timer
+			p2: 5,
+		},
+		// Never Leave Home Without... Turbo Twirly
+		// Kachina_Constellation_2 -> Avatar_Kachina_ElementalBurst, Avatar_Kachina_Constellation_2
+		c2: {
+			// Nyx_Add
+			p1: 20,
+		},
+		// More Foes, More Caution
+		// Kachina_Constellation_4 -> Avatar_Kachina_ElementalBurst_Field
+		c4: {
+			// Defence_Ratio_Lv1
+			p1: 0.08,
+			// Defence_Ratio_Lv2
+			p2: 0.12,
+			// Defence_Ratio_Lv3
+			p3: 0.16,
+			// Defence_Ratio_Lv4
+			p4: 0.2,
+		},
+		// This Time, I've Gotta Win
+		// Kachina_Constellation_6 -> Avatar_Kachina_Constellation_6
+		c6: {
+			// Constellation_6_Dmg
+			p1: 2,
+			// CD_Timer
+			p2: 5,
 		},
 	},
 	Kaeya: {
@@ -2937,6 +5786,52 @@ export const charTalentTables = {
 			// Energy Cost
 			p5: [80],
 		},
+		// An Architect's Undertaking
+		// Kaveh_PermanentSkill_1 -> Avatar_Kaveh_Overgrow_HealHP
+		a1: {
+			// Kaveh_Overgrow_HealHP_CD
+			p1: 0.5,
+			// Kaveh_Overgrow_HealHP_ElemMastery_Multiplier
+			p2: 3,
+		},
+		// A Craftsman's Curious Conceptions
+		// Kaveh_PermanentSkill_2 -> Avatar_Kaveh_ElementalBurst
+		a4: {
+			// Kaveh_ElementalBurst_ElementMastery_Buff_StackNum
+			p1: 4,
+			// Kaveh_ElementalBurst_ElementMastery_Buff_ElemMasteryDelta
+			p2: 25,
+		},
+		// Sublime Salutations
+		// Kaveh_Constellation_1 -> Avatar_Kaveh_ElementalArt
+		c1: {
+			// Kaveh_ElementalArt_HealBuff_Duration
+			p1: 3,
+			// Kaveh_ElementalArt_HealBuff_GrassSubHurtDelta
+			p2: 0.5,
+			// Kaveh_ElementalArt_HealBuff_HealedAddDelta
+			p3: 0.25,
+		},
+		// Grace of Royal Roads
+		// Kaveh_Constellation_2 -> Avatar_Kaveh_ElementalBurst
+		c2: {
+			// Kaveh_ElementalBurst_AtkSpeedBuff
+			p1: 0.15,
+		},
+		// Feast of Apadana
+		// Kaveh_Constellation_4 -> Avatar_Kaveh_Overgrow_ReactionDamageUp
+		c4: {
+			// Kaveh_Overgrow_ReactionDamageUp_Buff_ElemReactOvergrowDelta
+			p1: 0.6,
+		},
+		// Pairidaeza's Dreams
+		// Kaveh_Constellation_6 -> Avatar_Kaveh_ElementalBurst
+		c6: {
+			// Kaveh_ElementalBurst_ExtraStrike_Damage
+			p1: 0.618,
+			// Kaveh_ElementalBurst_ExtraStrike_CD
+			p2: 3,
+		},
 	},
 	Kazuha: {
 		s1_id: 10471,
@@ -2992,6 +5887,57 @@ export const charTalentTables = {
 			// Energy Cost
 			p6: [60],
 		},
+		// Soumon Swordsmanship
+		// Kazuha_PermanentSkill_1 ->
+		//     Avatar_Kazuha_PermanentSkill_1
+		//     Avatar_Kazuha_PermanentSkill_1_ExtraDamage
+		//     Avatar_Kazuha_PermanentSkill_1_Mix
+		//     Avatar_Kazuha_ElementalArt_EmptyJump
+		//     Avatar_Kazuha_ElementalArt_FlyAway
+		//     Avatar_Kazuha_FallingAnthem
+		//     Avatar_Kazuha_ElementalArt_AirCheck
+		a1: {
+			// PermanentSkill_1_FallingAttack_Damage
+			p1: 2,
+		},
+		// Poetics of Fuubutsu
+		// Kazuha_PermanentSkill_2 -> Avatar_Kazuha_PermanentSkill_2
+		a4: {
+			// Kazuha_PermanentSkill_2_Factor
+			p1: 0.0004,
+			// Kazuha_PermanentSkill_2_Duration
+			p2: 8,
+		},
+		// Yamaarashi Tailwind
+		// Kazuha_Constellation_2 -> Avatar_Kazuha_ElementalBurst_Mist
+		c2: {
+			// Constellation_2_ElementMastery_Delta
+			p1: 200,
+		},
+		// Oozora Genpou
+		// Kazuha_Constellation_4 -> Avatar_Kazuha_Constellation_4
+		c4: {
+			// Energy_Click
+			p1: 3,
+			// Energy_Hold
+			p2: 4,
+			// Energy_Fly
+			p3: 2,
+			// MaxEnergyRatio
+			p4: 0.75,
+		},
+		// Crimson Momiji
+		// Kazuha_Constellation_6 ->
+		//     Avatar_Kazuha_Constellation_6
+		//     Avatar_Kazuha_ElementalArt_EmptyJump
+		//     Avatar_Kazuha_ElementalArt_FlyAway
+		//     Avatar_Kazuha_ElementalBurst
+		c6: {
+			// ElemToDamage
+			p1: 0.002,
+			// Duration
+			p2: 5,
+		},
 	},
 	Keqing: {
 		s1_id: 10421,
@@ -3045,6 +5991,56 @@ export const charTalentTables = {
 			// Energy Cost
 			p5: [40],
 		},
+		// Thundering Penance
+		// Keqing_PermanentSkill_1 -> Avatar_Keqing_Electrans_Part2
+		a1: {
+			// Dura
+			p1: 5,
+		},
+		// Aristocratic Dignity
+		// Keqing_PermanentSkill_2 -> Avatar_Keqing_ElementalBurst_Camera
+		a4: {
+			// Critic
+			p1: 0.15,
+			// ChargeRatio
+			p2: 0.15,
+			// Time
+			p3: 8,
+		},
+		// Thundering Might
+		// Keqing_Constellation_1 ->
+		//     Avatar_Keqing_Electrans_Part2
+		//     Avatar_Keqing_Talent_Electrans_BlinkAttack1
+		//     Avatar_Keqing_Talent_Electrans_BlinkAttack2
+		c1: {
+			// Avatar_Keqing_Talent_Electrans_BlinkAttack1.Damage
+			// Avatar_Keqing_Talent_Electrans_BlinkAttack2.Damage
+			p1: 0.5,
+		},
+		// Keen Extraction
+		// Keqing_Constellation_2 -> Avatar_Keqing_DropBall_Talent
+		c2: {
+			// Chance
+			p1: 0.5,
+			// CDTime
+			p2: 5,
+		},
+		// Attunement
+		// Keqing_Constellation_4 -> Avatar_Keqing_ElecReaction_Talent
+		c4: {
+			// Dura
+			p1: 10,
+			// AttackUp
+			p2: 0.25,
+		},
+		// Tenacious Star
+		// Keqing_Constellation_6 -> Avatar_Keqing_ElecUpWhenDoSkill_Talent
+		c6: {
+			// Rate
+			p1: 0.06,
+			// Dura
+			p2: 8,
+		},
 	},
 	Kinich: {
 		s1_id: 11011,
@@ -3091,6 +6087,73 @@ export const charTalentTables = {
 			p4: [18],
 			// Energy Cost
 			p5: [70],
+		},
+		// The Price of Desolation
+		// Kinich_PermanentSkill_1 -> Avatar_Kinich_PermanentSkill_01
+		a1: {
+			// AddNyxValue
+			p1: 7,
+			// ColdDown
+			p2: 0.8,
+		},
+		// Flame Spirit Pact
+		// Kinich_PermanentSkill_2 -> Avatar_Kinich_PermanentSkill_02, Avatar_Kinich_EArt_Bullet_Final
+		a4: {
+			// Avatar_Kinich_PermanentSkill_02.Duration
+			p1: 15,
+			// Avatar_Kinich_EArt_Bullet_Final.DamageUp
+			p2: 3.2,
+		},
+		// Swift Envoy
+		// Kinich_PermanentSkill_4 -> Avatar_Kinich_PermanentSkill_4, Avatar_Kinich_PermanentSkill_4_Collect
+		a0_2: {
+			// Speed
+			p1: 0.15,
+			// Duration
+			p2: 10,
+		},
+		// Parrot's Beak
+		// Kinich_Constellation_1 -> Avatar_Kinich_ElementalArt_HookMove, Avatar_Kinich_Talent_1
+		c1: {
+			// MovespeedRatio
+			p1: 0.3,
+			// MovespeedDuration
+			p2: 6,
+			// CritUp
+			p3: 1,
+		},
+		// Tiger Beetle's Palm
+		// Kinich_Constellation_2 ->
+		//     Avatar_Kinich_ElementalArt_Start
+		//     Avatar_Kinich_EArt_Bullet_Final
+		//     Avatar_Kinich_Talent_2
+		c2: {
+			// Avatar_Kinich_Talent_2.GrassDefenseDown
+			p1: 0.3,
+			// Avatar_Kinich_Talent_2.DefenseDownDuration
+			p2: 6,
+			// Avatar_Kinich_EArt_Bullet_Final.T2DamageUp
+			p3: 1,
+		},
+		// Hummingbird's Feather
+		// Kinich_Constellation_4 ->
+		//     Avatar_Kinich_Talent_4
+		//     Avatar_Kinich_ElementalArt_Start
+		//     Avatar_Kinich_ElementalArt_Combat
+		//     Avatar_Kinich_ElementalArt_Combat_Over
+		c4: {
+			// ElemRevive
+			p1: 5,
+			// ColdDown
+			p2: 2.8,
+			// BurstUpRatio
+			p3: 0.7,
+		},
+		// Auspicious Beast's Shape
+		// Kinich_Constellation_6 -> Avatar_Kinich_EArt_Bullet_Final, Kinich_EArt_Bullet_T6_New_Selet
+		c6: {
+			// FinalAttackPercentageT6
+			p1: 7,
 		},
 	},
 	Kirara: {
@@ -3159,6 +6222,56 @@ export const charTalentTables = {
 			// Energy Cost
 			p5: [60],
 		},
+		// Bewitching, Betwitching Tails
+		// Momoka_PermanentSkill_1 -> Avatar_Momoka_ElementalArt_Hold, Momoka_ElementalArt_Shield_Handler
+		a1: {
+			// Momoka_PermanentSkill_1_PerShield
+			p1: 0.2,
+			p2: 3,
+			p3: 0.5,
+		},
+		// Pupillary Variance
+		// Momoka_PermanentSkill_2 -> Avatar_Momoka_PermanentSkill_2
+		a4: {
+			// ElementalArtDMGRatio
+			p1: 0.004,
+			// ElementalBurstDMGRatio
+			p2: 0.003,
+		},
+		// Material Circulation
+		// Momoka_Constellation_1 -> Avatar_Momoka_Constellation_1, Avatar_Momoka_ElementalBurst_ExpressDamage
+		c1: {
+			// Constellation_Rate
+			p1: 0.000125,
+		},
+		// Perfectly Packaged
+		// Momoka_Constellation_2 -> Avatar_Momoka_ElementalArt_Hold, Avatar_Momoka_Constellation_2_ExtraGrassShield
+		c2: {
+			// Constellation_Ratio
+			p1: 0.4,
+			// Dura
+			p2: 12,
+			p3: 10,
+		},
+		// Steed of Skanda
+		// Momoka_Constellation_4 ->
+		//     Momoka_ElementalArt_Shield_Handler
+		//     Avatar_Momoka_Constellation_2_ExtraGrassShield
+		//     Avatar_Momoka_Constellation_AddAttack
+		c4: {
+			// Constellation4_Mine_Damage
+			p1: 2,
+			// Momoka_Constellation_4_CD
+			p2: 3.8,
+		},
+		// Countless Sights to See
+		// Momoka_Constellation_6 -> Avatar_Momoka_Constellation_6
+		c6: {
+			// Constellation_6_AddHurtDelta
+			p1: 0.12,
+			// Constellation_6_Duration
+			p2: 15,
+		},
 	},
 	Klee: {
 		s1_id: 10291,
@@ -3201,6 +6314,47 @@ export const charTalentTables = {
 			p2: [15],
 			// Energy Cost
 			p3: [60],
+		},
+		// Witch's Eve Rite: Sparkborne Magic
+		// Klee_Hexenzirkel_1 -> Avatar_Klee_HexenzirkelSkill, Avatar_Klee_PermanentSkill_1
+		sp: {
+			// Avatar_Klee_HexenzirkelSkill.BuffDuration
+			p1: 20,
+			// Avatar_Klee_PermanentSkill_1.ExAtk_ExtraRatio_01
+			p2: 0.15,
+			// Avatar_Klee_PermanentSkill_1.ExAtk_ExtraRatio_02
+			p3: 0.3,
+			// Avatar_Klee_PermanentSkill_1.ExAtk_ExtraRatio_03
+			p4: 0.5,
+			// Avatar_Klee_PermanentSkill_1.Max_FreeExAtk_Count_02
+			p5: 2,
+		},
+		// Chained Reactions
+		// Klee_Constellation_1 -> Avatar_Klee_Constellation_1, Avatar_Klee_HexenzirkelSkill
+		c1: {
+			// C1_BuffDuration
+			p1: 12,
+			// C1_AttackUp
+			p2: 0.6,
+		},
+		// Sparkly Explosion
+		// Klee_Constellation_4 ->
+		//     Avatar_Klee_Constellation_4
+		//     Avatar_Klee_HexenzirkelSkill
+		//     Avatar_Klee_Elemental_Burst_Trigger
+		c4: {
+			// Klee_C4_DamageUp
+			p1: 1,
+		},
+		// Blazing Delight
+		// Klee_Constellation_6 -> Avatar_Klee_Constellation_6, Avatar_Klee_HexenzirkelSkill, Avatar_Klee_PermanentSkill_1
+		c6: {
+			// Avatar_Klee_PermanentSkill_1.C6_NotConsumChance
+			p1: 0.5,
+			// Avatar_Klee_PermanentSkill_1.C6_Chance
+			p2: 0.4,
+			// Avatar_Klee_HexenzirkelSkill.Klee_C6_FireDamageUp
+			p3: 0.4,
 		},
 	},
 	Kokomi: {
@@ -3256,6 +6410,52 @@ export const charTalentTables = {
 			p7: [18],
 			// Energy Cost
 			p8: [70],
+		},
+		// Song of Pearls
+		// Kokomi_PermanentSkill_2 -> Avatar_Kokomi_ElementalBurst_Initiate
+		a4: {
+			// ElementalBurst_Damage_HealAdd_Percentage
+			p1: 0.15,
+		},
+		// At Water's Edge
+		// Kokomi_Constellation_1 -> Avatar_Kokomi_Attack03, Kokomi_NormalAttack_Bullet_Bounce
+		c1: {
+			// Talent_ExtraBullet_MaxHP_Percentage
+			p1: 0.3,
+		},
+		// The Clouds Like Waves Rippling
+		// Kokomi_Constellation_2 -> Kokomi_ElementalArt_Gadget_Controller, Avatar_Kokomi_ElementalBurst_Heal
+		c2: {
+			// Kokomi_ElementalArt_Gadget_Controller.Talent_ExtraHealLowHPTarget_Threshold
+			// Avatar_Kokomi_ElementalBurst_Heal.Talent_ExtraHealLowHPTarget_Threshold
+			p1: 0.5,
+			// Kokomi_ElementalArt_Gadget_Controller.Talent_ExtraHealLowHPTarget_ElementalArt_MaxHP_Extra_Percentage
+			p2: 0.045,
+			// Avatar_Kokomi_ElementalBurst_Heal.Talent_ExtraHealLowHPTarget_ElementalBurst_MaxHP_Extra_Percentage
+			p3: 0.006,
+		},
+		// The Moon Overlooks the Waters
+		// Kokomi_Constellation_4 ->
+		//     Avatar_Kokomi_ElementalBurst_Initiate
+		//     Avatar_Kokomi_NormalAttack_Bullet_1_Burst_Damage
+		//     Avatar_Kokomi_NormalAttack_Bullet_2_Burst_Damage
+		//     Avatar_Kokomi_NormalAttack_Bullet_3_Burst_Damage
+		//     Avatar_Kokomi_ElementalBurst_ReviveEnergy
+		c4: {
+			// Avatar_Kokomi_ElementalBurst_Initiate.Talent_AtkSpeedBuff_Ratio
+			p1: 0.1,
+			// Avatar_Kokomi_ElementalBurst_ReviveEnergy.Talent_AtkSpeedBuff_ReviveEnergy
+			p2: 0.8,
+		},
+		// Sango Isshin
+		// Kokomi_Constellation_6 -> Avatar_Kokomi_ElementalBurst_Heal
+		c6: {
+			// Talent_OverHealBuff_Threshold
+			p1: 0.8,
+			// Talent_OverHealBuff_WaterAddHurt
+			p2: 0.4,
+			// Talent_OverHealBuff_Duration
+			p3: 4,
 		},
 	},
 	Kuki: {
@@ -3316,6 +6516,52 @@ export const charTalentTables = {
 			// Energy Cost
 			p7: [60],
 		},
+		// Breaking Free
+		// Shinobu_PermanentSkill_1 -> Avatar_Shinobu_PermanentSkill_WhenLowHp
+		a1: {
+			// HpRate_P1
+			p1: 0.5,
+			// HealAddDelta_P2
+			p2: 0.15,
+		},
+		// Heart's Repose
+		// Shinobu_PermanentSkill_2 -> Avatar_Shinobu_ElementalArt_TickLogic, Avatar_Shinobu_ElementalArt
+		a4: {
+			// Avatar_Shinobu_ElementalArt_TickLogic.Shinobu_PermanentSkill_2_P1
+			p1: 0.75,
+			// Avatar_Shinobu_ElementalArt_TickLogic.Shinobu_PermanentSkill_2_P2
+			// Avatar_Shinobu_ElementalArt.Shinobu_PermanentSkill_2_P2
+			p2: 0.25,
+		},
+		// To Forsake Fortune
+		// Shinobu_Constellation_2 -> SkillObj_Shinobu_ElementalArt_LifetimeHandler
+		c2: {
+			// Duration_Add
+			p1: 3,
+		},
+		// To Sever Sealing
+		// Shinobu_Constellation_4 -> SkillObj_Shinobu_ElementalArt_LifetimeHandler, Avatar_Shinobu_Constellation_AddAttack
+		c4: {
+			// Shinobu_Constellation_4_Dmg_P1
+			p1: 0.097,
+			// Shinobu_Constellation_4_CD_P2
+			p2: 5,
+		},
+		// To Ward Weakness
+		// Shinobu_Constellation_6 ->
+		//     Avatar_Shinobu_Constellation6_Limbo
+		//     Avatar_Shinobu_Constellation6_Limbo_Trigger_Protect
+		//     Avatar_Shinobu_Constellation6_Limbo_Trigger_ElemMastery
+		c6: {
+			// Avatar_Shinobu_Constellation6_Limbo.Shinobu_Constellation_6_HpRate_P1
+			p1: 0.25,
+			// Avatar_Shinobu_Constellation6_Limbo_Trigger_Protect.Shinobu_Constellation6_BuffDuration_P2
+			// Avatar_Shinobu_Constellation6_Limbo_Trigger_ElemMastery.Shinobu_Constellation6_BuffDuration_P2
+			p2: 15,
+			// Avatar_Shinobu_Constellation6_Limbo_Trigger_ElemMastery.Shinobu_Constellation6_ElemMasteryDelta_P3
+			p3: 150,
+			p4: 60,
+		},
 	},
 	LanYan: {
 		s1_id: 11081,
@@ -3364,6 +6610,78 @@ export const charTalentTables = {
 			p2: [15],
 			// Energy Cost
 			p3: [60],
+		},
+		// Four Sealing Divination Charms
+		// Lanyan_PermanentSkill_1 ->
+		//     Avatar_Lanyan_ElementalArt_Shield
+		//     Avatar_Lanyan_ElementalArt_Attack
+		//     Avatar_Lanyan_ElementalArt_Bullet_Fire
+		//     Avatar_Lanyan_ElementalArt_Bullet_Fire_Extra
+		//     Avatar_Lanyan_ElementalArt_Bullet_Water
+		//     Avatar_Lanyan_ElementalArt_Bullet_Water_Extra
+		//     Avatar_Lanyan_ElementalArt_Bullet_Electric
+		//     Avatar_Lanyan_ElementalArt_Bullet_Electric_Extra
+		//     Avatar_Lanyan_ElementalArt_Bullet_Ice
+		//     Avatar_Lanyan_ElementalArt_Bullet_Ice_Extra
+		a1: {
+			// Avatar_Lanyan_ElementalArt_Bullet_Fire.Lanyan_ElementalArt_Ratio_Damage
+			// Avatar_Lanyan_ElementalArt_Bullet_Fire_Extra.Lanyan_ElementalArt_Ratio_Damage
+			// Avatar_Lanyan_ElementalArt_Bullet_Water.Lanyan_ElementalArt_Ratio_Damage
+			// Avatar_Lanyan_ElementalArt_Bullet_Water_Extra.Lanyan_ElementalArt_Ratio_Damage
+			// Avatar_Lanyan_ElementalArt_Bullet_Electric.Lanyan_ElementalArt_Ratio_Damage
+			// Avatar_Lanyan_ElementalArt_Bullet_Electric_Extra.Lanyan_ElementalArt_Ratio_Damage
+			// Avatar_Lanyan_ElementalArt_Bullet_Ice.Lanyan_ElementalArt_Ratio_Damage
+			// Avatar_Lanyan_ElementalArt_Bullet_Ice_Extra.Lanyan_ElementalArt_Ratio_Damage
+			p1: 0.5,
+		},
+		// Skyfeather Evil-Subduing Charm
+		// Lanyan_PermanentSkill_2 ->
+		//     Avatar_Lanyan_ElementalArt_Bullet_Wind
+		//     Avatar_Lanyan_ElementalArt_Bullet_Fire
+		//     Avatar_Lanyan_ElementalArt_Bullet_Fire_Extra
+		//     Avatar_Lanyan_ElementalArt_Bullet_Water
+		//     Avatar_Lanyan_ElementalArt_Bullet_Water_Extra
+		//     Avatar_Lanyan_ElementalArt_Bullet_Electric
+		//     Avatar_Lanyan_ElementalArt_Bullet_Electric_Extra
+		//     Avatar_Lanyan_ElementalArt_Bullet_Ice
+		//     Avatar_Lanyan_ElementalArt_Bullet_Ice_Extra
+		//     Avatar_Lanyan_ElementalBurst_Bullet_2
+		a4: {
+			// Avatar_Lanyan_ElementalArt_Bullet_Wind.PermanentSkill_2_MasteryEnhanceDamge_ElementalArt
+			// Avatar_Lanyan_ElementalArt_Bullet_Fire.PermanentSkill_2_MasteryEnhanceDamge_ElementalArt
+			// Avatar_Lanyan_ElementalArt_Bullet_Fire_Extra.PermanentSkill_2_MasteryEnhanceDamge_ElementalArt
+			// Avatar_Lanyan_ElementalArt_Bullet_Water.PermanentSkill_2_MasteryEnhanceDamge_ElementalArt
+			// Avatar_Lanyan_ElementalArt_Bullet_Water_Extra.PermanentSkill_2_MasteryEnhanceDamge_ElementalArt
+			// Avatar_Lanyan_ElementalArt_Bullet_Electric.PermanentSkill_2_MasteryEnhanceDamge_ElementalArt
+			// Avatar_Lanyan_ElementalArt_Bullet_Electric_Extra.PermanentSkill_2_MasteryEnhanceDamge_ElementalArt
+			// Avatar_Lanyan_ElementalArt_Bullet_Ice.PermanentSkill_2_MasteryEnhanceDamge_ElementalArt
+			// Avatar_Lanyan_ElementalArt_Bullet_Ice_Extra.PermanentSkill_2_MasteryEnhanceDamge_ElementalArt
+			p1: 3.09,
+			// Avatar_Lanyan_ElementalBurst_Bullet_2.PermanentSkill_2_MasteryEnhanceDamge_ElementalBurst
+			p2: 7.74,
+		},
+		// "Dance Vestments Billow Like Rainbow Jade"
+		// Lanyan_Constellation_2 -> Avatar_Lanyan_ElementalArt_Shield
+		c2: {
+			// Lanyan_Shield_Recover
+			p1: 0.4,
+			// Lanyan_Shield_Recover_CD
+			p2: 2,
+		},
+		// "With Drakefalcon's Blood-Pearls Adorned"
+		// Lanyan_Constellation_4 -> Avatar_Lanyan_Constellation_4
+		c4: {
+			// Lanyan_Constellation_4_MasteryBuff
+			p1: 60,
+			// Lanyan_Constellation_4_MasteryBuff_Duration
+			p2: 12,
+		},
+		// "Let Us Away on Sylphic Wing, the Silvered Ornaments to Ring"
+		// Lanyan_Constellation_6
+		c6: {
+			p1: 0.001,
+			p2: 0.5,
+			p3: 2,
 		},
 	},
 	Lauma: {
@@ -3434,6 +6752,99 @@ export const charTalentTables = {
 			// Energy Cost
 			p7: [60],
 		},
+		// Light for the Frosty Night
+		// Lauma_PermanentSkill_1 -> Avatar_Lauma_PermanentSkill_1, Avatar_Lauma_ElementalArt
+		a1: {
+			// OvergrowCrit
+			p1: 0.15,
+			// OvergrowCritHurt
+			p2: 1,
+			// MoonOvergrowCrit
+			p3: 0.1,
+			// MoonOvergrowCritHurt
+			p4: 0.2,
+			// PermanentSkill_1_Dura
+			p5: 20,
+		},
+		// Cleansing for the Spring
+		// Lauma_PermanentSkill_2 -> Avatar_Lauma_PermanentSkill_2
+		a4: {
+			// Ratio_PerMastery
+			p1: 0.0004,
+			// Ratio_PerMastery_Max
+			p2: 0.32,
+			// CD_PerMastery
+			p3: 0.0002,
+			// CD_PerMastery_Max
+			p4: 0.2,
+		},
+		// Moonsign Benediction: Nature's Chorus
+		// Lauma_PermanentSkill_3 -> Avatar_Lauma_PermanentSkill_3
+		a0: {
+			// MasteryTransferRatio
+			p1: 0.000175,
+			// MaxTransRatio
+			p2: 0.14,
+		},
+		// "O Lips, Weave Me Songs and Psalms"
+		// Lauma_Constellation_1 ->
+		//     Avatar_Lauma_Constellation_1
+		//     Avatar_Lauma_ElementalArt
+		//     Avatar_Lauma_ElementalBurst
+		//     Avatar_Lauma_SpecialMove
+		c1: {
+			// Avatar_Lauma_Constellation_1.Constellation_1_Dura
+			p1: 20,
+			// Avatar_Lauma_Constellation_1.Constellation_1_Heal_Ratio
+			p2: 5,
+			// Avatar_Lauma_Constellation_1.Constellation_1_Heal_CD
+			p3: 1.9,
+			// Avatar_Lauma_SpecialMove.Lauma_SpecialMove_Constellation_1_Stamina_Reduce
+			p4: 0.4,
+			// Avatar_Lauma_Constellation_1.Constellation_1_SpecialMove_AddDura
+			p5: 5,
+		},
+		// "Twine Warnings and Tales From the North"
+		// Lauma_Constellation_2 -> Avatar_Lauma_Constellation_2, Avatar_Lauma_ElementalBurst
+		c2: {
+			// Avatar_Lauma_ElementalBurst.ElementalBurst_DamageExtra_Extra
+			p1: 5,
+			// Avatar_Lauma_ElementalBurst.ElementalBurst_DamageExtra_MoonOvergrow_Extra
+			p2: 4,
+			// Avatar_Lauma_Constellation_2.Constellation_2_Delta
+			p3: 0.4,
+		},
+		// "Nor Yearn for the Great Bear's Might"
+		// Lauma_Constellation_4 -> Avatar_Lauma_Constellation_4
+		c4: {
+			// Constellation_4_ReviveEnergy
+			p1: 4,
+			// Constellation_4_CD
+			p2: 5,
+		},
+		// "I Offer Blood and Tears to the Moonlight"
+		// Lauma_Constellation_6 ->
+		//     Avatar_Lauma_Constellation_6
+		//     Avatar_Lauma_ElementalArt
+		//     Avatar_Lauma_ElementalBurst
+		//     Avatar_Lauma_Attack01
+		//     Avatar_Lauma_Attack02
+		//     Avatar_Lauma_Attack03
+		c6: {
+			// Avatar_Lauma_ElementalBurst.Constellation_6_Attack
+			p1: 1.85,
+			// Avatar_Lauma_ElementalBurst._ABILITY_Lauma_ElementalBurst_BuffCount_3_Add
+			p2: 2,
+			// Avatar_Lauma_ElementalBurst.ElementalBurst_Dura_Constellation_6
+			p3: 15,
+			p4: 8,
+			// Avatar_Lauma_Attack01.Attack01_Constellation_6_Damage
+			// Avatar_Lauma_Attack02.Attack02_Constellation_6_Damage
+			// Avatar_Lauma_Attack03.Attack03_Constellation_6_Damage
+			p5: 1.5,
+			// Avatar_Lauma_Constellation_6.Constellation_6_Factor
+			p6: 0.25,
+		},
 	},
 	Layla: {
 		s1_id: 10741,
@@ -3482,6 +6893,51 @@ export const charTalentTables = {
 			p3: [12],
 			// Energy Cost
 			p4: [40],
+		},
+		// Like Nascent Light
+		// Layla_PermanentSkill_1 -> Avatar_Layla_ElementalArt_Handler, Avatar_Layla_ElementalBurst_Bullet1_Material
+		a1: {
+			// ShieldCostMinusRatio
+			p1: 0.06,
+		},
+		// Sweet Slumber Undisturbed
+		// Layla_PermanentSkill_2 -> Avatar_Layla_ArtAndBurst_DamageExtra
+		a4: {
+			// Ratio
+			p1: 0.015,
+		},
+		// Fortress of Fantasy
+		// Layla_Constellation_1 -> Avatar_Layla_ElementalArt_Handler
+		c1: {
+			// ShieldUp
+			p1: 0.2,
+			// Talent_Ratio
+			p2: 0.35,
+			// Dura_Talent
+			p3: 12,
+		},
+		// Light's Remit
+		// Layla_Constellation_2 -> Avatar_Layla_ArtAndBurst_ReviveEnergy, Avatar_Layla_ElementalArt_Bullet_Material
+		c2: {
+			// Energy
+			p1: 1,
+		},
+		// Starry Illumination
+		// Layla_Constellation_4 -> Avatar_Layla_Shoot_TeamBuff, Avatar_Layla_ElementalArt_Gadget
+		c4: {
+			// HP2ExtraRatio
+			p1: 0.05,
+			// Dura
+			p2: 3,
+			// Keep_Time
+			p3: 0.05,
+		},
+		// Radiant Soulfire
+		// Layla_Constellation_6 -> Avatar_Layla_ArtAndBurst_DamageUp, Avatar_Layla_ElementalArt_Handler
+		c6: {
+			p1: 0.2,
+			// DamageUp
+			p2: 0.4,
 		},
 	},
 	Linnea: {
@@ -3534,6 +6990,84 @@ export const charTalentTables = {
 			// Energy Cost
 			p7: [60],
 		},
+		// Field Observation Notes
+		// Linnea_PermanentSkill_1 -> Avatar_Linnea_PermanentSkill_1, Linnea_Partner_Handler
+		a1: {
+			// RockHurtDelta
+			p1: 0.15,
+			// RockHurtDelta_MoonLevel2
+			p2: 0.3,
+		},
+		// Universal Naturalist Archive
+		// Linnea_PermanentSkill_2 -> Avatar_Linnea_PermanentSkill_2
+		a4: {
+			// DefToMastery_Factor
+			p1: 0.05,
+		},
+		// Moonsign Benediction: Habitat Survey
+		// Linnea_PermanentSkill_3 -> Avatar_Linnea_PermanentSkill_3
+		a0: {
+			// DefenseTransferRatio
+			p1: 0.007,
+			// MaxTransRatio
+			p2: 0.14,
+		},
+		// Master Adventurer
+		// Linnea_PermanentSkill_4 -> Avatar_Linnea_PermanentSkill_4, Avatar_Linnea_Damage_Handler
+		a0_2: {
+			// ExtraAttack_WithElement_Special_Factor
+			p1: 0.2,
+		},
+		// Provisional Classification
+		// Linnea_Constellation_1 -> Avatar_Linnea_Constellation_1
+		c1: {
+			// C1_BuffCountAdder
+			p1: 6,
+			// C1_MaxBuffStack
+			p2: 18,
+			// C1_BuffDuration
+			p3: 10,
+			// C1_DamageExtra_DefRatio
+			p4: 0.75,
+			// C1_Cola_BuffConsumeCount
+			p5: 5,
+			// C1_Cola_DamageExtra_DefRatio
+			p6: 1.5,
+		},
+		// Tidings of Joy and Sorrow
+		// Linnea_Constellation_2 ->
+		//     Avatar_Linnea_Constellation_2
+		//     Linnea_Partner_Handler
+		//     Linnea_Partner_AttackSkill_02
+		//     Linnea_Partner_AttackSkill_03
+		c2: {
+			// C2_CritDamageUp
+			p1: 0.4,
+			// C2_BuffDuration
+			p2: 8,
+			// C2_ColaCritDamageUp
+			p3: 1.5,
+		},
+		// Expert Instinct
+		// Linnea_Constellation_4 -> Avatar_Linnea_Constellation_4
+		c4: {
+			// C4_BuffDuration
+			p1: 5,
+			// C4_DefenseRatio
+			p2: 0.25,
+			// C4_DefenseRatio_CurLocalAvatar
+			p3: 0.25,
+		},
+		// Golden Beagle's Dream
+		// Linnea_Constellation_6 -> Avatar_Linnea_Constellation_6, Avatar_Linnea_Constellation_1
+		c6: {
+			// Avatar_Linnea_Constellation_6.C6_DefenseRatio
+			p1: 0.25,
+			// Avatar_Linnea_Constellation_1.C6_BuffConsume_Factor
+			p2: 2,
+			// Avatar_Linnea_Constellation_1.C6_BuffDamageUp_Factor
+			p3: 0.75,
+		},
 	},
 	Lisa: {
 		s1_id: 10060,
@@ -3584,6 +7118,17 @@ export const charTalentTables = {
 			p3: [20],
 			// Energy Cost
 			p4: [80],
+		},
+		// Induced Aftershock
+		// Lisa_PermanentSkill_1 -> Avatar_Lisa_StaticElecField
+		a1: {
+			p1: 0.7,
+		},
+		// Static Electricity Field
+		// Lisa_PermanentSkill_2 -> Avatar_Lisa_PierceLightning_Ball_Attack
+		a4: {
+			p1: 0.15,
+			p2: 10,
 		},
 	},
 	Lohen: {
@@ -3656,6 +7201,89 @@ export const charTalentTables = {
 			// Energy Cost
 			p4: [60],
 		},
+		// Moratorium on Questioning
+		// Lohen_PermanentSkill_1 -> Avatar_Lohen_ElementalArt
+		a1: {
+			// ElementalArt_AddAnswerLevel_AttackRatio_Extra
+			p1: 30,
+			// ElementalArt_AddAnswerLevel_Success_Extra
+			p2: 60,
+		},
+		// Flippant Masterpiece
+		// Lohen_PermanentSkill_2 -> Avatar_Lohen_ElementalArt
+		a4: {
+			// PermanentSkill_2_SelfAttackRatio
+			p1: 0.15,
+			// PermanentSkill_2_CasterAttackRatio
+			p2: 0.15,
+			// PermanentSkill_2_Duration
+			p3: 8,
+		},
+		// When the Mood Strikes
+		// Lohen_PermanentSkill_3 -> Avatar_Lohen_PermanentSkill_3, Avatar_Lohen_ElementalArt
+		a0: {
+			// PermanentSkill_3_BaseDuration
+			p1: 9,
+			// PermanentSkill_3_ExtraDuration
+			p2: 6,
+			// PermanentSkill_3_CD
+			p3: 18,
+		},
+		// Witch's Eve Rite: Unhealing Thorn
+		// Lohen_Hexenzirkel_1 -> Avatar_Lohen_ElementalArt_Raid, Avatar_Lohen_ElementalBurst
+		sp: {
+			// Avatar_Lohen_ElementalArt_Raid.Hexenzirkel_RaidAnswerThreshold
+			// Avatar_Lohen_ElementalBurst.Hexenzirkel_RaidAnswerThreshold
+			p1: 0.5,
+			// Avatar_Lohen_ElementalArt_Raid.Hexenzirkel_DamageUpRatio
+			// Avatar_Lohen_ElementalBurst.Hexenzirkel_DamageUpRatio
+			p2: 0.4,
+			// Avatar_Lohen_ElementalArt_Raid.Hexenzirkel_Duration
+			// Avatar_Lohen_ElementalBurst.Hexenzirkel_Duration
+			p3: 6,
+		},
+		// O Breezes, That So Oft Bear Sorrowful Lament
+		// Lohen_Constellation_1 -> Avatar_Lohen_ElementalArt, Avatar_Lohen_ElementalBurst
+		c1: {
+			p1: 4,
+			p2: 2,
+		},
+		// In Flight, I Strike Whatever Flies
+		// Lohen_Constellation_2 -> Avatar_Lohen_ElementalArt, Avatar_Lohen_ElementalArt_Raid, Avatar_Lohen_ElementalBurst
+		c2: {
+			// Avatar_Lohen_ElementalArt.Constellation_2_Attack
+			p1: 5,
+			// Avatar_Lohen_ElementalArt.Constellation_2_ElemMasteryDelta
+			p2: 200,
+			// Avatar_Lohen_ElementalArt.Constellation_2_Duration
+			p3: 8,
+			// Avatar_Lohen_ElementalArt_Raid.Constellation_2_CD
+			// Avatar_Lohen_ElementalBurst.Constellation_2_CD
+			p4: 4,
+		},
+		// Radiant Love, Laughing Death
+		// Lohen_Constellation_4 -> Avatar_Lohen_ElementalArt, Avatar_Lohen_ElementalBurst
+		c4: {
+			// Avatar_Lohen_ElementalArt.Constellation_4_ReviveEnergy
+			// Avatar_Lohen_ElementalBurst.Constellation_4_ReviveEnergy
+			p1: 15,
+			// Avatar_Lohen_ElementalArt.Constellation_4_Duration
+			p2: 15,
+		},
+		// To Drown, to Sink, Unconscious — Supreme Joy
+		// Lohen_Constellation_6 ->
+		//     Avatar_Lohen_ElementalArt_Raid
+		//     Avatar_Lohen_ElementalBurst
+		//     SkillObj_Lohen_ElementalBurst_Gadget
+		//     Avatar_Lohen_ElementalArt
+		c6: {
+			// Avatar_Lohen_ElementalArt_Raid.Constellation_6_CD
+			// Avatar_Lohen_ElementalBurst.Constellation_6_CD
+			p1: 7,
+			// Avatar_Lohen_ElementalArt_Raid.Constellation_6_BonusCriticalHurt
+			// Avatar_Lohen_ElementalBurst.Constellation_6_BonusCriticalHurt
+			p2: 1.75,
+		},
 	},
 	Lynette: {
 		s1_id: 10831,
@@ -3714,6 +7342,40 @@ export const charTalentTables = {
 			p5: [18],
 			// Energy Cost
 			p6: [70],
+		},
+		// Sophisticated Synergy
+		// Linette_PermanentSkill_1 -> Avatar_Linette_PermanentSkill_1
+		a1: {
+			// Linette_PermanentSkill_1_Duration
+			p1: 10,
+			// Linette_PermanentSkill_1_ElementNum_Elem_1
+			p2: 0.08,
+			// Linette_PermanentSkill_1_ElementNum_Elem_2
+			p3: 0.12,
+			// Linette_PermanentSkill_1_ElementNum_Elem_3
+			p4: 0.16,
+			// Linette_PermanentSkill_1_ElementNum_Elem_4
+			p5: 0.2,
+		},
+		// Props Positively Prepped
+		// Linette_PermanentSkill_2 -> Avatar_Linette_ElementalBurst_MagicBox
+		a4: {
+			// PermanentSkill_2_AttackUp
+			p1: 0.15,
+		},
+		// Endless Mysteries
+		// Linette_Constellation_2 -> Avatar_Linette_ElementalBurst_MagicBox
+		c2: {
+			// Constellation_2_Chance
+			p1: 1,
+		},
+		// Watchful Eye
+		// Linette_Constellation_6 -> Avatar_Linette_Constellation_6
+		c6: {
+			// WindAddHurtDelta
+			p1: 0.2,
+			// Duration
+			p2: 6,
 		},
 	},
 	Lyney: {
@@ -3777,6 +7439,60 @@ export const charTalentTables = {
 			p4: [15],
 			// Energy Cost
 			p5: [60],
+		},
+		// Perilous Performance
+		// Liney_PermanentSkill_1 ->
+		//     Bullet_Liney_ShootArrow_WithFire_BeforeFission
+		//     Bullet_Liney_FissionAgent_EndBoom
+		//     SkillObj_Liney_FissionAgent_EndBoom_Enhanced
+		a1: {
+			// Bullet_Liney_FissionAgent_EndBoom.ReviveEnergy
+			// SkillObj_Liney_FissionAgent_EndBoom_Enhanced.ReviveEnergy
+			p1: 3,
+			// Bullet_Liney_FissionAgent_EndBoom.AfterFission_PermanentSkill_1_HurtUpRatio
+			// SkillObj_Liney_FissionAgent_EndBoom_Enhanced.AfterFission_PermanentSkill_1_HurtUpRatio
+			p2: 0.8,
+		},
+		// Conclusive Ovation
+		// Liney_PermanentSkill_2 -> Avatar_Liney_PermanentSkill_2
+		a4: {
+			// Liney_PermanentSkill_2_BaseDPR
+			p1: 0.6,
+			// Liney_PermanentSkill_2_ExtraDPR
+			p2: 0.2,
+		},
+		// Whimsical Wonders
+		// Liney_Constellation_1 ->
+		//     Avatar_Liney_Constellation_1
+		//     Bullet_Liney_ShootArrow_WithFire_BeforeFission
+		//     Avatar_Liney_ElementalBurst
+		c1: {
+			// Liney_Constellation_1_CD
+			p1: 15,
+		},
+		// Loquacious Cajoling
+		// Liney_Constellation_2 -> Avatar_Liney_Constellation_2
+		c2: {
+			// Liney_CriticalHurt_CriticalHurt
+			p1: 0.2,
+			// Liney_CriticalHurt_Buff_Interval
+			p2: 2,
+			// Liney_CriticalHurt_MaxCount
+			p3: 3,
+		},
+		// Well-Versed, Well-Rehearsed
+		// Liney_Constellation_4 -> Avatar_Liney_Constellation_4
+		c4: {
+			// Liney_FireSubHurt
+			p1: 0.2,
+			// Liney_FireSubHurt_Time
+			p2: 6,
+		},
+		// Guarded Smile
+		// Liney_Constellation_6 -> Avatar_Liney_ShootArrow_Aiming, Bullet_Liney_FissionAgent_EndBoom_Constellation_6
+		c6: {
+			// EndBoom_Constellation_6_DMGRatio
+			p1: 0.8,
 		},
 	},
 	Mavuika: {
@@ -3849,6 +7565,78 @@ export const charTalentTables = {
 			// Fighting Spirit Limit
 			p9: [200],
 		},
+		// Gift of Flaming Flowers
+		// Mavuika_PermanentSkill_1 -> Avatar_Mavuika_PermanentSkill_1
+		a1: {
+			// Atk_Ratio
+			p1: 0.3,
+			// Buff_Duration
+			p2: 10,
+		},
+		// "Kiongozi"
+		// Mavuika_PermanentSkill_2 -> Avatar_Mavuika_PermanentSkill_2
+		a4: {
+			// PerSpecialEnergy_DamageUp
+			p1: 0.0001,
+			// Buff_Duration
+			p2: 20,
+			p3: 200,
+		},
+		// The Night-Lord's Explication
+		// Mavuika_Constellation_1 -> Avatar_Mavuika_Constellation_1
+		c1: {
+			// Extra_NyxMaximumValue
+			p1: 40,
+			// Extra_NyxConvertRatio
+			p2: 0.25,
+			// Atk_Ratio
+			p3: 0.4,
+			// Timer
+			p4: 8,
+		},
+		// The Ashen Price
+		// Mavuika_Constellation_2 -> Avatar_Mavuika_Constellation_2
+		c2: {
+			// BaseAttack_Up
+			p1: 200,
+			// Defense_Ratio
+			p2: 0.2,
+			// AtkToDamage_NormalAttack_Ratio
+			p3: 0.6,
+			// AtkToDamage_ExtraAttack_Ratio
+			p4: 0.9,
+			// AtkToDamage_ElementalBurst_Ratio
+			p5: 1.2,
+		},
+		// The Leader's Resolve
+		// Mavuika_Constellation_4 -> Avatar_Mavuika_Constellation_4, Avatar_Mavuika_PermanentSkill_2
+		c4: {
+			// Constellation_4_ExtraDamageUp
+			p1: 0.1,
+		},
+		// "Humanity's Name" Unfettered
+		// Mavuika_Constellation_6 ->
+		//     Gadget_Mavuika_BattleWeapon
+		//     Avatar_Mavuika_AirSkill
+		//     Avatar_Mavuika_SwimSkill
+		//     Avatar_Mavuika_ClimbSkill
+		//     Avatar_Mavuika_NyxCycle
+		//     Avatar_Mavuika_Constellation_6
+		//     Gadget_Mavuika_Constellation_BattleWeapon
+		c6: {
+			// Avatar_Mavuika_Constellation_6.WeaponState_DamageRatio
+			p1: 2,
+			// Gadget_Mavuika_Constellation_BattleWeapon.MotorState_DamageRatio
+			p2: 5,
+			// Gadget_Mavuika_Constellation_BattleWeapon.MotorState_CDTimer
+			p3: 3,
+			// Avatar_Mavuika_Constellation_6.ExtraNyxValue
+			// Avatar_Mavuika_NyxCycle.ExtraNyxValue
+			p4: 80,
+			// Avatar_Mavuika_Constellation_6.TriggerTimer
+			// Avatar_Mavuika_NyxCycle.TriggerTimer
+			p5: 15,
+		},
 	},
 	Mika: {
 		s1_id: 10801,
@@ -3910,6 +7698,43 @@ export const charTalentTables = {
 			// Energy Cost
 			p8: [70],
 		},
+		// Suppressive Barrage
+		// Mika_PermanentSkill_1 ->
+		//     Avatar_Mika_Sub_Buff_GV_AddOne
+		//     Avatar_Mika_ElementalArt_Buff_Controller
+		//     Avatar_Mika_ElementBurst
+		a1: {
+			// Avatar_Mika_ElementalArt_Buff_Controller.SubBuffRatio
+			// Avatar_Mika_ElementBurst.SubBuffRatio
+			p1: 0.1,
+			// Avatar_Mika_Sub_Buff_GV_AddOne.MaxBuffStack, also fed by a4.p1, c6.p2
+			p2: 3,
+		},
+		// Topographical Mapping
+		// Mika_PermanentSkill_2 ->
+		//     Avatar_Mika_ElementBurst
+		//     Avatar_Mika_Sub_Buff_GV_AddOne
+		//     Avatar_Mika_ElementalArt_Buff_Controller
+		a4: {
+			// MaxBuffStack, also fed by a1.p2, c6.p2
+			p1: 1,
+		},
+		// Sunfrost Encomium
+		// Mika_Constellation_4 -> Avatar_Mika_ElementBurst
+		c4: {
+			// C4_Revive_Energy
+			p1: 3,
+			// C4_MaxStack
+			p2: 5,
+		},
+		// Companion's Counsel
+		// Mika_Constellation_6 -> Avatar_Mika_ElementalArt_Buff_Controller, Avatar_Mika_Sub_Buff_GV_AddOne
+		c6: {
+			// Avatar_Mika_ElementalArt_Buff_Controller.C6_DamageRatio
+			p1: 0.6,
+			// Avatar_Mika_Sub_Buff_GV_AddOne.MaxBuffStack, also fed by a1.p2, a4.p1
+			p2: 1,
+		},
 	},
 	Mitya: {
 		s1_id: 11361,
@@ -3965,6 +7790,79 @@ export const charTalentTables = {
 			// Energy Cost
 			p5: [60],
 		},
+		// Baseline Stress Test
+		// Mitya_PermanentSkill_1 -> Avatar_Mitya_PermanentSkill_1, Avatar_Mitya_Shard_CreateManager
+		a1: {
+			// AS_PermanentSkill_1_MasteryPerShard
+			p1: 30,
+		},
+		// Explosive Reagent: Safe Limits Exceeded
+		// Mitya_PermanentSkill_2 -> Avatar_Mitya_Shard_CreateShard, Avatar_Mitya_PermanentSkill_2
+		a4: {
+			// AS_T2_CritRateAdd
+			p1: 0.05,
+		},
+		// Stellar Jubilee: Top-Secret Protocol
+		// Mitya_PermanentSkill_3 -> Avatar_Mitya_PermanentSkill_3
+		a0: {
+			// AS_AttackTransferRatio
+			p1: 0.00028,
+			// AS_MaxTransRatio
+			p2: 0.14,
+		},
+		// Energy Catalysis
+		// Mitya_PermanentSkill_4
+		a0_2: {
+			p1: 0.2,
+		},
+		// The Observer Seeking What Is Missing
+		// Mitya_Constellation_1 ->
+		//     Avatar_Mitya_Shard_Controller
+		//     Avatar_Mitya_Partner_CommonManager
+		//     Avatar_Mitya_Constellation_1
+		c1: {
+			// AS_Constellation_1_CritHurt
+			p1: 0.4,
+			// AS_Constellation_1_EnergyRecover
+			p2: 10,
+			// AS_Constellation_1_EnergyCD
+			p3: 8,
+		},
+		// The Matter That Slumbers Beyond Inertness
+		// Mitya_Constellation_2 -> Avatar_Mitya_Constellation_2, Avatar_Mitya_Shard_Controller
+		c2: {
+			// Avatar_Mitya_Shard_Controller.AS_Constellation_2_ResistDown
+			p1: 0.2,
+			// Avatar_Mitya_Constellation_2.AS_Constellation_2_StableTeamMastery
+			p2: 123,
+			// Avatar_Mitya_Constellation_2.AS_Constellation_2_ExplodeFrontMastery
+			p3: 234,
+		},
+		// The Isotopes Born of Decay
+		// Mitya_Constellation_4 -> Avatar_Mitya_Constellation_4
+		c4: {
+			// AS_Constellation_4_UseShardExtra_Damage
+			p1: 3,
+		},
+		// Elemental Transition at the Gate of Reason
+		// Mitya_Constellation_6 ->
+		//     Avatar_Mitya_Constellation_6
+		//     Avatar_Mitya_Partner_EnhanceAttackManager
+		//     Avatar_Mitya_OverShardDamage
+		//     Avatar_Mitya_Partner_Enhance_DestroyShard_Gadget
+		//     Avatar_Mitya_Constellation_4
+		c6: {
+			// Avatar_Mitya_Constellation_6.AS_Constellation_6_RegenChance
+			p1: 0.34,
+			// Avatar_Mitya_Constellation_6.AS_Constellation_6_StarSConductIceEffectFactor
+			// Avatar_Mitya_Constellation_6.AS_Constellation_6_StarSConductElectricEffectFactor
+			p2: 0.2,
+			// Avatar_Mitya_Partner_EnhanceAttackManager.AS_Constellation_6_StableDamageUp
+			// Avatar_Mitya_OverShardDamage.AS_Constellation_6_StableDamageUp
+			// Avatar_Mitya_Partner_Enhance_DestroyShard_Gadget.AS_Constellation_6_StableDamageUp
+			// Avatar_Mitya_Constellation_4.AS_Constellation_6_StableDamageUp
+			p3: 0.15,
+		},
 	},
 	Mizuki: {
 		s1_id: 11091,
@@ -4017,6 +7915,90 @@ export const charTalentTables = {
 			p4: [15],
 			// Energy Cost
 			p5: [60],
+		},
+		// Thoughts by Day Bring Dreams by Night
+		// Mizuki_PermanentSkill_2 -> Avatar_Mizuki_PermanentSkill_2
+		a4: {
+			// MasteryBuffDelta
+			p1: 100,
+			// BuffDuration
+			p2: 4,
+		},
+		// All Ailments Banished
+		// Mizuki_PermanentSkill_3 -> Avatar_Mizuki_PermanentSkill_3
+		a0: {
+			// HealUpRatio
+			p1: 0.3,
+		},
+		// Vast Be the Dream
+		// Mizuki_ExtraProundSkill ->
+		//     Avatar_Mizuki_ExtraProudSkill
+		//     Avatar_Mizuki_Talent_1_New
+		//     Avatar_Mizuki_Talent_2
+		//     Avatar_Mizuki_ElementalBurst_DreamGadget_WindAttack
+		//     Avatar_Mizuki_Talent_6
+		//     Avatar_Mizuki_MasteryToSwirhurt
+		sp: {
+			// DamageRatio
+			p1: 10,
+			// BuffTriggerCD
+			p2: 2.5,
+			// MasterTransRatio
+			p3: 0.1,
+			// StarSwirlWindDamageRatio
+			p4: 10,
+		},
+		// In Mist-Like Waters
+		// Mizuki_Constellation_1 -> Avatar_Mizuki_Talent_1_New, Avatar_Mizuki_ElementalArt
+		c1: {
+			// TransferRatio
+			p1: 11,
+			// DebuffDuration
+			p2: 3,
+			// TriggerCD
+			p3: 3.5,
+			// NewT1Ratio
+			p4: 10,
+			// StarSwirlWindDamageRatio
+			p5: 4,
+			// TransferRatioStar
+			p6: 5.5,
+		},
+		// Your Echo I Meet in Dreams
+		// Mizuki_Constellation_2 -> Avatar_Mizuki_Talent_2
+		c2: {
+			// MasterToDamageRatio
+			p1: 0.0004,
+			// subhurtRatio
+			p2: 0.2,
+		},
+		// Buds Warm Lucid Springs
+		// Mizuki_Constellation_4 -> Avatar_Mizuki_ElementalBurst_DreamGadget_WindAttack
+		c4: {
+			// ElemRevive
+			p1: 5,
+			// ExtraHealRatio
+			p2: 2.66,
+		},
+		// The Heart Lingers Long
+		// Mizuki_Constellation_6 -> Avatar_Mizuki_Talent_6, Avatar_Mizuki_ElementalArt_Sprint
+		c6: {
+			// CritRatio
+			p1: 0.3,
+			// LowerMastery
+			p2: 500,
+			// transRatioCrit
+			p3: 0.0004,
+			// transRatioCritDamage
+			p4: 0.0016,
+			// Max_Critical_Rate
+			p5: 0.2,
+			// Max_Critical_Damage
+			p6: 0.8,
+			// AS_CritRateUp
+			p7: 0.1,
+			// AS_CriticalDamageUp
+			p8: 0.2,
 		},
 	},
 	Mona: {
@@ -4072,6 +8054,98 @@ export const charTalentTables = {
 			// Energy Cost
 			p6: [60],
 		},
+		// "Come 'n' Get Me, Hag!"
+		// Mona_PermanentSkill_01 ->
+		//     Avatar_Mona_Talent_LiquidStriket_Phantom
+		//     Avatar_Mona_Talent_MonaGadgetSkill_LiquidPhantom
+		a1: {
+			// Avatar_Mona_Talent_LiquidStriket_Phantom.AS_Mona_Talent_LiquidStrike_LiquidPhantom_Timer
+			p1: 2,
+			// Avatar_Mona_Talent_MonaGadgetSkill_LiquidPhantom.AS_Mona_Talent_LiquidStrike_LiquidPhantom_Duration
+			p2: 2,
+			// Avatar_Mona_Talent_MonaGadgetSkill_LiquidPhantom.AS_Mona_Talent_LiquidStrike_LiquidPhantom_DamageRate
+			p3: 0.5,
+		},
+		// Waterborne Destiny
+		// Mona_PermanentSkill_02 -> Avatar_Mona_Talent_ChargeEfficiencyToWaterAddHurt
+		a4: {
+			p1: 1,
+			// AS_Mona_Talent_WaterHurtAddRate
+			p2: 0.2,
+		},
+		// Witch's Eve Rite: Genesis of Starsigns
+		// Mona_Hexenzirkel_1 -> Avatar_Mona_HexenzirkelSkill, Avatar_Mona_StarChart
+		sp: {
+			// Avatar_Mona_HexenzirkelSkill.BuffDuration
+			p1: 8,
+			// Avatar_Mona_HexenzirkelSkill.MaxBuffCount
+			p2: 3,
+			// Avatar_Mona_HexenzirkelSkill.BuffDamageUp
+			p3: 0.05,
+			// Avatar_Mona_StarChart.DebuffExtend
+			p4: 2,
+			// Avatar_Mona_StarChart.Max_DebuffExtend_Count
+			p5: 4,
+			// Avatar_Mona_StarChart.DebuffExtend_CD
+			p6: 0.5,
+		},
+		// Prophecy of Submersion
+		// Mona_Talent_01 -> Avatar_Mona_StarChart, Avatar_Mona_HexenzirkelSkill
+		c1: {
+			// AS_Mona_Talent_ElementReactionUp_Electric
+			p1: 0.15,
+			// AS_Mona_Talent_ElementReactionUp_Steam
+			p2: 0.15,
+			// AS_Mona_Talent_ElementReactionUp_SwirlWater
+			p3: 0.15,
+			// AS_Mona_Talent_ElementReactionUp_Freeze
+			p4: 0.15,
+			p5: 5,
+			// AS_Mona_Talent_ElementReactionUp_Time
+			p6: 8,
+			// Hexenzirkel_Constellation_1_BuffUp
+			p7: 0.6,
+			// AS_Mona_Talent_ElementReactionUp_Crystallize
+			p8: 0.15,
+		},
+		// Lunar Chain
+		// Mona_Talent_02 -> Avatar_Mona_Talent_AutoExtraAttack, Avatar_Mona_HexenzirkelSkill
+		c2: {
+			// Avatar_Mona_Talent_AutoExtraAttack.AS_Mona_Talent_AutoExtraAttack_Rate
+			p1: 0.2,
+			// Avatar_Mona_Talent_AutoExtraAttack.AS_Mona_Talent_AutoExtraAttack_DamageRate
+			p2: 1,
+			// Avatar_Mona_Talent_AutoExtraAttack.AS_Mona_Talent_AutoExtraAttack_CD
+			p3: 5,
+			// Avatar_Mona_Talent_AutoExtraAttack.Hexenzirkel_AutoExtraAttack_Duration
+			p4: 5,
+			// Avatar_Mona_HexenzirkelSkill.C2_ElemMasteryUp
+			p5: 80,
+			// Avatar_Mona_HexenzirkelSkill.C2_Buff_Duration
+			p6: 12,
+		},
+		// Prophecy of Oblivion
+		// Mona_Talent_04 -> Avatar_Mona_StarChart, Avatar_Mona_HexenzirkelSkill
+		c4: {
+			// Avatar_Mona_StarChart.AS_Mona_Talent_AntiCritical
+			p1: -0.15,
+			// Avatar_Mona_HexenzirkelSkill.C4_BonusCriticalHurt
+			p2: 0.15,
+		},
+		// Rhetorics of Calamitas
+		// Mona_Talent_06 -> Avatar_Mona_Talent_LiquidStrike_ExtraAttakDamageUp, Avatar_Mona_HexenzirkelSkill
+		c6: {
+			// Avatar_Mona_Talent_LiquidStrike_ExtraAttakDamageUp.AS_Mona_Talent_LiquidStrike_ExtraAttackDamageUp_ThinkTime
+			p1: 1,
+			// Avatar_Mona_Talent_LiquidStrike_ExtraAttakDamageUp.AS_Mona_Talent_LiquidStrike_ExtraAttackDamageUp_ThinkValue
+			p2: 0.6,
+			// Avatar_Mona_Talent_LiquidStrike_ExtraAttakDamageUp.AS_Mona_Talent_LiquidStrike_ExtraAttackDamageUp_MaxValue
+			p3: 1.8,
+			// Avatar_Mona_Talent_LiquidStrike_ExtraAttakDamageUp.AS_Mona_Talent_LiquidStrike_ExtraAttackDamageUp_Time
+			p4: 8,
+			// Avatar_Mona_HexenzirkelSkill.C6_DamageExtraRatio
+			p5: 1,
+		},
 	},
 	Mualani: {
 		s1_id: 30000,
@@ -4116,6 +8190,83 @@ export const charTalentTables = {
 			p2: [15],
 			// Energy Cost
 			p3: [60],
+		},
+		// Heat-Resistant Freshwater Floater
+		// Mualani_PermanentSkill_1 ->
+		//     Avatar_Mualani_ElementalArt_Combat
+		//     Avatar_Mualani_Fugu_Drop_Bullet
+		//     Avatar_Mualani_Fugu_Bullet
+		a1: {
+			// Avatar_Mualani_Fugu_Drop_Bullet.PermanentSkill_1_AddNyxValue
+			// Avatar_Mualani_Fugu_Bullet.PermanentSkill_1_AddNyxValue
+			p1: 20,
+		},
+		// Natlan's Greatest Guide
+		// Mualani_PermanentSkill_2 -> Avatar_Mualani_PermanentSkill_2, Mualani_ElementalBurst_Bullet
+		a4: {
+			// Avatar_Mualani_PermanentSkill_2.Duration
+			p1: 20,
+			// Mualani_ElementalBurst_Bullet.PermanentSkill_2_ExtraPercentage_LV1
+			p2: 0.15,
+			// Mualani_ElementalBurst_Bullet.PermanentSkill_2_ExtraPercentage_LV2
+			p3: 0.3,
+			// Mualani_ElementalBurst_Bullet.PermanentSkill_2_ExtraPercentage_LV3
+			p4: 0.45,
+		},
+		// Night Realm's Gift: Crests and Troughs
+		// Mualani_PermanentSkill_3 -> Avatar_Mualani_ElementalArt_Surfing, Avatar_Mualani_ElementalArt_Combat
+		a0: {
+			// Avatar_Mualani_ElementalArt_Surfing.PermanentSkill_3_NyxRatio
+			// Avatar_Mualani_ElementalArt_Combat.PermanentSkill_3_NyxRatio
+			p1: 0.25,
+			// Avatar_Mualani_ElementalArt_Surfing.PermanentSkill_3_NyxRatio_NotNata
+			// Avatar_Mualani_ElementalArt_Combat.PermanentSkill_3_NyxRatio_NotNata
+			p2: 0.65,
+		},
+		// The Trick Is to Keep Smiling!
+		// Mualani_PermanentSkill_4 -> Avatar_Mualani_PermanentSkill_4, Avatar_Mualani_PermanentSkill_4_Collect
+		a0_2: {
+			// Phlogiston
+			p1: 15,
+		},
+		// The Leisurely "Meztli"...
+		// Mualani_Constellation_1 ->
+		//     Avatar_Mualani_ElementalArt_Combat
+		//     Avatar_Mualani_ElementalArt_Surfing
+		//     Avatar_Mualani_MultiAttack_Bullet
+		c1: {
+			// Avatar_Mualani_MultiAttack_Bullet.Constellation_1_ExtraDamagePercentage
+			// Avatar_Mualani_ElementalArt_Combat.Constellation_1_ExtraDamagePercentage
+			p1: 0.66,
+			// Avatar_Mualani_ElementalArt_Combat.Constellation_1_NyxRatio
+			// Avatar_Mualani_ElementalArt_Surfing.Constellation_1_NyxRatio
+			p2: 0.7,
+		},
+		// Mualani, Going All Out!
+		// Mualani_Constellation_2 ->
+		//     Avatar_Mualani_Surfing_Constellation_2
+		//     Avatar_Mualani_Fugu_Bullet
+		//     Avatar_Mualani_Fugu_Drop_Bullet
+		//     Avatar_Mualani_ElementalArt_Combat
+		c2: {
+			// Constellation_2_AddNyxValue
+			p1: 6,
+			// Constellation_2_Duration
+			p2: 2,
+		},
+		// Sharky Eats Puffies
+		// Mualani_Constellation_4 ->
+		//     Avatar_Mualani_Surfing_Constellation_4
+		//     Avatar_Mualani_Fugu_Bullet
+		//     Avatar_Mualani_Fugu_Drop_Bullet
+		//     Mualani_ElementalBurst_Bullet
+		c4: {
+			// Avatar_Mualani_Fugu_Drop_Bullet.Constellation_4_ReviveEnergy
+			// Avatar_Mualani_Fugu_Bullet.Constellation_4_ReviveEnergy
+			// Avatar_Mualani_Surfing_Constellation_4.Constellation_4_ReviveEnergy
+			p1: 8,
+			// Mualani_ElementalBurst_Bullet.Constellation_4_AddHurt
+			p2: 0.75,
 		},
 	},
 	Nahida: {
@@ -4180,6 +8331,64 @@ export const charTalentTables = {
 			// Energy Cost
 			p9: [50],
 		},
+		// Compassion Illuminated
+		// Nahida_PermanentSkill_1 -> Avatar_Nahida_PermanentSkill_1, Avatar_Nahida_ElementalBurst_Hollow_Gadget
+		a1: {
+			// Mastery_Ratio
+			p1: 0.25,
+			// Mastery_Max
+			p2: 250,
+		},
+		// Awakening Elucidated
+		// Nahida_PermanentSkill_2 -> Avatar_Nahida_PermanentSkill_2
+		a4: {
+			// Base_Mastery
+			p1: 200,
+			// Max_Mastery
+			p2: 800,
+			// Chain_Damage_Up
+			p3: 0.001,
+			// Chain_Crit_Up
+			p4: 0.0003,
+		},
+		// The Root of All Fullness
+		// Nahida_Constellation_2 -> Avatar_Nahida_ElementalArt
+		c2: {
+			// Reaction_Crit_Ratio
+			p1: 0.2,
+			// DefenseDown_Ratio
+			p2: 0.3,
+			// DefenseDown_Dura
+			p3: 8,
+			// MoonOvergrow_Crit_Ratio
+			p4: 0.1,
+			// MoonOvergrow_CritHurt_Ratio
+			p5: 0.2,
+		},
+		// The Stem of Manifest Inference
+		// Nahida_Constellation_4 -> Avatar_Nahida_Constellation_4
+		c4: {
+			// Constellation_4_Lv1
+			p1: 100,
+			// Constellation_4_Lv2
+			p2: 120,
+			// Constellation_4_Lv3
+			p3: 140,
+			// Constellation_4_Lv4
+			p4: 160,
+		},
+		// The Fruit of Reason's Culmination
+		// Nahida_Constellation_6 -> Avatar_Nahida_Constellation_6, Avatar_Nahida_ElementalArt
+		c6: {
+			// Constellation_6_Dmg_PerAtk
+			p1: 2,
+			// Constellation_6_Dmg_PerMastery
+			p2: 4,
+			// Attack_Count
+			p3: 6,
+			// Duration
+			p4: 10,
+		},
 	},
 	Navia: {
 		s1_id: 10911,
@@ -4232,6 +8441,48 @@ export const charTalentTables = {
 			p4: [15],
 			// Energy Cost
 			p5: [60],
+		},
+		// Undisclosed Distribution Channels
+		// Navia_PermanentSkill_1 -> Avatar_Navia_PermanentSkill_1, Avatar_Navia_ElementalArt
+		a1: {
+			// NormalAttackDamage_Up_Ratio
+			p1: 0.4,
+			// Duration
+			p2: 4,
+		},
+		// Mutual Assistance Network
+		// Navia_PermanentSkill_2 -> Navia_PermanentSkill_2_Driver
+		a4: {
+			// AttackUpRatio
+			p1: 0.2,
+		},
+		// A Lady's Rules for Keeping a Courteous Distance
+		// Navia_Constellation_1 -> Navia_Talent_1_Driver, Avatar_Navia_ElementalArt
+		c1: {
+			// ReviveEnergy
+			p1: 3,
+			// cdDelta
+			p2: 1,
+		},
+		// The President's Pursuit of Victory
+		// Navia_Constellation_2 -> Avatar_Navia_ElementalArt, Navia_Talent_2_Driver
+		c2: {
+			// Talent_2_Crit_Up_Ratio
+			p1: 0.12,
+		},
+		// The Oathsworn Never Capitulate
+		// Navia_Constellation_4 -> Navia_Talent_4_Driver
+		c4: {
+			// Rock_DefenseDown
+			p1: 0.2,
+			// DefenseDownDuration
+			p2: 8,
+		},
+		// The Flexible Finesse of the Spina's President
+		// Navia_Constellation_6 -> Avatar_Navia_ElementalArt
+		c6: {
+			// Talent_6_CritDamageUp
+			p1: 0.45,
 		},
 	},
 	Nefer: {
@@ -4304,6 +8555,91 @@ export const charTalentTables = {
 			// Energy Cost
 			p7: [60],
 		},
+		// A Wager of Moonlight
+		// Nefer_PermanentSkill_1 ->
+		//     Avatar_Nefer_PermanentSkill_1
+		//     Avatar_Nefer_PermanentSkill_1_Mushroom_State
+		//     Avatar_Nefer_Damage_Handler
+		a1: {
+			// Avatar_Nefer_PermanentSkill_1.MaxBuffCount, also fed by c2.p1
+			p1: 3,
+			// Avatar_Nefer_PermanentSkill_1.BuffDuration, also fed by c2.p2
+			p2: 9,
+			// Avatar_Nefer_PermanentSkill_1.MaxBuffCount_ElemMasteryDelta
+			p3: 100,
+			// Avatar_Nefer_PermanentSkill_1.MaxBuffCount_Duration
+			p4: 8,
+			// Avatar_Nefer_PermanentSkill_1_Mushroom_State.BuffDuration
+			p5: 15,
+			// Avatar_Nefer_Damage_Handler.MushroomBuff_Up_Factor
+			p6: 0.08,
+		},
+		// Daughter of the Dust and Sand
+		// Nefer_PermanentSkill_2 -> Avatar_Nefer_PermanentSkill_2
+		a4: {
+			// Speed
+			p1: 6,
+			// BuffDuration
+			p2: 5,
+			// ElemMastery_Min
+			p3: 500,
+			// SpeedUp_Factor
+			p4: 0.001,
+			// SpeedUp_Max
+			p5: 0.5,
+		},
+		// Moonsign Benediction: Dusklit Eaves
+		// Nefer_PermanentSkill_3 -> Avatar_Nefer_PermanentSkill_3
+		a0: {
+			// MasteryTransferRatio
+			p1: 0.000175,
+			// MaxTransRatio
+			p2: 0.14,
+		},
+		// Planning Breeds Success
+		// Nefer_Constellation_1 -> Avatar_Nefer_Constellation_1, Avatar_Nefer_Damage_Handler
+		c1: {
+			// ExAtk_ML_02_C6_DPM, also fed by c6.p1
+			p1: 0.6,
+			// ExAtk_MLS_01_DPM, also fed by s2.p9
+			p2: 0.6,
+			// ExAtk_MLS_02_DPM, also fed by s2.p10
+			p3: 0.6,
+			// ExAtk_MLS_03_DPM, also fed by s2.p11
+			p4: 0.6,
+			// ExAtk_MLSC6_Extra_DPM, also fed by c6.p2
+			p5: 0.6,
+		},
+		// Observation Feeds Strategy
+		// Nefer_Constellation_2 -> Avatar_Nefer_Constellation_2, Avatar_Nefer_ElementalArt, Avatar_Nefer_PermanentSkill_1
+		c2: {
+			// MaxBuffCount, also fed by a1.p1
+			p1: 2,
+			// BuffDuration, also fed by a1.p2
+			p2: 5,
+			// MaxBuffCount_ElemMasteryDelta_C2
+			p3: 200,
+		},
+		// Delusion Ensnares Reason
+		// Nefer_Constellation_4 -> Avatar_Nefer_Constellation_4
+		c4: {
+			// RecoverMoonLightUp
+			p1: 0.25,
+			// BuffDuration
+			p2: 4.5,
+			// GrassSubHurtDelta
+			p3: 0.2,
+		},
+		// Victory Flows from the Turning of Tides
+		// Nefer_Constellation_6 -> Avatar_Nefer_Constellation_6, Avatar_Nefer_ExtraAttack, Avatar_Nefer_Damage_Handler
+		c6: {
+			// Avatar_Nefer_Damage_Handler.ExAtk_ML_02_C6_DPM, also fed by c1.p1
+			p1: 0.85,
+			// Avatar_Nefer_Damage_Handler.ExAtk_MLSC6_Extra_DPM, also fed by c1.p5
+			p2: 1.2,
+			// Avatar_Nefer_Constellation_6.PowerUp
+			p3: 0.15,
+		},
 	},
 	Neuvillette: {
 		s1_id: 10871,
@@ -4356,6 +8692,54 @@ export const charTalentTables = {
 			p3: [18],
 			// Energy Cost
 			p4: [70],
+		},
+		// Heir to the Ancient Sea's Authority
+		// Neuvillette_PermanentSkill_1 ->
+		//     Avatar_Neuvillette_PermanentSkill_1
+		//     Avatar_Neuvillette_ExtraAttack_Attack_Gadget
+		//     Avatar_Neuvillette_Constellation_6_Bullet
+		a1: {
+			// Avatar_Neuvillette_ExtraAttack_Attack_Gadget.ExtraAttack_BonusRatio_Lv1
+			// Avatar_Neuvillette_Constellation_6_Bullet.ExtraAttack_BonusRatio_Lv1
+			p1: 0.1,
+			// Avatar_Neuvillette_ExtraAttack_Attack_Gadget.ExtraAttack_BonusRatio_Lv2
+			// Avatar_Neuvillette_Constellation_6_Bullet.ExtraAttack_BonusRatio_Lv2
+			p2: 0.25,
+			// Avatar_Neuvillette_ExtraAttack_Attack_Gadget.ExtraAttack_BonusRatio_Lv3
+			// Avatar_Neuvillette_Constellation_6_Bullet.ExtraAttack_BonusRatio_Lv3
+			p3: 0.6,
+			// Avatar_Neuvillette_PermanentSkill_1.Buff_Timer
+			p4: 30,
+		},
+		// Discipline of the Supreme Arbitration
+		// Neuvillette_PermanentSkill_2 -> Avatar_Neuvillette_PermanentSkill_2
+		a4: {
+			// LimitHp_Ratio_Min
+			p1: 0.3,
+			// LimitHp_Ratio_Max
+			p2: 0.8,
+			// DamageUp_PerHpEff
+			p3: 0.6,
+		},
+		// Juridical Exhortation
+		// Neuvillette_Constellation_2 -> Avatar_Neuvillette_Constellation_2
+		c2: {
+			// Critical_Ratio
+			p1: 0.14,
+		},
+		// Crown of Commiseration
+		// Neuvillette_Constellation_4 -> Avatar_Neuvillette_Constellation_4
+		c4: {
+			// CD_Timer
+			p1: 4,
+		},
+		// Wrathful Recompense
+		// Neuvillette_Constellation_6 -> Avatar_Neuvillette_Constellation_6, Avatar_Neuvillette_Constellation_6_Bullet
+		c6: {
+			// Avatar_Neuvillette_Constellation_6_Bullet.Constellation_Atk_HpRatio
+			p1: 0.1,
+			// Avatar_Neuvillette_Constellation_6.Trigger_CD
+			p2: 2,
 		},
 	},
 	Nicole: {
@@ -4411,6 +8795,72 @@ export const charTalentTables = {
 			p5: [15],
 			// Energy Cost
 			p6: [60],
+		},
+		// Methexis
+		// Nicole_PermanentSkill_1 -> Avatar_Nicole_PermanentSkill_1, Avatar_Nicole_ElementalArt
+		a1: {
+			// Avatar_Nicole_PermanentSkill_1.Watch_Dura
+			p1: 20,
+			// Avatar_Nicole_PermanentSkill_1.Watch_LevelUpDura
+			p2: 3,
+			// Avatar_Nicole_ElementalArt.PermanentSkill_1_AttackUp
+			p3: 300,
+		},
+		// Philokalia
+		// Nicole_PermanentSkill_2 -> Avatar_Nicole_PermanentSkill_2
+		a4: {
+			// PermanentSkill_2_Dura
+			p1: 8,
+		},
+		// Nepsis
+		// Nicole_PermanentSkill_4 -> Avatar_Nicole_PermanentSkill_4, Avatar_Nicole_ExtraAttack_Special
+		a0: {
+			// SpecialExtraAttack_CD
+			p1: 5,
+		},
+		// Witch's Eve Rite: Light in the Darkness
+		// Nicole_PermanentSkill_3 -> Avatar_Nicole_PermanentSkill_3
+		sp: {
+			// Ratio
+			p1: 3,
+		},
+		// "Do Not Be Afraid, Child Who Is Loved"
+		// Nicole_Constellation_1 -> Avatar_Nicole_Constellation_2
+		c1: {
+			// Constellation_2_Ratio
+			p1: 6,
+			// Constellation_2_CD
+			p2: 6,
+		},
+		// "I Will Guide You and Show You the Path You Should Tread"
+		// Nicole_Constellation_2 -> Avatar_Nicole_Constellation_1, Avatar_Nicole_ElementalArt
+		c2: {
+			// Constellation_1_AttackUp
+			p1: 300,
+			// Constellation_1_SubHurtDelta
+			p2: 0.25,
+		},
+		// "Whether Left or Right, No Matter Which Way You Turn"
+		// Nicole_Constellation_4 -> Avatar_Nicole_Constellation_4, Avatar_Nicole_ElementalArt
+		c4: {
+			// Constellation_4_Buff_Time
+			p1: 20,
+			// Constellation_4_Buff_CD
+			p2: 16,
+			// Constellation_4_Buff_Ratio
+			p3: 0.7,
+			// Constellation_4_Buff_Count
+			p4: 8,
+		},
+		// "This Is the Path, Walk It Without Delay"
+		// Nicole_Constellation_6 ->
+		//     Avatar_Nicole_Constellation_6
+		//     Avatar_Nicole_ElementalArt
+		//     Avatar_Nicole_PermanentSkill_1
+		//     Avatar_Nicole_PermanentSkill_2
+		c6: {
+			// Constellation_6_Ratio
+			p1: 0.4,
 		},
 	},
 	Nilou: {
@@ -4471,6 +8921,69 @@ export const charTalentTables = {
 			// Energy Cost
 			p4: [70],
 		},
+		// Court of Dancing Petals
+		// Nilou_PermanentSkill_1 ->
+		//     Avatar_Nilou_Spec_Attack_Over
+		//     Avatar_Nilou_Spec_EArt_Over
+		//     Avatar_Nilou_ElementalArt_Buff_Controller
+		a1: {
+			// Duration
+			p1: 30,
+			// MasteryUp
+			p2: 100,
+			// MasteryUpDuration
+			p3: 10,
+		},
+		// Dreamy Dance of Aeons
+		// Nilou_PermanentSkill_2 -> Avatar_Nilou_ElementalArt_Buff_Controller
+		a4: {
+			// MaxHP_Trans_To_Overgrow_Ratio
+			p1: 0.09,
+			// MaxHP_Lower_Limit
+			p2: 30000,
+			// Max_Overgrow_Damage_Ratio
+			p3: 4,
+		},
+		// Dance of the Waning Moon
+		// Nilou_Constellation_1 -> Avatar_Nilou_Water_Bubble_Bullet, Avatar_Nilou_Spec_EArt_Over
+		c1: {
+			// Avatar_Nilou_Water_Bubble_Bullet.Water_Damage_Up
+			p1: 0.65,
+			// Avatar_Nilou_Spec_EArt_Over.Water_Ring_Duration, also fed by s2.p8
+			p2: 6,
+		},
+		// The Starry Skies Their Flowers Rain
+		// Nilou_Constellation_2 -> Avatar_Nilou_ElementalArt_Buff_Controller
+		c2: {
+			// Water_DefenseDown
+			p1: 0.35,
+			// Grass_DefenseDown
+			p2: 0.35,
+			// DefenseDownDuration
+			p3: 10,
+		},
+		// Fricative Pulse
+		// Nilou_Constellation_4 -> Avatar_Nilou_Water_Bubble_Bullet, Avatar_Nilou_SpecE_Energy_Revive
+		c4: {
+			// ReviveEnergy
+			p1: 15,
+			// BurstDamageUpRatio
+			p2: 0.5,
+			// Duration
+			p3: 8,
+		},
+		// Frostbreaker's Melody
+		// Nilou_Constellation_6 -> Avatar_Nilou_MaxHP_Trans_Crit
+		c6: {
+			// MaxHP_Trans_Critical_Rate
+			p1: 0.006,
+			// MaxHP_Trans_Critical_Damage
+			p2: 0.012,
+			// Max_Critical_Rate
+			p3: 0.3,
+			// Max_Critical_Damage
+			p4: 0.6,
+		},
 	},
 	Ningguang: {
 		s1_id: 10271,
@@ -4507,6 +9020,12 @@ export const charTalentTables = {
 			p2: [12],
 			// Energy Cost
 			p3: [40],
+		},
+		// Strategic Reserve
+		// Ningguang_PermanentSkill_2 -> Avatar_Ningguang_PermanentSkill_2
+		a4: {
+			p1: 0.12,
+			p2: 10,
 		},
 	},
 	Noelle: {
@@ -4568,6 +9087,52 @@ export const charTalentTables = {
 			p5: [15],
 			// Energy Cost
 			p6: [60],
+		},
+		// Devotion
+		// Noel_ProudSkill_21 -> Avatar_Noel_ProudSkill_21, Avatar_Noel_ProudSkill_21_Shield
+		a1: {
+			// Avatar_Noel_ProudSkill_21.AS_ProudSkill_21_TriggerHPRate_PS21_P1
+			p1: 0.3,
+			// Avatar_Noel_ProudSkill_21_Shield.AS_ProudSkill_21_ShieldHp_DefRate_PS21_P2
+			p2: 4,
+			// Avatar_Noel_ProudSkill_21_Shield.AS_ProudSkill_21_Dura_PS21_P3
+			p3: 20,
+			// Avatar_Noel_ProudSkill_21_Shield.AS_ProudSkill_21_CD_PS21_P4
+			p4: 60,
+		},
+		// Nice and Clean
+		// Noel_ProudSkill_22 -> Avatar_Noel_ProudSkill_22
+		a4: {
+			// AS_ProudSkill_22_CD_PS22_P1
+			p1: -1,
+		},
+		// I Got Your Back
+		// Noel_Talent_341 -> Avatar_Noel_Skill_S
+		c1: {
+			// AS_Skill_S_HealthRate_Talent_341
+			p1: 1,
+		},
+		// Combat Maid
+		// Noel_Talent_342 -> Avatar_Noel_Talent_ChangeExtraAttackCost, Avatar_Noel_ProudSkill_NormalAttack_DamageHandler
+		c2: {
+			// Avatar_Noel_Talent_ChangeExtraAttackCost.ExtraAttack_Claymore_Stamina_Cost_Talent_342
+			p1: -0.2,
+			// Avatar_Noel_ProudSkill_NormalAttack_DamageHandler.ExtraAttack_DamagePercentage_Talent_342_P2
+			p2: 0.15,
+		},
+		// To Be Cleaned
+		// Noel_Talent_344 -> Avatar_Noel_Skill_S
+		c4: {
+			// AS_Skill_S_ShieldBrokenDamage_Talent_334
+			p1: 4,
+		},
+		// Must Be Spotless
+		// Noel_Talent_346 -> Avatar_Noel_Skill_E
+		c6: {
+			// AS_Skill_E_AttackUp_PS33_P3, also fed by s3.p3
+			p1: 0.5,
+			// AS_Skill_E_MaxTimeUp_Talent_334_P2
+			p2: 10,
 		},
 	},
 	Odette: {
@@ -4642,6 +9207,82 @@ export const charTalentTables = {
 			// Energy Cost
 			p7: [60],
 		},
+		// Spring Rite of the Chosen One
+		// Odette_PermanentSkill_1 -> Avatar_Odette_PermanentSkill_1
+		a1: {
+			// Talent1_InitPartnerLayer
+			p1: 4,
+			// Talent1_DamagePerLayer
+			p2: 0.15,
+			// Talent1_TransferLayerPerTick
+			p3: 1,
+		},
+		// Pathetique of Pateticheskaya
+		// Odette_PermanentSkill_2 -> Avatar_Odette_PermanentSkill_2
+		a4: {
+			// Talent2_AttackThreshold
+			p1: 1000,
+			// Talent2_DamageUpPer100Attack
+			p2: 0.015,
+			// Talent2_MaxDamageUpRatio
+			p3: 0.3,
+		},
+		// Stellar Jubilee: Dance of Aurore
+		// Odette_PermanentSkill_3 -> Avatar_Odette_PermanentSkill_3
+		a0: {
+			// AttackTransferRatio
+			p1: 0.007,
+			// MaxTransRatio
+			p2: 0.14,
+		},
+		// Echo of Winter Daydreams
+		// Odette_PermanentSkill_4 -> Avatar_Odette_Radar_Collectables_Snezhnaya
+		a0_2: {
+			p1: 50,
+			p2: 10,
+		},
+		// "On This Danceless Morn, She Gazes at Her Reflection"
+		// Odette_Constellation_1 -> Avatar_Odette_PermanentSkill_1, Avatar_Odette_Constellation_1
+		c1: {
+			// Avatar_Odette_PermanentSkill_1.C1_BlastExtraLayer
+			p1: 2,
+			// Avatar_Odette_PermanentSkill_1.C1_BlastTransferLayerPerTick
+			p2: 2,
+			// Avatar_Odette_Constellation_1.C1_Blast_DamagePercentage
+			p3: 4,
+			// Avatar_Odette_Constellation_1.C1_Blast_DamagePercentage_StarSD
+			p4: 3,
+			// Avatar_Odette_Constellation_1.C1_Blast_DamagePercentage_StarSW
+			p5: 4.5,
+		},
+		// "I Must See the Snow Swan's Unseen Dream for Myself, She Thought"
+		// Odette_Constellation_2 -> Avatar_Odette_PermanentSkill_1, Avatar_Odette_Constellation_2
+		c2: {
+			// Avatar_Odette_PermanentSkill_1.C2_AtkPerLayer
+			p1: 0.07,
+			// Avatar_Odette_Constellation_2.C2_ResReduction
+			p2: 0.2,
+		},
+		// "Up, Up the Long, Delirious, Burning Blue"
+		// Odette_Constellation_4 -> Avatar_Odette_Constellation_4, Avatar_Odette_ElementalBurst
+		c4: {
+			// Avatar_Odette_Constellation_4.C4_DamagePercentage_StarSD
+			p1: 0.66,
+			// Avatar_Odette_Constellation_4.C4_DamagePercentage_StarSW
+			p2: 0.99,
+			// Avatar_Odette_Constellation_4.C4_Cooldown
+			p3: 3.5,
+			// Avatar_Odette_ElementalBurst.C4_FinalAct_TeamDamageUp_Ratio
+			p4: 0.5,
+		},
+		// "Put Out My Hand, and Touched the Face of the Divine"
+		// Odette_Constellation_6 -> Avatar_Odette_PermanentSkill_1, Avatar_Odette_ElementalArt_Partner
+		c6: {
+			// C6_DamagePerLayer_Other
+			p1: 0.25,
+			// C6_DamagePerLayer_Self
+			p2: 0.2,
+		},
 	},
 	Ororon: {
 		s1_id: 30501,
@@ -4682,6 +9323,75 @@ export const charTalentTables = {
 			p4: [15],
 			// Energy Cost
 			p5: [60],
+		},
+		// Nightshade Synesthesia
+		// Olorun_PermanentSkill_1 ->
+		//     Avatar_Olorun_NyxState
+		//     Avatar_Olorun_Constellation_1
+		//     Avatar_Olorun_Constellation_AttackUp
+		a1: {
+			p1: 40,
+			// Damage_ExpendNyx
+			p2: 1.6,
+			p3: 10,
+			// Nyx_dura
+			p4: 6,
+		},
+		// Aspect Catalyst
+		// Olorun_PermanentSkill_2 -> Avatar_Olorun_PermanentSkill_ReviveEnergy
+		a4: {
+			// Dur
+			p1: 15,
+			// Revive
+			p2: 3,
+			// Revive_Olorun
+			p3: 3,
+			// CdTime
+			p4: 1,
+			// MaxCount
+			p5: 3,
+		},
+		// Trails Amidst the Forest Fog
+		// Olorun_Constellation_1 -> Avatar_Olorun_ElementalArt, Avatar_Olorun_Constellation_1
+		c1: {
+			// Rate
+			p1: 0.5,
+			// Dur
+			p2: 12,
+		},
+		// King Bee of the Hidden Honeyed Wine
+		// Olorun_Constellation_2 -> Avatar_Olorun_Constellation_2
+		c2: {
+			// Electric_Ratio_Lv1
+			p1: 0.08,
+			// Electric_Ratio_Lv2
+			p2: 0.16,
+			// Electric_Ratio_Lv3
+			p3: 0.24,
+			// Electric_Ratio_Lv4
+			p4: 0.32,
+			// Electric_Ratio_Lv5
+			p5: 0.4,
+			// Dur
+			p6: 9,
+		},
+		// As the Mysteries of the Night Wind
+		// Olorun_Constellation_4 -> Avatar_Olorun_ElementalBurst, SkillObj_Olorun_ElementalBurst
+		c4: {
+			// Olorun_Talent4_Value
+			p1: 8,
+		},
+		// Ode to Deep Springs
+		// Olorun_Constellation_6 -> Avatar_Olorun_Constellation_AttackUp, Avatar_Olorun_NyxState
+		c6: {
+			// AttackUp_Ratio
+			p1: 0.1,
+			// Dura
+			p2: 9,
+			// MaxLevel
+			p3: 3,
+			// Damage_Constellation6
+			p4: 2,
 		},
 	},
 	Prune: {
@@ -4725,6 +9435,72 @@ export const charTalentTables = {
 			p4: [18],
 			// Energy Cost
 			p5: [70],
+		},
+		// Verdict and Punishment
+		// Prune_PermanentSkill_1 -> Avatar_Prune_ElementalBurst
+		a1: {
+			// P1_Hammer_DamageRatio
+			p1: 1.5,
+		},
+		// Tolling Synchronicity
+		// Prune_PermanentSkill_2 -> Avatar_Prune_PermanentSkill_2
+		a4: {
+			// DamageAddRatio
+			p1: 0.00025,
+			// Duration
+			p2: 5,
+			// MaxAddRatio
+			p3: 0.5,
+			// Attack_Threshold
+			p4: 2000,
+		},
+		// Witch's Eve Rite: Witchseeker's Vow
+		// Prune_PermanentSkill_3 -> Avatar_Prune_PermanentSkill_2
+		sp: {
+			// SelfAttackRatio
+			p1: 0.6,
+			// Dura1
+			p2: 5,
+			// OtherAttackRatio
+			p3: 0.3,
+			// Dura2
+			p4: 5,
+		},
+		// With a Vow to Rescue, the Journey Begins
+		// Prune_Constellation_1 -> Avatar_Prune_Constellation_1
+		c1: {
+			// EnergyValue
+			p1: 2,
+		},
+		// Useful for Cleaning Messy Baggage, Elemental Powers Are Indeed
+		// Prune_Constellation_2 -> Avatar_Prune_ElementalBurst
+		c2: {
+			// C2_AttackAdd_Base
+			p1: 0.1,
+			// C2_AttackAdd_Up
+			p2: 0.05,
+			// C2_AttackAdd_Max
+			p3: 0.4,
+		},
+		// Looking Back Following the Wind, One's Shadow Still Halved
+		// Prune_Constellation_4 ->
+		//     Avatar_Prune_Constellation_4
+		//     Avatar_Prune_ElementalArt
+		//     Avatar_Prune_ElementalBurst
+		//     Prune_ElementalArt_Hammer
+		c4: {
+			// Hammer_Ratio
+			p1: 0.8,
+		},
+		// And That's the Story! Share It With Your Friends!
+		// Prune_Constellation_6 -> Avatar_Prune_ElementalBurst, Avatar_Prune_PermanentSkill_2
+		c6: {
+			// Avatar_Prune_ElementalBurst.C6_Duration_Add
+			p1: 4,
+			// Avatar_Prune_PermanentSkill_2.C6_Attack_Add
+			p2: 350,
+			// Avatar_Prune_PermanentSkill_2.C6_Attack_Add_Dura
+			p3: 5,
 		},
 	},
 	Qiqi: {
@@ -4792,6 +9568,51 @@ export const charTalentTables = {
 			p6: [80],
 			// Stellar-Conduct DMG
 			p7: [297.3336, 319.6336, 341.9336, 371.667, 393.967, 416.267, 446.0004, 475.7338, 505.4671, 535.2005, 564.9338, 594.6672, 631.8339, 669.0006, 706.1673],
+		},
+		// A Glimpse Into Arcanum
+		// Qiqi_PermanentSkill_2 -> Avatar_Qiqi_ElementalBurst_ApplyModifier
+		a4: {
+			// Qiqi_PermanentSkill_2_StarStrengthen_CDRatio
+			p1: 0.5,
+			// Qiqi_PermanentSkill_2_StarStrengthen_CDTime
+			p2: 15,
+		},
+		// Seven Sacred Treasures
+		// Qiqi_PermanentSkill_3 -> Avatar_Qiqi_PermanentSkill_3
+		sp: {
+			p1: 15,
+			// Qiqi_PermanentSkill_3_StarReaction_Ratio
+			p2: 0.5,
+		},
+		// Ascetics of Frost
+		// Qiqi_Constellation_1 -> Avatar_Qiqi_ElementalArt_Bullet, Avatar_Qiqi_Talent_1
+		c1: {
+			// Qiqi_Talent_1_ReviveEnergy
+			p1: 6,
+			// Qiqi_Talent_1_ReviveEnergy_CDTime
+			p2: 6,
+		},
+		// Frozen to the Bone
+		// Qiqi_Constellation_2 -> Avatar_Qiqi_Frozen_AttackUp
+		c2: {
+			// Qiqi_Talent_2_StarStrengthen_AttackRatio
+			p1: 0.5,
+		},
+		// Divine Suppression
+		// Qiqi_Constellation_4 -> Avatar_Qiqi_ElementalBurst_ApplyModifier
+		c4: {
+			// Qiqi_Talent_4_StarStrengthen_HealHP
+			p1: 1.8,
+		},
+		// Rite of Resurrection
+		// Qiqi_Constellation_6 -> Avatar_Qiqi_ElementalBurst, Avatar_Qiqi_Talent_6
+		c6: {
+			// Qiqi_Talent_6_StarReaction_Dur
+			p1: 12,
+			// Qiqi_Talent_6_StarReaction_Ratio
+			p2: 6,
+			// Qiqi_Talent_6_StarReaction_MaxCount
+			p3: 4,
 		},
 	},
 	RaidenShogun: {
@@ -4876,6 +9697,55 @@ export const charTalentTables = {
 			// Energy Cost
 			p20: [90],
 		},
+		// Wishes Unnumbered
+		// Shougun_PermanentSkill_1 -> Avatar_Shougun_ChargeLevel
+		a1: {
+			// GainElemBall_ExtraChargeLevel
+			p1: 2,
+			// GainElemBall_ExtraChargeLevel_CD
+			p2: 3,
+		},
+		// Enlightened One
+		// Shougun_PermanentSkill_2 -> Avatar_Shougun_Talent_ChargeEfficiencyToElecAddHurt, Avatar_Shougun_ElementalBurst
+		a4: {
+			// Avatar_Shougun_ElementalBurst.ExtraReviveEnergy_ValidProp_StartPoint
+			// Avatar_Shougun_Talent_ChargeEfficiencyToElecAddHurt.ExtraElecAddHurt_ValidProp_StartPoint
+			p1: 1,
+			// Avatar_Shougun_ElementalBurst.ExtraReviveEnergy_PropConvertRatio
+			p2: 0.006,
+			// Avatar_Shougun_Talent_ChargeEfficiencyToElecAddHurt.ExtraElecAddHurt_PropConvertRatio
+			p3: 0.004,
+		},
+		// Ominous Inscription
+		// Shougun_Constellation_1 -> Avatar_Shougun_ChargeLevel
+		c1: {
+			// BurstSkillEnergy_ExtraChargeLevel_ElecElemRatio
+			p1: 0.8,
+			// BurstSkillEnergy_ExtraChargeLevel_OtherElemRatio
+			p2: 0.2,
+		},
+		// Steelbreaker
+		// Shougun_Constellation_2 -> Avatar_Shougun_ElementalBurst
+		c2: {
+			// KatanaIgnoreDefense_Rate
+			p1: 0.6,
+		},
+		// Pledge of Propriety
+		// Shougun_Constellation_4 -> Avatar_Shougun_Talent_BuffAfterKatana, Avatar_Shougun_ElementalBurst
+		c4: {
+			// BuffAfterKatana_ATKUP
+			p1: 0.3,
+			// BuffAfterKatana_Duration
+			p2: 10,
+		},
+		// Wishbearer
+		// Shougun_Constellation_6 -> Avatar_Shougun_ElementalBurst
+		c6: {
+			// Tachi_ReduceBurstCD_Delta
+			p1: 1,
+			// Tachi_ReduceBurstCD_CD
+			p2: 1,
+		},
 	},
 	Razor: {
 		s1_id: 10201,
@@ -4937,6 +9807,32 @@ export const charTalentTables = {
 			// Energy Cost
 			p7: [80],
 		},
+		// Witch's Eve Rite: Surge of Lightning
+		// Razor_Hexenzirkel_1 -> Avatar_Razor_HexenzirkelSkill
+		sp: {
+			// Wolf_DamageUp
+			p1: 0.7,
+			// ThunderfallDamage
+			p2: 1.5,
+			// ReviveEnergy
+			p3: 7,
+			// MarkOverLoad_Buff_CD
+			p4: 1,
+		},
+		// Lupus Fulguris
+		// Razor_Constellation_6 ->
+		//     Avatar_Razor_Talent_ChargedBlade
+		//     Avatar_Razor_ClawMark_SetMark
+		//     Avatar_Razor_ClawMark_EnergyRegain
+		//     Avatar_Razor_HexenzirkelSkill
+		c6: {
+			// C6_CritUp
+			p1: 0.1,
+			// C6_CritDamageUp
+			p2: 0.5,
+			// C6_Buff_Duration
+			p3: 15,
+		},
 	},
 	Rosaria: {
 		s1_id: 10451,
@@ -4987,6 +9883,62 @@ export const charTalentTables = {
 			p5: [15],
 			// Energy Cost
 			p6: [60],
+		},
+		// Regina Probationum
+		// Rosaria_PermanentSkill_1 -> Avatar_Rosaria_ElementalArt
+		a1: {
+			// Critical
+			p1: 0.12,
+			// Time
+			p2: 5,
+		},
+		// Shadow Samaritan
+		// Rosaria_PermanentSkill_2 -> Avatar_Rosaria_ElementalBurst_Strike_01
+		a4: {
+			// TalentPercent
+			p1: 0.15,
+			// Dura
+			p2: 10,
+			// Max_Value
+			p3: 0.15,
+		},
+		// Night Walk
+		// Rosaria_Talent_RunningInTheNight -> Avatar_Rosaria_Talent_RunningInTheNight
+		a0: {
+			// Avatar_Rosaria_Talent_RunningInTheNight_Speed
+			p1: 0.1,
+		},
+		// Unholy Revelation
+		// Rosaria_Constellation_1 -> Avatar_Rosaria_Talent_CritEnhanceAtkSpeed
+		c1: {
+			// AttackSpeed
+			p1: 0.1,
+			// Attack_DamageRatio
+			p2: 0.1,
+			// Dura
+			p3: 4,
+		},
+		// Land Without Promise
+		// Rosaria_Constellation_2 -> Avatar_Rosaria_ElementalBurst_Gadget_Material
+		c2: {
+			// Dura_Add
+			p1: 4,
+		},
+		// Painful Grace
+		// Rosaria_Constellation_4 -> Avatar_Rosaria_ElementalArt
+		c4: {
+			// ReviveEnergy
+			p1: 5,
+		},
+		// Divine Retribution
+		// Rosaria_Constellation_6 -> Avatar_Rosaria_Talent_ElementalBurst_PhyResistDown
+		c6: {
+			// DefenseDown (subtracted)
+			p1: 0.2,
+			// Dura
+			p2: 10,
+			// Stack
+			p3: 1,
 		},
 	},
 	Sandrone: {
@@ -5041,6 +9993,76 @@ export const charTalentTables = {
 			// Energy Cost
 			p5: [60],
 		},
+		// Eternal Speculation Engine
+		// MarionetteNew_PermanentSkill_1 ->
+		//     Avatar_MarionetteNew_ElementalArt
+		//     Avatar_MarionetteNew_ElementalBurst
+		//     Avatar_MarionetteNew_ElementalBurstEnhance
+		//     Avatar_MarionetteNew_Funnel_Bullet_Enhanced
+		a1: {
+			// Avatar_MarionetteNew_Funnel_Bullet_Enhanced.P1AttackUpRatio
+			p1: 3,
+			// Avatar_MarionetteNew_ElementalBurstEnhance.ExtraAttackRatio
+			p2: 0.1,
+		},
+		// A Lady's Code of Conduct
+		// MarionetteNew_PermanentSkill_2 -> Avatar_Marionette_PermanentSkill_2
+		a4: {
+			// TransRatio
+			p1: 0.08,
+			// MaxMasteryUp
+			p2: 160,
+		},
+		// Stellar Jubilee: Light of Rationalisme
+		// MarionetteNew_PermanentSkill_3 -> Avatar_MarionetteNew_ElementalBurst
+		a0: {
+			// AttackTransferRatio
+			p1: 0.007,
+			// MaxTransRatio
+			p2: 0.14,
+		},
+		// Morrow After the Golden Dusk
+		// MarionetteNew_Constellation_1 ->
+		//     Avatar_MarionetteNew_T1
+		//     Avatar_Marionette_FrostValue_Driver
+		//     Avatar_MarionetteNew_SpecialExAtkDriver
+		c1: {
+			// DamageUpRatio
+			p1: 0.3,
+		},
+		// An Heiress Gazed Into the Looking-Glass
+		// MarionetteNew_Constellation_2 -> Avatar_MarionetteNew_T2, Avatar_MarionetteNew_SpecialExAtkDriver
+		c2: {
+			// DamageUpRatio
+			p1: 0.4,
+			// DamageUpRatioPerLayer
+			p2: 0.2,
+		},
+		// In Knowledge Lies the World's True Ground
+		// MarionetteNew_Constellation_4 -> Avatar_MarionetteNew_T4
+		c4: {
+			// DamageRatio
+			p1: 1.25,
+			// T4CD
+			p2: 4,
+			// SwirlDamageRatio
+			p3: 1.875,
+		},
+		// Narcissus Wakes, Her Eyes Upon the Dawn
+		// MarionetteNew_Constellation_6 ->
+		//     Avatar_MarionetteNew_T6
+		//     Avatar_MarionetteNew_SpecialExAtkDriver
+		//     Avatar_Marionette_ExtraAttackBullet_Loop
+		c6: {
+			// Avatar_Marionette_ExtraAttackBullet_Loop.NormalDamageRatio
+			p1: 1,
+			// Avatar_Marionette_ExtraAttackBullet_Loop.LaserStarSuperconductCoeff
+			p2: 0.8,
+			// Avatar_MarionetteNew_T6.BuffRatio
+			p3: 0.2,
+			// Avatar_Marionette_ExtraAttackBullet_Loop.LaserStarSwirlCoeff
+			p4: 1.2,
+		},
 	},
 	Sara: {
 		s1_id: 10561,
@@ -5087,6 +10109,41 @@ export const charTalentTables = {
 			p3: [20],
 			// Energy Cost
 			p4: [80],
+		},
+		// Immovable Will
+		// Sara_PermanentSkill_1 -> Avatar_Sara_ShootAimingArrow_Charge, Avatar_Sara_ShootArrow_Aiming
+		a1: {
+			// Avatar_Sara_ShootAimingArrow_Charge.Sara_AimShoot_Enchanted_Ratio (subtracted)
+			// Avatar_Sara_ShootArrow_Aiming.Sara_AimShoot_Enchanted_Ratio (subtracted)
+			p1: 0.6,
+		},
+		// Decorum
+		// Sara_PermanentSkill_2 -> Avatar_Sara_PermanentSkill_2
+		a4: {
+			// ReviveEnergy_Ratio
+			p1: 1.2,
+			// ReviveEnergy_CD
+			p2: 3,
+		},
+		// Crow's Eye
+		// Sara_Constellation_1 -> Avatar_Sara_PermanentSkill_1, Avatar_Sara_AttackUp
+		c1: {
+			// Sara_PermanentSkill_1_ReduceColdDown (subtracted)
+			p1: 1,
+			// ReduceColdDown_CD
+			p2: 3,
+		},
+		// Dark Wings
+		// Sara_Constellation_2 -> Avatar_Sara_Elemental_Art, Avatar_Sara_KarasShoot_DelayAttack
+		c2: {
+			// Constellation_2_Ratio
+			p1: 0.3,
+		},
+		// Sin of Pride
+		// Sara_Constellation_6 -> Avatar_Sara_AttackUp
+		c6: {
+			// Sara_Constellation_6_CriticalHurt
+			p1: 0.6,
 		},
 	},
 	Sayu: {
@@ -5157,6 +10214,50 @@ export const charTalentTables = {
 			// Energy Cost
 			p9: [80],
 		},
+		// Someone More Capable
+		// Sayu_PermanentSkill_1 -> Avatar_Sayu_PermanentSkill_1
+		a1: {
+			// Heal_BaseAmount
+			p1: 300,
+			// Heal_MasteryRatio
+			p2: 1.2,
+			// CDTime
+			p3: 2,
+		},
+		// No Work Today!
+		// Sayu_PermanentSkill_2 -> Avatar_Sayu_ElementalBurst_Phantom
+		a4: {
+			// PermanentSkill_2_RangeRatio
+			p1: 0.2,
+		},
+		// Egress Prep
+		// Sayu_Constellation_2 -> Avatar_Sayu_Constellation_2
+		c2: {
+			// Rate
+			p1: 0.033,
+			// MaxLevel
+			p2: 20,
+		},
+		// Skiving: New and Improved
+		// Sayu_Constellation_4 -> Avatar_Sayu_Constellation_4
+		c4: {
+			// Energy
+			p1: 1.2,
+			// CDTime
+			p2: 2,
+		},
+		// Sleep O'Clock
+		// Sayu_Constellation_6 -> Avatar_Sayu_ElementalBurst_Phantom
+		c6: {
+			// Constellation_6_PerMasteryDamage
+			p1: 0.002,
+			// Constellation_6_MaxDamage
+			p2: 4,
+			// Constellation_6_PerMasteryHeal
+			p3: 3,
+			// Constellation_6_MaxHeal
+			p4: 6000,
+		},
 	},
 	Sethos: {
 		s1_id: 10971,
@@ -5203,6 +10304,67 @@ export const charTalentTables = {
 			p3: [15],
 			// Energy Cost
 			p4: [60],
+		},
+		// Black Kite's Enigma
+		// Sethos_PermanentSkill_1 -> Avatar_Sethos_ShootAimingArrow_Charge, Avatar_Sethos_ShootArrow_Aiming
+		a1: {
+			// Avatar_Sethos_ShootAimingArrow_Charge.ChargeEnergyRequire
+			p1: 20,
+			// Avatar_Sethos_ShootArrow_Aiming.ArrowWithElec_EnergyRatio
+			p2: 0.5,
+		},
+		// The Sand King's Boon
+		// Sethos_PermanentSkill_2 -> Avatar_Sethos_PermanentSkill_2, Bullet_Sethos_ShootArrow_Lightning
+		a4: {
+			// Avatar_Sethos_PermanentSkill_2.PermanentSkill_2_CD
+			p1: 15,
+			// Bullet_Sethos_ShootArrow_Lightning.PermanentSkill_2_LightningRatio
+			p2: 7,
+			// Avatar_Sethos_PermanentSkill_2.PermanentSkill_2_Buff_Duration
+			p3: 5,
+			// Avatar_Sethos_PermanentSkill_2.PermanentSkill_2_DamageUp_MaxCount
+			// Bullet_Sethos_ShootArrow_Lightning.PermanentSkill_2_DamageUp_MaxCount
+			p4: 4,
+		},
+		// Sealed Shrine's Spiritsong
+		// Sethos_Constellation_1 -> Bullet_Sethos_ShootArrow_Lightning
+		c1: {
+			// Constellation_1_bonusCritical
+			p1: 0.15,
+		},
+		// Papyrus Scripture of Silent Secrets
+		// Sethos_Constellation_2 ->
+		//     Avatar_Sethos_Constellation_2
+		//     Avatar_Sethos_ShootArrow_Aiming
+		//     Avatar_Sethos_ElementalArt
+		//     Avatar_Sethos_ElementalBurst
+		c2: {
+			// Constellation_2_ElecAddHurtDelta
+			p1: 0.15,
+			// Constellation_2_MaxStacking
+			p2: 2,
+			// Constellation_2_Duration
+			p3: 10,
+		},
+		// Beneficent Plumage
+		// Sethos_Constellation_4 ->
+		//     Avatar_Sethos_Constellation_4
+		//     Bullet_Sethos_ShootArrow_Lightning
+		//     Bullet_Sethos_ShootArrow_Lightning_Burst_01
+		//     Bullet_Sethos_ShootArrow_Lightning_Burst_02
+		//     Bullet_Sethos_ShootArrow_Lightning_Burst_03
+		//     Bullet_Sethos_ShootArrow_Lightning_Burst_04
+		c4: {
+			// Constellation_4_ElemMasteryDelta
+			p1: 80,
+			// Constellation_4_Duration
+			p2: 10,
+		},
+		// Pylon of the Sojourning Sun Temple
+		// Sethos_Constellation_6 -> Avatar_Sethos_ShootArrow_Aiming
+		c6: {
+			// Constellation_6_CD
+			p1: 15,
 		},
 	},
 	Shenhe: {
@@ -5267,6 +10429,42 @@ export const charTalentTables = {
 			// Energy Cost
 			p6: [80],
 		},
+		// Deific Embrace
+		// Shenhe_PermanentSkill_1 -> SkillObj_Shenhe_Shadow
+		a1: {
+			// Shenhe_Shadow_IceAddHurtUp
+			p1: 0.15,
+		},
+		// Spirit Communion Seal
+		// Shenhe_PermanentSkill_2 -> Avatar_Shenhe_ElementalArt_Attack_L, Avatar_Shenhe_ElementalArt_Attack_H
+		a4: {
+			// Avatar_Shenhe_ElementalArt_Attack_L.ElementalArt_L_Extra_Buff_Ratio
+			p1: 0.15,
+			// Avatar_Shenhe_ElementalArt_Attack_L.ElementalArt_L_Extra_Buff_Time
+			p2: 10,
+			// Avatar_Shenhe_ElementalArt_Attack_H.ElementalArt_H_Extra_Buff_Ratio
+			p3: 0.15,
+			// Avatar_Shenhe_ElementalArt_Attack_H.ElementalArt_H_Extra_Buff_Time
+			p4: 15,
+		},
+		// Centered Spirit
+		// Shenhe_Constellation_2 -> SkillObj_Shenhe_Shadow
+		c2: {
+			// Shenhe_Shadow_LifeTime, also fed by s3.p4
+			p1: 6,
+		},
+		// Insight
+		// Shenhe_Constellation_4 ->
+		//     Avatar_Shenhe_Constellation_4
+		//     Avatar_Shenhe_ElementalArt_Bullet
+		//     Avatar_Shenhe_ElementalArt_Attack_L
+		//     Avatar_Shenhe_ElementalArt_Attack_H
+		c4: {
+			// Buff_Talent_Level_Ratio
+			p1: 0.05,
+			// Buff_Talent_Max_Level
+			p2: 50,
+		},
 	},
 	Sigewinne: {
 		s1_id: 10951,
@@ -5317,6 +10515,65 @@ export const charTalentTables = {
 			p2: [18],
 			// Energy Cost
 			p3: [70],
+		},
+		// Requires Appropriate Rest
+		// Sigewinne_PermanentSkill_1 ->
+		//     Avatar_Sigewinne_PermanentSkill_1
+		//     Avatar_Sigewinne_ElementalArt
+		//     Sigewinne_EArt_Bullet_Normal
+		a1: {
+			// HPToDamageUpRatio, also fed by c1.p1
+			p1: 80,
+			// MaxBuffRatio, also fed by c1.p2
+			p2: 2800,
+			// BuffDuration
+			p3: 18,
+			// WaterDamageRatio
+			p4: 0.08,
+			// InitLayer
+			p5: 10,
+			// LowHPLimit
+			p6: 30000,
+		},
+		// Detailed Diagnosis, Thorough Treatment
+		// Sigewinne_PermanentSkill_2 -> Avatar_Sigewinne_PermanentSkill_2
+		a4: {
+			// P2_Heal_Up_Ratio
+			p1: 0.03,
+			// P2_Heal_Up_Max
+			p2: 0.3,
+		},
+		// "Can the Happiest of Spirits Understand Anxiety?"
+		// Sigewinne_Constellation_1 -> Sigewinne_EArt_Bullet_Normal, Avatar_Sigewinne_PermanentSkill_1
+		c1: {
+			// HPToDamageUpRatio, also fed by a1.p1
+			p1: 20,
+			// MaxBuffRatio, also fed by a1.p2
+			p2: 700,
+		},
+		// "Can the Most Merciful of Spirits Defeat Its Foes?"
+		// Sigewinne_Constellation_2 -> Avatar_Sigewinne_Talent_2
+		c2: {
+			// ShieldRatio
+			p1: 0.3,
+			// Water_DefenseDown
+			p2: 0.35,
+			// DefenseDownDuration
+			p3: 8,
+		},
+		// "Can the Most Radiant of Spirits Pray For Me?"
+		// Sigewinne_Constellation_6 -> Avatar_Sigewinne_Talent_6
+		c6: {
+			// MaxHP_Trans_Critical_Rate
+			p1: 0.004,
+			// MaxHP_Trans_Critical_Damage
+			p2: 0.022,
+			// BuffDuration
+			p3: 15,
+			// Max_Critical_Rate
+			p4: 0.2,
+			// Max_Critical_Damage
+			p5: 1.1,
 		},
 	},
 	Skirk: {
@@ -5397,6 +10654,84 @@ export const charTalentTables = {
 			// CD
 			p8: [15],
 		},
+		// Reason Beyond Reason
+		// SkirkNew_PermanentSkill_1 -> Avatar_SkirkNew_Pickable_Handler
+		a1: {
+			// SkirkNew_Pickable_Energy_Revive
+			p1: 8,
+		},
+		// Return to Oblivion
+		// SkirkNew_PermanentSkill_2 ->
+		//     Avatar_SkirkNew_PermanentSkill_2
+		//     Avatar_SkirkNew_NormalAttack
+		//     Avatar_SkirkNew_Constellation_6
+		//     Avatar_SkirkNew_ElementalBurst_Bullet
+		a4: {
+			// Avatar_SkirkNew_PermanentSkill_2.SkirkNew_PermanentSkill_2_Buff_Duration
+			p1: 20,
+			// Avatar_SkirkNew_NormalAttack.SkirkNew_PermanentSkill_2_NormalAttack_BonusRatio_LV1
+			// Avatar_SkirkNew_Constellation_6.SkirkNew_PermanentSkill_2_NormalAttack_BonusRatio_LV1
+			p2: 0.1,
+			// Avatar_SkirkNew_NormalAttack.SkirkNew_PermanentSkill_2_NormalAttack_BonusRatio_LV2
+			// Avatar_SkirkNew_Constellation_6.SkirkNew_PermanentSkill_2_NormalAttack_BonusRatio_LV2
+			p3: 0.2,
+			// Avatar_SkirkNew_NormalAttack.SkirkNew_PermanentSkill_2_NormalAttack_BonusRatio_LV3
+			// Avatar_SkirkNew_Constellation_6.SkirkNew_PermanentSkill_2_NormalAttack_BonusRatio_LV3
+			p4: 0.7,
+			// Avatar_SkirkNew_ElementalBurst_Bullet.SkirkNew_PermanentSkill_2_ElementalBurst_BonusRatio_LV1
+			p5: 0.05,
+			// Avatar_SkirkNew_ElementalBurst_Bullet.SkirkNew_PermanentSkill_2_ElementalBurst_BonusRatio_LV2
+			p6: 0.15,
+			// Avatar_SkirkNew_ElementalBurst_Bullet.SkirkNew_PermanentSkill_2_ElementalBurst_BonusRatio_LV3
+			p7: 0.6,
+		},
+		// Far to Fall
+		// SkirkNew_Constellation_1 -> Avatar_SkirkNew_Pickable, Avatar_SkirkNew_Pickable_Collidor
+		c1: {
+			// SkirkNew_Constellation_1_Damage
+			p1: 5,
+		},
+		// Into the Abyss
+		// SkirkNew_Constellation_2 ->
+		//     Avatar_SkirkNew_ElementalArt_HoverAir
+		//     Avatar_SkirkNew_ElementalBurst_Bullet
+		//     Avatar_SkirkNew_ElementalBurst
+		c2: {
+			// Avatar_SkirkNew_ElementalArt_HoverAir.SkirkNew_Constellation_2_ExtraEnergy
+			// Avatar_SkirkNew_ElementalBurst_Bullet.SkirkNew_Constellation_2_ElementalBurst_MaxEnergyOverflow_Extra
+			p1: 10,
+			// Avatar_SkirkNew_ElementalBurst.SkirkNew_Constellation_2_BuffDuration
+			p2: 12.5,
+			// Avatar_SkirkNew_ElementalBurst.SkirkNew_Constellation_2_AttackRatio
+			p3: 0.7,
+		},
+		// Fractured Flow
+		// SkirkNew_Constellation_4 -> Avatar_SkirkNew_PermanentSkill_2
+		c4: {
+			// SkirkNew_PermanentSkill_2_Buff_LV1_Extra
+			p1: 0.1,
+			// SkirkNew_PermanentSkill_2_Buff_LV2_Extra
+			p2: 0.2,
+			// SkirkNew_PermanentSkill_2_Buff_LV3_Extra
+			p3: 0.4,
+		},
+		// To the Source
+		// SkirkNew_Constellation_6 ->
+		//     Avatar_SkirkNew_Constellation_6
+		//     Avatar_SkirkNew_ElementalBurst_Bullet
+		//     Avatar_SkirkNew_Pickable_Handler
+		c6: {
+			// Avatar_SkirkNew_Pickable_Handler.SkirkNew_Constellation_6_Buff_Duration
+			p1: 15,
+			// Avatar_SkirkNew_ElementalBurst_Bullet.SkirkNew_Constellation_6_ElementalBurst_Damage
+			p2: 7.5,
+			// Avatar_SkirkNew_Constellation_6.SkirkNew_Constellation_6_NormalAttack_Damage
+			p3: 1.8,
+			// Avatar_SkirkNew_Constellation_6.SkirkNew_Constellation_6_ReduceDamage
+			p4: 0.8,
+			// Avatar_SkirkNew_Constellation_6.SkirkNew_Constellation_6_BeingHit_Damage
+			p5: 1.8,
+		},
 	},
 	Sucrose: {
 		s1_id: 10431,
@@ -5439,6 +10774,52 @@ export const charTalentTables = {
 			p4: [20],
 			// Energy Cost
 			p5: [80],
+		},
+		// Catalyst Conversion
+		// Sucrose_PermanentSkill_1 -> Avatar_Sucrose_PermanentSkill_Catalysa
+		a1: {
+			// Sucrose_PermanentSkill_Catalysa_ElemMasteryDelta
+			p1: 50,
+			// Sucrose_PermanentSkill_Catalysa_Duration
+			p2: 8,
+		},
+		// Mollis Favonius
+		// Sucrose_PermanentSkill_2 -> Avatar_Sucrose_PermanentSkill_NetherWind
+		a4: {
+			// Sucrose_PermanentSkill_NetherWind_Factor
+			p1: 0.2,
+			// Sucrose_PermanentSkill_NetherWind_Duration
+			p2: 8,
+		},
+		// Witch's Eve Rite: Sevenfold Transmutation
+		// Sucrose_Hexenzirkel_1 ->
+		//     Avatar_Sucrose_HexenzirkelSkill
+		//     Avatar_Sucrose_WindBlackHole
+		//     Avatar_Sucrose_DemiHurricane_Flusk
+		//     Avatar_Sucrose_DemiHurricane_Mix
+		sp: {
+			// Avatar_Sucrose_WindBlackHole.Duration
+			p1: 15,
+			// Avatar_Sucrose_WindBlackHole.Ratio
+			p2: 0.057143,
+			// Avatar_Sucrose_HexenzirkelSkill.Duration
+			p3: 20,
+			// Avatar_Sucrose_HexenzirkelSkill.Ratio
+			p4: 0.071429,
+		},
+		// Beth: Unbound Form
+		// Sucrose_Constellation_2 -> Avatar_Sucrose_DemiHurricane_Gadget
+		c2: {
+			// Sucrose_DemiHurricane_Gadget_LifeTimeBonus
+			p1: 2,
+		},
+		// Chaotic Entropy
+		// Sucrose_Constellation_6 -> Avatar_Sucrose_DemiHurricane_Mix
+		c6: {
+			// Sucrose_DemiHurricane_Gadget_Mix_AddHurtDelta
+			p1: 0.2,
+			// Ratio
+			p2: 0.085714,
 		},
 	},
 	Tartaglia: {
@@ -5523,6 +10904,24 @@ export const charTalentTables = {
 			// Energy Cost
 			p6: [60],
 		},
+		// Never Ending
+		// Tartaglia_PermanentSkill_1 -> Avatar_Tartaglia_WaterFlower_Handler
+		a1: {
+			// AquaFlower_Duration
+			p1: 8,
+		},
+		// Foul Legacy: Understream
+		// Tartaglia_Constellation_2 -> Avatar_Tartaglia_WaterFlower_Handler
+		c2: {
+			// AquaFlower_GainEnergy
+			p1: 4,
+		},
+		// Abyssal Mayhem: Hydrospout
+		// Tartaglia_Constellation_4 -> Avatar_Tartaglia_WaterFlower_Handler
+		c4: {
+			// AquaFlower_RippleInterval
+			p1: 4,
+		},
 	},
 	Thoma: {
 		s1_id: 10501,
@@ -5582,6 +10981,54 @@ export const charTalentTables = {
 			// Energy Cost
 			p9: [80],
 		},
+		// Imbricated Armor
+		// Tohma_PermanentSkill_1 -> Avatar_Tohma_ElementalArt_Handler
+		a1: {
+			// PermanentSkill1_ShieldCostMinusRatio
+			p1: 0.05,
+			// PermanentSkill1_Time
+			p2: 6,
+			// PermanentSkill1_Stack
+			p3: 5,
+			// PermanentSkill1_CDTime
+			p4: 0.3,
+		},
+		// Flaming Assault
+		// Tohma_PermanentSkill_2 -> Avatar_Tohma_ElementalBurst_TriggerAttack
+		a4: {
+			// HP2Damage
+			p1: 0.022,
+		},
+		// A Comrade's Duty
+		// Tohma_Constellation_1 -> Avatar_Tohma_ElementalArt_Handler
+		c1: {
+			// Art_CD
+			p1: 3,
+			// Burst_CD
+			p2: 3,
+			// Talent1_CD
+			p3: 20,
+		},
+		// A Subordinate's Skills
+		// Tohma_Constellation_2 -> Avatar_Tohma_ElementalBurst_Buff_Handler
+		c2: {
+			// Dura, also fed by s3.p7
+			p1: 3,
+		},
+		// Long-Term Planning
+		// Tohma_Constellation_4 -> Avatar_Tohma_ElementalBurst_Start
+		c4: {
+			// Tohma_Talent4_Value
+			p1: 15,
+		},
+		// Burning Heart
+		// Tohma_Constellation_6 -> Avatar_Tohma_ElementalArt_Handler
+		c6: {
+			// Talent6_DamageUp
+			p1: 0.15,
+			// Talent6_Time
+			p2: 6,
+		},
 	},
 	Tighnari: {
 		s1_id: 10691,
@@ -5630,6 +11077,63 @@ export const charTalentTables = {
 			p3: [12],
 			// Energy Cost
 			p4: [40],
+		},
+		// Keen Sight
+		// Tighnari_PermanentSkill_1 -> Avatar_Tighnari_ShootArrow_Aiming, Avatar_Tighnari_PermanentSkill_1
+		a1: {
+			// Value
+			p1: 50,
+			// Dura
+			p2: 4,
+		},
+		// Scholarly Blade
+		// Tighnari_PermanentSkill_2 -> Avatar_Tighnari_PermanentSkill_2
+		a4: {
+			// Ratio
+			p1: 0.0006,
+			// MaxDamageUp
+			p2: 0.6,
+		},
+		// Beginnings Determined at the Roots
+		// Tighnari_Constellation_1 -> Avatar_Tighnari_Constellation_1
+		c1: {
+			// Rate
+			p1: 0.15,
+		},
+		// Origins Known From the Stem
+		// Tighnari_Constellation_2 -> SkillObj_Tighnari_ElementalArt_CenterGadget_Material
+		c2: {
+			// Rate
+			p1: 0.2,
+			// Time
+			p2: 6,
+		},
+		// Withering Glimpsed in the Leaves
+		// Tighnari_Constellation_4 ->
+		//     Avatar_Tighnari_Constellation_4
+		//     Avatar_Tighnari_ElementalBurst
+		//     Avatar_Tighnari_ElementalBurst_Bullet_1_Material
+		//     Avatar_Tighnari_ElementalBurst_Bullet_2_Material
+		c4: {
+			// Rate
+			p1: 60,
+			// Time
+			p2: 8,
+		},
+		// Karma Adjudged From the Leaden Fruit
+		// Tighnari_Constellation_6 ->
+		//     Tighnari_AimingArrow_BeforeFission_Material
+		//     Avatar_Tighnari_ShootAimingArrow_Charge
+		//     Avatar_Tighnari_ShootArrow_Aiming
+		//     Tighnari_AimingArrow_Fission_Material_Talent
+		//     Tighnari_AimingArrow_Fission_LifeOver_Talent
+		c6: {
+			// Avatar_Tighnari_ShootAimingArrow_Charge.Talent6
+			// Avatar_Tighnari_ShootArrow_Aiming.Talent6
+			p1: 3,
+			// Tighnari_AimingArrow_Fission_Material_Talent.Damage_Talent
+			// Tighnari_AimingArrow_Fission_LifeOver_Talent.Damage_Talent
+			p2: 1.5,
 		},
 	},
 	TravelerPyro: {
@@ -5683,6 +11187,30 @@ export const charTalentTables = {
 			p2: [18],
 			// Energy Cost
 			p3: [70],
+		},
+		// Foreign Starfire
+		// Player_Fire_PermanentSkill_3 ->
+		//     Avatar_Player_Fire_EnhancedExtraAttack
+		//     Avatar_Player_EnhancedExtraAttack_ElementalBonus
+		sp: {
+			// Avatar_Player_EnhancedExtraAttack_ElementalBonus.ElementalBonus_Value_Wind
+			p1: 0.1,
+			// Avatar_Player_EnhancedExtraAttack_ElementalBonus.ElementalBonus_Value_Rock
+			p2: 0.2,
+			// Avatar_Player_EnhancedExtraAttack_ElementalBonus.ElementalBonus_Value_Electric
+			p3: 0.2,
+			// Avatar_Player_EnhancedExtraAttack_ElementalBonus.ElementalBonus_Value_Grass
+			p4: 60,
+			// Avatar_Player_EnhancedExtraAttack_ElementalBonus.ElementalBonus_Value_Water
+			p5: 0.2,
+			// Avatar_Player_EnhancedExtraAttack_ElementalBonus.ElementalBonus_Value_Fire
+			p6: 0.2,
+			// Avatar_Player_EnhancedExtraAttack_ElementalBonus.ElementalBonus_Value_Ice
+			p7: 0.2,
+			// Avatar_Player_Fire_EnhancedExtraAttack.ExtraAttack_Enhanced_ratio
+			p8: 2,
+			// Avatar_Player_Fire_EnhancedExtraAttack.ExtraAttack_Enhanced_CD
+			p9: 15,
 		},
 	},
 	TravelerHydro: {
@@ -5745,6 +11273,88 @@ export const charTalentTables = {
 			// Energy Cost
 			p4: [80],
 		},
+		// Spotless Waters
+		// Player_Water_PermanentSkill_1 -> Avatar_PlayerBoy_ElementalArt_Water, Avatar_PlayerBoy_Core_Heal
+		a1: {
+			// Avatar_PlayerBoy_ElementalArt_Water.P1_CD
+			p1: 1,
+			// Avatar_PlayerBoy_ElementalArt_Water.Core_Max
+			p2: 4,
+			// Avatar_PlayerBoy_Core_Heal.HealOnceRatio
+			p3: 0.07,
+		},
+		// Clear Waters
+		// Player_Water_PermanentSkill_2 -> Avatar_PlayerBoy_ElementalArt_Water
+		a4: {
+			// LoseHPRatio_P2_DamageUpRatio
+			p1: 0.45,
+			// LoseHPRatio_P2_DamageUp_Max
+			p2: 5000,
+		},
+		// Foreign Aqualis
+		// Player_Water_PermanentSkill_3 ->
+		//     Avatar_Player_Water_EnhancedExtraAttack
+		//     Avatar_Player_EnhancedExtraAttack_ElementalBonus
+		sp: {
+			// Avatar_Player_EnhancedExtraAttack_ElementalBonus.ElementalBonus_Value_Wind
+			p1: 0.1,
+			// Avatar_Player_EnhancedExtraAttack_ElementalBonus.ElementalBonus_Value_Rock
+			p2: 0.2,
+			// Avatar_Player_EnhancedExtraAttack_ElementalBonus.ElementalBonus_Value_Electric
+			p3: 0.2,
+			// Avatar_Player_EnhancedExtraAttack_ElementalBonus.ElementalBonus_Value_Grass
+			p4: 60,
+			// Avatar_Player_EnhancedExtraAttack_ElementalBonus.ElementalBonus_Value_Water
+			p5: 0.2,
+			// Avatar_Player_EnhancedExtraAttack_ElementalBonus.ElementalBonus_Value_Fire
+			p6: 0.2,
+			// Avatar_Player_EnhancedExtraAttack_ElementalBonus.ElementalBonus_Value_Ice
+			p7: 0.2,
+			// Avatar_Player_Water_EnhancedExtraAttack.ExtraAttack_Enhanced_ratio
+			p8: 1.5,
+			// Avatar_Player_Water_EnhancedExtraAttack.ExtraAttack_Enhanced_CD
+			p9: 15,
+			// Avatar_Player_Water_EnhancedExtraAttack.ExtraAttack_Enhanced_Stack_CD
+			p10: 4,
+			// Avatar_Player_Water_EnhancedExtraAttack.ExtraAttack_Enhanced_LifeTrigger_Portion
+			p11: 0.5,
+			// Avatar_Player_Water_EnhancedExtraAttack.ExtraAttack_Enhanced_LifeTrigger_Heal
+			p12: 0.25,
+			// Avatar_Player_Water_EnhancedExtraAttack.ExtraAttack_Enhanced_LifeTrigger_Paid
+			p13: 0.1,
+			// Avatar_Player_Water_EnhancedExtraAttack.ExtraAttack_Enhanced_LifeTrigger_PowerUp
+			p14: 1,
+			// Avatar_Player_Water_EnhancedExtraAttack.ExtraAttack_Enhanced_LifeTrigger_hpThreshholdMaxHPRatio
+			p15: 0.05,
+		},
+		// Swelling Lake
+		// Player_Water_Constellation_1 -> Avatar_PlayerBoy_Core_Heal
+		c1: {
+			// ReviveEnergy
+			p1: 2,
+		},
+		// Trickling Purity
+		// Player_Water_Constellation_2 -> Player_Water_ElementalBurst_Bullet
+		c2: {
+			// T2_Speed_Down_Ratio
+			p1: 0.3,
+			// Duration, also fed by s3.p2
+			p2: 3,
+		},
+		// Pouring Descent
+		// Player_Water_Constellation_4 -> Avatar_Player_Water_Talent_4_Shield
+		c4: {
+			// ShieldRatio
+			p1: 0.1,
+			// RefreshCD
+			p2: 2,
+		},
+		// Tides of Justice
+		// Player_Water_Constellation_6 -> Avatar_PlayerBoy_Core_Heal
+		c6: {
+			// HealOnceRatioT6
+			p1: 0.06,
+		},
 	},
 	TravelerAnemo: {
 		s1_id: 100555,
@@ -5803,6 +11413,39 @@ export const charTalentTables = {
 			p4: [15],
 			// Energy Cost
 			p5: [60],
+		},
+		// Foreign Windwrath
+		// Player_Wind_PermanentSkill_3 ->
+		//     Avatar_Player_Wind_EnhancedExtraAttack
+		//     Gadget_Player_Wind_EnhancedExtraAttack_AdditionnalStike_Electric
+		//     Gadget_Player_Wind_EnhancedExtraAttack_AdditionnalStike_Fire
+		//     Gadget_Player_Wind_EnhancedExtraAttack_AdditionnalStike_Ice
+		//     Gadget_Player_Wind_EnhancedExtraAttack_AdditionnalStike_Water
+		//     Avatar_Player_EnhancedExtraAttack_ElementalBonus
+		sp: {
+			// Avatar_Player_EnhancedExtraAttack_ElementalBonus.ElementalBonus_Value_Wind
+			p1: 0.1,
+			// Avatar_Player_EnhancedExtraAttack_ElementalBonus.ElementalBonus_Value_Rock
+			p2: 0.2,
+			// Avatar_Player_EnhancedExtraAttack_ElementalBonus.ElementalBonus_Value_Electric
+			p3: 0.2,
+			// Avatar_Player_EnhancedExtraAttack_ElementalBonus.ElementalBonus_Value_Grass
+			p4: 60,
+			// Avatar_Player_EnhancedExtraAttack_ElementalBonus.ElementalBonus_Value_Water
+			p5: 0.2,
+			// Avatar_Player_EnhancedExtraAttack_ElementalBonus.ElementalBonus_Value_Fire
+			p6: 0.2,
+			// Avatar_Player_EnhancedExtraAttack_ElementalBonus.ElementalBonus_Value_Ice
+			p7: 0.2,
+			// Avatar_Player_Wind_EnhancedExtraAttack.ExtraAttack_Enhanced_ratio
+			p8: 0.6,
+			// Avatar_Player_Wind_EnhancedExtraAttack.ExtraAttack_Enhanced_CD
+			p9: 15,
+			// Gadget_Player_Wind_EnhancedExtraAttack_AdditionnalStike_Electric.ExtraAttack_Enhanced_ExtraRatio
+			// Gadget_Player_Wind_EnhancedExtraAttack_AdditionnalStike_Fire.ExtraAttack_Enhanced_ExtraRatio
+			// Gadget_Player_Wind_EnhancedExtraAttack_AdditionnalStike_Ice.ExtraAttack_Enhanced_ExtraRatio
+			// Gadget_Player_Wind_EnhancedExtraAttack_AdditionnalStike_Water.ExtraAttack_Enhanced_ExtraRatio
+			p10: 0.5,
 		},
 	},
 	TravelerCryo: {
@@ -5869,6 +11512,90 @@ export const charTalentTables = {
 			// Energy Cost
 			p7: [60],
 		},
+		// Ever-Keen Frost
+		// Player_Ice_PermanentSkill_1 -> Avatar_Player_ElementalArt_Ice
+		a1: {
+			// Ice_Superconducted_Attack_Up_Ratio
+			p1: 0.8,
+		},
+		// Lucent Ice
+		// Player_Ice_PermanentSkill_2 -> Avatar_Player_Ice_PermanentSkill_2
+		a4: {
+			// Attack_Transform_To_Mastery_Ratio
+			p1: 0.08,
+			// Attack_Transform_To_Mastery_Max
+			p2: 160,
+		},
+		// Stellar Jubilee: Illusory Frostmirror
+		// Player_Ice_PermanentSkill_0 -> Avatar_Player_Ice_StarReaction_Damage_Up_By_Attack
+		a0: {
+			// StarSuperconduct_Atk_Ratio
+			p1: 0.000035,
+			// StarSuperconduct_Max_Ratio
+			p2: 0.07,
+			// StarSwirl_Atk_Ratio
+			p3: 0.000035,
+			// StarSwirl_Max_Ratio
+			p4: 0.07,
+		},
+		// Foreign Permafrost
+		// Player_Ice_PermanentSkill_3 ->
+		//     Avatar_Player_Ice_EnhancedExtraAttack
+		//     Avatar_Player_EnhancedExtraAttack_ElementalBonus
+		sp: {
+			// Avatar_Player_EnhancedExtraAttack_ElementalBonus.ElementalBonus_Value_Wind
+			p1: 0.1,
+			// Avatar_Player_EnhancedExtraAttack_ElementalBonus.ElementalBonus_Value_Rock
+			p2: 0.2,
+			// Avatar_Player_EnhancedExtraAttack_ElementalBonus.ElementalBonus_Value_Electric
+			p3: 0.2,
+			// Avatar_Player_EnhancedExtraAttack_ElementalBonus.ElementalBonus_Value_Grass
+			p4: 60,
+			// Avatar_Player_EnhancedExtraAttack_ElementalBonus.ElementalBonus_Value_Water
+			p5: 0.2,
+			// Avatar_Player_EnhancedExtraAttack_ElementalBonus.ElementalBonus_Value_Fire
+			p6: 0.2,
+			// Avatar_Player_EnhancedExtraAttack_ElementalBonus.ElementalBonus_Value_Ice
+			p7: 0.2,
+			// Avatar_Player_Ice_EnhancedExtraAttack.ExtraAttack_Enhanced_ratio
+			p8: 1.4,
+			// Avatar_Player_Ice_EnhancedExtraAttack.ExtraAttack_Enhanced_CD
+			p9: 15,
+			// Avatar_Player_Ice_EnhancedExtraAttack.ExtraAttack_Enhanced_Stack_Star_CD
+			p10: 2,
+		},
+		// Somber Freeze
+		// Player_Ice_Constellation_1 -> Avatar_Player_Ice_Constellation_1_Energy_Recover
+		c1: {
+			// Element_Recover_By_Talent_1
+			p1: 5,
+			// Element_Recover_By_Talent_1_Interval
+			p2: 0.5,
+		},
+		// Frostfall Reverberation
+		// Player_Ice_Constellation_2 -> Avatar_Player_ElementalArt_Ice
+		c2: {
+			// Icicle_Hit_Mastery_Value
+			p1: 60,
+			// Icicle_Hit_Mastery_Duration
+			p2: 5,
+			// Icicle_Hit_Mastery_Enhanced_Ratio
+			p3: 2,
+		},
+		// Enduring Ice
+		// Player_Ice_Constellation_4 -> Avatar_Player_ElementalArt_Ice
+		c4: {
+			// ElementArt_Icicle_Duration_Ratio
+			p1: 0.25,
+		},
+		// Brumal Grimfrost
+		// Player_Ice_Constellation_6 -> Avatar_Player_Ice_ElementalBurst_Initiate
+		c6: {
+			// Elemental_Damage_Up_Ratio
+			p1: 0.05,
+			// Elemental_Damage_Up_Duration
+			p2: 15,
+		},
 	},
 	TravelerGeo: {
 		s1_id: 100555,
@@ -5919,6 +11646,36 @@ export const charTalentTables = {
 			p3: [15],
 			// Energy Cost
 			p4: [60],
+		},
+		// Foreign Adamantine
+		// Player_Rock_PermanentSkill_3 ->
+		//     Avatar_Player_Rock_EnhancedExtraAttack
+		//     Avatar_Player_EnhancedExtraAttack_ElementalBonus
+		sp: {
+			// Avatar_Player_EnhancedExtraAttack_ElementalBonus.ElementalBonus_Value_Wind
+			p1: 0.1,
+			// Avatar_Player_EnhancedExtraAttack_ElementalBonus.ElementalBonus_Value_Rock
+			p2: 0.2,
+			// Avatar_Player_EnhancedExtraAttack_ElementalBonus.ElementalBonus_Value_Electric
+			p3: 0.2,
+			// Avatar_Player_EnhancedExtraAttack_ElementalBonus.ElementalBonus_Value_Grass
+			p4: 60,
+			// Avatar_Player_EnhancedExtraAttack_ElementalBonus.ElementalBonus_Value_Water
+			p5: 0.2,
+			// Avatar_Player_EnhancedExtraAttack_ElementalBonus.ElementalBonus_Value_Fire
+			p6: 0.2,
+			// Avatar_Player_EnhancedExtraAttack_ElementalBonus.ElementalBonus_Value_Ice
+			p7: 0.2,
+			// Avatar_Player_Rock_EnhancedExtraAttack.ExtraAttack_Enhanced_ratio
+			p8: 1.2,
+			// Avatar_Player_Rock_EnhancedExtraAttack.ExtraAttack_Enhanced_CD
+			p9: 15,
+			// Avatar_Player_Rock_EnhancedExtraAttack.ExtraAttack_Enhanced_TeamBuffRatio
+			p10: 0.2,
+			// Avatar_Player_Rock_EnhancedExtraAttack.ExtraAttack_Enhanced_TeamBuffDuration
+			p11: 15,
+			// Avatar_Player_Rock_EnhancedExtraAttack.ExtraAttack_Enhanced_Stack_CD
+			p12: 1,
 		},
 	},
 	TravelerElectro: {
@@ -5981,6 +11738,69 @@ export const charTalentTables = {
 			// Energy Cost
 			p6: [80],
 		},
+		// Thunderflash
+		// Player_Electric_PermanentSkill_1 -> Player_Electric_ElementalArt_Magatama_Pickable
+		a1: {
+			// ElementalArt_Magatama_ModifySkillCD
+			p1: -1.5,
+		},
+		// Resounding Roar
+		// Player_Electric_PermanentSkill_2 -> Player_Electric_ElementalArt_Magatama_Pickable
+		a4: {
+			// ElementalArt_Magatama_ExtraEfficiencyUp_Percentage
+			p1: 0.1,
+		},
+		// Foreign Thundertrail
+		// Player_Electric_PermanentSkill_3 ->
+		//     Avatar_Player_Electric_EnhancedExtraAttack
+		//     Gadget_Player_Electric_EnhancedExtraAttack_ThunderBoltField
+		//     Avatar_Player_EnhancedExtraAttack_ElementalBonus
+		sp: {
+			// Avatar_Player_EnhancedExtraAttack_ElementalBonus.ElementalBonus_Value_Wind
+			p1: 0.1,
+			// Avatar_Player_EnhancedExtraAttack_ElementalBonus.ElementalBonus_Value_Rock
+			p2: 0.2,
+			// Avatar_Player_EnhancedExtraAttack_ElementalBonus.ElementalBonus_Value_Electric
+			p3: 0.2,
+			// Avatar_Player_EnhancedExtraAttack_ElementalBonus.ElementalBonus_Value_Grass
+			p4: 60,
+			// Avatar_Player_EnhancedExtraAttack_ElementalBonus.ElementalBonus_Value_Water
+			p5: 0.2,
+			// Avatar_Player_EnhancedExtraAttack_ElementalBonus.ElementalBonus_Value_Fire
+			p6: 0.2,
+			// Avatar_Player_EnhancedExtraAttack_ElementalBonus.ElementalBonus_Value_Ice
+			p7: 0.2,
+			// Avatar_Player_Electric_EnhancedExtraAttack.ExtraAttack_Enhanced_ratio
+			p8: 1,
+			// Avatar_Player_Electric_EnhancedExtraAttack.ExtraAttack_Enhanced_CD
+			p9: 15,
+			// Gadget_Player_Electric_EnhancedExtraAttack_ThunderBoltField.ExtraAttack_Enhanced_Field_WaitTime
+			p10: 3,
+			// Gadget_Player_Electric_EnhancedExtraAttack_ThunderBoltField.ExtraAttack_Enhanced_Field_DamageRatio
+			p11: 2,
+		},
+		// Violet Vehemence
+		// Player_Electric_Constellation_2 -> Avatar_Player_Electric_ElementalBurst_Bullet
+		c2: {
+			// ElementalBurst_ElecResDown_Duration
+			p1: 8,
+			// ElementalBurst_ElecResDown_ElecSubHurtDelta
+			p2: -0.15,
+		},
+		// Fickle Cloudstrike
+		// Player_Electric_Constellation_4 -> Player_Electric_ElementalArt_Magatama_Pickable
+		c4: {
+			// ElementalArt_Magatama_ReviveExtraElemEnergy_Check_Percentage
+			p1: 0.35,
+		},
+		// World-Shaker
+		// Player_Electric_Constellation_6 -> Avatar_Player_Electric_ElementalBurst_Bullet
+		c6: {
+			// ElementalBurst_ThunderAttack_Enhanced_Damage_Percentage
+			p1: 2,
+			// ElementalBurst_ReviveEnergy_Enhanced
+			p2: 1,
+		},
 	},
 	TravelerDendro: {
 		s1_id: 100557,
@@ -6031,6 +11851,72 @@ export const charTalentTables = {
 			p6: [20],
 			// Energy Cost
 			p7: [80],
+		},
+		// Verdant Overgrowth
+		// Player_Grass_PermanentSkill_1 -> Avatar_Player_Grass_Permanent_Skill_1
+		a1: {
+			// Grass_Seed_Element_Mastery_Up
+			p1: 6,
+		},
+		// Verdant Luxury
+		// Player_Grass_PermanentSkill_2 -> Avatar_Player_Grass_Damage_Up_By_Element_Mastery
+		a4: {
+			// Element_Mastery_Transform_To_ElementArt_Damage_Ratio
+			p1: 0.0015,
+			// Element_Mastery_Transform_To_ElementBurst_Damage_Ratio
+			p2: 0.001,
+		},
+		// Foreign Verdalume
+		// Player_Grass_PermanentSkill_3 ->
+		//     Avatar_Player_Grass_EnhancedExtraAttack
+		//     Gadget_Player_Grass_EnhancedExtraAttack_Field
+		//     Avatar_Player_EnhancedExtraAttack_ElementalBonus
+		sp: {
+			// Avatar_Player_EnhancedExtraAttack_ElementalBonus.ElementalBonus_Value_Wind
+			p1: 0.1,
+			// Avatar_Player_EnhancedExtraAttack_ElementalBonus.ElementalBonus_Value_Rock
+			p2: 0.2,
+			// Avatar_Player_EnhancedExtraAttack_ElementalBonus.ElementalBonus_Value_Electric
+			p3: 0.2,
+			// Avatar_Player_EnhancedExtraAttack_ElementalBonus.ElementalBonus_Value_Grass
+			p4: 60,
+			// Avatar_Player_EnhancedExtraAttack_ElementalBonus.ElementalBonus_Value_Water
+			p5: 0.2,
+			// Avatar_Player_EnhancedExtraAttack_ElementalBonus.ElementalBonus_Value_Fire
+			p6: 0.2,
+			// Avatar_Player_EnhancedExtraAttack_ElementalBonus.ElementalBonus_Value_Ice
+			p7: 0.2,
+			// Avatar_Player_Grass_EnhancedExtraAttack.ExtraAttack_Enhanced_ratio
+			p8: 0.8,
+			// Avatar_Player_Grass_EnhancedExtraAttack.ExtraAttack_Enhanced_CD
+			p9: 15,
+			// Avatar_Player_Grass_EnhancedExtraAttack.ExtraAttack_Enhanced_Stack_Seed_CD
+			// Avatar_Player_Grass_EnhancedExtraAttack.ExtraAttack_Enhanced_Stack_Moon_CD
+			p10: 4,
+			// Gadget_Player_Grass_EnhancedExtraAttack_Field.ExtraAttack_Enhanced_Field_DamageRatio
+			p11: 1.2,
+			// Gadget_Player_Grass_EnhancedExtraAttack_Field.ExtraAttack_Enhanced_Field_Time
+			p12: 4,
+			// Avatar_Player_Grass_EnhancedExtraAttack.ExtraAttack_Enhanced_Field_Time_2
+			p13: 100,
+		},
+		// Symbiotic Creeper
+		// Player_Grass_Constellation_1 -> Avatar_PlayerBoy_ElementalArt_Grass
+		c1: {
+			// Element_Recover_By_Talent_1
+			p1: 3.5,
+		},
+		// Green Resilience
+		// Player_Grass_Constellation_2 -> Avatar_Player_Grass_Seed_Gadget
+		c2: {
+			// Grass_Seed_Duration, also fed by s3.p5
+			p1: 3,
+		},
+		// Withering Aggregation
+		// Player_Grass_Constellation_6 -> Avatar_Player_Grass_Permanent_Skill_1
+		c6: {
+			// Elemental_Damage_Up_Ratio
+			p1: 0.12,
 		},
 	},
 	Valeriy: {
@@ -6088,6 +11974,64 @@ export const charTalentTables = {
 			p4: [15],
 			// Energy Cost
 			p5: [60],
+		},
+		// Advance With the Creeping Barrage
+		// Valeriy_PermanentSkill_1 -> SkillObj_Valeriy_Funnel
+		a1: {
+			// ChargeValue_Add
+			p1: 5,
+			// ChargeValue_Max
+			p2: 80,
+		},
+		// Into the Breach
+		// Valeriy_PermanentSkill_2 -> Avatar_Valeriy_ExtraAttack
+		a4: {
+			// DamageExtra_Electric_Ratio_PerChargerValue
+			p1: 0.003,
+			// DamageExtra_SSC_Electric_Ratio_PerChargerValue
+			p2: 0.009,
+		},
+		// The Cadence of Suppressive Fire
+		// Valeriy_Constellation_1 -> Avatar_Valeriy_ExtraAttack, Avatar_Valeriy_Constellation_1
+		c1: {
+			// ElemEnergy_Add
+			p1: 6,
+			// ElemEnergy_Add_CD
+			p2: 15,
+			// ElemEnergy_Add_PerCV
+			p3: 1.5,
+		},
+		// Ranks That Charge as One
+		// Valeriy_Constellation_2 -> SkillObj_Valeriy_Funnel, Avatar_Valeriy_ElementalArt
+		c2: {
+			// C2_PerCV_Shield_Ratio
+			p1: 0.08,
+			// C2_Mastery
+			p2: 100,
+			// C2_MaxCV_OverFlow
+			p3: 20,
+			// C2_Mastery_Duration
+			p4: 18,
+		},
+		// Fortitude Unshaken by Attrition
+		// Valeriy_Constellation_4 -> Avatar_Valeriy_Global_Handler, Avatar_Valeriy_ElementalArt, SkillObj_Valeriy_Funnel
+		c4: {
+			// Avatar_Valeriy_Global_Handler.C4_MaxCV_Add_Ratio
+			// Avatar_Valeriy_ElementalArt.C4_CV_Add_Ratio
+			// SkillObj_Valeriy_Funnel.C4_CV_Add_Ratio
+			p1: 0.3,
+		},
+		// The Strength to Breach Enemy Lines
+		// Valeriy_Constellation_6 -> Avatar_Valeriy_Constellation_6
+		c6: {
+			// Damage_Modify_Ratio
+			p1: 1,
+			// Pierce_Duration
+			p2: 7,
+			// Critical_Add
+			p3: 0.1,
+			// CriticalHurt_Add
+			p4: 0.4,
 		},
 	},
 	Varesa: {
@@ -6153,6 +12097,68 @@ export const charTalentTables = {
 			p5: [402.64, 432.838, 463.036, 503.3, 533.498, 563.696, 603.96, 644.224, 684.488, 724.752, 765.016, 805.28, 855.61, 905.94, 956.27],
 			// Volcano Kablam Energy Cost
 			p6: [30],
+		},
+		// Tag-Team Triple Jump!
+		// Varesa_PermanentSkill_1 ->
+		//     Avatar_Varesa_PermanentSkill_1
+		//     Avatar_Varesa_ElementalArt
+		//     Avatar_Varesa_FallingAnthem
+		a1: {
+			// Pretty_FallingDamageUp
+			p1: 0.5,
+			// Berserker_FallingDamageUp
+			p2: 1.8,
+		},
+		// The Hero Twice-Returned!
+		// Varesa_PermanentSkill_2 -> Avatar_Varesa_PermanentSkill_2
+		a4: {
+			// PermanentSkill_2_AttackRatio
+			p1: 0.35,
+			// PermanentSkill_2_Buff_Duration
+			p2: 12,
+		},
+		// Blazing Heart, Singular Advance!
+		// Varesa_PermanentSkill_4 -> Avatar_Varesa_PermanentSkill_4
+		a0_2: {
+			// Phlogiston
+			p1: 20,
+			// Time
+			p2: 10,
+		},
+		// Undying Passion
+		// Varesa_Constellation_1 ->
+		//     Avatar_Varesa_Constellation_1
+		//     Avatar_Varesa_ElementalArt
+		//     Avatar_Varesa_SpecialSprintDash_Cost
+		//     Avatar_Varesa_PermanentSkill_1
+		c1: {
+			p1: 1.8,
+			// CostRatio_Constellation_1
+			p2: 0.3,
+		},
+		// Beyond the Edge of Light
+		// Varesa_Constellation_2 -> Avatar_Varesa_Constellation_2, Avatar_Varesa_FallingAnthem
+		c2: {
+			// Energy
+			p1: 11.5,
+		},
+		// The Courage to Press On
+		// Varesa_Constellation_4 -> Avatar_Varesa_Constellation_4, Avatar_Varesa_ElementalBurst
+		c4: {
+			// Avatar_Varesa_ElementalBurst.Varesa_Constellation_4_DamageExtra_Ratio
+			p1: 5,
+			// Avatar_Varesa_ElementalBurst.Varesa_Constellation_4_DamageExtra_Max
+			p2: 20000,
+			// Avatar_Varesa_Constellation_4.Varesa_Constellation_4_BerserkerBurstUp
+			p3: 1,
+		},
+		// A Hero of Justice's Triumph
+		// Varesa_Constellation_6 -> Avatar_Varesa_Constellation_6, Avatar_Varesa_FallingAnthem, Avatar_Varesa_ElementalArt
+		c6: {
+			// CritUp
+			p1: 0.1,
+			// CritHurtUp
+			p2: 1,
 		},
 	},
 	Varka: {
@@ -6243,6 +12249,84 @@ export const charTalentTables = {
 			// Energy Cost
 			p4: [60],
 		},
+		// Dawn Wind's March
+		// Varka_PermanentSkill_2 -> Avatar_Varka_PermanentSkill_2, Avatar_Varka_DoubleBlade
+		a1: {
+			// Avatar_Varka_PermanentSkill_2.Ratio
+			p1: 0.1,
+			// Avatar_Varka_PermanentSkill_2.MaxRatio
+			p2: 0.25,
+			// Avatar_Varka_DoubleBlade.DamageRatio1
+			p3: 1.4,
+			// Avatar_Varka_DoubleBlade.DamageRatio2
+			p4: 2.2,
+		},
+		// Wind's Vanguard
+		// Varka_PermanentSkill_1 -> Avatar_Varka_PermanentSkill_1
+		a4: {
+			// Dura
+			p1: 8,
+			// DamageRatio
+			p2: 0.075,
+			// MaxStack
+			p3: 4,
+			// Trigger_CD
+			p4: 1,
+		},
+		// Homebound Wind's Paean
+		// Varka_PermanentSkill_3 -> Avatar_Varka_PermanentSkill_3
+		a0: {
+			// SkillCD
+			p1: 0.05,
+		},
+		// Witch's Eve Rite: Dawn's Return
+		// Varka_Hexenzirkel_1 -> Avatar_Varka_ElementalArt
+		sp: {
+			// cdDelta (subtracted)
+			p1: 1,
+		},
+		// "Come, Friend, Let Us Dance Beneath the Moon's Soft Glow"
+		// Varka_Constellation_1 ->
+		//     Avatar_Varka_Talent_1
+		//     Avatar_Varka_ElementalArt
+		//     Avatar_Varka_Special_ElementalArt
+		//     Avatar_Varka_Special_ExtraAttack
+		c1: {
+			// Rate
+			p1: 2,
+		},
+		// "When Dawn Breaks, Our Journey Shall Take Flight"
+		// Varka_Constellation_2 ->
+		//     Avatar_Varka_Talent_2
+		//     Avatar_Varka_Special_ElementalArt
+		//     Avatar_Varka_Special_ExtraAttack
+		c2: {
+			// Talent2_Damage
+			p1: 8,
+		},
+		// "For None May Take From Us Our Freedom of Song"
+		// Varka_Constellation_4 -> Avatar_Varka_Talent_4
+		c4: {
+			// TeamWindRatio
+			// TeamElemRatio
+			p1: 0.2,
+			p2: 0,
+			// BuffDura
+			p3: 10,
+		},
+		// "Beloved Mondstadt, Steadfast You Shall Shine"
+		// Varka_Constellation_6 ->
+		//     Avatar_Varka_Talent_6
+		//     Avatar_Varka_Special_ElementalArt
+		//     Avatar_Varka_Special_ExtraAttack
+		//     Avatar_Varka_PermanentSkill_1
+		c6: {
+			// Avatar_Varka_Special_ElementalArt.Talent6_Dura
+			// Avatar_Varka_Special_ExtraAttack.Talent6_Dura
+			p1: 3,
+			// Avatar_Varka_PermanentSkill_1.CritHurt
+			p2: 0.2,
+		},
 	},
 	Venti: {
 		s1_id: 10221,
@@ -6295,6 +12379,70 @@ export const charTalentTables = {
 			p4: [15],
 			// Energy Cost
 			p5: [60],
+		},
+		// Embrace of Winds
+		// Venti_PermanentSkill_1 -> Avatar_Venti_WindBlade
+		a1: {
+			p1: 20,
+		},
+		// Stormeye
+		// Venti_PermanentSkill_2 -> Avatar_Venti_Hurricane_DropBall
+		a4: {
+			p1: 15,
+			p2: 15,
+		},
+		// Witch's Eve Rite: Temporal Wind's Eulogy
+		// Venti_Hexenzirkel_1 -> Avatar_Venti_HexenzirkelSkill
+		sp: {
+			// Buff_Ratio
+			p1: 0.5,
+			// Buff_Ratio_Burst
+			p2: 1.35,
+			// Buff_Time
+			p3: 4,
+		},
+		// Splitting Gales
+		// Venti_Constellation_1 ->
+		//     Avatar_Venti_ShootArrow_Aiming
+		//     Avatar_Venti_ShootArrow_01
+		//     Avatar_Venti_ShootArrow_02
+		//     Avatar_Venti_ShootArrow_03
+		//     Avatar_Venti_ShootArrow_04
+		//     Avatar_Venti_ShootArrow_05
+		//     Avatar_Venti_ShootArrow_06
+		//     Bullet_Venti_Constellation01_Arrow
+		//     Bullet_Venti_Constellation01_Arrow_Fire
+		//     Bullet_Venti_Constellation01_Arrow_Electric
+		//     Bullet_Venti_Constellation01_Arrow_Water
+		//     Bullet_Venti_Constellation01_Arrow_Ice
+		//     Venti_Constellation_1_CDHandler
+		c1: {
+			// Bullet_Venti_Constellation01_Arrow.Constellation01_Arrow_Damge
+			// Bullet_Venti_Constellation01_Arrow_Fire.Constellation01_Arrow_Damge
+			// Bullet_Venti_Constellation01_Arrow_Electric.Constellation01_Arrow_Damge
+			// Bullet_Venti_Constellation01_Arrow_Water.Constellation01_Arrow_Damge
+			// Bullet_Venti_Constellation01_Arrow_Ice.Constellation01_Arrow_Damge
+			p1: 0.2,
+		},
+		// Breeze of Reminiscence
+		// Venti_Constellation_2 ->
+		//     Avatar_Venti_WindBlade
+		//     Venti_WindBlade_FX
+		//     Venti_WindBlade_FX_Land
+		//     Avatar_Venti_Hurricane
+		c2: {
+			// Avatar_Venti_WindBlade.Random_chance
+			p1: 0.25,
+			// Venti_WindBlade_FX_Land.Constellation_2_Ratio
+			p2: 3,
+			// Avatar_Venti_WindBlade.Constellation_2_Time
+			p3: 15,
+		},
+		// Storm of Defiance
+		// Venti_Constellation_6 -> Hurricane_FX, Avatar_Venti_Hurricane
+		c6: {
+			// Twisted_Hexenzirkel
+			p1: 1,
 		},
 	},
 	Vesna: {
@@ -6361,6 +12509,78 @@ export const charTalentTables = {
 			// Energy Cost
 			p4: [60],
 		},
+		// Rite of Spring's Procession
+		// Vesna_PermanentSkill_1 -> Avatar_Vesna_PermanentSkill_1, Avatar_Vesna_Damage_Handler
+		a1: {
+			// Avatar_Vesna_PermanentSkill_1.BuffDuration
+			p1: 20,
+			// Avatar_Vesna_PermanentSkill_1.MaxBuffCount
+			p2: 6,
+			// Avatar_Vesna_Damage_Handler.Sword_Buff_Up_Factor
+			p3: 0.1,
+		},
+		// Truth Prevails
+		// Vesna_PermanentSkill_2 -> Avatar_Vesna_PermanentSkill_2
+		a4: {
+			// AttackUpRatio
+			p1: 0.06,
+			// ElementalMasteryUp
+			p2: 25,
+		},
+		// Stellar Jubilee: Splendid Prelude
+		// Vesna_PermanentSkill_3 -> Avatar_Vesna_PermanentSkill_3
+		a0: {
+			// AttackTransferRatio
+			p1: 0.007,
+			// MaxTransRatio
+			p2: 0.14,
+		},
+		// The Grand Circuit
+		// Vesna_PermanentSkill_4 -> Avatar_Vesna_PermanentSkill_4, Avatar_Vesna_SpecialMove
+		a0_2: {
+			// Stamina_Revive_Switch
+			p1: 50,
+			// SwitchIn_CD
+			p2: 10,
+		},
+		// Winter's Farewell Feast
+		// Vesna_Constellation_1 -> Avatar_Vesna_Constellation_1, Avatar_Vesna_ElementalArt, Avatar_Vesna_ElementalArt_C
+		c1: {
+			// Avatar_Vesna_ElementalArt.Buff_Duration_Extra
+			p1: 5,
+			// Avatar_Vesna_Constellation_1.C1_StarDamage_Ratio
+			p2: 0.2,
+		},
+		// Kolo of Spring's Arrival
+		// Vesna_Constellation_2 -> Avatar_Vesna_Constellation_2, Avatar_Vesna_ElementalArt
+		c2: {
+			// C2_ATK_Ratio
+			p1: 0.4,
+		},
+		// Glory to Our Forebears
+		// Vesna_Constellation_4 -> Avatar_Vesna_Constellation_4, Avatar_Vesna_PermanentSkill_2
+		c4: {
+			// C4_PowerUpRatio
+			p1: 2,
+		},
+		// Unwavering Ardor
+		// Vesna_Constellation_6 ->
+		//     Avatar_Vesna_Constellation_6
+		//     Avatar_Vesna_ElementalArt_D
+		//     Avatar_Vesna_ElementalArt_D_SwitchAttack
+		//     Avatar_Vesna_ElementalArt
+		//     Avatar_Vesna_Damage_Handler
+		c6: {
+			// Avatar_Vesna_ElementalArt_D.BuffDuration
+			p1: 5,
+			// Avatar_Vesna_Damage_Handler.Elemental_Art_D
+			p2: 1.5,
+			// Avatar_Vesna_Damage_Handler.Elemental_Art_D_Sword_Star
+			p3: 2,
+			// Avatar_Vesna_Constellation_6.StarSwirlIceDelta
+			// Avatar_Vesna_Constellation_6.StarSwirlWindDelta
+			p4: 0.2,
+		},
 	},
 	Vodyanitsa: {
 		s1_id: 11401,
@@ -6418,6 +12638,78 @@ export const charTalentTables = {
 			// Energy Cost
 			p4: [60],
 		},
+		// The Last Djeguako Songstress
+		// Vodyanitsa_PermanentSkill_2 -> Avatar_Vodyanitsa_ElementalArt
+		a1: {
+			p1: 0.35,
+			p2: 6,
+		},
+		// Dirge of the Fandyr
+		// Vodyanitsa_PermanentSkill_1 -> Avatar_Vodyanitsa_ElementalArt
+		a4: {
+			// Vodyanitsa_MaxConcerto
+			p1: 25,
+			// Vodyanitsa_MaxExtraConcerto
+			p2: 10,
+			// Vodyanitsa_Concerto_MinHP
+			p3: 40000,
+			// Vodyanitsa_Concerto_DamageExtra_StarSwirl_Perkilo
+			p4: 260,
+			// Vodyanitsa_Concerto_DamageExtra_IceWater_Perkilo
+			p5: 140,
+			// Vodyanitsa_Concerto_DamageExtra_MaxValue_StarSwirl
+			p6: 6500,
+			// Vodyanitsa_Concerto_DamageExtra_MaxValue_IceWater
+			p7: 3500,
+		},
+		// Echoes Over the Frozen Lake
+		// Vodyanitsa_PermanentSkill_3 -> Avatar_Vodyanitsa_ElementalArt
+		a0: {
+			// Vodyanitsa_ElementalArt_Hold_Stamina_Cost
+			p1: 24,
+		},
+		// Waters in Full Splendor
+		// Vodyanitsa_Constellation_1 -> Avatar_Vodyanitsa_ElementalArt
+		c1: {
+			// Vodyanitsa_Constellation_1_AttackUpRatio
+			p1: 0.008,
+			// Vodyanitsa_Constellation_1_Duration
+			p2: 5,
+		},
+		// Echoes That Pierce the Snow
+		// Vodyanitsa_Constellation_2 -> Bullet_Vodyanitsa_ElementalArt, Avatar_Vodyanitsa_ElementalArt
+		c2: {
+			// Bullet_Vodyanitsa_ElementalArt.Vodyanitsa_Constellation_2_IceWaterCritHurtRatio
+			p1: 0.5,
+			// Bullet_Vodyanitsa_ElementalArt.Vodyanitsa_Constellation_2_StarSwirlCritHurtRatio
+			p2: 0.6,
+			// Bullet_Vodyanitsa_ElementalArt.Vodyanitsa_Constellation_2_Duration
+			p3: 5,
+			// Avatar_Vodyanitsa_ElementalArt.Vodyanitsa_ElementalArt_Duration, also fed by s2.p2
+			p4: 9,
+		},
+		// Melancholic Voice Upon the Gentle Waters
+		// Vodyanitsa_Constellation_4 -> Avatar_Vodyanitsa_ElementalArt
+		c4: {
+			// Vodyanitsa_Constellation_4_HPThreshold
+			p1: 0.4,
+			// Vodyanitsa_Constellation_4_ExtraHealRatio
+			p2: 0.5,
+			// Vodyanitsa_Constellation_4_MaxHPRatio
+			p3: 0.2,
+			// Vodyanitsa_Constellation_4_Duration
+			p4: 6,
+			// Vodyanitsa_Constellation_4_MaxStackCount
+			p5: 3,
+		},
+		// Neverending Song of Revelry
+		// Vodyanitsa_Constellation_6 -> Avatar_Vodyanitsa_ElementalArt, Bullet_Vodyanitsa_ElementalArt
+		c6: {
+			// Vodyanitsa_Constellation_6_StarSwirlEffectFactor
+			p1: 0.25,
+			// Vodyanitsa_Constellation_6_IceWaterDPR
+			p2: 0.6,
+		},
 	},
 	Wanderer: {
 		s1_id: 10751,
@@ -6462,6 +12754,66 @@ export const charTalentTables = {
 			p2: [15],
 			// Energy Cost
 			p3: [60],
+		},
+		// Jade-Claimed Flower
+		// Wanderer_PermanentSkill_1 -> Avatar_Wanderer_PermanentSkill_1, Avatar_Wanderer_ElementalArt_Ring
+		a1: {
+			// PermanentSkill_1_Fire_Atk_Ratio
+			p1: 0.3,
+			// PermanentSkill_1_Water_Add_Stamina
+			p2: 20,
+			// PermanentSkill_1_Ice_Crit_Ratio
+			p3: 0.2,
+			// PermanentSkill_1_Electric_Add_Energy
+			p4: 0.8,
+		},
+		// Gales of Reverie
+		// Wanderer_PermanentSkill_2 -> Avatar_Wanderer_PermanentSkill_2, Avatar_Wanderer_ElementalArt_Bullet_HoverDash
+		a4: {
+			// Avatar_Wanderer_PermanentSkill_2.PermanentSkill_2_Chance
+			p1: 0.16,
+			// Avatar_Wanderer_PermanentSkill_2.PermanentSkill_2_Chance_Compensate
+			p2: 0.12,
+			// Avatar_Wanderer_ElementalArt_Bullet_HoverDash.PermanentSkill_2_Damage
+			p3: 0.35,
+		},
+		// Shoban: Ostentatious Plumage
+		// Wanderer_Constellation_1 -> Avatar_Wanderer_ElementalArt_HoverAir, Avatar_Wanderer_ElementalArt_Bullet_HoverDash
+		c1: {
+			// Avatar_Wanderer_ElementalArt_HoverAir.Constellation_1_AtkSpeed_Ratio
+			p1: 0.1,
+			// Avatar_Wanderer_ElementalArt_Bullet_HoverDash.Constellation_1_ExtraDamagePercentage
+			p2: 0.25,
+		},
+		// Niban: Isle Amidst White Waves
+		// Wanderer_Constellation_2 -> Avatar_Wanderer_ElementalBurst, Avatar_Wanderer_ElementalBurst_Bullet
+		c2: {
+			// Constellation_2_AddHurt_Ratio
+			p1: 0.04,
+			// Constellation_2_AddHurt_Ratio_Max
+			p2: 2,
+		},
+		// Shugen: The Curtains' Melancholic Sway
+		// Wanderer_Constellation_6 ->
+		//     Avatar_Wanderer_ElementalArt_Bullet_1
+		//     Avatar_Wanderer_ElementalArt_Bullet_2
+		//     Avatar_Wanderer_ElementalArt_Bullet_3
+		//     Avatar_Wanderer_ElementalArt_Bullet_4
+		//     Avatar_Wanderer_ElementalArt_HoverAir
+		//     Avatar_Wanderer_ElementalArt_Bullet_1_Extra
+		//     Avatar_Wanderer_ElementalArt_Bullet_2_Extra
+		//     Avatar_Wanderer_ElementalArt_Bullet_3_Extra
+		//     Avatar_Wanderer_ElementalArt_Bullet_4_Extra
+		c6: {
+			// Avatar_Wanderer_ElementalArt_Bullet_1_Extra.NormalAttack_Constellation_6_Ratio
+			// Avatar_Wanderer_ElementalArt_Bullet_2_Extra.NormalAttack_Constellation_6_Ratio
+			// Avatar_Wanderer_ElementalArt_Bullet_3_Extra.NormalAttack_Constellation_6_Ratio
+			// Avatar_Wanderer_ElementalArt_Bullet_4_Extra.NormalAttack_Constellation_6_Ratio
+			p1: 0.4,
+			// Avatar_Wanderer_ElementalArt_HoverAir.Constellation_6_Revive_Stamina
+			p2: 4,
+			// Avatar_Wanderer_ElementalArt_HoverAir.Constellation_6_Revive_Stamina_Threshold
+			p3: 40,
 		},
 	},
 	Wriothesley: {
@@ -6514,6 +12866,121 @@ export const charTalentTables = {
 			// Energy Cost
 			p4: [60],
 		},
+		// There Shall Be a Plea for Justice
+		// Wriothesley_PermanentSkill_1 -> Avatar_Wriothesley_ElementalArt_Buff
+		a1: {
+			// Wriothesley_ExtraAttack_Buff_HP_Threshold
+			p1: 0.6,
+			// Wriothesley_ExtraAttack_Buff_Ratio
+			p2: 0.5,
+			// Wriothesley_ExtraAttack_Buff_HealHP
+			p3: 0.3,
+			// Wriothesley_ExtraAttack_Buff_CD
+			p4: 5,
+		},
+		// There Shall Be a Reckoning for Sin
+		// Wriothesley_PermanentSkill_2 -> Avatar_Wriothesley_ElementalArt_Buff
+		a4: {
+			// Wriothesley_HPUpDown_AttackRatio
+			p1: 0.06,
+			// Wriothesley_HPUpDown_Buff_Stacking_Max
+			p2: 5,
+		},
+		// There Shall Be an Unveiling for Injustice
+		// Wriothesley_PermanentSkill_3 ->
+		//     Avatar_Wriothesley_ElementalArt_Buff
+		//     Avatar_Wriothesley_ExtraAttack_Strike
+		//     Avatar_Wriothesley_NormalAttack_Damage_Handler
+		//     Avatar_Wriothesley_AttackSpeed_Buff
+		sp: {
+			// Avatar_Wriothesley_ElementalArt_Buff.Wriothesley_P3_HP_Threshold
+			p1: 0.6,
+			// Avatar_Wriothesley_ElementalArt_Buff.Wriothesley_P3_Heal_Ratio
+			p2: 0.3,
+			// Avatar_Wriothesley_ElementalArt_Buff.Wriothesley_P3_Heal_CD
+			p3: 2,
+			// Avatar_Wriothesley_ElementalArt_Buff.Wriothesley_P3_StarSuperconductorIceDamage_Ratio
+			p4: 0.3,
+			// Avatar_Wriothesley_NormalAttack_Damage_Handler.Wriothesley_P3_SSC_NA3_DamageRatio
+			p5: -0.4,
+			// Avatar_Wriothesley_NormalAttack_Damage_Handler.Wriothesley_P3_SSC_NA5_DamageRatio
+			p6: -0.2,
+		},
+		// Terror for the Evildoers
+		// Wriothesley_Constellation_1 -> Avatar_Wriothesley_ElementalArt_Buff
+		c1: {
+			// Wriothesley_ExtraAttack_Buff_CD_Reduce
+			p1: 2.5,
+			// Wriothesley_ExtraAttack_Buff_Extra_Ratio
+			p2: 1.5,
+			// Wriothesley_ElementalArt_Buff_Extend_Duration
+			p3: 4,
+			// Wriothesley_C1_SSC_EA_AddRatio
+			p4: 0.5,
+			// Wriothesley_C1_SSC_NA_AddRatio
+			p5: 0.5,
+			// Wriothesley_C1_AddDuration
+			p6: 5,
+		},
+		// Shackles for the Arrogant
+		// Wriothesley_Constellation_2 ->
+		//     Avatar_Wriothesley_ElementalArt_Buff
+		//     Avatar_Wriothesley_ElementalBurst_Bullet
+		//     Avatar_Wriothesley_NormalAttack_Damage_Handler
+		//     Avatar_Wriothesley_ExtraAttack_Strike
+		c2: {
+			// Avatar_Wriothesley_ElementalBurst_Bullet.Wriothesley_Constellation_2_AddHurt_Ratio
+			p1: 0.4,
+			// Avatar_Wriothesley_NormalAttack_Damage_Handler.Wriothesley_C2_NoSSC_NA_Ratio
+			p2: 0.25,
+			// Avatar_Wriothesley_ExtraAttack_Strike.Wriothesley_C2_NoSSC_EA_Ratio
+			p3: 0.3,
+			// Avatar_Wriothesley_NormalAttack_Damage_Handler.Wriothesley_C2_SSC_NA3_NewRatio
+			p4: -0.1,
+			// Avatar_Wriothesley_NormalAttack_Damage_Handler.Wriothesley_C2_SSC_NA5_NewRatio
+			p5: 0.2,
+			// Avatar_Wriothesley_ExtraAttack_Strike.Wriothesley_C2_SSC_EA_NewRatio
+			p6: 0.5,
+		},
+		// Redemption for the Suffering
+		// Wriothesley_Constellation_4 -> Avatar_Wriothesley_AttackSpeed_Buff, Avatar_Wriothesley_ElementalArt_Buff
+		c4: {
+			// Avatar_Wriothesley_AttackSpeed_Buff.Wriothesley_AttackSpeed_Buff_Self
+			p1: 0.2,
+			// Avatar_Wriothesley_AttackSpeed_Buff.Wriothesley_AttackSpeed_Buff_Self_Duration
+			p2: 4,
+			// Avatar_Wriothesley_AttackSpeed_Buff.Wriothesley_AttackSpeed_Buff_Team
+			p3: 0.1,
+			// Avatar_Wriothesley_AttackSpeed_Buff.Wriothesley_AttackSpeed_Buff_Team_Duration
+			p4: 6,
+			// Avatar_Wriothesley_ElementalArt_Buff.Wriothesley_ExtraAttack_Buff_HealHP_Extra
+			p5: 0.2,
+			// Avatar_Wriothesley_AttackSpeed_Buff.Wriothesley_SubHurt_SSC_Buff
+			p6: 0.25,
+			// Avatar_Wriothesley_AttackSpeed_Buff.Wriothesley_AttackSpeed_SSC_Buff
+			p7: 0.2,
+			// Avatar_Wriothesley_AttackSpeed_Buff.Wriothesley_Other_AttackSpeed_SSC_Buff
+			p8: 0.1,
+		},
+		// Esteem for the Innocent
+		// Wriothesley_Constellation_6 ->
+		//     Avatar_Wriothesley_ExtraAttack_Strike
+		//     Avatar_Wriothesley_NormalAttack_Damage_Handler
+		c6: {
+			// Avatar_Wriothesley_ExtraAttack_Strike.Wriothesley_ExtraAttack_Constellation_6_CritRate
+			p1: 0.1,
+			// Avatar_Wriothesley_ExtraAttack_Strike.Wriothesley_ExtraAttack_Constellation_6_CritHurt
+			p2: 0.8,
+			// Avatar_Wriothesley_ExtraAttack_Strike.Wriothesley_ExtraAttack_Constellation_6_Ratio
+			p3: 1,
+			// Avatar_Wriothesley_ExtraAttack_Strike.Wriothesley_C6_SSC_CritRate
+			p4: 0.1,
+			// Avatar_Wriothesley_ExtraAttack_Strike.Wriothesley_C6_SSC_CritHurt
+			p5: 0.8,
+			// Avatar_Wriothesley_NormalAttack_Damage_Handler.Wriothesley_C6_SSC_Icicle_Ratio
+			// Avatar_Wriothesley_ExtraAttack_Strike.Wriothesley_C6_SSC_Icicle_Ratio
+			p6: 0.2,
+		},
 	},
 	Xiangling: {
 		s1_id: 10231,
@@ -6562,6 +13029,50 @@ export const charTalentTables = {
 			p6: [20],
 			// Energy Cost
 			p7: [80],
+		},
+		// Crossfire
+		// Xiangling_ProudSkill_23 -> Avatar_Xiangling_PandaFire_Effect, Avatar_Xiangling_PandaFire_Attack
+		a1: {
+			// Xiangling_ProudSkill_23_P1_Range
+			p1: 0.2,
+		},
+		// Beware, It's Super Hot!
+		// Xiangling_ProudSkill_24 -> Avatar_Xiangling_PandaFireAim, Avatar_Xiangling_PandaPepper
+		a4: {
+			// Xiangling_ProudSkill24_P1_AttackUpRate
+			p1: 0.1,
+			// Xiangling_ProudSkill24_P2_AttackUpTime
+			p2: 10,
+		},
+		// Crispy Outside, Tender Inside
+		// Xiangling_Talent_231 -> Avatar_Xiangling_PandaFireAim
+		c1: {
+			// Xiangling_Talent_231_P1_FireDefDown (subtracted)
+			p1: 0.15,
+			// Xiangling_Talent_231_P2_FireDefDownTime
+			p2: 6,
+		},
+		// Oil Meets Fire
+		// Xiangling_Talent_232 -> Avatar_Xiangling_TalentBomb
+		c2: {
+			// Xiangling_Talent_232_P1_Bomb_Time
+			p1: 2,
+			// Xiangling_Talent_232_P2_Bomb_Range
+			p2: 2,
+			// Xiangling_Talent_232_P3_Bomb_Damage
+			p3: 0.75,
+		},
+		// Slowbake
+		// Xiangling_Talent_234 -> Avatar_Xiangling_FireCircle_Material
+		c4: {
+			// Time_Rate
+			p1: 0.4,
+		},
+		// Condensed Pyronado
+		// Xiangling_Talent_236 -> Avatar_Xiangling_FireCircle_Material
+		c6: {
+			// Xiangling_Talent_236_P1_FireAddHurtDelta
+			p1: 0.15,
 		},
 	},
 	Xianyun: {
@@ -6620,6 +13131,66 @@ export const charTalentTables = {
 			// Energy Cost
 			p11: [70],
 		},
+		// Galefeather Pursuit
+		// Liuyun_PermanentSkill_1 -> Avatar_Liuyun_PermanentSkill_1, Avatar_Liuyun_ElementalArt_ExtraFallingAttack
+		a1: {
+			// CritUp_Lv1
+			p1: 0.04,
+			// CritUp_Lv2
+			p2: 0.06,
+			// CritUp_Lv3
+			p3: 0.08,
+			// CritUp_Lv4
+			p4: 0.1,
+			// Timer
+			p5: 20,
+		},
+		// Consider, the Adeptus in Her Realm
+		// Liuyun_PermanentSkill_2 -> Avatar_Liuyun_ElementBurst_Drone
+		a4: {
+			// PermanentSkill_Atk_Ratio
+			p1: 2,
+			// Max_EffAtk
+			p2: 4500,
+			// Trigger_CD
+			p3: 0.4,
+		},
+		// Aloof From the World
+		// Liuyun_Constellation_2 -> Avatar_Liuyun_Constellation_2, Avatar_Liuyun_ElementBurst_Drone
+		c2: {
+			// Avatar_Liuyun_Constellation_2.Atk_Ratio
+			p1: 0.2,
+			// Avatar_Liuyun_Constellation_2.Duration
+			p2: 15,
+			// Avatar_Liuyun_ElementBurst_Drone.Constellation_2_ExtraRatio
+			p3: 1,
+		},
+		// Mystery Millet Gourmet
+		// Liuyun_Constellation_4 -> Avatar_Liuyun_Constellation_4
+		c4: {
+			// Constellation_Heal_AttackRatio_Lv1
+			p1: 0.5,
+			// Constellation_Heal_AttackRatio_Lv2
+			p2: 0.8,
+			// Constellation_Heal_AttackRatio_Lv3
+			p3: 1.5,
+			// Heal_CD
+			p4: 5,
+		},
+		// They Call Her Cloud Retainer
+		// Liuyun_Constellation_6 -> Avatar_Liuyun_Constellation_6, Avatar_Liuyun_ElementalArt, Avatar_Liuyun_ElementBurst
+		c6: {
+			// Constellation_6_CritHurtUp_Lv1
+			p1: 0.15,
+			// Constellation_6_CritHurtUp_Lv2
+			p2: 0.35,
+			// Constellation_6_CritHurtUp_Lv3
+			p3: 0.7,
+			// Free_Times
+			p4: 8,
+			// Timer
+			p5: 16,
+		},
 	},
 	Xiao: {
 		s1_id: 10261,
@@ -6670,6 +13241,42 @@ export const charTalentTables = {
 			p4: [18],
 			// Energy Cost
 			p5: [70],
+		},
+		// Conqueror of Evil: Tamer of Demons
+		// Xiao_PermanentSkill_1 -> Avatar_Xiao_Talent_DevilMayCry
+		a1: {
+			// DevilMayCry_DamageUp
+			p1: 0.05,
+		},
+		// Dissolution Eon: Heaven Fall
+		// Xiao_PermanentSkill_2 -> Avatar_Xiao_DevilDash_Handler
+		a4: {
+			// DevilDash_SoulReaper_Duration
+			p1: 7,
+			// DevilDash_SoulReaper_DamageUp
+			p2: 0.15,
+			// DevilDash_SoulReaper_MaxStack
+			p3: 3,
+		},
+		// Annihilation Eon: Blossom of Kaleidos
+		// Xiao_Constellation_2 -> Avatar_Xiao_Talent_Zen
+		c2: {
+			// Xiao_Talent_Zen_ChargeEfficiencyUp
+			p1: 0.25,
+		},
+		// Transcension: Extinction of Suffering
+		// Xiao_Constellation_4 -> Avatar_Xiao_Talent_LowHP_DefenceUp
+		c4: {
+			// Xiao_Talent_LowHPRatio
+			p1: 0.5,
+			// Xiao_Talent_LowHP_DefenceRatio
+			p2: 1,
+		},
+		// Conqueror of Evil: Guardian Yaksha
+		// Xiao_Constellation_6 -> Avatar_Xiao_DevilDash_Handler
+		c6: {
+			// DevilDash_Infinite_Activator_Duration
+			p1: 1,
 		},
 	},
 	Xilonen: {
@@ -6733,6 +13340,86 @@ export const charTalentTables = {
 			p6: [15],
 			// Energy Cost
 			p7: [60],
+		},
+		// Netotiliztli's Echoes
+		// Xilonen_PermanentSkill_1 ->
+		//     Avatar_Xilonen_Gem_Handler
+		//     Avatar_Xilonen_ElementalArt_Launch
+		//     Avatar_Xilonen_PermanentSkill_1
+		a1: {
+			// SkateAttack_GainNyx_Lv1
+			p1: 35,
+			// SkateAttack_GainDamage_Lv1
+			p2: 0.3,
+		},
+		// Portable Armored Sheath
+		// Xilonen_PermanentSkill_2 -> Avatar_Xilonen_PermanentSkill_2, Avatar_Xilonen_ElementalArt_SpecialMove
+		a4: {
+			// Avatar_Xilonen_ElementalArt_SpecialMove.PermanentSkill_2_Buff_CD
+			p1: 14,
+			// Avatar_Xilonen_PermanentSkill_2.PermanentSkill_2_DefenceRatio
+			p2: 0.2,
+			// Avatar_Xilonen_PermanentSkill_2.PermanentSkill_2_Buff_Duration
+			p3: 15,
+		},
+		// Tour of Tepeilhuitl
+		// Xilonen_PermanentSkill_4 -> Avatar_Xilonen_PermanentSkill_4
+		a0_2: {
+			p1: 0,
+			p2: 0,
+			// Phlogiston
+			p3: 15,
+		},
+		// Sabbatical Phrase
+		// Xilonen_Constellation_1 ->
+		//     Avatar_Xilonen_Constellation_1
+		//     Avatar_Xilonen_ElementalArt_SpecialMove
+		//     Avatar_Xilonen_ElementalArt_Launch
+		c1: {
+			// CostRatio_Constellation_1
+			p1: 0.3,
+		},
+		// Chiucue Mix
+		// Xilonen_Constellation_2 ->
+		//     Avatar_Xilonen_Constellation_2
+		//     Avatar_Xilonen_Gem_Handler
+		//     Avatar_Xilonen_ElementalArt_Exit
+		//     Avatar_Xilonen_ElementalArt_SpecialMove
+		c2: {
+			// Fire_AttackUpRatio
+			p1: 0.45,
+			// Water_MaxHPRatio
+			p2: 0.45,
+			// Ice_CriticalHurtDelta
+			p3: 0.6,
+			// Rock_DamagePercentageRatio
+			p4: 0.5,
+			// ReviveElemEnergy
+			p5: 25,
+			// ReduceBurstCD_Delta
+			p6: 6,
+		},
+		// Suchitl's Trance
+		// Xilonen_Constellation_4 -> Avatar_Xilonen_Constellation_4, Avatar_Xilonen_ElementalArt_Launch
+		c4: {
+			// Constellation_4_ExtraRatio
+			p1: 0.65,
+			// Constellation_4_Buff_Count
+			p2: 6,
+			// Constellation_4_Buff_Time
+			p3: 15,
+		},
+		// Imperishable Night Carnival
+		// Xilonen_Constellation_6 -> Avatar_Xilonen_Constellation_6
+		c6: {
+			// Constellation_6_Duration
+			p1: 5,
+			// Constellation_6_ExtraRatio
+			p2: 3,
+			// Constellation_6_CD
+			p3: 15,
+			// Constellation_6_Heal_Defence
+			p4: 1.2,
 		},
 	},
 	Xingqiu: {
@@ -6852,6 +13539,47 @@ export const charTalentTables = {
 			// Energy Cost
 			p4: [60],
 		},
+		// "...Now That's Rock 'N' Roll!"
+		// Xinyan_PermanentSkill_2 ->
+		//     Avatar_Xinyan_ElementalArt_Shield_1
+		//     Avatar_Xinyan_ElementalArt_Shield_2
+		//     Avatar_Xinyan_ElementalArt_Shield_3
+		a4: {
+			// Avatar_Xinyan_ElementalArt_Shield_1.Xinyan_Talent_ShieldEnhancePhysicalDMG_DMGRate
+			// Avatar_Xinyan_ElementalArt_Shield_2.Xinyan_Talent_ShieldEnhancePhysicalDMG_DMGRate
+			// Avatar_Xinyan_ElementalArt_Shield_3.Xinyan_Talent_ShieldEnhancePhysicalDMG_DMGRate
+			p1: 0.15,
+		},
+		// Fatal Acceleration
+		// Xinyan_Constellation_1 -> Avatar_Xinyan_Talent_CritEnhanceAtkSpeed
+		c1: {
+			// Avatar_Xinyan_Talent_CritEnhanceAtkSpeed_AttackSpeedRatio
+			p1: 0.12,
+			// Avatar_Xinyan_Talent_CritEnhanceAtkSpeed_Duration
+			p2: 5,
+		},
+		// Impromptu Opening
+		// Xinyan_Constellation_2 -> Avatar_Xinyan_ElementalBurst_Hit
+		c2: {
+			// Xinyan_Talent_CritWhenElementalBurst_CritRate
+			p1: 1,
+		},
+		// Wildfire Rhythm
+		// Xinyan_Constellation_4 -> Avatar_Xinyan_ElementalArt
+		c4: {
+			// Xinyan_Talent_ElementaArtReduceDef_DefDownRate
+			p1: -0.15,
+			// Xinyan_Talent_ElementaArtReduceDef_Duration
+			p2: 12,
+		},
+		// Rockin' in a Flaming World
+		// Xinyan_Constellation_6 -> Avatar_Xinyan_Talent_EnhanceExtraAttack
+		c6: {
+			// Xinyan_Talent_EnhanceExtraAttack_StaminaCost
+			p1: -0.3,
+			// Xinyan_Talent_EnhanceExtraAttack_DefPer
+			p2: 0.5,
+		},
 	},
 	YaeMiko: {
 		s1_id: 10581,
@@ -6898,6 +13626,94 @@ export const charTalentTables = {
 			p3: [22],
 			// Energy Cost
 			p4: [90],
+		},
+		// The Shrine's Sacred Shade
+		// Yae_PermanentSkill_1 -> Avatar_Yae_ElementalBurst_Mark_Tower, Avatar_Yae_PermanentSkill_3
+		a1: {
+			// AS_Permanent3_ThunderDMG
+			p1: 0.4,
+			// AS_Permanent3_ThunderDMG_Star
+			p2: 0.5,
+		},
+		// Enlightened Blessing
+		// Yae_PermanentSkill_2 -> Avatar_Yae_PermanentSkill_2
+		a4: {
+			// Yae_PermanentSkill_2_AttackUpRatio
+			p1: 0.0015,
+		},
+		// Edict of Cleansing
+		// Yae_PermanentSkill_3 ->
+		//     Avatar_Yae_PermanentSkill_3
+		//     Avatar_Yae_ElementalArt_FoxTower_Material
+		//     Avatar_Yae_ElementalBurst_Mark_Tower
+		//     Avatar_Yae_ElementalArt
+		//     Avatar_Yae_ElementalArt_Retreat_Foxtail
+		//     Avatar_Yae_ElementalArt_Foxtail
+		//     Avatar_Yae_Constellation_4
+		//     Avatar_Yae_Constellation_6
+		sp: {
+			// Avatar_Yae_PermanentSkill_3.AS_Yae_PermanentSkill_3_AttackRatio
+			p1: 0.8,
+			// Avatar_Yae_PermanentSkill_3.AS_CDDuration
+			p2: 2.5,
+			// Avatar_Yae_PermanentSkill_3.AS_Yae_PermanentSkill_3_StarSCAttackRatio
+			p3: 2,
+			// Avatar_Yae_ElementalArt_FoxTower_Material.FoxTower_LifeTime
+			p4: 10,
+		},
+		// Yakan Offering
+		// Yae_Constellation_1 -> Avatar_Yae_ElementalBurst_TowerExplosion_Material, Avatar_Yae_PermanentSkill_3
+		c1: {
+			// Avatar_Yae_ElementalBurst_TowerExplosion_Material.Constellation_1_ReviveElemEnergy
+			p1: 8,
+			// Avatar_Yae_PermanentSkill_3.AS_Constellation_1_AddedDamageRatio
+			p2: 0.5,
+			// Avatar_Yae_PermanentSkill_3.AS_Duration
+			p3: 10,
+		},
+		// Fox's Mooncall
+		// Yae_Constellation_2 ->
+		//     Avatar_Yae_ElementalArt_FoxTower_Material
+		//     Avatar_Yae_ElementalArt
+		//     Avatar_Yae_PermanentSkill_3
+		c2: {
+			p1: 2.56,
+			p2: 0.6,
+			// Avatar_Yae_ElementalArt_FoxTower_Material.MaxLevel
+			// Avatar_Yae_ElementalArt_FoxTower_Material.InitLevel
+			// Avatar_Yae_ElementalArt.MaxLevel
+			// Avatar_Yae_ElementalArt.InitLevel
+			p3: 1,
+			// Avatar_Yae_PermanentSkill_3.AS_ElemMasteryDelta_1
+			p4: 60,
+			// Avatar_Yae_PermanentSkill_3.AS_ElemMasteryDelta_2
+			p5: 90,
+			// Avatar_Yae_PermanentSkill_3.AS_ElemMasteryDelta_3
+			p6: 120,
+			// Avatar_Yae_PermanentSkill_3.AS_ElemMasteryDelta_4
+			p7: 200,
+		},
+		// Sakura Channeling
+		// Yae_Constellation_4 -> Avatar_Yae_Constellation_4
+		c4: {
+			// Yae_ElecAddHurtDelta
+			p1: 0.2,
+			// ElecAddHurtDown_Duration
+			p2: 5,
+			// AS_Element_Recover
+			p3: 8,
+			// AS_CDDuration
+			p4: 5,
+			// AS_EB_AddedDamageRatio
+			p5: 1,
+		},
+		// Forbidden Art: Daisesshou
+		// Yae_Constellation_6 -> Avatar_Yae_Constellation_6
+		c6: {
+			// DefenseIgnoreRatio
+			p1: 0.6,
+			// AS_CriticalDamageUp
+			p2: 2,
 		},
 	},
 	YanFei: {
@@ -6953,6 +13769,55 @@ export const charTalentTables = {
 			p5: [20],
 			// Energy Cost
 			p6: [80],
+		},
+		// Proviso
+		// Feiyan_PermanentSkill_1 -> Avatar_Feiyan_ExtraAttack_Weight_Clear
+		a1: {
+			// Feiyan_Talent_FireAddHurtDelta
+			p1: 0.05,
+			// Feiyan_Talent_FireAddHurtDuration
+			p2: 6,
+			// Feiyan_Talent_FireAddHurtMaxCount
+			p3: 5,
+		},
+		// Blazing Eye
+		// Feiyan_PermanentSkill_2 -> Avatar_Feiyan_ExtraAttack_DoAttack
+		a4: {
+			// Feiyan_Talent_CriticalAttack_Damage
+			p1: 0.8,
+		},
+		// The Law Knows No Kindness
+		// Feiyan_Constellation_1 -> Avatar_Feiyan_ExtraAttack
+		c1: {
+			// Feiyan_Talent_WeightReduceStaminaRatio_ExtraAttack
+			p1: -0.1,
+			// Feiyan_Talent_EndureDelta
+			p2: -0.1,
+		},
+		// Right of Final Interpretation
+		// Feiyan_Constellation_2 -> Avatar_Feiyan_Talent_ExtraAttack_AntiCritical
+		c2: {
+			// Feiyan_Talent_EnemyHpRatio
+			p1: 0.5,
+			// Feiyan_Talent_Critical
+			p2: 0.2,
+		},
+		// Supreme Amnesty
+		// Feiyan_Constellation_4 -> Avatar_Feiyan_ElementalBurst
+		c4: {
+			// Feiyan_Talent_FireShield_HpRatio
+			p1: 0.45,
+		},
+		// Extra Clause
+		// Feiyan_Constellation_6 ->
+		//     Avatar_Feiyan_ExtraAttack_Weight_Handler
+		//     Avatar_Feiyan_ExtraAttack_Weight_Clear
+		//     Avatar_Feiyan_ElementalBurst
+		c6: {
+			// Avatar_Feiyan_ExtraAttack_Weight_Handler.Feiyan_ExtraAttack_MaxCount
+			// Avatar_Feiyan_ExtraAttack_Weight_Clear.Feiyan_ExtraAttack_MaxCount
+			// Avatar_Feiyan_ElementalBurst.Feiyan_ExtraAttack_MaxCount
+			p1: 1,
 		},
 	},
 	Yaoyao: {
@@ -7013,6 +13878,68 @@ export const charTalentTables = {
 			// Energy Cost
 			p8: [80],
 		},
+		// Starscatter
+		// Yaoyao_PermanentSkill_1 -> Avatar_Yaoyao_PermanentSkill_1
+		a1: {
+			p1: 0.6,
+		},
+		// In Others' Shoes
+		// Yaoyao_PermanentSkill_2 -> Avatar_Yaoyao_PermanentSkill_2
+		a4: {
+			p1: 1,
+			// Yaoyao_PermanentSkill_2_Hot_Ratio
+			p2: 0.008,
+			// Yaoyao_PermanentSkill_2_Hot_Duration
+			p3: 5,
+		},
+		// Adeptus' Tutelage
+		// Yaoyao_Constellation_1 -> Avatar_Yaoyao_Turnip_Bullet, Avatar_Yaoyao_Turnip
+		c1: {
+			// Avatar_Yaoyao_Turnip_Bullet.Yaoyao_Constellation_1_Duration
+			// Avatar_Yaoyao_Turnip.Yaoyao_Constellation_1_Duration
+			p1: 8,
+			// Avatar_Yaoyao_Turnip_Bullet.Yaoyao_Constellation_1_AddHurtDelta
+			// Avatar_Yaoyao_Turnip.Yaoyao_Constellation_1_AddHurtDelta
+			p2: 0.15,
+			// Avatar_Yaoyao_Turnip_Bullet.Yaoyao_Constellation_1_ReviveStamina
+			// Avatar_Yaoyao_Turnip.Yaoyao_Constellation_1_ReviveStamina
+			p3: 15,
+			// Avatar_Yaoyao_Turnip_Bullet.Yaoyao_Constellation_1_ReviveStamina_CD
+			// Avatar_Yaoyao_Turnip.Yaoyao_Constellation_1_ReviveStamina_CD
+			p4: 5,
+		},
+		// Innocent
+		// Yaoyao_Constellation_2 -> Avatar_Yaoyao_ElementalBurst
+		c2: {
+			// Yaoyao_Constellation_2_ReviveEnergy_Ratio
+			p1: 3,
+			// Yaoyao_Constellation_2_CD
+			p2: 0.8,
+		},
+		// Winsome
+		// Yaoyao_Constellation_4 -> Avatar_Yaoyao_Constellation_4
+		c4: {
+			// Yaoyao_Constellation_4_Ratio
+			p1: 0.003,
+			// Duration
+			p2: 8,
+			p3: 120,
+		},
+		// Beneficent
+		// Yaoyao_Constellation_6 ->
+		//     Avatar_Yaoyao_ElementalArt_Rabbit
+		//     Avatar_Yaoyao_Golden_Turnip_Bullet
+		//     Avatar_Yaoyao_Golden_Turnip
+		c6: {
+			// Avatar_Yaoyao_ElementalArt_Rabbit.Golden_Turnip_Chance
+			p1: 0,
+			// Avatar_Yaoyao_Golden_Turnip_Bullet.Yaoyao_Constellation_6_Damage
+			// Avatar_Yaoyao_Golden_Turnip.Yaoyao_Constellation_6_Damage
+			p2: 0.75,
+			// Avatar_Yaoyao_Golden_Turnip_Bullet.Yaoyao_Constellation_6_HealHp_Ratio
+			// Avatar_Yaoyao_Golden_Turnip.Yaoyao_Constellation_6_HealHp_Ratio
+			p3: 0.075,
+		},
 	},
 	Yelan: {
 		s1_id: 10606,
@@ -7059,6 +13986,67 @@ export const charTalentTables = {
 			p4: [18],
 			// Energy Cost
 			p5: [70],
+		},
+		// Turn Control
+		// Yelan_PermanentSkill_1 -> Avatar_Yelan_PermanentSkill_1
+		a1: {
+			// Hp_Ratio_Lv1
+			p1: 0.06,
+			// Hp_Ratio_Lv2
+			p2: 0.12,
+			// Hp_Ratio_Lv3
+			p3: 0.18,
+			// Hp_Ratio_Lv4
+			p4: 0.3,
+		},
+		// Adapt With Ease
+		// Yelan_PermanentSkill_2 -> Avatar_Yelan_ElementalBurst_Dice
+		a4: {
+			// Base_Damage_Ratio
+			p1: 0.01,
+			// Per_Damage_Ratio
+			p2: 0.035,
+			// Tick_Time
+			p3: 1,
+			// Max_Level
+			p4: 14,
+		},
+		// Taking All Comers
+		// Yelan_Constellation_2 ->
+		//     Avatar_Yelan_ElementalBurst_Dice_TriggerBullet
+		//     Avatar_Yelan_ElementalBurst_Dice_TriggerBullet_Extra
+		//     Avatar_Yelan_ElementalBurst_Dice_Bullet_Extra
+		c2: {
+			// Avatar_Yelan_ElementalBurst_Dice_Bullet_Extra.Constellation_2_Damage
+			p1: 0.14,
+			// Avatar_Yelan_ElementalBurst_Dice_TriggerBullet.Constellation_2_CD
+			// Avatar_Yelan_ElementalBurst_Dice_TriggerBullet_Extra.Constellation_2_CD
+			p2: 1.8,
+		},
+		// Bait-and-Switch
+		// Yelan_Constellation_4 -> Avatar_Yelan_Constellation_4, Avatar_Yelan_ElementalArt_TriggerCollision
+		c4: {
+			// Hp_Ratio
+			p1: 0.1,
+			// Duration
+			p2: 25,
+			// Max_Level
+			p3: 4,
+		},
+		// Winner Takes All
+		// Yelan_Constellation_6 ->
+		//     Avatar_Yelan_Constellation_6
+		//     Avatar_Yelan_ElementalBurst
+		//     Avatar_Yelan_SneakArrow_Extra_Before
+		//     Avatar_Yelan_SneakArrow_Extra_After
+		c6: {
+			// Avatar_Yelan_Constellation_6.Atk_Count
+			p1: 5,
+			// Avatar_Yelan_Constellation_6.Duration
+			p2: 20,
+			// Avatar_Yelan_SneakArrow_Extra_Before.Constellation_6_Ratio
+			// Avatar_Yelan_SneakArrow_Extra_After.Constellation_6_Ratio
+			p3: 1.56,
 		},
 	},
 	Yoimiya: {
@@ -7108,6 +14096,56 @@ export const charTalentTables = {
 			p5: [15],
 			// Energy Cost
 			p6: [60],
+		},
+		// Tricks of the Trouble-Maker
+		// Yoimiya_PermanentSkill_1 -> Avatar_Yoimiya_ElementalArt
+		a1: {
+			// ElementalArt_Buff
+			p1: 0.02,
+			// PermanentSkill_Dura
+			p2: 3,
+		},
+		// Summer Night's Dawn
+		// Yoimiya_PermanentSkill_2 -> Avatar_Yoimiya_ElementalBurst_Camera
+		a4: {
+			// Base_Buff
+			p1: 0.1,
+			// Stack_Buff
+			p2: 0.01,
+			// Dura
+			p3: 15,
+		},
+		// Agate Ryuukin
+		// Yoimiya_Constellation_1 -> Avatar_Yoimiya_Talent_KillAndAdd, Avatar_Yoimiya_ElementalBurst_SetTag
+		c1: {
+			// Avatar_Yoimiya_ElementalBurst_SetTag.Duration_Max, also fed by s3.p4
+			p1: 4,
+			// Avatar_Yoimiya_Talent_KillAndAdd.Rate
+			p2: 0.2,
+			// Avatar_Yoimiya_Talent_KillAndAdd.Time
+			p3: 20,
+		},
+		// A Procession of Bonfires
+		// Yoimiya_Constellation_2 -> Avatar_Yoimiya_Talent_FireUpWhenCritic
+		c2: {
+			// FireUp
+			p1: 0.25,
+			// Dura
+			p2: 6,
+		},
+		// Pyrotechnic Professional
+		// Yoimiya_Constellation_4 -> Avatar_Yoimiya_ElementalBurst_SetTag
+		c4: {
+			// CdDelta (subtracted)
+			p1: 1.2,
+		},
+		// Naganohara Meteor Swarm
+		// Yoimiya_Constellation_6 -> Avatar_Yoimiya_Talent_ExtraBullet, Bullet_Yoimiya_NormalAttack_Handler
+		c6: {
+			// Avatar_Yoimiya_Talent_ExtraBullet.Chance
+			p1: 0.5,
+			// Bullet_Yoimiya_NormalAttack_Handler.TalentArrowRatio
+			p2: 0.6,
 		},
 	},
 	YunJin: {
@@ -7168,6 +14206,40 @@ export const charTalentTables = {
 			// Energy Cost
 			p5: [60],
 		},
+		// Breaking Conventions
+		// Yunjin_PermanentSkill_2 -> Avatar_Yunjin_ElementalBurst_Buff
+		a4: {
+			// Yunjin_PermanentSkill_2_ElementNum_Elem_1
+			p1: 0.025,
+			// Yunjin_PermanentSkill_2_ElementNum_Elem_2
+			p2: 0.05,
+			// Yunjin_PermanentSkill_2_ElementNum_Elem_3
+			p3: 0.075,
+			// Yunjin_PermanentSkill_2_ElementNum_Elem_4
+			p4: 0.115,
+		},
+		// Myriad Mise-En-Scène
+		// Yunjin_Constellation_2 -> Avatar_Yunjin_ElementalBurst_Buff
+		c2: {
+			// Yunjin_Constellation_2_Buff_DamagePercentageRatio
+			p1: 0.15,
+			// Yunjin_Constellation_2_Buff_Duration
+			p2: 12,
+		},
+		// Flower and a Fighter
+		// Yunjin_Constellation_4 -> Avatar_Yunjin_Constellation_4
+		c4: {
+			// Yunjin_CrystallizeAddDef_DefRatio
+			p1: 0.2,
+			// Yunjin_CrystallizeAddDef_Duration
+			p2: 12,
+		},
+		// Decorous Harmony
+		// Yunjin_Constellation_6 -> Avatar_Yunjin_ElementalBurst_Buff
+		c6: {
+			// Yunjin_ElementalBurst_Buff_AttackSpeedRatio
+			p1: 0.12,
+		},
 	},
 	Zhongli: {
 		s1_id: 10301,
@@ -7224,6 +14296,48 @@ export const charTalentTables = {
 			p3: [12],
 			// Energy Cost
 			p4: [40],
+		},
+		// Resonant Waves
+		// Zhongli_PermanentSkill_1 -> Avatar_Zhongli_RockShield
+		a1: {
+			// ShieldCostMinusRatio
+			p1: 0.05,
+		},
+		// Dominance of Earth
+		// Zhongli_PermanentSkill_2 ->
+		//     Avatar_Zhongli_NormalAttack
+		//     SkillObj_Zhongli_Attack05
+		//     SkillObj_Zhongli_ExtraAttack
+		//     Avatar_Zhongli_FallingAnthem
+		//     SkillObj_Zhongli_PrimoPillar
+		//     Avatar_Zhongli_RockShield
+		//     Avatar_Zhongli_GeoOrder
+		a4: {
+			// Avatar_Zhongli_NormalAttack.HP2ATK_Ratio1
+			// SkillObj_Zhongli_Attack05.HP2ATK_Ratio1
+			// SkillObj_Zhongli_ExtraAttack.HP2ATK_Ratio1
+			// Avatar_Zhongli_FallingAnthem.HP2ATK_Ratio1
+			p1: 0.0139,
+			// SkillObj_Zhongli_PrimoPillar.HP2ATK_Ratio2
+			// Avatar_Zhongli_RockShield.HP2ATK_Ratio2
+			p2: 0.019,
+			// Avatar_Zhongli_GeoOrder.HP2ATK_Ratio3
+			p3: 0.33,
+		},
+		// Topaz, Unbreakable and Fearless
+		// Zhongli_Constellation_4 -> Avatar_Zhongli_GeoOrder
+		c4: {
+			p1: 0.2,
+			// Petrifaction_Duration, also fed by s3.p2
+			p2: 2,
+		},
+		// Chrysos, Bounty of Dominator
+		// Zhongli_Constellation_6 -> Avatar_Zhongli_RockShield
+		c6: {
+			// HealRatio
+			p1: 0.4,
+			// healLimitedByLocalCreatureMaxHPRatio
+			p2: 0.08,
 		},
 	},
 	Zibai: {
@@ -7289,6 +14403,68 @@ export const charTalentTables = {
 			p3: [15],
 			// Energy Cost
 			p4: [60],
+		},
+		// The Selenic Adeptus Descends
+		// Zibai_PermanentSkill_1 ->
+		//     Avatar_Zibai_PermanentSkill_1
+		//     Avatar_Zibai_ElementalArt_Extra
+		//     Avatar_Zibai_ElementalArt
+		a1: {
+			// ExtraDefenceRatio
+			p1: 0.6,
+			// Duration
+			p2: 4,
+		},
+		// Layered Peaks Pierce the Clouds
+		// Zibai_PermanentSkill_2 -> Avatar_Zibai_PermanentSkill_2
+		a4: {
+			// DefenseUpPerLayer
+			p1: 0.15,
+			// ElemMasteryUpPerLayer
+			p2: 60,
+		},
+		// Moonsign Benediction: The Coursing Sun and Moon
+		// Zibai_PermanentSkill_3 -> Avatar_Zibai_ElementalBurst
+		a0: {
+			// DefenseTransferRatio
+			p1: 0.007,
+			// MaxTransRatio
+			p2: 0.14,
+		},
+		// Moonlit Flower Forest
+		// Zibai_PermanentSkill_4 -> Avatar_Zibai_NightEnergyAdd
+		a0_2: {
+			// tickTime
+			p1: 2,
+		},
+		// Burst Forth With Vigor, But Enter in Silence
+		// Zibai_Constellation_1 -> Avatar_Zibai_ElementalArt_Ghost_Energy_Driver, Avatar_Zibai_ElementalArt_Extra
+		c1: {
+			// T1UPRatio
+			p1: 2.2,
+		},
+		// At Birth Are Souls Born, and in Death Leave But Husks
+		// Zibai_Constellation_2 -> Avatar_Zibai_Talent_2
+		c2: {
+			// T2MoonCrystalDamageRatio
+			p1: 0.3,
+			// T2ExtraDefenceRatio
+			p2: 5.5,
+		},
+		// The Spirit Passes, Then Form Follows
+		// Zibai_Constellation_4 -> Avatar_Zibai_ElementalArt, Avatar_Zibai_ElementalArt_Extra
+		c4: {
+			// T4DefenseRatio
+			p1: 2.5,
+		},
+		// The World, A Journey in Passing
+		// Zibai_Constellation_6 ->
+		//     Avatar_Zibai_ElementalArt_Ghost_Energy_Driver
+		//     Avatar_Zibai_ElementalArt_Extra
+		//     Avatar_Zibai_ElementalArt
+		c6: {
+			// T6BuffRatio
+			p1: 0.016,
 		},
 	},
 };

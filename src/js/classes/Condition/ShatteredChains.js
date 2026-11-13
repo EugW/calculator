@@ -1,5 +1,6 @@
 import { Condition } from "../Condition";
 import { Stats } from "../Stats";
+import { partyView } from "../Team/Party";
 
 export class ConditionShatteredChains extends Condition {
     getType() {
@@ -7,21 +8,16 @@ export class ConditionShatteredChains extends Condition {
     }
 
     getData(settings) {
+        let view = partyView(settings);
         let stacks = 0;
-        if (settings.char_origin == 'natlan') {
+        if (view.self.origin == 'natlan') {
             ++stacks;
         }
 
-        for (let i = 1; i <= 3; ++i) {
-            let charId = settings['party_char_'+ i];
-            if (!charId) {
-                continue;
-            }
-
-            const char = DB.Chars.getById(charId);
+        for (const char of view.others) {
             if (char.origin == 'natlan') {
                 ++stacks;
-            } else if (char.element != settings.char_element) {
+            } else if (char.element != view.self.element) {
                 ++stacks;
             }
         }

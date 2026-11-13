@@ -2,6 +2,8 @@ import { ConditionStacks } from "../../../classes/Condition/Stacks";
 import { DbObjectWeapon } from "../../../classes/DbObject/Weapon";
 import { StatTable } from "../../../classes/StatTable";
 import { weaponStatTables } from "../../generated/WeaponStatTables";
+import { weaponPassiveTables } from "../../generated/WeaponPassiveTables";
+import { percent } from "../../Params";
 
 export const CompoundBow = new DbObjectWeapon({
     name: 'compound_bow',
@@ -20,8 +22,8 @@ export const CompoundBow = new DbObjectWeapon({
             maxStacks: 4,
             levelSetting: 'weapon_refine',
             stats: [
-                new StatTable('atk_percent', [4, 5, 6, 7, 8]),
-                new StatTable('atk_speed_normal', [1.2, 1.5, 1.8, 2.1, 2.4]),
+                new StatTable('atk_percent', percent(weaponPassiveTables.CompoundBow.p1)),
+                new StatTable('atk_speed_normal', percent(weaponPassiveTables.CompoundBow.p2)),
             ],
         })
     ],

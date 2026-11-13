@@ -2,6 +2,8 @@ import { ArtifactSet } from "../../../classes/ArtifactSet";
 import { ConditionBoolean } from "../../../classes/Condition/Boolean";
 import { ConditionNot } from "../../../classes/Condition/Not";
 import { ConditionStatic } from "../../../classes/Condition/Static";
+import { artifactSetTables } from "../../generated/ArtifactSetTables";
+import { percent } from "../../Params";
 
 export const FinaleOfTheDeepGalleries = new ArtifactSet({
     serializeId: 55,
@@ -20,7 +22,7 @@ export const FinaleOfTheDeepGalleries = new ArtifactSet({
                     title: 'set_bonus.finale_of_the_deep_galleries_2',
                     description: 'set_descr.finale_of_the_deep_galleries_2',
                     stats: {
-                        dmg_cryo: 15,
+                        dmg_cryo: artifactSetTables.FinaleOfTheDeepGalleries.pc2.dmg_cryo,
                     },
                 })
             ],
@@ -32,7 +34,7 @@ export const FinaleOfTheDeepGalleries = new ArtifactSet({
                     title: 'set_bonus.finale_of_the_deep_galleries_4',
                     description: 'set_descr.finale_of_the_deep_galleries_4',
                     stats: {
-                        text_percent: 60,
+                        text_percent: percent(artifactSetTables.FinaleOfTheDeepGalleries.pc4.p1),
                     },
                 }),
                 new ConditionBoolean({
@@ -40,7 +42,7 @@ export const FinaleOfTheDeepGalleries = new ArtifactSet({
                     serializeId: 46,
                     title: 'set_bonus.finale_of_the_deep_galleries_4_1',
                     stats: {
-                        dmg_normal: 60,
+                        dmg_normal: percent(artifactSetTables.FinaleOfTheDeepGalleries.pc4.p1),
                     },
                 }),
                 new ConditionBoolean({
@@ -48,7 +50,7 @@ export const FinaleOfTheDeepGalleries = new ArtifactSet({
                     serializeId: 47,
                     title: 'set_bonus.finale_of_the_deep_galleries_4_2',
                     stats: {
-                        dmg_burst: 60,
+                        dmg_burst: percent(artifactSetTables.FinaleOfTheDeepGalleries.pc4.p2),
                     },
                     condition: new ConditionNot([
                         new ConditionBoolean({name: 'set.finale_of_the_deep_galleries_4_1'}),

@@ -1,90 +1,83 @@
-import { BuildData } from "../src/js/classes/Build/Data";
-import { Flins } from "../src/js/db/Char/Flins";
+import { Team } from "../src/js/classes/Team";
+import { DB } from "../src/js/db/DB";
+import { finalStats, makeBuild } from "./support/team";
 
-function applyConditions(data, conditions) {
-    for (const condition of conditions) {
-        const conditionData = condition.getData(data.settings);
-        data.addSettings(conditionData.settings);
-        data.addStats(conditionData.stats);
-    }
+global.DB = DB;
+
+// Former party-API regressions for Flins, moved onto real teams: Flins has no
+// partyData left, so every check below builds a team with a real carrier.
+
+function makeFlins(constellation = 6) {
+    const flins = makeBuild('Flins');
+    flins.setCharLevels({level: 90, ascension: 6, constellation});
+    return flins;
 }
 
-function getSelfCondition(name) {
-    return Flins.getAllConditions().find((c) => c.getName() === name);
-}
-
-function getPartyCondition(name) {
-    return Flins.getPartyConditions().find((c) => c.getName() === name);
-}
-
-test("Flins A1 is self-only: no party-wide Symphony of Winter", () => {
-    expect(getPartyCondition('party.flins_symphony_of_winter')).toBeUndefined();
-
-    // Old World Secrets (party base bonus) and C6 elevate must still exist
-    expect(getPartyCondition('party.flins_songs_and_dances_of_death')).toBeDefined();
+test("Flins A1 is self-only: teammates get no Symphony of Winter", () => {
+    const receiver = makeBuild('Keqing');
+    const flins = makeFlins();
+    flins.setCharSettings({flins_symphony_of_winter: true});
+    const ineffa = makeBuild('Ineffa');
+    const team = Team.fromMember(receiver);
+    team.setMember(1, flins);
+    team.setMember(2, ineffa);
+    // Ascendant Gleam (two Nod-Krai members), still nothing delivered.
+    expect(finalStats(receiver).get('dmg_reaction_lunarcharged')).toBe(0);
 });
 
 test("Flins self A1 only buffs at Ascendant Gleam (party_moonsign 2)", () => {
-    const cond = getSelfCondition('flins_symphony_of_winter');
-    expect(cond).toBeDefined();
+    const flins = makeFlins(0);
+    flins.setCharLevels({level: 90, ascension: 1, constellation: 0});
+    flins.setCharSettings({flins_symphony_of_winter: true});
+    const receiver = makeBuild('Keqing');
+    const team = Team.fromMember(flins);
+    team.setMember(1, receiver);
+    // Solo Flins is the only Nod-Krai member: Nascent Gleam, no bonus.
+    expect(finalStats(flins).get('dmg_reaction_lunarcharged')).toBe(0);
 
-    const nascent = new BuildData({
-        char_ascension: 1,
-        flins_symphony_of_winter: true,
-        party_moonsign: 1,
-    }, {});
-    applyConditions(nascent, [cond]);
-    expect(nascent.stats.get('dmg_reaction_lunarcharged')).toBeCloseTo(0, 5);
-
-    const ascendant = new BuildData({
-        char_ascension: 1,
-        flins_symphony_of_winter: true,
-        party_moonsign: 2,
-    }, {});
-    applyConditions(ascendant, [cond]);
-    expect(ascendant.stats.get('dmg_reaction_lunarcharged')).toBeCloseTo(20, 5);
+    const ineffa = makeBuild('Ineffa');
+    team.setMember(2, ineffa);
+    // Two Nod-Krai members: Ascendant Gleam, +20% Lunar-Charged for Flins.
+    expect(finalStats(flins).get('dmg_reaction_lunarcharged')).toBeCloseTo(0.2, 5);
 });
 
 test("Flins self A1 requires ascension 1", () => {
-    const cond = getSelfCondition('flins_symphony_of_winter');
-
-    const data = new BuildData({
-        char_ascension: 0,
-        flins_symphony_of_winter: true,
-        party_moonsign: 2,
-    }, {});
-    applyConditions(data, [cond]);
-    expect(data.stats.get('dmg_reaction_lunarcharged')).toBeCloseTo(0, 5);
+    const flins = makeFlins(0);
+    flins.setCharLevels({level: 60, ascension: 0, constellation: 0});
+    flins.setCharSettings({flins_symphony_of_winter: true});
+    const ineffa = makeBuild('Ineffa');
+    const team = Team.fromMember(flins);
+    team.setMember(1, ineffa);
+    expect(finalStats(flins).get('dmg_reaction_lunarcharged')).toBe(0);
 });
 
-test("Flins party C6 only elevates at Ascendant Gleam", () => {
-    const cond = getPartyCondition('party.flins_songs_and_dances_of_death');
-    expect(cond).toBeDefined();
+test("Flins C6 elevates himself by 35 and teammates by 10 at Ascendant Gleam", () => {
+    const receiver = makeBuild('Keqing');
+    const flins = makeFlins();
+    flins.setCharSettings({flins_songs_and_dances_of_death: true});
+    const team = Team.fromMember(receiver);
+    team.setMember(1, flins);
+    // Nascent Gleam (one Nod-Krai member): Flins keeps 35, teammate gets 0.
+    expect(finalStats(flins).get('dmg_lunarcharged_special')).toBeCloseTo(0.35, 5);
+    expect(finalStats(receiver).get('dmg_lunarcharged_special')).toBe(0);
 
-    const nascent = new BuildData({
-        'party.flins_songs_and_dances_of_death': true,
-        party_moonsign: 1,
-    }, {});
-    applyConditions(nascent, [cond]);
-    expect(nascent.stats.get('dmg_lunarcharged_special')).toBeCloseTo(0, 5);
-
-    const ascendant = new BuildData({
-        'party.flins_songs_and_dances_of_death': true,
-        party_moonsign: 2,
-    }, {});
-    applyConditions(ascendant, [cond]);
-    expect(ascendant.stats.get('dmg_lunarcharged_special')).toBeCloseTo(10, 5);
+    // Ascendant Gleam (Flins + Ineffa): teammate gets 10, Flins keeps 35.
+    const ineffa = makeBuild('Ineffa');
+    team.setMember(2, ineffa);
+    expect(finalStats(receiver).get('dmg_lunarcharged_special')).toBeCloseTo(0.1, 5);
+    expect(finalStats(flins).get('dmg_lunarcharged_special')).toBeCloseTo(0.35, 5);
 });
 
-test("Flins party Old World Secrets base bonus still present", () => {
-    const postEffects = Flins.getPartyPostEffects();
-    const lunarPost = postEffects.find((p) => {
-        try {
-            return p.params.percent.getName() === 'lunarcharged_multi';
-        } catch (e) {
-            return false;
-        }
-    });
-    expect(lunarPost).toBeDefined();
-    expect(lunarPost.params.from).toBe('flins_atk_total');
+test("Flins Lunar-Charged base bonus scales on his live ATK", () => {
+    const receiver = makeBuild('Keqing');
+    const flins = makeFlins();
+    const team = Team.fromMember(receiver);
+    team.setMember(1, flins);
+    // Move below the 14-point cap first, then raise ATK by 500.
+    flins.modifyBuffsSettings({'custom_buffs.atk': -1000});
+    const before = finalStats(receiver).get('lunarcharged_multi');
+    flins.modifyBuffsSettings({'custom_buffs.atk': -500});
+    const after = finalStats(receiver).get('lunarcharged_multi');
+    // 0.7% per 100 ATK: +500 ATK raises the bonus by 3.5 points of multi.
+    expect(after - before).toBeCloseTo(0.035, 5);
 });

@@ -1,5 +1,6 @@
 import { Artifact } from '../src/js/classes/Artifact';
 import { CalcSet } from '../src/js/classes/CalcSet';
+import { Team } from '../src/js/classes/Team';
 import { DB } from '../src/js/db/DB';
 import { evaluateArtifactActionPredictions } from '../src/js/classes/ArtifactActionPredictor';
 import { ArtifactsSuggest } from '../src/js/classes/ArtifactsSuggest';
@@ -35,7 +36,7 @@ const makeArtifact = (slot, set = 'GladiatorFinale', main = mains[slot], subs = 
 function setup() {
     const build = new CalcSet();
     build.setChar(DB.Chars.get('Jean'));
-    build.setEnemy(DB.Enemies.getFirst().getFirst());
+    Team.fromMember(build);
     const inventory = Object.keys(mains).map(slot => makeArtifact(slot));
     for (const artifact of inventory) build.setArtifact(artifact);
     inventory.push(makeArtifact('flower', 'WandererTroupe', 'hp', [{stat: 'atk_percent', value: 23.3}]));

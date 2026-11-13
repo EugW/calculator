@@ -12,6 +12,7 @@ import { DbObjectTalents } from "../../classes/DbObject/Talents";
 import { StatTable } from "../../classes/StatTable";
 import { charTalentTables } from "../generated/CharTalentTables";
 import { charTables } from "../generated/CharTables";
+import { percent } from "../Params";
 import { FeatureDamageNormal } from "../../classes/Feature2/Damage/Normal";
 import { FeatureMultiplier } from "../../classes/Feature2/Multiplier";
 import { FeatureDamageMultihit } from "../../classes/Feature2/Damage/Multihit";
@@ -149,17 +150,17 @@ const Talents = new DbObjectTalents({
 });
 
 const TalentValues = {
-    A4CritRate: 10,
-    C0ElectroBonus: 20,
-    C0ElectroBonusMax: 1800,
-    C1Damage: 30,
-    C2ElectroBonus: 30,
-    C2ElectroBonusMax: 2700,
-    C4BurstBonus: 2,
-    C4BurstBonusCap: 200,
-    C6CritRate: 10,
-    C6CritDmg: 70,
-    C6Damage: 200,
+    A4CritRate: percent(charTalentTables.Clorinde.a4.p3),
+    C0ElectroBonus: percent(charTalentTables.Clorinde.a1.p3),
+    C0ElectroBonusMax: charTalentTables.Clorinde.a1.p2,
+    C1Damage: percent(charTalentTables.Clorinde.c1.p2),
+    C2ElectroBonus: percent(charTalentTables.Clorinde.c2.p2),
+    C2ElectroBonusMax: charTalentTables.Clorinde.c2.p1,
+    C4BurstBonus: percent(charTalentTables.Clorinde.c4.p1),
+    C4BurstBonusCap: percent(charTalentTables.Clorinde.c4.p2),
+    C6CritRate: percent(charTalentTables.Clorinde.c6.p1),
+    C6CritDmg: percent(charTalentTables.Clorinde.c6.p2),
+    C6Damage: percent(charTalentTables.Clorinde.c6.p5),
 };
 
 export const Clorinde = new DbObjectChar({
@@ -173,6 +174,11 @@ export const Clorinde = new DbObjectChar({
     origin: 'fontaine',
     talents: Talents,
     statTable: charTables.Clorinde,
+    // Damage hits below (normal/charged/plunge/skill/burst, Surging Blade) read the
+    // total ATK by construction (default atk* scaling) and need nothing. A4 Lawful
+    // Remuneration is a flat CRIT toggle: its game gate (BoL >= 100% MaxHP,
+    // UNIQUE_Avatar_Clorinde_PermanentSkill_2_Handler predicate on FIGHT_PROP_MAX_HP)
+    // is user-toggled here, with no stat scaling.
     features: [
         new FeatureDamageNormal({
             name: 'normal_hit_1',
@@ -380,6 +386,9 @@ export const Clorinde = new DbObjectChar({
             element: 'electro',
             category: 'skill',
             multipliers: [
+                // Game data: C1 coordinated attacks (Avatar_Clorinde_Constellation_1_Gadget)
+                // damageExtra off ATK; GO reads input.total.atk. Damage hits read the
+                // total by construction (default atk* scaling), so nothing is declared.
                 new FeatureMultiplier({
                     source: 'constellation1',
                     values: new ValueTable([TalentValues.C1Damage]),
@@ -395,6 +404,11 @@ export const Clorinde = new DbObjectChar({
             name: 'clorinde_impale_the_night_2_heal',
             subtractBoL: true,
             multipliers: [
+                // Game data: Avatar_Clorinde_ElementalArt_Dodge HealHP amounts read
+                // FIGHT_PROP_CUR_HP_DEBTS (Bond of Life); healing converts to BoL
+                // (SwitchHealToHPDebtsMixin). scaling 'hp*' already reads the total HP
+                // and bond_of_life has no extra lane, so no params. No ability writes
+                // extra HP, so premod and total HP agree today.
                 new FeatureMultiplierBondOfLife({
                     scaling: 'hp*',
                     leveling: 'char_skill_elemental',
@@ -407,6 +421,8 @@ export const Clorinde = new DbObjectChar({
             name: 'clorinde_impale_the_night_3_heal',
             subtractBoL: true,
             multipliers: [
+                // Same evidence as clorinde_impale_the_night_2_heal above: total HP
+                // by construction (hp*), bond_of_life has no lane.
                 new FeatureMultiplierBondOfLife({
                     scaling: 'hp*',
                     leveling: 'char_skill_elemental',
@@ -441,6 +457,8 @@ export const Clorinde = new DbObjectChar({
             element: 'electro',
             category: 'other',
             multipliers: [
+                // Game data: C6 Glimbright Shade damageExtra off ATK; GO reads
+                // input.total.atk. Damage hits read the total by construction.
                 new FeatureMultiplier({
                     source: 'constellation6',
                     values: new ValueTable([TalentValues.C6Damage]),
@@ -506,6 +524,14 @@ export const Clorinde = new DbObjectChar({
         }),
     ],
     postEffects: [
+        // C4 To Enshrine Tears, Life, and Love: game data
+        // Avatar_Clorinde_ElementalBurst_Activate onAbilityStart sets
+        // Clorinde_Constellation_4_final_ratio from FIGHT_PROP_CUR_HP_DEBTS x
+        // Clorinde_Constellation_4_DMG_Multiplier x 100 / FIGHT_PROP_MAX_HP (total HP;
+        // ProudSkill talent 984 = [0.02, 2]: 2% per 1% BoL, max 200%), applied by
+        // ModifyDamageMixin to the burst. Our from 'bond_of_life' (BoL percent)
+        // matches that formula, and bond_of_life / dmg_burst_clorinde have no extra
+        // lane, so no params. KQM has no interaction test; GO reads a user BoL percent.
         new PostEffectStats({
             from: 'bond_of_life',
             percent: new StatTable('dmg_burst_clorinde', [TalentValues.C4BurstBonus * 100]),
@@ -516,6 +542,13 @@ export const Clorinde = new DbObjectChar({
         }),
     ],
     multipliers: [
+        // A1 Dark-Shattering Flame: game data Avatar_Clorinde_Talent_PassiveSkill,
+        // UNIQUE_Clorinde_PermanentSkill_1_Buff_DamageExtra (onAdded/onThinkInterval)
+        // sets Clorinde_PermanentSkill_1_DamageExtra from FIGHT_PROP_CUR_ATTACK (total)
+        // x AttackTo_DamageExtra_Ratio (ProudSkill 982101: 0.2, max 1800; C2 talent 982:
+        // 0.3, max 2700), applied by ModifyDamageMixin to Normal Attacks and the burst.
+        // GO reads input.total.atk. The default atk* scaling already reads the total,
+        // so no params; it counts every ATK buff (Bennett extra, Columbina C2 premod).
         new FeatureMultiplierClorinde({
             source: 'ascension1',
             leveling: 'clorinde_stacks_level',

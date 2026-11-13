@@ -3,6 +3,7 @@ import { ConditionAscensionChar } from "../../classes/Condition/Ascension/Char";
 import { ConditionBoolean } from "../../classes/Condition/Boolean";
 import { ConditionBooleanWeaponType } from "../../classes/Condition/Boolean/WeaponType";
 import { ConditionConstellation } from "../../classes/Condition/Constellation";
+import { ConditionReceiver } from "../../classes/Condition/Receiver";
 import { ConditionStatic } from "../../classes/Condition/Static";
 import { DbObjectChar } from "../../classes/DbObject/Char";
 import { DbObjectConstellation } from "../../classes/DbObject/Constellation";
@@ -17,8 +18,10 @@ import { FeatureDamageSkill } from "../../classes/Feature2/Damage/Skill";
 import { FeatureMultiplier } from "../../classes/Feature2/Multiplier";
 import { StatTable } from "../../classes/StatTable";
 import { ValueTable } from "../../classes/ValueTable";
+import { RECEIVERS } from "../../classes/Team/Receivers";
 import { charTables } from "../generated/CharTables";
 import { charTalentTables } from "../generated/CharTalentTables";
+import { percent } from "../Params";
 
 const Talents = new DbObjectTalents({
     attack: {
@@ -106,13 +109,20 @@ const Talents = new DbObjectTalents({
 });
 
 const TalentValues = {
-    A1AtkSpeed: 8,
-    A4Damage: 100,
-    A4ResCryo: -10,
-    C1Damage: 50,
-    C2CdRecovery: 15,
-    C6BurstDamage: 15,
+    A1AtkSpeed: percent(charTalentTables.Chongyun.a1.p1),
+    A4Damage: percent(charTalentTables.Chongyun.a4.p1),
+    A4ResCryo: percent(charTalentTables.Chongyun.a4.p2),
+    C1Damage: percent(charTalentTables.Chongyun.c1.p1),
+    C2CdRecovery: percent(charTalentTables.Chongyun.c2.p1),
+    C6BurstDamage: percent(charTalentTables.Chongyun.c6.p1),
 };
+
+// Sword, Claymore and Polearm wielders within the Frost Field.
+const meleeReceiver = () => new ConditionReceiver({
+    condition: new ConditionBooleanWeaponType({
+        types: ['sword', 'claymore', 'polearm'],
+    }),
+});
 
 export const Chongyun = new DbObjectChar({
     name: 'chongyun',
@@ -243,6 +253,8 @@ export const Chongyun = new DbObjectChar({
     ],
     conditions: [
         new Condition({
+            receivers: RECEIVERS.TEAM,
+            condition: meleeReceiver(),
             settings: {
                 allowed_infusion_cryo: 1,
             },
@@ -253,7 +265,9 @@ export const Chongyun = new DbObjectChar({
             title: 'talent_name.chongyun_frost_field',
             description: 'talent_descr.chongyun_frost_field',
         }),
+        // Sword, Claymore, or Polearm-wielding characters within the field.
         new ConditionStatic({
+            receivers: RECEIVERS.TEAM,
             title: 'talent_name.chongyun_steady_breathing',
             description: 'talent_descr.chongyun_steady_breathing',
             stats: {
@@ -265,9 +279,11 @@ export const Chongyun = new DbObjectChar({
                 new ConditionBoolean({
                     name: 'chongyun_frost_field',
                 }),
+                meleeReceiver(),
             ],
         }),
         new ConditionStatic({
+            receivers: RECEIVERS.TEAM,
             title: 'talent_name.chongyun_layered_frost',
             description: 'talent_descr.chongyun_layered_frost',
             settings: {
@@ -275,6 +291,7 @@ export const Chongyun = new DbObjectChar({
             },
             info: {ascension: 1},
             subConditions: [
+                meleeReceiver(),
                 new ConditionBoolean({
                     name: 'chongyun_frost_field',
                 }),
@@ -295,6 +312,7 @@ export const Chongyun = new DbObjectChar({
         new ConditionBoolean({
             name: 'chongyun_rimechaser_blade',
             serializeId: 2,
+            receivers: RECEIVERS.TEAM,
             title: 'talent_name.chongyun_rimechaser_blade',
             description: 'talent_descr.chongyun_rimechaser_blade_2',
             stats: {
@@ -327,7 +345,9 @@ export const Chongyun = new DbObjectChar({
                         text_percent_cd: TalentValues.C2CdRecovery,
                     },
                 }),
+                // Elemental Skills and Bursts cast within the Frost Field.
                 new Condition({
+                    receivers: RECEIVERS.TEAM,
                     stats: {
                         recovery: TalentValues.C2CdRecovery,
                     },
@@ -377,65 +397,5 @@ export const Chongyun = new DbObjectChar({
             ]
         },
     ]),
-    partyData: {
-        conditions: [
-            new Condition({
-                settings: {
-                    allowed_infusion_cryo: 1,
-                },
-                subConditions: [
-                    new ConditionBooleanWeaponType({
-                        types: ['sword', 'claymore', 'polearm'],
-                    }),
-                ],
-            }),
-            new ConditionBoolean({
-                name: 'party.chongyun_layered_frost',
-                serializeId: 1,
-                rotation: 'party',
-                title: 'talent_name.chongyun_layered_frost',
-                description: 'talent_descr.chongyun_layered_frost',
-                settings: {
-                    attack_infusion_cryo: 1,
-                },
-            }),
-            new ConditionBoolean({
-                name: 'party.chongyun_frost_field',
-                serializeId: 2,
-                title: 'talent_name.chongyun_steady_breathing',
-                description: 'talent_descr.chongyun_steady_breathing',
-                info: {ascension: 1},
-                stats: {
-                    atk_speed_normal: TalentValues.A1AtkSpeed,
-                },
-                subConditions: [
-                    new ConditionBoolean({name: 'party.chongyun_layered_frost'}),
-                ],
-            }),
-            new ConditionBoolean({
-                name: 'party.chongyun_rimechaser_blade',
-                serializeId: 3,
-                title: 'talent_name.chongyun_rimechaser_blade',
-                description: 'talent_descr.chongyun_rimechaser_blade_2',
-                info: {ascension: 4},
-                stats: {
-                    enemy_res_cryo: TalentValues.A4ResCryo,
-                },
-            }),
-            new ConditionBoolean({
-                name: 'party.chongyun_atmospheric_revolution',
-                serializeId: 4,
-                title: 'talent_name.chongyun_atmospheric_revolution',
-                description: 'talent_descr.chongyun_atmospheric_revolution',
-                info: {constellation: 2},
-                stats: {
-                    text_percent_cd: TalentValues.C2CdRecovery,
-                    recovery: TalentValues.C2CdRecovery,
-                },
-                subConditions: [
-                    new ConditionBoolean({name: 'party.chongyun_layered_frost'}),
-                ],
-            }),
-        ],
-    },
+    retiredParty: [[1, 'checkbox'], [2, 'checkbox'], [3, 'checkbox'], [4, 'checkbox']],
 });

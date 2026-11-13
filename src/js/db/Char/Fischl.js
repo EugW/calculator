@@ -2,10 +2,13 @@ import { Condition } from "../../classes/Condition";
 import { ConditionAnd } from "../../classes/Condition/And";
 import { ConditionAscensionChar } from "../../classes/Condition/Ascension/Char";
 import { ConditionBoolean } from "../../classes/Condition/Boolean";
+import { ConditionOnField } from "../../classes/Condition/Field";
 import { ConditionConstellation } from "../../classes/Condition/Constellation";
 import { ConditionHexereiResonance } from "../../classes/Condition/HexereiResonance";
 import { ConditionNot } from "../../classes/Condition/Not";
+import { ConditionReceiver } from "../../classes/Condition/Receiver";
 import { ConditionStatic } from "../../classes/Condition/Static";
+import { RECEIVERS } from "../../classes/Team/Receivers";
 import { DbObjectChar } from "../../classes/DbObject/Char";
 import { DbObjectConstellation } from "../../classes/DbObject/Constellation";
 import { DbObjectTalents } from "../../classes/DbObject/Talents";
@@ -22,6 +25,7 @@ import { StatTable } from "../../classes/StatTable";
 import { ValueTable } from "../../classes/ValueTable";
 import { charTables } from "../generated/CharTables";
 import { charTalentTables } from "../generated/CharTalentTables";
+import { percent } from "../Params";
 
 const Talents = new DbObjectTalents({
     attack: {
@@ -103,20 +107,25 @@ const Talents = new DbObjectTalents({
 });
 
 const TalentValues = {
-    A1ChargedDmg: 152.7,
-    A4OzDmg: 80,
-    C1OzDmg: 22,
-    C2SkillDmg: 200,
-    C4BurstDmg: 222,
-    C4BurstHeal: 20,
-    C6OzDmg: 30,
+    A1ChargedDmg: percent(charTalentTables.Fischl.a1.p1),
+    A4OzDmg: percent(charTalentTables.Fischl.a4.p1),
+    C1OzDmg: percent(charTalentTables.Fischl.c1.p1),
+    C2SkillDmg: percent(charTalentTables.Fischl.c2.p1),
+    C4BurstDmg: percent(charTalentTables.Fischl.c4.p1),
+    C4BurstHeal: percent(charTalentTables.Fischl.c4.p2),
+    C6OzDmg: percent(charTalentTables.Fischl.c6.p1),
+    SpAtk: percent(charTalentTables.Fischl.sp.p2),
+    SpMastery: charTalentTables.Fischl.sp.p4,
 };
 
 const condWitchHomeworkOn  = new ConditionBoolean({name: 'fischl_witch_homework'});
 const condWitchHomeworkOff = new ConditionNot([condWitchHomeworkOn]);
-const condPartyWitchHomeworkOn  = new ConditionBoolean({name: 'party.fischl_witch_homework'});
-const condPartyWitchHomeworkOff = new ConditionNot([condPartyWitchHomeworkOn]);
 const condHexereiResonance = new ConditionHexereiResonance({});
+// Phantasmal Nocturne also raises other nearby active party members;
+// Fischl herself keeps the amounts from her own toggles above.
+const condActiveReceiver = new ConditionReceiver({
+    condition: new ConditionOnField(),
+});
 
 export const Fischl = new DbObjectChar({
     name: 'fischl',
@@ -353,7 +362,7 @@ export const Fischl = new DbObjectChar({
                 condHexereiResonance
             ]),
             stats: {
-                atk_percent: 22.5,
+                atk_percent: TalentValues.SpAtk,
             },
         }),
         new ConditionBoolean({
@@ -373,7 +382,33 @@ export const Fischl = new DbObjectChar({
                 condHexereiResonance
             ]),
             stats: {
-                mastery: 90,
+                mastery: TalentValues.SpMastery,
+            },
+        }),
+        new Condition({
+            isHidden: true,
+            receivers: RECEIVERS.OTHERS,
+            condition: new ConditionAnd([
+                condWitchHomeworkOn,
+                condHexereiResonance,
+                new ConditionBoolean({name: 'fischl_overloaded_buff'}),
+                condActiveReceiver,
+            ]),
+            stats: {
+                atk_percent: TalentValues.SpAtk,
+            },
+        }),
+        new Condition({
+            isHidden: true,
+            receivers: RECEIVERS.OTHERS,
+            condition: new ConditionAnd([
+                condWitchHomeworkOn,
+                condHexereiResonance,
+                new ConditionBoolean({name: 'fischl_electrocharged_buff'}),
+                condActiveReceiver,
+            ]),
+            stats: {
+                mastery: TalentValues.SpMastery,
             },
         }),
         new ConditionStatic({
@@ -481,7 +516,7 @@ export const Fischl = new DbObjectChar({
                         new ConditionBoolean({name: 'fischl_evernight_raven'}),
                         new ConditionBoolean({name: 'fischl_overloaded_buff'}),
                     ]),
-                    stats: { atk_percent: 22.5 },
+                    stats: { atk_percent: TalentValues.SpAtk },
                     info: {constellation: 6},
                 }),
                 new Condition({
@@ -491,96 +526,37 @@ export const Fischl = new DbObjectChar({
                         new ConditionBoolean({name: 'fischl_evernight_raven'}),
                         new ConditionBoolean({name: 'fischl_electrocharged_buff'}),
                     ]),
-                    stats: { mastery: 90 },
+                    stats: { mastery: TalentValues.SpMastery },
                     info: {constellation: 6},
+                }),
+                // Evernight Raven doubles the Phantasmal Nocturne effects
+                // for other nearby active party members as well.
+                new Condition({
+                    isHidden: true,
+                    receivers: RECEIVERS.OTHERS,
+                    condition: new ConditionAnd([
+                        condWitchHomeworkOn,
+                        condHexereiResonance,
+                        new ConditionBoolean({name: 'fischl_evernight_raven'}),
+                        new ConditionBoolean({name: 'fischl_overloaded_buff'}),
+                        condActiveReceiver,
+                    ]),
+                    stats: { atk_percent: TalentValues.SpAtk },
+                }),
+                new Condition({
+                    isHidden: true,
+                    receivers: RECEIVERS.OTHERS,
+                    condition: new ConditionAnd([
+                        condWitchHomeworkOn,
+                        condHexereiResonance,
+                        new ConditionBoolean({name: 'fischl_evernight_raven'}),
+                        new ConditionBoolean({name: 'fischl_electrocharged_buff'}),
+                        condActiveReceiver,
+                    ]),
+                    stats: { mastery: TalentValues.SpMastery },
                 }),
             ],
         },
     ]),
-    partyData: {
-        conditions: [
-            new ConditionBoolean({
-                name: 'party.fischl_witch_homework',
-                serializeId: 3,
-                rotation: 'party',
-                title: 'talent_name.fischl_phantasmal_nocturne',
-                description: 'talent_descr.fischl_phantasmal_nocturne',
-                info: {hexerei: true},
-            }),
-            new ConditionBoolean({
-                name: 'party.fischl_overloaded_buff',
-                serializeId: 4,
-                rotation: 'party',
-                title: 'talent_name.fischl_overloaded_buff',
-                hideCondition: [
-                    new ConditionNot([
-                        new ConditionAnd([
-                            condPartyWitchHomeworkOn,
-                            condHexereiResonance
-                        ])
-                    ])
-                ],
-                condition: new ConditionAnd([
-                    condPartyWitchHomeworkOn,
-                    condHexereiResonance
-                ]),
-                stats: {
-                    atk_percent: 22.5,
-                },
-                info: {hexerei: true},
-            }),
-            new ConditionBoolean({
-                name: 'party.fischl_electrocharged_buff',
-                serializeId: 5,
-                rotation: 'party',
-                title: 'talent_name.fischl_electrocharged_buff',
-                hideCondition: [
-                    new ConditionNot([
-                        new ConditionAnd([
-                            condPartyWitchHomeworkOn,
-                            condHexereiResonance
-                        ])
-                    ])
-                ],
-                condition: new ConditionAnd([
-                    condPartyWitchHomeworkOn,
-                    condHexereiResonance
-                ]),
-                stats: {
-                    mastery: 90,
-                },
-                info: {hexerei: true},
-            }),
-            new ConditionBoolean({
-                name: 'party.fischl_evernight_raven',
-                serializeId: 6,
-                rotation: 'party',
-                title: 'talent_name.fischl_evernight_raven',
-                description: 'talent_descr.fischl_evernight_raven_buffed',
-                hideCondition: [condPartyWitchHomeworkOff],
-                condition: condPartyWitchHomeworkOn,
-                info: { constellation: 6 },
-            }),
-            new Condition({
-                condition: new ConditionAnd([
-                    condPartyWitchHomeworkOn,
-                    condHexereiResonance,
-                    new ConditionBoolean({name: 'party.fischl_evernight_raven'}),
-                    new ConditionBoolean({name: 'party.fischl_overloaded_buff'}),
-                ]),
-                stats: { atk_percent: 22.5 },
-                info: { constellation: 6 },
-            }),
-            new Condition({
-                condition: new ConditionAnd([
-                    condPartyWitchHomeworkOn,
-                    condHexereiResonance,
-                    new ConditionBoolean({name: 'party.fischl_evernight_raven'}),
-                    new ConditionBoolean({name: 'party.fischl_electrocharged_buff'}),
-                ]),
-                stats: { mastery: 90 },
-                info: { constellation: 6 },
-            }),
-        ],
-    },
+    retiredParty: [[3, 'checkbox'], [4, 'checkbox'], [5, 'checkbox'], [6, 'checkbox']],
 });

@@ -5,6 +5,8 @@ import { ConditionStacksSetting } from "../../../classes/Condition/Stacks/Settin
 import { DbObjectWeapon } from "../../../classes/DbObject/Weapon";
 import { StatTable } from "../../../classes/StatTable";
 // import { weaponStatTables } from "../../generated/WeaponStatTables";
+import { weaponPassiveTables } from "../../generated/WeaponPassiveTables";
+import { percent } from "../../Params";
 import { atkTables } from "../AtkTables";
 
 export const ShatteredChains = new DbObjectWeapon({
@@ -28,7 +30,7 @@ export const ShatteredChains = new DbObjectWeapon({
             maxStacks: 3,
             levelSetting: 'weapon_refine',
             stats: [
-                new StatTable('atk_percent', [4.8, 6, 7.2, 8.4, 9.6]),
+                new StatTable('atk_percent', percent(weaponPassiveTables.ShatteredChains.p1)),
             ],
             subConditions: [
                 new ConditionBoolean({name: 'weapon_shattered_chains_stacks'}),
@@ -42,7 +44,7 @@ export const ShatteredChains = new DbObjectWeapon({
             value: 3,
             setting: 'weapon_shattered_chains_stacks',
             stats: [
-                new StatTable('mastery', [24, 30, 36, 42, 48]),
+                new StatTable('mastery', weaponPassiveTables.ShatteredChains.p2),
             ],
         }),
     ],

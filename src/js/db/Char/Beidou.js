@@ -2,7 +2,10 @@ import { Condition } from "../../classes/Condition";
 import { ConditionAnd } from "../../classes/Condition/And";
 import { ConditionAscensionChar } from "../../classes/Condition/Ascension/Char";
 import { ConditionBoolean } from "../../classes/Condition/Boolean";
+import { ConditionOnField } from "../../classes/Condition/Field";
+import { ConditionTeam } from "../../classes/Condition/Team";
 import { ConditionConstellation } from "../../classes/Condition/Constellation";
+import { ConditionReceiver } from "../../classes/Condition/Receiver";
 import { ConditionStatic } from "../../classes/Condition/Static";
 import { DbObjectChar } from "../../classes/DbObject/Char";
 import { DbObjectConstellation } from "../../classes/DbObject/Constellation";
@@ -21,8 +24,10 @@ import { FeatureShield } from "../../classes/Feature2/Shield";
 import { FeatureStatic } from "../../classes/Feature2/Static";
 import { StatTable } from "../../classes/StatTable";
 import { ValueTable } from "../../classes/ValueTable";
+import { RECEIVERS } from "../../classes/Team/Receivers";
 import { charTables } from "../generated/CharTables";
 import { charTalentTables } from "../generated/CharTalentTables";
+import { percent } from "../Params";
 
 const Talents = new DbObjectTalents({
     attack: {
@@ -126,14 +131,14 @@ const Talents = new DbObjectTalents({
 });
 
 const TalentValues = {
-    A4NormalBonus: 15,
-    A4ChargedBonus: 15,
-    A4SpeedBonus: 15,
-    C1Shield: 16,
-    C4Damage: 20,
-    C6ElectroRes: -15,
-    C6CryoRes: -15,
-    C6Mastery: 200,
+    A4NormalBonus: percent(charTalentTables.Beidou.a4.p1),
+    A4ChargedBonus: percent(charTalentTables.Beidou.a4.p1),
+    A4SpeedBonus: percent(charTalentTables.Beidou.a4.p1),
+    C1Shield: percent(charTalentTables.Beidou.c1.p1),
+    C4Damage: percent(charTalentTables.Beidou.c4.p1),
+    C6ElectroRes: -percent(charTalentTables.Beidou.c6.p1),
+    C6CryoRes: -percent(charTalentTables.Beidou.c6.p2),
+    C6Mastery: charTalentTables.Beidou.c6.p3,
 };
 
 export const Beidou = new DbObjectChar({
@@ -379,7 +384,7 @@ export const Beidou = new DbObjectChar({
             title: 'talent_name.beidou_polaris',
             description: 'talent_descr.beidou_polaris',
             subConditions: [
-                new ConditionBoolean({name: 'polestar_field'}),
+                new ConditionTeam({condition: new ConditionBoolean({name: 'polestar_field'})}),
             ],
         }),
     ],
@@ -435,62 +440,46 @@ export const Beidou = new DbObjectChar({
         },
         {
             conditions: [
+                // During Stormbreaker: nearby opponents lose Electro RES.
                 new ConditionBoolean({
                     name: 'beidou_bane_of_the_evil',
                     serializeId: 3,
+                    receivers: RECEIVERS.TEAM,
                     title: 'talent_name.beidou_bane_of_evil',
                     description: 'talent_descr.beidou_bane_of_evil_buffed',
                     stats: {
                         enemy_res_electro: TalentValues.C6ElectroRes,
                     },
                 }),
+                // Radiance Stellar-Conduct: nearby opponents lose Cryo RES;
+                // the current active character gains 200 Mastery.
                 new Condition({
+                    isHidden: true,
+                    receivers: RECEIVERS.TEAM,
                     stats: {
                         enemy_res_cryo: TalentValues.C6CryoRes,
-                        mastery: TalentValues.C6Mastery,
                     },
                     condition: new ConditionAnd([
                         new ConditionBoolean({name: 'beidou_bane_of_the_evil'}),
                         new ConditionBoolean({name: 'beidou_radiance_stellarconduct'}),
                     ]),
                 }),
+                new Condition({
+                    isHidden: true,
+                    receivers: RECEIVERS.TEAM,
+                    stats: {
+                        mastery: TalentValues.C6Mastery,
+                    },
+                    condition: new ConditionAnd([
+                        new ConditionBoolean({name: 'beidou_bane_of_the_evil'}),
+                        new ConditionBoolean({name: 'beidou_radiance_stellarconduct'}),
+                        new ConditionReceiver({
+                            condition: new ConditionOnField(),
+                        }),
+                    ]),
+                }),
             ],
         },
     ]),
-    partyData: {
-        conditions: [
-            new ConditionBoolean({
-                name: 'party.beidou_radiance_stellarconduct',
-                serializeId: 2,
-                rotation: 'party',
-                title: 'talent_name.beidou_polaris',
-                description: 'talent_descr.beidou_polaris',
-                info: {special: true},
-                subConditions: [
-                    new ConditionBoolean({name: 'polestar_field'}),
-                ],
-            }),
-            new ConditionBoolean({
-                name: 'party.beidou_bane_of_the_evil',
-                serializeId: 1,
-                rotation: 'party',
-                title: 'talent_name.beidou_bane_of_evil',
-                description: 'talent_descr.beidou_bane_of_evil_buffed',
-                info: {constellation: 6},
-                stats: {
-                    enemy_res_electro: TalentValues.C6ElectroRes,
-                },
-            }),
-            new Condition({
-                stats: {
-                    enemy_res_cryo: TalentValues.C6CryoRes,
-                    mastery: TalentValues.C6Mastery,
-                },
-                condition: new ConditionAnd([
-                    new ConditionBoolean({name: 'party.beidou_bane_of_the_evil'}),
-                    new ConditionBoolean({name: 'party.beidou_radiance_stellarconduct'}),
-                ]),
-            }),
-        ],
-    },
+    retiredParty: [[1, 'checkbox'], [2, 'checkbox']],
 });

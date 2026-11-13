@@ -2,6 +2,8 @@ import { ArtifactSet } from "../../../classes/ArtifactSet";
 import { ConditionStatic } from "../../../classes/Condition/Static";
 import { ConditionStacks } from "../../../classes/Condition/Stacks";
 import { StatTable } from "../../../classes/StatTable";
+import { artifactSetTables } from "../../generated/ArtifactSetTables";
+import { percent, times } from "../../Params";
 
 export const FlowerOfParadiseLost = new ArtifactSet({
     serializeId: 43,
@@ -20,7 +22,7 @@ export const FlowerOfParadiseLost = new ArtifactSet({
                     title: 'set_bonus.flower_of_paradise_lost_2',
                     description: 'set_descr.flower_of_paradise_lost_2',
                     stats: {
-                        mastery: 80,
+                        mastery: artifactSetTables.FlowerOfParadiseLost.pc2.mastery,
                     },
                 }),
             ],
@@ -31,10 +33,10 @@ export const FlowerOfParadiseLost = new ArtifactSet({
                 new ConditionStatic({
                     title: 'set_bonus.flower_of_paradise_lost_4',
                     description: 'set_descr.flower_of_paradise_lost_4_1',
-                    stacks: 4,
+                    stacks: artifactSetTables.FlowerOfParadiseLost.pc4.p5,
                     stats: {
-                        'dmg_reaction_bloom': 40,
-                        'dmg_reaction_lunarbloom': 10,
+                        'dmg_reaction_bloom': percent(artifactSetTables.FlowerOfParadiseLost.pc4.p1),
+                        'dmg_reaction_lunarbloom': percent(artifactSetTables.FlowerOfParadiseLost.pc4.p8),
                     },
                 }),
                 new ConditionStacks({
@@ -42,10 +44,10 @@ export const FlowerOfParadiseLost = new ArtifactSet({
                     serializeId: 30,
                     title: 'set_bonus.flower_of_paradise_lost_4',
                     description: 'set_descr.flower_of_paradise_lost_4_2',
-                    maxStacks: 4,
+                    maxStacks: artifactSetTables.FlowerOfParadiseLost.pc4.p5,
                     stats: [
-                        new StatTable('dmg_reaction_bloom', [10]),
-                        new StatTable('dmg_reaction_lunarbloom', [2.5]),
+                        new StatTable('dmg_reaction_bloom', [percent(times(artifactSetTables.FlowerOfParadiseLost.pc4.p1, artifactSetTables.FlowerOfParadiseLost.pc4.p6))]),
+                        new StatTable('dmg_reaction_lunarbloom', [percent(times(artifactSetTables.FlowerOfParadiseLost.pc4.p8, artifactSetTables.FlowerOfParadiseLost.pc4.p6))]),
                     ],
                 }),
             ],

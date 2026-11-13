@@ -3,6 +3,9 @@
     flex-direction: column;
     overflow: hidden;
     flex-grow: 1;
+    /* Room for the scrollbar at the right of the scrollable part. A static
+       part above it can leave the same room to line up with it. */
+    --full-height-gutter: 13px;
 }
 
 .tab-content > .full-height {
@@ -22,7 +25,7 @@
 
 .full-height .content-scrollbar {
     width: 100%;
-    padding-right: 13px;
+    padding-right: var(--full-height-gutter);
     box-sizing: border-box;
 }
 

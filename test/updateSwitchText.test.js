@@ -1,7 +1,5 @@
 import { Condition } from "../src/js/classes/Condition";
 import { DB } from "../src/js/db/DB";
-import { Artifacts as ArtifactBuffs } from "../src/js/db/Buffs/Artifacts";
-import { Weapons as WeaponBuffs } from "../src/js/db/Buffs/Weapons";
 
 global.window = {};
 require("../src/js/lang/eng.js");
@@ -92,11 +90,10 @@ function expectPanelTextToBeDistinct(panel, conditions) {
     }
 }
 
-test('new character switch text is distinct within each self and party panel', () => {
+test('new character switch text is distinct within each character panel', () => {
     for (const key of characterKeys) {
         const character = DB.Chars.get(key);
         expectPanelTextToBeDistinct(`${key}:self`, character.getAllConditions());
-        expectPanelTextToBeDistinct(`${key}:party`, character.getPartyConditions());
     }
 });
 
@@ -111,7 +108,7 @@ test('new weapon switch text is distinct within each weapon panel', () => {
     }
 });
 
-test('new and updated artifact switch text is distinct in self and party panels', () => {
+test('new and updated artifact switch text is distinct in each source panel', () => {
     for (const key of ['ViridescentVenerer', 'ScarletProof', 'HeartOfTheFurnace']) {
         const byPieces = DB.Artifacts.Sets.get(key).getConditionsByPieces();
         for (const [pieces, conditions] of Object.entries(byPieces)) {
@@ -119,17 +116,4 @@ test('new and updated artifact switch text is distinct in self and party panels'
         }
     }
 
-    const artifactPartyConditions = Condition.unwrap(ArtifactBuffs.getConditions()).filter(
-        (condition) => /^set_other\.(viridescent_venerer|heart_of_the_furnace)/
-            .test(condition.getName() || ''),
-    );
-    expectPanelTextToBeDistinct('artifacts:party', artifactPartyConditions);
-});
-
-test('new party weapon controls do not repeat their source card text', () => {
-    const partyConditions = Condition.unwrap(WeaponBuffs.getConditions()).filter(
-        (condition) => /^weapon_other\.(weapon_hymn_of_the_maelstrom|weapon_breezeborne_refrain)/
-            .test(condition.getName() || ''),
-    );
-    expectPanelTextToBeDistinct('weapons:party', partyConditions);
 });

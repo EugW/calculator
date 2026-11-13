@@ -1,6 +1,9 @@
 import { ArtifactSet } from "../../../classes/ArtifactSet";
-import { ConditionBoolean } from "../../../classes/Condition/Boolean";
+import { ConditionShielded } from "../../../classes/Condition/Field";
+import { ConditionRetired } from "../../../classes/Condition/Retired";
 import { ConditionStatic } from "../../../classes/Condition/Static";
+import { artifactSetTables } from "../../generated/ArtifactSetTables";
+import { percent } from "../../Params";
 
 export const RetracingBolide = new ArtifactSet({
     serializeId: 20,
@@ -19,7 +22,7 @@ export const RetracingBolide = new ArtifactSet({
                     title: 'set_bonus.retracing_bolide_2',
                     description: 'set_descr.retracing_bolide_2',
                     stats: {
-                        shield: 35,
+                        shield: artifactSetTables.RetracingBolide.pc2.shield,
                     },
                 }),
             ],
@@ -27,16 +30,19 @@ export const RetracingBolide = new ArtifactSet({
         {},
         {
             conditions: [
-                new ConditionBoolean({
-                    name: 'common.char_status_shield',
-                    serializeId: 13,
+                // Shield state follows the team's on-field shield.
+                new ConditionStatic({
                     title: 'set_bonus.retracing_bolide_4',
                     description: 'set_descr.retracing_bolide_4',
                     stats: {
-                        dmg_normal: 40,
-                        dmg_charged: 40,
+                        dmg_normal: percent(artifactSetTables.RetracingBolide.pc4.p1),
+                        dmg_charged: percent(artifactSetTables.RetracingBolide.pc4.p1),
                     },
+                    subConditions: [
+                        new ConditionShielded(),
+                    ],
                 }),
+                new ConditionRetired({serializeId: 13, type: 'checkbox'}),
             ],
         },
     ],

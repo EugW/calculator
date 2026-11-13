@@ -18,6 +18,7 @@ import { StatTable } from "../../classes/StatTable";
 import { ValueTable } from "../../classes/ValueTable";
 import { charTables } from "../generated/CharTables";
 import { charTalentTables } from "../generated/CharTalentTables";
+import { percent } from "../Params";
 
 const Talents = new DbObjectTalents({
     attack: {
@@ -109,13 +110,13 @@ const Talents = new DbObjectTalents({
 });
 
 const TalentValues = {
-    A1Heal: 1.5,
-    A4Healing: 20,
-    A4SkillBonus: 20,
-    C1Heal: 15,
-    C2AtkBonus: 20,
-    C6CritRate: 20,
-    C6CritDmg: 40,
+    A1Heal: percent(charTalentTables.Gaming.a1.p2),
+    A4Healing: percent(charTalentTables.Gaming.a4.p2),
+    A4SkillBonus: percent(charTalentTables.Gaming.a4.p3),
+    C1Heal: percent(charTalentTables.Gaming.c1.p1),
+    C2AtkBonus: percent(charTalentTables.Gaming.c2.p1),
+    C6CritRate: percent(charTalentTables.Gaming.c6.p1),
+    C6CritDmg: percent(charTalentTables.Gaming.c6.p2),
 };
 
 export const Gaming = new DbObjectChar({

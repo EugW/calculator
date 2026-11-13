@@ -1,10 +1,13 @@
-import { ConditionBoolean } from "../../../classes/Condition/Boolean";
+import { ConditionShielded } from "../../../classes/Condition/Field";
 import { ConditionNot } from "../../../classes/Condition/Not";
+import { ConditionRetired } from "../../../classes/Condition/Retired";
 import { ConditionStacks } from "../../../classes/Condition/Stacks";
 import { ConditionStaticRefine } from "../../../classes/Condition/Static/Refine";
 import { DbObjectWeapon } from "../../../classes/DbObject/Weapon";
 import { StatTable } from "../../../classes/StatTable";
 import { weaponStatTables } from "../../generated/WeaponStatTables";
+import { weaponPassiveTables } from "../../generated/WeaponPassiveTables";
+import { percent } from "../../Params";
 
 export const BeaconOfTheReedSea = new DbObjectWeapon({
     name: 'beacon_of_the_reed_sea',
@@ -37,23 +40,20 @@ export const BeaconOfTheReedSea = new DbObjectWeapon({
             maxStacks: 2,
             levelSetting: 'weapon_refine',
             stats: [
-                new StatTable('atk_percent', [20, 25, 30, 35, 40]),
+                new StatTable('atk_percent', percent(weaponPassiveTables.BeaconOfTheReedSea.p1)),
             ],
         }),
-        new ConditionBoolean({
-            name: 'common.char_status_shield',
-            serializeId: 2,
-            title: 'buffs_name.resonance_geo_shield',
-        }),
+        // Shield state follows the team's on-field shield.
+        new ConditionRetired({serializeId: 2, type: 'checkbox'}),
         new ConditionStaticRefine({
             title: 'talent_name.beacon_of_the_reed_sea',
             description: 'talent_descr.beacon_of_the_reed_sea_2',
             stats: [
-                new StatTable('hp_percent', [32, 40, 48, 56, 64]),
+                new StatTable('hp_percent', percent(weaponPassiveTables.BeaconOfTheReedSea.p5)),
             ],
             subConditions: [
                 new ConditionNot([
-                    new ConditionBoolean({name: 'common.char_status_shield'}),
+                    new ConditionShielded(),
                 ]),
             ],
         }),

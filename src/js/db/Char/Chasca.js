@@ -19,6 +19,7 @@ import { FeatureMultiplier } from "../../classes/Feature2/Multiplier";
 import { StatTable } from "../../classes/StatTable";
 import { charTables } from "../generated/CharTables";
 import { charTalentTables } from "../generated/CharTalentTables";
+import { percent } from "../Params";
 
 
 const Talents = new DbObjectTalents({
@@ -111,14 +112,14 @@ const Talents = new DbObjectTalents({
     },
 });
 
-const A1Bonus1 = 15;
-const A1Bonus2 = 35;
-const A1Bonus3 = 65;
-const A4AnemoDmg = 150;
-const A4ElementalDmg = 150;
-const C2Dmg = 400;
+const A1Bonus1 = percent(charTalentTables.Chasca.a1.p4);
+const A1Bonus2 = percent(charTalentTables.Chasca.a1.p5);
+const A1Bonus3 = percent(charTalentTables.Chasca.a1.p6);
+const A4AnemoDmg = percent(charTalentTables.Chasca.a4.p1);
+const A4ElementalDmg = percent(charTalentTables.Chasca.a4.p1);
+const C2Dmg = percent(charTalentTables.Chasca.c2.p1);
 const C4Dmg = 400;
-const C6CritDmg = 120;
+const C6CritDmg = percent(charTalentTables.Chasca.c6.p2);
 
 export const Chasca = new DbObjectChar({
     name: 'chasca',
@@ -441,7 +442,4 @@ export const Chasca = new DbObjectChar({
             ],
         },
     ]),
-    partyData: {
-        conditions: [],
-    },
 });

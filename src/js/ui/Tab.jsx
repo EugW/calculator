@@ -16,9 +16,9 @@ export class Tab {
         }
 
         if (this.rightRab) {
-            UI.Layout.addRightTab(this.id, 'gi-'+ this.id +'-tab', 'gi-'+ this.id +'-container');
+            UI.Layout.addRightTab(this.id, 'gi-'+ this.id +'-tab', 'gi-'+ this.id +'-container', {side: this.sideTab, title: this.title});
         } else {
-            UI.Layout.addLeftTab(this.id, 'gi-'+ this.id +'-tab', 'gi-'+ this.id +'-container');
+            UI.Layout.addLeftTab(this.id, 'gi-'+ this.id +'-tab', 'gi-'+ this.id +'-container', {title: this.title});
         }
 
         this.root = $('.gi-'+ this.id +'-container');

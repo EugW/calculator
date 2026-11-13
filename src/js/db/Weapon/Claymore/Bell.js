@@ -6,6 +6,8 @@ import { FeatureShield } from "../../../classes/Feature2/Shield";
 import { StatTable } from "../../../classes/StatTable";
 import { ValueTable } from "../../../classes/ValueTable";
 import { weaponStatTables } from "../../generated/WeaponStatTables";
+import { weaponPassiveTables } from "../../generated/WeaponPassiveTables";
+import { percent } from "../../Params";
 
 export const Bell = new DbObjectWeapon({
     name: 'the_bell',
@@ -20,7 +22,7 @@ export const Bell = new DbObjectWeapon({
             title: 'talent_name.weapon_rebellious_guardian',
             description: 'talent_descr.weapon_rebellious_guardian_passive',
             stats: [
-                new StatTable('text_percent_hp', [20, 23, 26, 29, 32]),
+                new StatTable('text_percent_hp', percent(weaponPassiveTables.Bell.p1)),
             ],
         }),
         new ConditionBooleanRefine({
@@ -29,7 +31,7 @@ export const Bell = new DbObjectWeapon({
             title: 'talent_name.weapon_rebellious_guardian',
             description: 'talent_descr.weapon_rebellious_guardian',
             stats: [
-                new StatTable('dmg_all', [12, 15, 18, 21, 24]),
+                new StatTable('dmg_all', percent(weaponPassiveTables.Bell.p3)),
             ],
         }),
     ],
@@ -41,7 +43,7 @@ export const Bell = new DbObjectWeapon({
                 new FeatureMultiplier({
                     scaling: 'hp*',
                     leveling: 'weapon_refine',
-                    values: new ValueTable([20, 23, 26, 29, 32]),
+                    values: new ValueTable(percent(weaponPassiveTables.Bell.p1)),
                 }),
             ],
         }),

@@ -3,6 +3,8 @@ import { ConditionStaticRefine } from "../../../classes/Condition/Static/Refine"
 import { DbObjectWeapon } from "../../../classes/DbObject/Weapon";
 import { StatTable } from "../../../classes/StatTable";
 import { weaponStatTables } from "../../generated/WeaponStatTables";
+import { weaponPassiveTables } from "../../generated/WeaponPassiveTables";
+import { percent } from "../../Params";
 
 export const ThunderingPulse = new DbObjectWeapon({
     name: 'thundering_pulse',
@@ -17,7 +19,7 @@ export const ThunderingPulse = new DbObjectWeapon({
             title: 'talent_name.weapon_thundering_pulse',
             description: 'talent_descr.weapon_thundering_pulse',
             stats: [
-                new StatTable('atk_percent', [20, 25, 30, 35, 40]),
+                new StatTable('atk_percent', weaponPassiveTables.ThunderingPulse.atk_percent),
             ],
         }),
         new ConditionDropdown({
@@ -34,7 +36,7 @@ export const ThunderingPulse = new DbObjectWeapon({
                     conditions: [
                         new ConditionStaticRefine({
                             stats: [
-                                new StatTable('dmg_normal', [12, 16, 18, 21, 24]),
+                                new StatTable('dmg_normal', percent(weaponPassiveTables.ThunderingPulse.p2)),
                             ],
                         }),
                     ],
@@ -46,7 +48,7 @@ export const ThunderingPulse = new DbObjectWeapon({
                     conditions: [
                         new ConditionStaticRefine({
                             stats: [
-                                new StatTable('dmg_normal', [24, 30, 36, 42, 48]),
+                                new StatTable('dmg_normal', percent(weaponPassiveTables.ThunderingPulse.p3)),
                             ],
                         }),
                     ],
@@ -58,7 +60,7 @@ export const ThunderingPulse = new DbObjectWeapon({
                     conditions: [
                         new ConditionStaticRefine({
                             stats: [
-                                new StatTable('dmg_normal', [40, 50, 60, 70, 80]),
+                                new StatTable('dmg_normal', percent(weaponPassiveTables.ThunderingPulse.p4)),
                             ],
                         }),
                     ],

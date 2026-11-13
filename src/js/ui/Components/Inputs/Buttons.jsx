@@ -1,12 +1,14 @@
 import React from 'react';
 import '../../../../css/Components/Inputs/Buttons.css'
 
+// Without a title the button is its icon alone; a tooltip can name it.
 export class TitledButton extends React.PureComponent {
     render() {
         const Tag = this.props.type ? 'button' : 'div';
         return (
             <Tag
-                className={'inputs-button' + (this.props.type ? ' native' : '') + (this.props.disabled ? ' disabled' : '')}
+                className={'inputs-button' + (this.props.title ? '' : ' icon-only') + (this.props.type ? ' native' : '') + (this.props.disabled ? ' disabled' : '')}
+                data-tooltip={this.props.tooltip}
                 type={this.props.type}
                 disabled={this.props.type ? this.props.disabled : undefined}
                 autoFocus={this.props.type ? this.props.autoFocus : undefined}

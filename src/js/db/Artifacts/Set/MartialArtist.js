@@ -1,6 +1,8 @@
 import { ArtifactSet } from "../../../classes/ArtifactSet";
 import { ConditionBoolean } from "../../../classes/Condition/Boolean";
 import { ConditionStatic } from "../../../classes/Condition/Static";
+import { artifactSetTables } from "../../generated/ArtifactSetTables";
+import { percent } from "../../Params";
 
 export const MartialArtist = new ArtifactSet({
     serializeId: 17,
@@ -19,8 +21,8 @@ export const MartialArtist = new ArtifactSet({
                     title: 'set_bonus.martial_artist_2',
                     description: 'set_descr.martial_artist_2',
                     stats: {
-                        dmg_normal: 15,
-                        dmg_charged: 15,
+                        dmg_normal: percent(artifactSetTables.MartialArtist.pc2.p1),
+                        dmg_charged: percent(artifactSetTables.MartialArtist.pc2.p1),
                     },
                 })
             ],
@@ -34,8 +36,8 @@ export const MartialArtist = new ArtifactSet({
                     title: 'set_bonus.martial_artist_4',
                     description: 'set_descr.martial_artist_4',
                     stats: {
-                        dmg_normal: 25,
-                        dmg_charged: 25,
+                        dmg_normal: percent(artifactSetTables.MartialArtist.pc4.p3),
+                        dmg_charged: percent(artifactSetTables.MartialArtist.pc4.p3),
                     },
                 })
             ],

@@ -2,6 +2,8 @@ import { ArtifactSet } from "../../../classes/ArtifactSet";
 import { ConditionBoolean } from "../../../classes/Condition/Boolean";
 import { ConditionStatic } from "../../../classes/Condition/Static";
 import { ConditionWitchHomework } from "../../../classes/Condition/WitchHomework";
+import { artifactSetTables } from "../../generated/ArtifactSetTables";
+import { percent } from "../../Params";
 
 export const ADayCarvedFromRisingWinds = new ArtifactSet({
     serializeId: 59,
@@ -20,7 +22,7 @@ export const ADayCarvedFromRisingWinds = new ArtifactSet({
                     title: 'set_bonus.a_day_carved_from_rising_winds_2',
                     description: 'set_descr.a_day_carved_from_rising_winds_2',
                     stats: {
-                        atk_percent: 18,
+                        atk_percent: artifactSetTables.ADayCarvedFromRisingWinds.pc2.atk_percent,
                     },
                 })
             ],
@@ -35,7 +37,7 @@ export const ADayCarvedFromRisingWinds = new ArtifactSet({
                     title: 'set_bonus.a_day_carved_from_rising_winds_4',
                     description: 'set_descr.a_day_carved_from_rising_winds_4_1',
                     stats: {
-                        atk_percent: 25,
+                        atk_percent: percent(artifactSetTables.ADayCarvedFromRisingWinds.pc4.p2),
                     },
                 }),
                 // Resolve of Pastoral Winds: Additional CRIT Rate +20% when Witch's Homework completed
@@ -44,7 +46,7 @@ export const ADayCarvedFromRisingWinds = new ArtifactSet({
                     description: 'set_descr.a_day_carved_from_rising_winds_4_2',
                     info: {hexerei: true},
                     stats: {
-                        crit_rate: 20,
+                        crit_rate: percent(artifactSetTables.ADayCarvedFromRisingWinds.pc4.p3),
                     },
                     subConditions: [
                         new ConditionBoolean({name: 'set.a_day_carved_from_rising_winds_4'}),

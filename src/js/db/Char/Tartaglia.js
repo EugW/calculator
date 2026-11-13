@@ -16,6 +16,7 @@ import { FeatureDamagePlungeShockWave } from "../../classes/Feature2/Damage/Plun
 import { FeatureDamageSkill } from "../../classes/Feature2/Damage/Skill";
 import { FeatureMultiplier } from "../../classes/Feature2/Multiplier";
 import { StatTable } from "../../classes/StatTable";
+import { RECEIVERS } from "../../classes/Team/Receivers";
 import { charTables } from "../generated/CharTables";
 import { charTalentTables } from "../generated/CharTalentTables";
 
@@ -514,9 +515,14 @@ export const Tartaglia = new DbObjectChar({
         }),
     ],
     conditions: [
+        // Master of Weaponry: your own party members, Tartaglia included.
+        // _bonus_2: a receiver's own constellations set char_skill_*_bonus.
         new Condition({
+            receivers: RECEIVERS.TEAM,
+            title: 'talent_name.tartaglia_master_of_weaponry',
+            description: 'talent_descr.tartaglia_master_of_weaponry',
             settings: {
-                char_skill_attack_bonus: 1,
+                char_skill_attack_bonus_2: 1,
             },
         }),
         new ConditionBoolean({
@@ -603,15 +609,4 @@ export const Tartaglia = new DbObjectChar({
             ],
         },
     ]),
-    partyData: {
-        conditions: [
-            new ConditionStatic({
-                title: 'talent_name.tartaglia_master_of_weaponry',
-                description: 'talent_descr.tartaglia_master_of_weaponry',
-                settings: {
-                    char_skill_attack_bonus_2: 1,
-                },
-            }),
-        ],
-    },
 });

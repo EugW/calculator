@@ -1,24 +1,55 @@
 import { Feature2 } from "../Feature2";
 import { FeatureResult } from "../FeatureResult";
-import { CBlock } from "./Compile/Types";
-import { Feature2RotationTree, getReactionName } from "./Rotation/Tree";
-// import { getUsedStats } from "./Compile/Stats";
+import { Feature2RotationTree, forEachHit, getActiveFeature, hitData, isTeamHit } from "./Rotation/Tree";
 
-
+/**
+ * A team's rotation as one member's feature, compiled into the member's
+ * programs (see RotationCompiler): the whole team's hits
+ * (rotation.total) or only the member's own (rotation_self.total). The
+ * compiled items are the rotation's states and hits, each hit with its
+ * member's data at its point of the rotation.
+ */
 export class FeatureRotation extends Feature2 {
+    /**
+     * @param {Object} params {name, items: compiled items, viewerSlot: the
+     *     member's slot, onlySlot: the only slot whose hits count (optional)}
+     */
     constructor(params) {
-        super(params);
+        super({name: params.name, items: params.items});
+        this.name = params.name;
         this.items = params.items;
+        this.viewerSlot = params.viewerSlot;
+        this.onlySlot = params.onlySlot;
     }
 
-    getName() { return 'rotation.total'; }
+    getName() { return this.name; }
+
+    /**
+     * It holds its team's states as they were when it was compiled: a build
+     * with other artifacts needs its own (see MemberView.getResultOf).
+     *
+     * @returns {boolean}
+     */
+    isRotation() { return true; }
+
+    /**
+     * @param {Object} hit a compiled hit
+     * @returns {boolean} whether this feature counts the hit: a member's own
+     *     total leaves out what the whole team deals
+     */
+    counts(hit) {
+        return this.onlySlot === undefined || (hit.slot == this.onlySlot && !isTeamHit(hit.feature));
+    }
 
     /**
      * @param {BuildData} data
      * @returns {Function}
      */
     getTree(data, opts) {
-        let tree = new Feature2RotationTree(this.items, opts);
+        let tree = new Feature2RotationTree(this.items, Object.assign({}, opts, {
+            viewerSlot: this.viewerSlot,
+            counts: (hit) => this.counts(hit),
+        }));
         return tree.getTree(data);
     }
 
@@ -40,12 +71,13 @@ export class FeatureRotation extends Feature2 {
         return root.compile(opts);
     }
 
-    getResult(data) {
+    /** A prepared compiler may be reused while only artifact stats vary. */
+    getResult(data, compiler) {
         if (!this.checkConditions(data)) {
             return {};
         }
 
-        let compiler = this.getCompiled(data);
+        compiler ||= this.getCompiled(data);
         let [normal, crit, average] = compiler.execute(data);
 
         let element = this.getElement(data);
@@ -63,82 +95,21 @@ export class FeatureRotation extends Feature2 {
         };
     }
 
-    getResultForEditor(build) {
-        let buildData = build.getBuildData();
-        return this.processBlock(this.items, buildData);
-    }
-
-    processBlock(items, buildData) {
-        let result = [];
-
-        for (let item of items) {
-            if (item.type == 'feature') {
-                buildData.settings.reaction = getReactionName(item);
-                let activeFeature = getActiveFeature(item.feature, buildData);
-                if (activeFeature) {
-                    let featureResult = activeFeature.getResult(buildData)[activeFeature.getName()];
-                    result.push({
-                        result: featureResult,
-                        count: item.count,
-                        subLine: featureSubline(item.feature, buildData),
-                    });
-                } else {
-                    result.push({});
-                }
-            } else if (item.type == 'condition') {
-                if (item.settings) { buildData.addSettings(item.settings); }
-                if (item.stats) { buildData.addStats(item.stats); }
-
-                // TODO
-                if (item.postEffects && item.postEffects.length) { buildData.postEffects = item.postEffects; }
-                if (item.multipliers && item.multipliers.length) { buildData.multipliers = item.multipliers; }
-
-            } else if (item.type == 'repeat') {
-                let blockBuildData = buildData.clone();
-                blockBuildData.addSettings({inside_rotation_block: 1});
-                let subItems = this.processBlock(item.items, blockBuildData);
-                result = result.concat(subItems);
-            } else if (item.type == 'uptime') {
-                let blockBuildData = buildData.clone();
-                blockBuildData.addSettings({inside_rotation_block: 1});
-
-                let blockBuildData2 = blockBuildData.clone();
-
-                let subItems1 = this.processBlock(item.items, blockBuildData);
-                let subItems2 = this.processBlock(item.conditions.concat(item.items), blockBuildData2);
-                let percent = item.percent / 100;
-                let rev_recent = 1 - percent;
-
-                for (let i = 0; i < subItems1.length; ++i) {
-                    let item1 = subItems1[i].result;
-                    let item2 = subItems2[i].result;
-
-                    if (!item1 && !item2) continue;  // both invalid
-
-                    if (!item2) {
-                        item2 = {normal: 0, crit: 0, average: 0};
-                    } else if (!item1) {
-                        subItems1[i] = Object.assign({}, subItems2[i]);
-                        item1 = subItems1[i].result = {normal: 0, crit: 0, average: 0};
-                    }
-
-                    for (let key of ['normal', 'crit', 'average']) {
-                        item1[key] = item1[key] * rev_recent + item2[key] * percent;
-                    }
-                }
-
-                result = result.concat(subItems1);
-            } else if (item.type == 'invalid') {
-                result.push({});
-            }
-        }
-
-        return result;
+    /**
+     * Every hit's result in the rotation's order, for the editor, whichever
+     * hits this feature counts. A hit is computed with its member's data at
+     * its point of the rotation; a hit in an uptime block is weighted by it.
+     *
+     * @returns {Array.<Object>} {result, count, subLine}, or {} for a hit that does not apply
+     */
+    getResultForEditor() {
+        return editorResults(this.items);
     }
 
     getDisplaySettings(data) {
         let elements = {};
         let damageTypes = {};
+        let section = this.getName().split('.')[0];
 
         let result = [{
             settings: {rotation_include: null},
@@ -146,33 +117,20 @@ export class FeatureRotation extends Feature2 {
             icon: 'multi',
         }];
 
-        function processBlock(items, data, elements, damageTypes) {
-            let buildData = data.clone();
+        forEachHit(this.items, (hit) => {
+            if (!this.counts(hit)) return;
 
-            for (let item of items) {
-                if (item.type == 'feature') {
-                    let activeFeature = getActiveFeature(item.feature, buildData);
-                    if (activeFeature) {
-                        elements[activeFeature.getElement(buildData)] = 1;
-                        damageTypes[activeFeature.getDamageType()] = 1;
-                    }
-                } else if (item.type == 'condition') {
-                    if (item.settings) { buildData.addSettings(item.settings); }
-                    if (item.stats) { buildData.addStats(item.stats); }
-                } else if (item.type == 'repeat') {
-                    processBlock(item.items, buildData, elements, damageTypes);
-                } else if (item.type == 'uptime') {
-                    processBlock(item.items, buildData, elements, damageTypes);
-                    processBlock([...item.conditions, ...item.items], buildData, elements, damageTypes);
-                }
+            let hitDataItem = hitData(hit);
+            let activeFeature = getActiveFeature(hit.feature, hitDataItem);
+            if (activeFeature) {
+                elements[activeFeature.getElement(hitDataItem)] = 1;
+                damageTypes[activeFeature.getDamageType()] = 1;
             }
-        }
-
-        processBlock(this.items, data, elements, damageTypes);
+        });
 
         for (let element of Object.keys(elements)) {
             result.push({
-                id: 'rotation.total_' + element,
+                id: section + '.total_' + element,
                 title: 'rotation.' + element,
                 isChild: true,
                 settings: {rotation_include: element},
@@ -182,7 +140,7 @@ export class FeatureRotation extends Feature2 {
 
         for (let datageType of Object.keys(damageTypes)) {
             result.push({
-                id: 'rotation.total_' + datageType,
+                id: section + '.total_' + datageType,
                 title: 'rotation.' + datageType,
                 icon: 'multi',
                 isChild: true,
@@ -195,18 +153,53 @@ export class FeatureRotation extends Feature2 {
     }
 }
 
-function getActiveFeature(features, data) {
-    features = Array.isArray(features) ? features : [features];
+function editorResults(items) {
+    let result = [];
 
-    for (let feature of features) {
-        if (feature.isActive(data) && feature.usedInRotation()) {
-            return feature;
+    for (let item of items) {
+        if (item.type == 'feature') {
+            let data = hitData(item);
+            let activeFeature = getActiveFeature(item.feature, data);
+            if (activeFeature) {
+                result.push({
+                    result: activeFeature.getResult(data)[activeFeature.getName()],
+                    count: item.count,
+                    subLine: featureSubline(activeFeature, data),
+                });
+            } else {
+                result.push({});
+            }
+        } else if (item.type == 'repeat') {
+            result = result.concat(editorResults(item.items));
+        } else if (item.type == 'uptime') {
+            let on = editorResults(item.on);
+            let off = editorResults(item.off);
+            let percent = item.percent / 100;
+
+            for (let i = 0; i < off.length; ++i) {
+                let resultOn = on[i] && on[i].result;
+                let resultOff = off[i].result;
+
+                if (!resultOn && !resultOff) continue;  // both invalid
+
+                let base = resultOff ? off[i] : on[i];
+                let merged = Object.assign(Object.create(Object.getPrototypeOf(base.result)), base.result);
+                for (let key of ['normal', 'crit', 'average']) {
+                    merged[key] = (resultOff ? resultOff[key] : 0) * (1 - percent) + (resultOn ? resultOn[key] : 0) * percent;
+                }
+                off[i] = Object.assign({}, base, {result: merged});
+            }
+
+            result = result.concat(off);
+        } else if (item.type == 'invalid') {
+            result.push({});
         }
     }
+
+    return result;
 }
 
-function featureSubline(features, data) {
-    let feature = getActiveFeature(features, data);
+function featureSubline(feature, data) {
     let descr = feature.getRotationHitDescription(data);
 
     if (descr) {

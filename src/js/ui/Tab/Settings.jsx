@@ -17,7 +17,6 @@ import {
     GPU_TOP_K_MAX_BATCH_COMBINATIONS,
     normalizeGPUOptimizerBatchSize,
 } from '../../classes/GPUOptimizerContract';
-import { ImporterGood } from '../../classes/Importer/Good';
 
 let FileSaver = require('file-saver');
 let lang = new Lang();
@@ -40,6 +39,7 @@ export class SettingsTab extends Tab {
 
         this.id = 'settings';
         this.rightRab = true;
+        this.title = 'tab_header.settings_view';
     }
 
     refresh() {
@@ -70,11 +70,13 @@ export class SettingsView extends React.Component {
         this.state = {
             create_backup: {
                 saveChars: true,
+                saveTeams: true,
                 saveArts: true,
                 saveRotations: true,
             },
             load_backup: {
                 addChars: false,
+                addTeams: false,
                 addArts: false,
                 addRotations: false,
             },
@@ -152,16 +154,6 @@ export class SettingsView extends React.Component {
         }
     }
 
-    handleGoodImport() {
-        UI.WindowGood.show();
-    }
-
-    handleGoodExport() {
-        let data = ImporterGood.export(this.props.app.storage.artifacts.listArtifacts());
-        let blob = new Blob([JSON.stringify(data)], {type: "application/json;charset=utf-8"});
-        FileSaver.saveAs(blob, 'artifacts_GOOD.json');
-    }
-
     handleToggleBetaContent(value) {
         this.props.app.setSetting('show_beta_content', value ? 1 : 0);
         this.refresh();
@@ -210,6 +202,11 @@ export class SettingsView extends React.Component {
                                                 checked: this.state.create_backup.saveChars,
                                             },
                                             {
+                                                name: 'saveTeams',
+                                                title: lang.get('settings_view.create_backup_teams'),
+                                                checked: this.state.create_backup.saveTeams,
+                                            },
+                                            {
                                                 name: 'saveArts',
                                                 title: lang.get('settings_view.create_backup_artifacts'),
                                                 checked: this.state.create_backup.saveArts,
@@ -237,6 +234,11 @@ export class SettingsView extends React.Component {
                                                 name: 'addChars',
                                                 title: lang.get('settings_view.restore_chars'),
                                                 checked: this.state.load_backup.addChars,
+                                            },
+                                            {
+                                                name: 'addTeams',
+                                                title: lang.get('settings_view.restore_teams'),
+                                                checked: this.state.load_backup.addTeams,
                                             },
                                             {
                                                 name: 'addArts',
@@ -268,19 +270,6 @@ export class SettingsView extends React.Component {
                                         handleSyncEnable={() => this.handleSyncEnable()}
                                     />
                                 </GroupBox>
-                            </AccordionItem>
-                            <AccordionItem id="good" title={lang.get('good_import.title')}>
-                                {parse(lang.get('good_import.disclaimer'))}
-                                <TitledButton
-                                    icon='icon-ok'
-                                    title={lang.get('good_import.open_window')}
-                                    onClick={() => this.handleGoodImport()}
-                                />
-                                <TitledButton
-                                    icon='icon-ok'
-                                    title={lang.get('good_import.export')}
-                                    onClick={() => this.handleGoodExport(true)}
-                                />
                             </AccordionItem>
                             <AccordionItem id="artifact_suggest" title={lang.get('settings_view.artifact_suggest')}>
                                 <Checkbox

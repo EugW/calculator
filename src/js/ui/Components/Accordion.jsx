@@ -38,6 +38,7 @@ export class Accordion extends React.Component {
                     key={item.props.id}
                     onClick={() => this.handleOpen(item.props.id)}
                     isActive={item.props.id == this.state.openedId}
+                    lazy={item.props.lazy}
                     title={item.props.title}
                 >
                     {item.props.children}
@@ -66,12 +67,16 @@ class AccordionItemContainer extends React.Component {
                         if (event.key === 'Enter' || event.key === ' ') { event.preventDefault(); this.props.onClick(); }
                     }} onClick={this.props.onClick}>{this.props.title}</div>
                 <div className="accordion-item-content">
-                    {this.props.children}
+                    {this.props.isActive || !this.props.lazy ? this.props.children : null}
                 </div>
             </div>
         );
     }
 }
 
+/**
+ * An item of an Accordion: `id`, `title`, and `lazy` to render the content
+ * only while the item is open (content that is costly to render).
+ */
 export function AccordionItem(props) {}
 

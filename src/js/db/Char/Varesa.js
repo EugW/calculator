@@ -22,6 +22,7 @@ import { StatTable } from "../../classes/StatTable";
 import { ValueTable } from "../../classes/ValueTable";
 import { charTables } from "../generated/CharTables";
 import { charTalentTables } from "../generated/CharTalentTables";
+import { percent } from "../Params";
 
 const Talents = new DbObjectTalents({
     attack: {
@@ -136,14 +137,14 @@ const Talents = new DbObjectTalents({
     },
 });
 
-const A1PlungeDmg = 50;
-const A1PlungeDmg2 = 180;
-const A4AtkPercent = 35;
-const C4AtkScale = 500;
-const C4BonusMax = 20000;
-const C4BurstBonus = 100;
-const C6CritRate = 10;
-const C6CritDmg = 100;
+const A1PlungeDmg = percent(charTalentTables.Varesa.a1.p1);
+const A1PlungeDmg2 = percent(charTalentTables.Varesa.a1.p2);
+const A4AtkPercent = percent(charTalentTables.Varesa.a4.p1);
+const C4AtkScale = percent(charTalentTables.Varesa.c4.p1);
+const C4BonusMax = charTalentTables.Varesa.c4.p2;
+const C4BurstBonus = percent(charTalentTables.Varesa.c4.p3);
+const C6CritRate = percent(charTalentTables.Varesa.c6.p1);
+const C6CritDmg = percent(charTalentTables.Varesa.c6.p2);
 
 const stanceCond = new ConditionBoolean({name: 'varesa_fiery_passion'});
 const stanceRevCond = new ConditionNot([stanceCond]);
@@ -477,5 +478,4 @@ export const Varesa = new DbObjectChar({
             ],
         },
     ]),
-    partyData: {},
 });

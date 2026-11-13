@@ -1,6 +1,8 @@
 import { ArtifactSet } from "../../../classes/ArtifactSet";
 import { ConditionStatic } from "../../../classes/Condition/Static";
 import { ConditionBoolean } from "../../../classes/Condition/Boolean";
+import { artifactSetTables } from "../../generated/ArtifactSetTables";
+import { percent, times } from "../../Params";
 
 export const NighttimeWhispersInTheEchoingWoods = new ArtifactSet({
     serializeId: 49,
@@ -20,7 +22,7 @@ export const NighttimeWhispersInTheEchoingWoods = new ArtifactSet({
                     description: 'set_descr.nighttime_whispers_in_the_echoing_woods_2',
                     settings: {},
                     stats: {
-                        atk_percent: 18,
+                        atk_percent: artifactSetTables.NighttimeWhispersInTheEchoingWoods.pc2.atk_percent,
                     },
                 })
             ],
@@ -35,7 +37,7 @@ export const NighttimeWhispersInTheEchoingWoods = new ArtifactSet({
                     description: 'set_descr.nighttime_whispers_in_the_echoing_woods_4_1',
                     settings: {},
                     stats: {
-                        dmg_geo: 20,
+                        dmg_geo: percent(artifactSetTables.NighttimeWhispersInTheEchoingWoods.pc4.p2),
                     },
                 }),
                 new ConditionBoolean({
@@ -44,7 +46,7 @@ export const NighttimeWhispersInTheEchoingWoods = new ArtifactSet({
                     title: 'set_bonus.nighttime_whispers_in_the_echoing_woods_4',
                     description: 'set_descr.nighttime_whispers_in_the_echoing_woods_4_2',
                     stats: {
-                        dmg_geo: 30,
+                        dmg_geo: percent(times(artifactSetTables.NighttimeWhispersInTheEchoingWoods.pc4.p2, artifactSetTables.NighttimeWhispersInTheEchoingWoods.pc4.p3)),
                     },
                     subConditions: [
                         new ConditionBoolean({name: 'set.nighttime_whispers_in_the_echoing_woods_4_1'}),

@@ -1,12 +1,11 @@
 // Separate from build/storage blobs: these are browser-wide optimizer preferences,
 // not artifact data, prediction parameters, results, or a preset payload.
 export const ARTIFACT_SUGGEST_PREFERENCES_KEY = 'artifact_suggest_settings';
-const VERSION = 1;
+const VERSION = 2;
 const SLOTS = ['flower', 'plume', 'sands', 'goblet', 'circlet'];
 const isMap = value => value !== null && typeof value === 'object' && !Array.isArray(value);
 const safeKey = key => !['__proto__', 'prototype', 'constructor'].includes(key);
 const isBoolean = value => typeof value === 'boolean';
-const isScalar = value => typeof value === 'string' || isBoolean(value) || Number.isFinite(value);
 const isLevel = value => Number.isInteger(value) && value >= 0 && value <= 20;
 
 function pickMap(value, validValue, validKey = safeKey) {
@@ -30,7 +29,6 @@ export function normalizeArtifactSuggestPreferences(value) {
         groups: pickMap(settings.groups, isBoolean),
         slots: pickMap(settings.slots, isBoolean, key => SLOTS.includes(key)),
         sets: pickMap(settings.sets, isBoolean, key => /^[A-Za-z0-9_]+-[1-5]$/.test(key)),
-        sets_settings: pickMap(settings.sets_settings, isScalar),
         required_sets: pickMap(settings.required_sets, value => typeof value === 'string' && /^[A-Za-z0-9_]*$/.test(value),
             key => key === 'set1' || key === 'set2'),
         filter: {main_stats: Object.fromEntries(SLOTS.filter(slot => isMap(mainStats[slot]))
@@ -49,7 +47,7 @@ export function normalizeArtifactSuggestPreferences(value) {
 export function restoreArtifactSuggestPreferences(defaults, saved) {
     const clean = normalizeArtifactSuggestPreferences(saved);
     const settings = {};
-    for (const key of ['stats', 'groups', 'slots', 'sets', 'sets_settings', 'required_sets']) {
+    for (const key of ['stats', 'groups', 'slots', 'sets', 'required_sets']) {
         settings[key] = {...defaults.settings[key], ...clean.settings[key]};
     }
     settings.filter = {...defaults.settings.filter, ...clean.settings.filter, main_stats: {}};
@@ -63,7 +61,9 @@ export function restoreArtifactSuggestPreferences(defaults, saved) {
 export function loadArtifactSuggestPreferences(storage) {
     try {
         const data = JSON.parse((storage || globalThis.localStorage)?.getItem(ARTIFACT_SUGGEST_PREFERENCES_KEY) || 'null');
-        return isMap(data) && data.version === VERSION ? normalizeArtifactSuggestPreferences(data) : null;
+        // Version 1's effect assumptions belonged to the optimizer, never to a
+        // member. Discard them while retaining its constraints and filters.
+        return isMap(data) && [1, VERSION].includes(data.version) ? normalizeArtifactSuggestPreferences(data) : null;
     } catch (error) {
         return null;
     }

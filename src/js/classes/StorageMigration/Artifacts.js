@@ -35,6 +35,9 @@ const STORAGE_TARGETS = [
  * explicitly opt into a new migration instead of rewriting data implicitly.
  * Every target is prepared and verified before the first write. If a write
  * fails, already written keys are restored on a best-effort basis.
+ *
+ * A build is rewritten in the layout it is stored in, or left as it is (see
+ * canonicalBuildData).
  */
 export function migrateArtifactPersistence(storage) {
     let report = {
@@ -235,12 +238,25 @@ function canonicalArtifactData(data) {
     );
 }
 
+/**
+ * This version writes a build as its character only (format 3). A build of
+ * the released calculator (format 1) also holds its enemy and its party and
+ * buff rows, which writing it again would drop: it stays as stored. Its
+ * artifacts are read into their current identities whatever their stored
+ * version.
+ */
 function canonicalBuildData(data) {
-    return canonicalData(
+    let canonical = canonicalData(
         data,
         (input) => CalcSet.deserialize(input),
         (build) => buildUsesTargetArtifactVersion(build),
     );
+
+    return canonical && buildFormat(canonical) == buildFormat(data) ? canonical : null;
+}
+
+function buildFormat(data) {
+    return Serializer.unpack(data)[0];
 }
 
 function canonicalData(data, deserialize, validateObject) {

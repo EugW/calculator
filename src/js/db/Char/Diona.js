@@ -2,6 +2,7 @@ import { Condition } from "../../classes/Condition";
 import { ConditionAnd } from "../../classes/Condition/And";
 import { ConditionAscensionChar } from "../../classes/Condition/Ascension/Char";
 import { ConditionBoolean } from "../../classes/Condition/Boolean";
+import { ConditionTeam } from "../../classes/Condition/Team";
 import { ConditionConstellation } from "../../classes/Condition/Constellation";
 import { ConditionNot } from "../../classes/Condition/Not";
 import { ConditionOr } from "../../classes/Condition/Or";
@@ -21,8 +22,10 @@ import { FeatureMultiplier } from "../../classes/Feature2/Multiplier";
 import { FeatureMultiplierList } from "../../classes/Feature2/Multiplier/List";
 import { FeatureShield } from "../../classes/Feature2/Shield";
 import { StatTable } from "../../classes/StatTable";
+import { RECEIVERS } from "../../classes/Team/Receivers";
 import { charTables } from "../generated/CharTables";
 import { charTalentTables } from "../generated/CharTalentTables";
+import { percent } from "../Params";
 
 
 const Talents = new DbObjectTalents({
@@ -130,21 +133,20 @@ const Talents = new DbObjectTalents({
 
 const TalentValues = {
     ShieldHoldRatio: 1.75,
-    A1MoveSpeed: 10,
-    A1StanimaConsume: 10,
-    C2SkillDmg: 15,
-    C2PartyShield: 50,
-    C2ShieldBonus: 15,
-    C6Mastery: 200,
-    C6Healing: 30,
-    C6Hp: 25,
-    C6RadianceDmg: 40,
+    A1MoveSpeed: percent(charTalentTables.Diona.a1.p1),
+    A1StanimaConsume: -percent(charTalentTables.Diona.a1.p2),
+    A4AtkDown: -percent(charTalentTables.Diona.a4.p1),
+    C2SkillDmg: percent(charTalentTables.Diona.c2.p1),
+    C2PartyShield: percent(charTalentTables.Diona.c2.p3),
+    C2ShieldBonus: percent(charTalentTables.Diona.c2.p2),
+    C6Mastery: charTalentTables.Diona.c6.p2,
+    C6Healing: percent(charTalentTables.Diona.c6.p1),
+    C6Hp: percent(charTalentTables.Diona.c6.p3),
+    C6RadianceDmg: percent(charTalentTables.Diona.c6.p4),
 };
 
 const radianceConductName = 'diona_radiance_stellarconduct';
 const radianceSwirlName = 'diona_radiance_stellarswirl';
-const partyRadianceConductName = 'party.diona_cats_tail_radiance_stellarconduct';
-const partyRadianceSwirlName = 'party.diona_cats_tail_radiance_stellarswirl';
 
 function radianceCondition(mode) {
     return new ConditionRadianceStellarGlimmer({
@@ -407,6 +409,7 @@ export const Diona = new DbObjectChar({
         new ConditionBoolean({
             name: 'diona_secret_menu',
             serializeId: 1,
+            receivers: RECEIVERS.TEAM,
             title: 'talent_name.diona_cats_tail_secret_menu',
             description: 'talent_descr.diona_cats_tail_secret_menu',
             stats: {
@@ -422,7 +425,7 @@ export const Diona = new DbObjectChar({
             title: 'talent_name.diona_drunkards_farce',
             description: 'talent_descr.diona_drunkards_farce',
             stats: {
-                text_percent_dmg: 10,
+                text_percent_dmg: TalentValues.A4AtkDown,
             },
             info: {ascension: 4},
             subConditions: [
@@ -440,7 +443,7 @@ export const Diona = new DbObjectChar({
             serializeId: 4,
             title: 'talent_name.diona_choice_treasures',
             description: 'talent_descr.diona_choice_treasures',
-            condition: new ConditionBoolean({name: 'polestar_field'}),
+            condition: new ConditionTeam({condition: new ConditionBoolean({name: 'polestar_field'})}),
         }),
         new ConditionBoolean({
             name: radianceSwirlName,
@@ -506,28 +509,34 @@ export const Diona = new DbObjectChar({
         },
         {
             conditions: [
-                new ConditionStatic({
+                // The toggles assume Signature Mix's radius and the selected
+                // HP range; HP itself is not simulated. Each effect is an
+                // independent assumption, even when both are enabled.
+                new ConditionBoolean({
+                    name: 'diona_cats_tail_mastery',
+                    serializeId: 7,
+                    receivers: RECEIVERS.TEAM,
                     title: 'talent_name.diona_cats_tail_closing_time',
-                    description: 'talent_descr.diona_cats_tail_closing_time_buffed',
+                    description: 'talent_descr.diona_cats_tail_closing_time_1',
                     stats: {
                         mastery: TalentValues.C6Mastery,
-                        hp_percent: TalentValues.C6Hp,
                     },
-                    subConditions: [
-                        new ConditionNot([
-                            new ConditionBoolean({name: 'diona_cats_tail'}),
-                        ]),
-                    ],
                 }),
                 new ConditionBoolean({
                     name: 'diona_cats_tail',
                     serializeId: 2,
+                    receivers: RECEIVERS.TEAM,
                     title: 'talent_name.diona_cats_tail_closing_time',
-                    description: 'talent_descr.diona_cats_tail_closing_time_buffed',
+                    description: 'talent_descr.diona_cats_tail_closing_time_2',
                     stats: {
                         healing_recv: TalentValues.C6Healing,
-                        hp_percent: TalentValues.C6Hp,
                     },
+                }),
+                // The updated constellation's Max HP increase belongs to Diona.
+                new ConditionStatic({
+                    title: 'talent_name.diona_cats_tail_closing_time',
+                    description: 'talent_descr.diona_cats_tail_closing_time_buffed',
+                    stats: {hp_percent: TalentValues.C6Hp},
                 }),
                 new ConditionBoolean({
                     name: 'diona_cats_tail_radiance',
@@ -539,6 +548,7 @@ export const Diona = new DbObjectChar({
                     ],
                 }),
                 new Condition({
+                    receivers: RECEIVERS.TEAM,
                     stats: {
                         dmg_reaction_superconduct: TalentValues.C6RadianceDmg,
                         dmg_stellarconduct: TalentValues.C6RadianceDmg,
@@ -549,6 +559,7 @@ export const Diona = new DbObjectChar({
                     ]),
                 }),
                 new Condition({
+                    receivers: RECEIVERS.TEAM,
                     stats: {
                         dmg_reaction_swirl_cryo: TalentValues.C6RadianceDmg,
                         dmg_stellarswirl: TalentValues.C6RadianceDmg,
@@ -561,74 +572,5 @@ export const Diona = new DbObjectChar({
             ],
         },
     ]),
-    partyData: {
-        conditions: [
-            new ConditionBoolean({
-                name: 'party.diona_secret_menu',
-                serializeId: 1,
-                rotation: 'party',
-                title: 'talent_name.diona_cats_tail_secret_menu',
-                description: 'talent_descr.diona_cats_tail_secret_menu',
-                info: {ascension: 1},
-                stats: {
-                    move_speed: TalentValues.A1MoveSpeed,
-                    stamina_consume: TalentValues.A1StanimaConsume,
-                },
-            }),
-            new ConditionBoolean({
-                name: 'party.diona_cats_tail_1',
-                serializeId: 2,
-                rotation: 'party',
-                title: 'talent_name.diona_cats_tail_closing_time',
-                description: 'talent_descr.diona_cats_tail_closing_time_1',
-                info: {constellation: 6},
-                stats: {
-                    mastery: TalentValues.C6Mastery,
-                },
-            }),
-            new ConditionBoolean({
-                name: 'party.diona_cats_tail_2',
-                serializeId: 3,
-                rotation: 'party',
-                title: 'talent_name.diona_cats_tail_closing_time',
-                description: 'talent_descr.diona_cats_tail_closing_time_2',
-                info: {constellation: 6},
-                stats: {
-                    healing_recv: TalentValues.C6Healing,
-                },
-                subConditions: [
-                    new ConditionNot([
-                        new ConditionBoolean({name: 'party.diona_cats_tail_1'}),
-                    ]),
-                ],
-            }),
-            new ConditionBoolean({
-                name: partyRadianceConductName,
-                serializeId: 4,
-                rotation: 'party',
-                title: 'talent_name.diona_cats_tail_closing_time',
-                description: 'talent_descr.diona_cats_tail_closing_time_buffed',
-                info: {constellation: 6},
-                stats: {
-                    dmg_reaction_superconduct: TalentValues.C6RadianceDmg,
-                    dmg_stellarconduct: TalentValues.C6RadianceDmg,
-                },
-            }),
-            new ConditionBoolean({
-                name: partyRadianceSwirlName,
-                serializeId: 5,
-                rotation: 'party',
-                title: 'talent_name.diona_cats_tail_closing_time',
-                description: 'talent_descr.diona_cats_tail_closing_time_buffed',
-                info: {constellation: 6},
-                stats: {
-                    dmg_reaction_swirl_cryo: TalentValues.C6RadianceDmg,
-                    dmg_stellarswirl: TalentValues.C6RadianceDmg,
-                },
-                condition: new ConditionNot([
-                    new ConditionBoolean({name: partyRadianceConductName}),
-                ]),
-            }),
-        ],
-    },
+    retiredParty: [[1, 'checkbox'], [2, 'checkbox'], [3, 'checkbox'], [4, 'checkbox'], [5, 'checkbox']],
 });

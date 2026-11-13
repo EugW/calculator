@@ -25,6 +25,7 @@ import { StatTable } from "../../classes/StatTable";
 import { ValueTable } from "../../classes/ValueTable";
 import { charTables } from "../generated/CharTables";
 import { charTalentTables } from "../generated/CharTalentTables";
+import { percent } from "../Params";
 
 
 const Talents = new DbObjectTalents({
@@ -132,12 +133,16 @@ const Talents = new DbObjectTalents({
 
 const TalentValues = {
     BondOfLifeThreshold: 30,
-    C1BonusScale: 100,
-    C2SkillDamage: 900,
-    C2Resistance: 20,
-    C6BurstDamage: 700,
-    C6CritRate: 10,
-    C6CritDamage: 70,
+    C1BonusScale: percent(charTalentTables.Arlecchino.c1.p1),
+    C2SkillDamage: percent(charTalentTables.Arlecchino.c2.p1),
+    C2Resistance: percent(charTalentTables.Arlecchino.c2.p3),
+    C6BurstDamage: percent(charTalentTables.Arlecchino.c6.p5),
+    C6CritRate: percent(charTalentTables.Arlecchino.c6.p1),
+    C6CritDamage: percent(charTalentTables.Arlecchino.c6.p2),
+    A1BondOfLife: percent(charTalentTables.Arlecchino.a1.p3),
+    A4Resistance: percent(charTalentTables.Arlecchino.a4.p2),
+    A4ResistanceMax: percent(charTalentTables.Arlecchino.a4.p3),
+    A0PyroDmg: percent(charTalentTables.Arlecchino.a0.p1),
 };
 
 export const Arlecchino = new DbObjectChar({
@@ -393,7 +398,7 @@ export const Arlecchino = new DbObjectChar({
             description: 'talent_descr.arlecchino_agony_alone_may_be_repaid',
             info: {ascension: 1},
             stats: {
-                text_percent: 130,
+                text_percent: TalentValues.A1BondOfLife,
             },
             subConditions: [
                 new ConditionAscensionChar({ascension: 1}),
@@ -404,8 +409,8 @@ export const Arlecchino = new DbObjectChar({
             description: 'talent_descr.arlecchino_strength_alone_can_defend',
             info: {ascension: 4},
             stats: {
-                text_percent: 1,
-                text_percent_max: 20,
+                text_percent: TalentValues.A4Resistance,
+                text_percent_max: TalentValues.A4ResistanceMax,
             },
             subConditions: [
                 new ConditionAscensionChar({ascension: 4}),
@@ -417,7 +422,7 @@ export const Arlecchino = new DbObjectChar({
             title: 'talent_name.arlecchino_cinders_alone_shall_nourish',
             description: 'talent_descr.arlecchino_cinders_alone_shall_nourish',
             stats: {
-                dmg_pyro: 40,
+                dmg_pyro: TalentValues.A0PyroDmg,
             },
         }),
     ],

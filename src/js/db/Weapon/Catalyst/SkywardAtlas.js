@@ -4,6 +4,8 @@ import { FeatureDamage } from "../../../classes/Feature2/Damage";
 import { FeatureMultiplier } from "../../../classes/Feature2/Multiplier";
 import { StatTable } from "../../../classes/StatTable";
 import { weaponStatTables } from "../../generated/WeaponStatTables";
+import { weaponPassiveTables } from "../../generated/WeaponPassiveTables";
+import { percent } from "../../Params";
 
 export const SkywardAtlas = new DbObjectWeapon({
     name: 'skyward_atlas',
@@ -18,13 +20,13 @@ export const SkywardAtlas = new DbObjectWeapon({
             title: 'talent_name.weapon_skyward_atlas',
             description: 'talent_descr.weapon_skyward_atlas',
             stats: [
-                new StatTable('dmg_anemo', [12, 15, 18, 21, 24]),
-                new StatTable('dmg_geo', [12, 15, 18, 21, 24]),
-                new StatTable('dmg_pyro', [12, 15, 18, 21, 24]),
-                new StatTable('dmg_electro', [12, 15, 18, 21, 24]),
-                new StatTable('dmg_hydro', [12, 15, 18, 21, 24]),
-                new StatTable('dmg_cryo', [12, 15, 18, 21, 24]),
-                new StatTable('dmg_dendro', [12, 15, 18, 21, 24]),
+                new StatTable('dmg_anemo', percent(weaponPassiveTables.SkywardAtlas.p1)),
+                new StatTable('dmg_geo', percent(weaponPassiveTables.SkywardAtlas.p1)),
+                new StatTable('dmg_pyro', percent(weaponPassiveTables.SkywardAtlas.p1)),
+                new StatTable('dmg_electro', percent(weaponPassiveTables.SkywardAtlas.p1)),
+                new StatTable('dmg_hydro', percent(weaponPassiveTables.SkywardAtlas.p1)),
+                new StatTable('dmg_cryo', percent(weaponPassiveTables.SkywardAtlas.p1)),
+                new StatTable('dmg_dendro', percent(weaponPassiveTables.SkywardAtlas.p1)),
             ],
         }),
     ],
@@ -34,7 +36,7 @@ export const SkywardAtlas = new DbObjectWeapon({
             multipliers: [
                 new FeatureMultiplier({
                     leveling: 'weapon_refine',
-                    values: new StatTable('skyward_atlas_cloud', [160, 200, 240, 280, 320]),
+                    values: new StatTable('skyward_atlas_cloud', percent(weaponPassiveTables.SkywardAtlas.p3)),
                 }),
             ],
         }),

@@ -18,6 +18,15 @@ export class FeatureReactionLunar extends FeatureReactionTransformative {
         return this.penalty;
     }
 
+    /**
+     * A row with a rank weight of its own is a member's contribution at that
+     * rank. New hits are offered the team's row instead, which ranks the
+     * contributions itself (Feature2/Reaction/Team).
+     */
+    isRotationChoice() {
+        return this.getContributionWeight() == 1;
+    }
+
     getFinalReactionBaseMultipliers(data) {
         let weight = this.getContributionWeight(data);
         if (!weight || weight == 1) {

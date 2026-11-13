@@ -1,8 +1,10 @@
 import { Condition } from "../../classes/Condition";
 import { ConditionAscensionChar } from "../../classes/Condition/Ascension/Char";
 import { ConditionBoolean } from "../../classes/Condition/Boolean";
+import { ConditionOnField } from "../../classes/Condition/Field";
 import { ConditionConstellation } from "../../classes/Condition/Constellation";
 import { ConditionDropdown } from "../../classes/Condition/Dropdown";
+import { ConditionReceiver } from "../../classes/Condition/Receiver";
 import { ConditionStatic } from "../../classes/Condition/Static";
 import { DbObjectChar } from "../../classes/DbObject/Char";
 import { DbObjectConstellation } from "../../classes/DbObject/Constellation";
@@ -18,9 +20,11 @@ import { FeatureDamageSkill } from "../../classes/Feature2/Damage/Skill";
 import { FeatureMultiplier } from "../../classes/Feature2/Multiplier";
 import { FeatureMultiplierTarget } from "../../classes/Feature2/Multiplier/Target";
 import { StatTable } from "../../classes/StatTable";
+import { RECEIVERS } from "../../classes/Team/Receivers";
 import { ValueTable } from "../../classes/ValueTable";
 import { charTables } from "../generated/CharTables";
 import { charTalentTables } from "../generated/CharTalentTables";
+import { percent } from "../Params";
 
 const Talents = new DbObjectTalents({
     attack: {
@@ -112,31 +116,35 @@ const Talents = new DbObjectTalents({
 });
 
 const TalentValues = {
-    A1GeoDmg: 20,
-    A4SkillDmg: 20,
-    C4Stack1: 8,
-    C4Stack2: 12,
-    C4Stack3: 16,
-    C4Stack4: 20,
-    C6DefDmg: 200,
+    A1GeoDmg: percent(charTalentTables.Kachina.a1.p1),
+    A4SkillDmg: percent(charTalentTables.Kachina.a4.p1),
+    C4Stack1: percent(charTalentTables.Kachina.c4.p1),
+    C4Stack2: percent(charTalentTables.Kachina.c4.p2),
+    C4Stack3: percent(charTalentTables.Kachina.c4.p3),
+    C4Stack4: percent(charTalentTables.Kachina.c4.p4),
+    C6DefDmg: percent(charTalentTables.Kachina.c6.p1),
 };
+
+const activeRecipient = new ConditionReceiver({
+    condition: new ConditionOnField(),
+});
 
 const C4Values = [
     {
         title: 1, value: 1, serializeId: 1,
-        conditions: [ new Condition({stats: {def_percent: TalentValues.C4Stack1}}) ],
+        conditions: [ new Condition({condition: activeRecipient, stats: {def_percent: TalentValues.C4Stack1}}) ],
     },
     {
         title: 2, value: 2, serializeId: 2,
-        conditions: [ new Condition({stats: {def_percent: TalentValues.C4Stack2}}) ],
+        conditions: [ new Condition({condition: activeRecipient, stats: {def_percent: TalentValues.C4Stack2}}) ],
     },
     {
         title: 3, value: 3, serializeId: 3,
-        conditions: [ new Condition({stats: {def_percent: TalentValues.C4Stack3}}) ],
+        conditions: [ new Condition({condition: activeRecipient, stats: {def_percent: TalentValues.C4Stack3}}) ],
     },
     {
         title: 4, value: 4, serializeId: 4,
-        conditions: [ new Condition({stats: {def_percent: TalentValues.C4Stack4}}) ],
+        conditions: [ new Condition({condition: activeRecipient, stats: {def_percent: TalentValues.C4Stack4}}) ],
     },
 ];
 
@@ -374,6 +382,7 @@ export const Kachina = new DbObjectChar({
                 new ConditionDropdown({
                     name: 'kachina_more_foes_more_caution',
                     serializeId: 3,
+                    receivers: RECEIVERS.TEAM,
                     title: 'talent_name.kachina_more_foes_more_caution',
                     description: 'talent_descr.kachina_more_foes_more_caution',
                     values: C4Values,
@@ -401,17 +410,5 @@ export const Kachina = new DbObjectChar({
             ],
         },
     ]),
-    partyData: {
-        conditions: [
-            new ConditionDropdown({
-                name: 'party.kachina_more_foes_more_caution',
-                serializeId: 1,
-                rotation: 'party',
-                title: 'talent_name.kachina_more_foes_more_caution',
-                description: 'talent_descr.kachina_more_foes_more_caution',
-                values: C4Values,
-                info: {constellation: 4},
-            }),
-        ],
-    },
+    retiredParty: [[1, 'dropdown']],
 });

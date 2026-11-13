@@ -4,7 +4,6 @@ import { ConditionBoolean } from "../../classes/Condition/Boolean";
 import { ConditionBooleanLevels } from "../../classes/Condition/Boolean/Levels";
 import { ConditionConstellation } from "../../classes/Condition/Constellation";
 import { ConditionNumber } from "../../classes/Condition/Number";
-import { ConditionNumberTalent } from "../../classes/Condition/Number/Talent";
 import { ConditionStacks } from "../../classes/Condition/Stacks";
 import { ConditionStatic } from "../../classes/Condition/Static";
 import { DbObjectChar } from "../../classes/DbObject/Char";
@@ -19,8 +18,10 @@ import { FeatureDamagePlungeShockWave } from "../../classes/Feature2/Damage/Plun
 import { FeatureDamageSkill } from "../../classes/Feature2/Damage/Skill";
 import { FeatureMultiplier } from "../../classes/Feature2/Multiplier";
 import { StatTable } from "../../classes/StatTable";
+import { RECEIVERS } from "../../classes/Team/Receivers";
 import { charTables } from "../generated/CharTables";
 import { charTalentTables } from "../generated/CharTalentTables";
+import { percent } from "../Params";
 
 const Talents = new DbObjectTalents({
     attack: {
@@ -147,9 +148,9 @@ const Talents = new DbObjectTalents({
 const TalentValues = {
     SkillDefBonus: 30,
     BurstMaxStacks: 30,
-    A1Damage: 50,
-    C1PhysBonus: 30,
-    C4BurstBonus: 25,
+    A1Damage: percent(charTalentTables.Eula.a1.p1),
+    C1PhysBonus: percent(charTalentTables.Eula.c1.p1),
+    C4BurstBonus: percent(charTalentTables.Eula.c4.p1),
 };
 
 export const Eula = new DbObjectChar({
@@ -385,6 +386,7 @@ export const Eula = new DbObjectChar({
         new ConditionBooleanLevels({
             name: 'eula_icewhirl_brand',
             serializeId: 1,
+            receivers: RECEIVERS.TEAM,
             title: 'talent_name.eula_icewhirl_brand',
             description: 'talent_descr.eula_icewhirl_brand',
             levelSetting: 'char_skill_elemental',
@@ -482,47 +484,5 @@ export const Eula = new DbObjectChar({
             ],
         },
     ]),
-    partyData: {
-        loadStats: {
-            settings: ['char_skill_elemental'],
-        },
-        conditions: [
-            new ConditionNumberTalent({
-                name: 'eula_char_skill_elemental',
-                title: 'talent_name.stats_level_skill',
-                partySetting: 'char_skill_elemental',
-                serializeId: 1,
-            }),
-            new ConditionBoolean({
-                name: 'party.eula_constellation_5',
-                serializeId: 3,
-                title: 'talent_name.eula_chivalric_quality',
-                description: 'talent_descr.char_constellation_skill',
-                info: {constellation: 5},
-                settings: {
-                    eula_char_skill_elemental_bonus: 3,
-                },
-            }),
-            new ConditionBooleanLevels({
-                name: 'party.eula_icewhirl_brand',
-                serializeId: 2,
-                rotation: 'party',
-                title: 'talent_name.eula_icewhirl_brand',
-                description: 'talent_descr.eula_icewhirl_brand',
-                levelSetting: 'eula_char_skill_elemental',
-                stats: [
-                    Talents.getMulti({
-                        name: 'enemy_res_phys',
-                        from: 'skill.eula_phys_res_decrease',
-                        multi: -1,
-                    }),
-                    Talents.getMulti({
-                        name: 'enemy_res_cryo',
-                        from: 'skill.eula_cryo_res_decrease',
-                        multi: -1,
-                    }),
-                ],
-            }),
-        ],
-    },
+    retiredParty: [[1, 'number'], [2, 'checkbox'], [3, 'checkbox']],
 });

@@ -2,6 +2,8 @@ import { ConditionBooleanRefine } from "../../../classes/Condition/Boolean/Refin
 import { DbObjectWeapon } from "../../../classes/DbObject/Weapon";
 import { StatTable } from "../../../classes/StatTable";
 import { weaponStatTables } from "../../generated/WeaponStatTables";
+import { weaponPassiveTables } from "../../generated/WeaponPassiveTables";
+import { percent } from "../../Params";
 
 export const Earthshaker = new DbObjectWeapon({
     name: 'earthshaker',
@@ -19,7 +21,7 @@ export const Earthshaker = new DbObjectWeapon({
             description: 'talent_descr.weapon_earthshaker',
             levelSetting: 'weapon_refine',
             stats: [
-                new StatTable('dmg_skill', [16, 20, 24, 28, 32]),
+                new StatTable('dmg_skill', percent(weaponPassiveTables.Earthshaker.p1)),
             ],
         })
     ],

@@ -1,6 +1,8 @@
 import { ArtifactPrepPool } from '../src/js/classes/ArtifactPrepPool';
+import { serializeWorkerMember } from '../src/js/classes/Team';
 import { Artifact } from '../src/js/classes/Artifact';
 import { CalcSet } from '../src/js/classes/CalcSet';
+import { Team } from '../src/js/classes/Team';
 import { normalizeArtifactRVFilters } from '../src/js/classes/ArtifactUsefulRV';
 import { DB } from '../src/js/db/DB';
 import { makeFakePrepWorker } from './support/prepWorkerFake';
@@ -8,11 +10,11 @@ import { makeFakePrepWorker } from './support/prepWorkerFake';
 global.DB = DB;
 const build = new CalcSet();
 build.setChar(DB.Chars.get('Jean'));
-build.setEnemy(DB.Enemies.getFirst().getFirst());
+Team.fromMember(build);
 const inventory = Object.entries({flower: 'hp', plume: 'atk', sands: 'atk_percent', goblet: 'dmg_phys', circlet: 'crit_dmg'})
     .map(([slot, main]) => new Artifact(5, 20, slot, 'GladiatorFinale', main, []));
 const input = {kind: 'craft', set: 'GladiatorFinale', feature: 'stats.crit_dmg', baseValue: 1,
-    build: build.serialize(), inventory: inventory.map(art => art.serialize()),
+    build: serializeWorkerMember(build), inventory: inventory.map(art => art.serialize()),
     inventoryHashes: inventory.map(art => art.getHash()), group: {slot: 'flower'},
     craftAffixes: {flower: {mainStat: 'hp', substats: ['crit_dmg', 'def']}},
     rvFilters: normalizeArtifactRVFilters(), topologySpecs: [], retainOutcomes: false};
@@ -31,8 +33,9 @@ test('candidate keeps CPU state and exchanges only numeric GPU inputs and final 
     const progress = [];
     const gpu = jest.fn(async request => {
         expect(request.program.kind).toBe('gpu-program');
-        expect(request.inputs.outcomeRows).toBeInstanceOf(Float32Array);
-        expect(request.inputs.poolData).toBeInstanceOf(Float32Array);
+        // Cloned by the fake worker in Node's realm, so not instanceof this realm's Float32Array.
+        expect(Object.prototype.toString.call(request.inputs.outcomeRows)).toBe('[object Float32Array]');
+        expect(Object.prototype.toString.call(request.inputs.poolData)).toBe('[object Float32Array]');
         expect(request.inputs).not.toHaveProperty('artifacts');
         expect(request).not.toHaveProperty('union');
         return executeGPU(request);

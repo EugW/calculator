@@ -21,9 +21,11 @@ import { FeatureMultiplierStatic } from "../../classes/Feature2/Multiplier/Stati
 import { FeatureStatic } from "../../classes/Feature2/Static";
 import { StatTable } from "../../classes/StatTable";
 import { StatTableAscensionScale } from "../../classes/StatTable/Ascension/Scale";
+import { RECEIVERS } from "../../classes/Team/Receivers";
 import { ValueTable } from "../../classes/ValueTable";
 import { charTables } from "../generated/CharTables";
 import { charTalentTables } from "../generated/CharTalentTables";
+import { percent } from "../Params";
 
 const Talents = new DbObjectTalents({
     attack: {
@@ -115,8 +117,8 @@ const Talents = new DbObjectTalents({
 const condTravelerAether = new ConditionBoolean({name: 'traveler_aether'});
 const condLumineDefault = new ConditionNot([condTravelerAether]);
 
-const ForeignRockfellBonus = 120;
-const ForeignRockfellCooldown = 15;
+const ForeignRockfellBonus = percent(charTalentTables.TravelerGeo.sp.p8);
+const ForeignRockfellCooldown = charTalentTables.TravelerGeo.sp.p9;
 
 const bladeReadyCondition = new ConditionBooleanValue({
     setting: 'traveler_geo_blade_archaic_petra',
@@ -420,9 +422,11 @@ export const TravelerGeo = new DbObjectChar({
     constellation: new DbObjectConstellation([
         {
             conditions: [
+                // Party members within the radius of Wake of Earth.
                 new ConditionBoolean({
                     name: 'traveler_invincible_stonewall',
                     serializeId: 1,
+                    receivers: RECEIVERS.TEAM,
                     title: 'talent_name.traveler_invincible_stonewall',
                     description: 'talent_descr.traveler_invincible_stonewall',
                     stats: {
@@ -482,19 +486,5 @@ export const TravelerGeo = new DbObjectChar({
             ],
         },
     ]),
-    partyData: {
-        conditions: [
-            new ConditionBoolean({
-                name: 'party.traveler_invincible_stonewall',
-                serializeId: 1,
-                rotation: 'party',
-                title: 'talent_name.traveler_invincible_stonewall',
-                description: 'talent_descr.traveler_invincible_stonewall',
-                info: {constellation: 1},
-                stats: {
-                    crit_rate: 10,
-                },
-            }),
-        ],
-    },
+    retiredParty: [[1, 'checkbox']],
 });

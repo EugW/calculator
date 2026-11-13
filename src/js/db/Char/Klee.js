@@ -19,10 +19,12 @@ import { FeatureDamagePlungeCollision } from "../../classes/Feature2/Damage/Plun
 import { FeatureDamagePlungeShockWave } from "../../classes/Feature2/Damage/Plunge/ShockWave";
 import { FeatureDamageSkill } from "../../classes/Feature2/Damage/Skill";
 import { FeatureMultiplier } from "../../classes/Feature2/Multiplier";
+import { RECEIVERS } from "../../classes/Team/Receivers";
 import { StatTable } from "../../classes/StatTable";
 import { ValueTable } from "../../classes/ValueTable";
 import { charTables } from "../generated/CharTables";
 import { charTalentTables } from "../generated/CharTalentTables";
+import { percent } from "../Params";
 
 const Talents = new DbObjectTalents({
     attack: {
@@ -108,12 +110,15 @@ const TalentValues = {
     C2DefReduce: 23,
     C4BurstDamage: 555,
     C6PyroBonus: 10,
+    SpChargedBonus1: charTalentTables.Klee.sp.p2,
+    SpChargedBonus2: charTalentTables.Klee.sp.p3,
+    SpChargedBonus3: charTalentTables.Klee.sp.p4,
+    C1AtkBonus: percent(charTalentTables.Klee.c1.p2),
+    C4OnFieldBonus: percent(charTalentTables.Klee.c4.p1),
 };
 
 const condWitchHomeworkOn = new ConditionBoolean({name: 'klee_witch_homework'});
 const condWitchHomeworkOff = new ConditionNot([condWitchHomeworkOn]);
-const condPartyWitchHomeworkOn = new ConditionBoolean({name: 'party.klee_witch_homework'});
-const condPartyWitchHomeworkOff = new ConditionNot([condPartyWitchHomeworkOn]);
 
 export const Klee = new DbObjectChar({
     name: 'klee',
@@ -167,7 +172,7 @@ export const Klee = new DbObjectChar({
                 }),
                 new FeatureMultiplier({
                     leveling: 'char_skill_attack',
-                    scalingMultiplier: 0.15,
+                    scalingMultiplier: TalentValues.SpChargedBonus1,
                     values: Talents.get('attack.charged_hit'),
                     condition: new ConditionAnd([
                         condWitchHomeworkOn,
@@ -176,7 +181,7 @@ export const Klee = new DbObjectChar({
                 }),
                 new FeatureMultiplier({
                     leveling: 'char_skill_attack',
-                    scalingMultiplier: 0.30,
+                    scalingMultiplier: TalentValues.SpChargedBonus2,
                     values: Talents.get('attack.charged_hit'),
                     condition: new ConditionAnd([
                         condWitchHomeworkOn,
@@ -185,7 +190,7 @@ export const Klee = new DbObjectChar({
                 }),
                 new FeatureMultiplier({
                     leveling: 'char_skill_attack',
-                    scalingMultiplier: 0.50,
+                    scalingMultiplier: TalentValues.SpChargedBonus3,
                     values: Talents.get('attack.charged_hit'),
                     condition: new ConditionAnd([
                         condWitchHomeworkOn,
@@ -278,7 +283,7 @@ export const Klee = new DbObjectChar({
                 }),
                 new FeatureMultiplier({
                     source: 'constellation4',
-                    values: new ValueTable([100]),
+                    values: new ValueTable([TalentValues.C4OnFieldBonus]),
                     condition: new ConditionAnd([
                         condWitchHomeworkOn,
                         new ConditionBoolean({name: 'klee_sparkly_explosion_on_field'}),
@@ -367,7 +372,7 @@ export const Klee = new DbObjectChar({
                     condition: condWitchHomeworkOn,
                     stats: { 
                         text_percent_dmg: TalentValues.C1Damage,
-                        atk_percent: 60 
+                        atk_percent: TalentValues.C1AtkBonus
                     },
                 }),
             ],
@@ -377,6 +382,7 @@ export const Klee = new DbObjectChar({
                 new ConditionBoolean({
                     name: 'klee_explosive_frags',
                     serializeId: 3,
+                    receivers: RECEIVERS.TEAM,
                     title: 'talent_name.klee_explosive_frags',
                     description: 'talent_descr.klee_explosive_frags',
                     stats: {
@@ -450,56 +456,18 @@ export const Klee = new DbObjectChar({
                         dmg_pyro: 50,
                     },
                 }),
+                // Sparks 'n' Splash grants all other party members 10% Pyro
+                // DMG Bonus; Klee herself keeps 10%/50% from her own toggles.
+                new Condition({
+                    isHidden: true,
+                    receivers: RECEIVERS.OTHERS,
+                    condition: new ConditionBoolean({name: 'klee_blazing_delight'}),
+                    stats: {
+                        dmg_pyro: TalentValues.C6PyroBonus,
+                    },
+                }),
             ],
         },
     ]),
-    partyData: {
-        conditions: [
-            new ConditionBoolean({
-                name: 'party.klee_witch_homework',
-                serializeId: 4,
-                rotation: 'party',
-                title: 'talent_name.klee_sparkborne_magic',
-                description: 'talent_descr.klee_sparkborne_magic',
-                info: {hexerei: true},
-            }),
-            new ConditionBoolean({
-                name: 'party.klee_explosive_frags',
-                serializeId: 1,
-                rotation: 'party',
-                title: 'talent_name.klee_explosive_frags',
-                description: 'talent_descr.klee_explosive_frags',
-                info: {constellation: 2},
-                stats: {
-                    enemy_def_reduce: TalentValues.C2DefReduce,
-                },
-            }),
-            new ConditionBoolean({
-                name: 'party.klee_blazing_delight',
-                serializeId: 2,
-                rotation: 'party',
-                title: 'talent_name.klee_blazing_delight',
-                description: 'talent_descr.klee_blazing_delight',
-                hideCondition: [condPartyWitchHomeworkOn],
-                condition: condPartyWitchHomeworkOff,
-                info: {constellation: 6},
-                stats: {
-                    dmg_pyro: TalentValues.C6PyroBonus,
-                },
-            }),
-            new ConditionBoolean({
-                name: 'party.klee_blazing_delight',
-                serializeId: 2,
-                rotation: 'party',
-                title: 'talent_name.klee_blazing_delight',
-                description: 'talent_descr.klee_blazing_delight_buffed',
-                hideCondition: [condPartyWitchHomeworkOff],
-                condition: condPartyWitchHomeworkOn,
-                info: {constellation: 6},
-                stats: {
-                    dmg_pyro: TalentValues.C6PyroBonus,
-                },
-            }),
-        ],
-    },
+    retiredParty: [[4, 'checkbox'], [1, 'checkbox'], [2, 'checkbox']],
 });

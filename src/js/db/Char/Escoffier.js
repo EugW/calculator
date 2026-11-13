@@ -2,11 +2,11 @@ import { Condition } from "../../classes/Condition";
 import { ConditionAnd } from "../../classes/Condition/And";
 import { ConditionAscensionChar } from "../../classes/Condition/Ascension/Char";
 import { ConditionBoolean } from "../../classes/Condition/Boolean";
-import { ConditionBooleanLevels } from "../../classes/Condition/Boolean/Levels";
+import { ConditionOnField } from "../../classes/Condition/Field";
 import { ConditionBooleanValue } from "../../classes/Condition/Boolean/Value";
 import { ConditionCalcElementsEscoffier } from "../../classes/Condition/CalcElementsEscoffier";
 import { ConditionConstellation } from "../../classes/Condition/Constellation";
-import { ConditionNumber } from "../../classes/Condition/Number";
+import { ConditionReceiver } from "../../classes/Condition/Receiver";
 import { ConditionStatic } from "../../classes/Condition/Static";
 import { ConditionStaticLevel } from "../../classes/Condition/Static/Level";
 import { DbObjectChar } from "../../classes/DbObject/Char";
@@ -23,12 +23,14 @@ import { FeatureHeal } from "../../classes/Feature2/Heal";
 import { FeatureMultiplier } from "../../classes/Feature2/Multiplier";
 import { FeatureMultiplierList } from "../../classes/Feature2/Multiplier/List";
 import { FeatureMultiplierTarget } from "../../classes/Feature2/Multiplier/Target";
+import { RECEIVERS } from "../../classes/Team/Receivers";
 import { StatTable } from "../../classes/StatTable";
 import { StatTableAscensionScale } from "../../classes/StatTable/Ascension/Scale";
 import { ValueTable } from "../../classes/ValueTable";
 import { charScales } from "../generated/CharScale";
 import { charTables } from "../generated/CharTables";
 import { charTalentTables } from "../generated/CharTalentTables";
+import { percent } from "../Params";
 
 
 const Talents = new DbObjectTalents({
@@ -126,12 +128,17 @@ const Talents = new DbObjectTalents({
     links: [11120001, 11120002],
 });
 
-const A1Heal = 138.24;
-const A4ResShred = [-5, -10, -15, -55];
-const C1CritDmg = 60;
-const C2BonusDmg = 240;
+const A1Heal = percent(charTalentTables.Escoffier.a1.p1);
+const A4ResShred = [-percent(charTalentTables.Escoffier.a4.p1), -percent(charTalentTables.Escoffier.a4.p2), -percent(charTalentTables.Escoffier.a4.p3), -percent(charTalentTables.Escoffier.a4.p4)];
+const C1CritDmg = percent(charTalentTables.Escoffier.c1.p1);
+const C2BonusDmg = percent(charTalentTables.Escoffier.c2.p2);
 const C4HealCritDmg = 100;
-const C6Dmg = 500;
+const C6Dmg = percent(charTalentTables.Escoffier.c6.p1);
+
+// Fresh, Fragrant Stew reaches nearby active characters apart from Escoffier (OTHERS + active).
+const activeOtherReceiver = new ConditionReceiver({
+    condition: new ConditionOnField(),
+});
 
 export const Escoffier = new DbObjectChar({
     name: 'escoffier',
@@ -308,20 +315,26 @@ export const Escoffier = new DbObjectChar({
             condition: new ConditionConstellation({constellation: 6}),
         }),
     ],
-    // multipliers: [
-    //     new FeatureMultiplier({
-    //         source: 'constellation2',
-    //         values: new ValueTable([C2BonusDmg]),
-    //         condition: new ConditionAnd([
-    //             new ConditionConstellation({constellation: 2}),
-    //             new ConditionBoolean({name: 'escoffier_fresh_fragrant_stew_is_an_art'}),
-    //         ]),
-    //         target: new FeatureMultiplierTarget({
-    //             damageElements: ['cryo'],
-    //             damageTypes: ['normal', 'charged', 'plunge', 'skill', 'burst'],
-    //         }),
-    //     }),
-    // ],
+    multipliers: [
+        // Fresh, Fragrant Stew: nearby active characters apart from Escoffier deal Cryo DMG
+        // with N/C/P/skill/burst, expending Cold Dish to gain 240% of Escoffier's ATK.
+        // Live ATK (atk*) replaces the typed-in total. OTHERS already excludes Escoffier.
+        new FeatureMultiplier({
+            receivers: RECEIVERS.OTHERS,
+            scaling: 'atk*',
+            source: 'constellation2',
+            values: new ValueTable([C2BonusDmg]),
+            condition: new ConditionAnd([
+                new ConditionConstellation({constellation: 2}),
+                new ConditionBoolean({name: 'escoffier_fresh_fragrant_stew_is_an_art'}),
+                activeOtherReceiver,
+            ]),
+            target: new FeatureMultiplierTarget({
+                damageElements: ['cryo'],
+                damageTypes: ['normal', 'charged', 'plunge', 'skill', 'burst'],
+            }),
+        }),
+    ],
     conditions: [
         new ConditionCalcElementsEscoffier({}),
         new ConditionStatic({
@@ -334,6 +347,7 @@ export const Escoffier = new DbObjectChar({
             condition: new ConditionAscensionChar({ascension: 1}),
         }),
         new ConditionStaticLevel({
+            receivers: RECEIVERS.TEAM,
             title: 'talent_name.escoffier_inspiration_immersed_seasoning',
             description: 'talent_descr.escoffier_inspiration_immersed_seasoning',
             levelSetting: 'escoffier_chars_count',
@@ -349,13 +363,18 @@ export const Escoffier = new DbObjectChar({
     constellation: new DbObjectConstellation([
         {
             conditions: [
+                // All nearby party members' Cryo CRIT DMG when 4 Hydro/Cryo. The Hydro/Cryo
+                // count already reads the source team; the gate stays on the delivery.
+                // Ascension 4 (Inspiration) is required by the text; the carrier in tests is asc 6.
                 new ConditionStatic({
+                    receivers: RECEIVERS.TEAM,
                     title: 'talent_name.escoffier_pre_dinner_dance_for_your_taste_buds',
                     description: 'talent_descr.escoffier_pre_dinner_dance_for_your_taste_buds',
                     stats: {
                         crit_dmg_cryo: C1CritDmg,
                     },
                     condition: new ConditionAnd([
+                        new ConditionAscensionChar({ascension: 4}),
                         new ConditionBoolean({name: 'escoffier_chars_only'}),
                         new ConditionBooleanValue({setting: 'escoffier_chars_count', cond: 'ge', value: 4}),
                     ]),
@@ -417,71 +436,5 @@ export const Escoffier = new DbObjectChar({
             ],
         },
     ]),
-    partyData: {
-        loadStats: {
-            stats: ['atk_total'],
-        },
-        conditions: [
-            new ConditionCalcElementsEscoffier({}),
-            new ConditionNumber({
-                name: 'escoffier_atk_total',
-                title: 'talent_name.stats_total_atk',
-                partyStat: 'atk_total',
-                serializeId: 1,
-                rotation: 'party',
-                max: 10000,
-            }),
-            new ConditionBooleanLevels({
-                name: 'party_escoffier_inspiration_immersed_seasoning',
-                serializeId: 2,
-                title: 'talent_name.escoffier_inspiration_immersed_seasoning',
-                description: 'talent_descr.escoffier_inspiration_immersed_seasoning',
-                levelSetting: 'escoffier_chars_count',
-                rotation: 'party',
-                info: {ascension: 4},
-                stats: [
-                    new StatTable('enemy_res_cryo', A4ResShred),
-                    new StatTable('enemy_res_hydro', A4ResShred),
-                ],
-            }),
-            new ConditionBoolean({
-                name: 'party_escoffier_pre_dinner_dance_for_your_taste_buds',
-                serializeId: 3,
-                title: 'talent_name.escoffier_pre_dinner_dance_for_your_taste_buds',
-                description: 'talent_descr.escoffier_pre_dinner_dance_for_your_taste_buds',
-                rotation: 'party',
-                info: {constellation: 1},
-                stats: {
-                    crit_dmg_cryo: C1CritDmg,
-                },
-                condition: new ConditionAnd([
-                    new ConditionBoolean({name: 'escoffier_chars_only'}),
-                    new ConditionBooleanValue({setting: 'escoffier_chars_count', cond: 'ge', value: 4}),
-                ]),
-            }),
-            new ConditionBoolean({
-                name: 'party_escoffier_fresh_fragrant_stew_is_an_art',
-                serializeId: 4,
-                title: 'talent_name.escoffier_fresh_fragrant_stew_is_an_art',
-                description: 'talent_descr.escoffier_fresh_fragrant_stew_is_an_art',
-                rotation: 'party',
-                info: {constellation: 2},
-                stats: {
-                    text_percent_dmg: C2BonusDmg,
-                },
-            }),
-        ],
-        multipliers: [
-            new FeatureMultiplier({
-                scaling: 'escoffier_atk_total',
-                source: 'escoffier',
-                values: new ValueTable([C2BonusDmg]),
-                condition: new ConditionBoolean({name: 'party_escoffier_fresh_fragrant_stew_is_an_art'}),
-                target: new FeatureMultiplierTarget({
-                    damageElements: ['cryo'],
-                    damageTypes: ['normal', 'charged', 'plunge', 'skill', 'burst'],
-                }),
-            }),
-        ],
-    },
+    retiredParty: [[1, 'number'], [2, 'checkbox'], [3, 'checkbox'], [4, 'checkbox']],
 });

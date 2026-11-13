@@ -3,7 +3,6 @@ import { ConditionAnd } from "../../classes/Condition/And";
 import { ConditionAscensionChar } from "../../classes/Condition/Ascension/Char";
 import { ConditionBoolean } from "../../classes/Condition/Boolean";
 import { ConditionConstellation } from "../../classes/Condition/Constellation";
-import { ConditionNumber } from "../../classes/Condition/Number";
 import { ConditionNumberIfa } from "../../classes/Condition/Number/Ifa";
 import { ConditionStatic } from "../../classes/Condition/Static";
 import { DbObjectChar } from "../../classes/DbObject/Char";
@@ -20,9 +19,11 @@ import { FeatureMultiplierList } from "../../classes/Feature2/Multiplier/List";
 import { FeaturePostEffectValue } from "../../classes/Feature2/PostEffectValue";
 import { PostEffectStats } from "../../classes/PostEffect/Stats";
 import { StatTable } from "../../classes/StatTable";
+import { RECEIVERS } from "../../classes/Team/Receivers";
 import { ValueTable } from "../../classes/ValueTable";
 import { charTables } from "../generated/CharTables";
 import { charTalentTables } from "../generated/CharTalentTables";
+import { percent } from "../Params";
 
 const Talents = new DbObjectTalents({
     attack: {
@@ -107,16 +108,25 @@ const Talents = new DbObjectTalents({
     links: [11130001, 11130002, 11130003, 11130004],
 });
 
-const A1Stacks = 150;
-const A1ReactionDmg = 1.5;
+const A1Stacks = charTalentTables.Ifa.a1.p3;
+const A1ReactionDmg = percent(charTalentTables.Ifa.a1.p4);
 const A1MoonReactionDmg = 0.2;
-const A1StellarSwirlDmg = 0.24;
-const A4Mastery = 80;
-const C2Stacks = 50;
-const C4Mastery = 100;
-const C6Dmg = 120;
+const A1StellarSwirlDmg = percent(charTalentTables.Ifa.a1.p5);
+const A4Mastery = charTalentTables.Ifa.a4.p1;
+const C2Stacks = charTalentTables.Ifa.c2.p3;
+const C4Mastery = charTalentTables.Ifa.c4.p1;
+const C6Dmg = percent(charTalentTables.Ifa.c6.p1);
 
 const reactionDmgPost = new PostEffectStats({
+    // A1 Field Medic's Vision: the team reaction bonuses scale on the Rescue
+    // Essentials counter (live Nightsoul points), not on any stat. Game data:
+    // Avatar_Ifa_PermanentSkill_1, UNIQUE_Ifa_PermanentSkill_1_Handler_Buff
+    // writes Actor_ElemReactSwirl*Delta and Actor_ElemReactElectricDelta as
+    // CharmerCount x Permanent_1_ElemReactDelta (ProudSkill 1132101: 0.015),
+    // with no FIGHT_PROP read. GO multiplies the Essentials count by the same
+    // per-point factor. KQM has no EM-interaction test for Ifa. Reaction
+    // bonuses have no extra lane: default channels confirmed, no params.
+    receivers: RECEIVERS.TEAM,
     from: 'ifa_field_medics_vision',
     percent: [
         new StatTable('dmg_reaction_swirl', [A1ReactionDmg]),
@@ -130,6 +140,9 @@ const reactionDmgPost = new PostEffectStats({
 });
 
 const reactionDmgPost2 = new PostEffectStats({
+    // A1 Lunar-Charged bonus: same counter, hardcoded 0.002 per point in the
+    // game data (Actor_ElemReactMoonShockDelta). Default confirmed, no params.
+    receivers: RECEIVERS.TEAM,
     from: 'ifa_field_medics_vision',
     percent: [
         new StatTable('dmg_reaction_lunarcharged', [A1MoonReactionDmg]),
@@ -142,6 +155,9 @@ const reactionDmgPost2 = new PostEffectStats({
 });
 
 const reactionDmgPost3 = new PostEffectStats({
+    // A1 Stellar Swirl bonus: same counter x Permanent_1_ElemReactDelta_Star
+    // (ProudSkill 1132101: 0.0024). Default confirmed, no params.
+    receivers: RECEIVERS.TEAM,
     from: 'ifa_field_medics_vision',
     percent: [
         new StatTable('dmg_stellarswirl', [A1StellarSwirlDmg]),
@@ -242,6 +258,8 @@ export const Ifa = new DbObjectChar({
             name: 'ifa_tonicshot_add_dmg',
             category: 'skill',
             element: 'anemo',
+            // C6 Oath on a Feathered Knot: 120% of Ifa's ATK (GO reads
+            // input.total.atk). Damage hits read the total and need nothing.
             multipliers: [
                 new FeatureMultiplier({
                     leveling: 'char_skill_elemental',
@@ -253,6 +271,10 @@ export const Ifa = new DbObjectChar({
         }),
         new FeatureHeal({
             category: 'skill',
+            // Game data: Avatar_Ifa_HoverAttack_Heal caches GetFightProperty
+            // FIGHT_PROP_ELEMENT_MASTERY (total) into MasteryCache and heals
+            // MasteryCache x ElementalArt_HealRatio + ElementalArt_HealAmount.
+            // Heals read the total, so scaling 'mastery*' needs nothing.
             multipliers: [
                 new FeatureMultiplierList({
                     scaling: 'mastery*',
@@ -322,6 +344,9 @@ export const Ifa = new DbObjectChar({
             serializeId: 3,
             title: 'talent_name.ifa_mutual_aid_agreement',
             description: 'talent_descr.ifa_mutual_aid_agreement',
+            // Game data: Avatar_Ifa_PermanentSkill_2 (A4) writes
+            // Actor_ElemMasteryDelta (no "Extra": premod), ProudSkill 11322:
+            // 80 EM. Conditions write premod: default confirmed, no params.
             stats: {
                 mastery: A4Mastery,
             },
@@ -339,12 +364,19 @@ export const Ifa = new DbObjectChar({
             conditions: [
                 new ConditionStatic({
                     title: 'talent_name.ifa_vitiferous_elixirs_concoction',
+                    // C1: flat 6 Energy on a Supporting Fire hit
+                    // (Avatar_Ifa_DropBall Talent_1_EnergyRecover, no stat
+                    // read). Not a stat effect: nothing to declare.
                     description: 'talent_descr.ifa_vitiferous_elixirs_concoction',
                 }),
             ],
         },
         {
             conditions: [
+                // C2 Guiding Spirit of Ballistic Prayer: extra Rescue Essentials
+                // per Nightsoul point over 60 and +50 to the cap (Talent_2_NyxCVR
+                // / Talent_2_NyxLimit global values, no stat read). Counter logic
+                // in ConditionNumberIfa: nothing to declare.
                 new ConditionStatic({
                     title: 'talent_name.ifa_guiding_spirit_of_ballistic_prayer',
                     description: 'talent_descr.ifa_guiding_spirit_of_ballistic_prayer',
@@ -367,6 +399,9 @@ export const Ifa = new DbObjectChar({
                     serializeId: 4,
                     title: 'talent_name.ifa_decayed_vessels_permutation',
                     description: 'talent_descr.ifa_decayed_vessels_permutation',
+                    // Game data: Avatar_Ifa_Talent_4 (C4) writes
+                    // Actor_ElemMasteryDelta (no "Extra": premod), 100 EM.
+                    // Conditions write premod: default confirmed, no params.
                     stats: {
                         mastery: C4Mastery,
                     },
@@ -394,29 +429,5 @@ export const Ifa = new DbObjectChar({
             ],
         },
     ]),
-    partyData: {
-        conditions: [
-            new ConditionNumber({
-                name: 'party_ifa_field_medics_vision',
-                serializeId: 1,
-                title: 'talent_name.ifa_field_medics_vision',
-                description: 'talent_descr.ifa_field_medics_vision',
-                max: A1Stacks + C2Stacks,
-                rotation: 'party',
-                info: {ascension: 1},
-            }),
-        ],
-        postEffects: [
-            new PostEffectStats({
-                from: 'party_ifa_field_medics_vision',
-                percent: [
-                    new StatTable('dmg_reaction_swirl', [A1ReactionDmg]),
-                    new StatTable('dmg_reaction_electrocharged', [A1ReactionDmg]),
-                    new StatTable('dmg_reaction_lunarcharged', [A1MoonReactionDmg]),
-                    new StatTable('dmg_stellarswirl', [A1StellarSwirlDmg]),
-                ],
-                condition: new ConditionBoolean({name: 'party_ifa_field_medics_vision'}),
-            }),
-        ],
-    },
+    retiredParty: [[1, 'number']],
 });

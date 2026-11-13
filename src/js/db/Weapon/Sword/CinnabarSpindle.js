@@ -6,6 +6,8 @@ import { FeatureMultiplierTarget } from "../../../classes/Feature2/Multiplier/Ta
 import { StatTable } from "../../../classes/StatTable";
 import { ValueTable } from "../../../classes/ValueTable";
 import { weaponStatTables } from "../../generated/WeaponStatTables";
+import { weaponPassiveTables } from "../../generated/WeaponPassiveTables";
+import { percent } from "../../Params";
 
 export const CinnabarSpindle = new DbObjectWeapon({
     name: 'cinnabar_spindle',
@@ -22,7 +24,7 @@ export const CinnabarSpindle = new DbObjectWeapon({
             title: 'talent_name.weapon_cinnabar_spindle',
             description: 'talent_descr.weapon_cinnabar_spindle',
             stats: [
-                new StatTable('text_percent', [40, 50, 60, 70, 80]),
+                new StatTable('text_percent', percent(weaponPassiveTables.CinnabarSpindle.p1)),
             ],
         }),
     ],
@@ -31,7 +33,7 @@ export const CinnabarSpindle = new DbObjectWeapon({
             scaling: 'def*',
             leveling: 'weapon_refine',
             source: 'weapon',
-            values: new ValueTable([40, 50, 60, 70, 80]),
+            values: new ValueTable(percent(weaponPassiveTables.CinnabarSpindle.p1)),
             condition: new ConditionBoolean({name: 'weapon_cinnabar_spindle'}),
             target: new FeatureMultiplierTarget({
                 damageTypes: ['skill'],

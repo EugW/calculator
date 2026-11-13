@@ -19,14 +19,6 @@
     flex-grow: 1;
 }
 
-.gi-tab-right .tab-content {
-    padding-left: 3px;
-}
-
-.gi-tab-left .tab-content {
-    padding-right: 3px;
-}
-
 .react-tab {
     display: flex;
     flex-direction: column;
@@ -49,6 +41,34 @@
 
 .tab-message .gi-tab-change {
     text-decoration: underline;
+}
+
+.tab-modes {
+    display: flex;
+    margin-bottom: 6px;
+}
+
+.tab-mode {
+    flex: 1 1 0;
+    height: 32px;
+    line-height: 32px;
+    text-align: center;
+    font-size: 16px;
+    color: #BEAEA9;
+    border-bottom: solid 2px #4B505E;
+    cursor: pointer;
+    user-select: none;
+}
+
+.tab-mode:hover {
+    color: #ECE5D8;
+}
+
+.tab-mode.active {
+    color: #D3BC8E;
+    border-bottom-color: #D3BC8E;
+    background-color: rgba(211, 188, 142, 0.08);
+    cursor: default;
 }
 
 .tab-disclaimer {

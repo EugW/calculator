@@ -2,6 +2,8 @@ import { ArtifactSet } from "../../../classes/ArtifactSet";
 import { ConditionStatic } from "../../../classes/Condition/Static";
 import { ConditionStacks } from "../../../classes/Condition/Stacks";
 import { StatTable } from "../../../classes/StatTable";
+import { artifactSetTables } from "../../generated/ArtifactSetTables";
+import { percent } from "../../Params";
 
 export const FragmentOfHarmonicWhimsy = new ArtifactSet({
     serializeId: 50,
@@ -20,7 +22,7 @@ export const FragmentOfHarmonicWhimsy = new ArtifactSet({
                     title: 'set_bonus.fragment_of_harmonic_whimsy_2',
                     description: 'set_descr.fragment_of_harmonic_whimsy_2',
                     stats: {
-                        atk_percent: 18,
+                        atk_percent: artifactSetTables.FragmentOfHarmonicWhimsy.pc2.atk_percent,
                     },
                 }),
             ],
@@ -33,9 +35,9 @@ export const FragmentOfHarmonicWhimsy = new ArtifactSet({
                     serializeId: 40,
                     title: 'set_bonus.fragment_of_harmonic_whimsy_4',
                     description: 'set_descr.fragment_of_harmonic_whimsy_4',
-                    maxStacks: 3,
+                    maxStacks: artifactSetTables.FragmentOfHarmonicWhimsy.pc4.p3,
                     stats: [
-                        new StatTable('dmg_all', [18]),
+                        new StatTable('dmg_all', [percent(artifactSetTables.FragmentOfHarmonicWhimsy.pc4.p1)]),
                     ],
                 }),
             ],

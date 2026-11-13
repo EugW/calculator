@@ -1,5 +1,6 @@
 import { ArtifactSet } from "../../../classes/ArtifactSet";
 import { ConditionStatic } from "../../../classes/Condition/Static";
+import { artifactSetTables } from "../../generated/ArtifactSetTables";
 
 export const Exile = new ArtifactSet({
     serializeId: 9,
@@ -18,7 +19,7 @@ export const Exile = new ArtifactSet({
                     title: 'set_bonus.the_exile_2',
                     description: 'set_descr.the_exile_2',
                     stats: {
-                        recharge: 20,
+                        recharge: artifactSetTables.Exile.pc2.recharge,
                     },
                 })
             ],

@@ -1,6 +1,8 @@
 import { ArtifactSet } from "../../../classes/ArtifactSet";
 import { ConditionBoolean } from "../../../classes/Condition/Boolean";
 import { ConditionStatic } from "../../../classes/Condition/Static";
+import { artifactSetTables } from "../../generated/ArtifactSetTables";
+import { percent } from "../../Params";
 
 export const HeartofDepth = new ArtifactSet({
     serializeId: 12,
@@ -19,7 +21,7 @@ export const HeartofDepth = new ArtifactSet({
                     title: 'set_bonus.heart_of_depth_2',
                     description: 'set_descr.heart_of_depth_2',
                     stats: {
-                        dmg_hydro: 15,
+                        dmg_hydro: artifactSetTables.HeartofDepth.pc2.dmg_hydro,
                     },
                 })
             ],
@@ -33,8 +35,8 @@ export const HeartofDepth = new ArtifactSet({
                     title: 'set_bonus.heart_of_depth_4',
                     description: 'set_descr.heart_of_depth_4',
                     stats: {
-                        dmg_normal: 30,
-                        dmg_charged: 30,
+                        dmg_normal: percent(artifactSetTables.HeartofDepth.pc4.p1),
+                        dmg_charged: percent(artifactSetTables.HeartofDepth.pc4.p1),
                     },
                 }),
             ],

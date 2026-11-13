@@ -1,4 +1,4 @@
-import { CalcSet } from './CalcSet';
+import { deserializeWorkerMember } from './Team';
 import { lowerGPUProgram } from './GPUOptimizerProgram';
 import { getFusedOutcomeKernel } from './Feature2/WGSLFusedOutcome';
 import { artifactCraftRecipeMatches, getArtifactCraftAffixes } from './ArtifactCraftAffixes';
@@ -123,7 +123,7 @@ export function createArtifactActionAccumulator(baseValue) {
  * row per member, in member order.
  */
 export async function evaluateArtifactActionCandidate(input, {executeGPU, onProgress = () => {}}) {
-    const params = {...input, baseBuild: CalcSet.deserialize(input.build)};
+    const params = {...input, baseBuild: deserializeWorkerMember(input.build)};
     const inventory = input.inventory.map(data => Artifact.deserialize(data));
     const {slot} = input.group;
     const members = (input.group.members || [input.group]).map(member => {
@@ -160,7 +160,7 @@ export async function evaluateArtifactActionCandidate(input, {executeGPU, onProg
             first ? first.mainStat : DB.Artifacts.Slots.get(slot).mainStats[0], []);
     const poolArtifacts = inventory.filter(artifact => artifact.slot !== slot).concat(placeholder);
     const suggester = new ArtifactsSuggest({...options, artifacts: poolArtifacts,
-        settings: makeArtifactOptimizerSettings(params.baseBuild, poolArtifacts, params.optimizerSettings)});
+        settings: makeArtifactOptimizerSettings(params.optimizerSettings)});
     suggester.prepare();
     // Auto selectors need the prepared suggester's dependency closure, so
     // craft recipes are expanded after prepare() instead of at group build.

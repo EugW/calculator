@@ -223,9 +223,6 @@ function processChar(data) {
     try {
         let set = new CalcSet();
 
-        set.setEnemy(DB.Enemies.getFirst().getFirst());
-        set.setEnemyLevels({level: 90});
-
         let char = DB.Chars.getByGameId(data.avatarId, data.skillDepotId);
         if (!char) return;
 

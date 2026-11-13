@@ -17,9 +17,11 @@ import { FeaturePostEffectValue } from "../../classes/Feature2/PostEffectValue";
 import { PostEffectStatsDef } from "../../classes/PostEffect/Stats/Def";
 import { PostEffectStatsHP } from "../../classes/PostEffect/Stats/HP";
 import { StatTable } from "../../classes/StatTable";
+import { RECEIVERS } from "../../classes/Team/Receivers";
 import { ValueTable } from "../../classes/ValueTable";
 import { charTables } from "../generated/CharTables";
 import { charTalentTables } from "../generated/CharTalentTables";
+import { percent } from "../Params";
 
 const Talents = new DbObjectTalents({
     attack: {
@@ -121,12 +123,21 @@ const TalentValues = {
     BurstResistance: -20,
     A1AtkSpeed: 10,
     A1AtkSpeedCap: 30,
-    A4ChargedDefBonus: 35,
-    C4AtkPercent: 20,
-    C4DefPercent: 20,
-    C6CritDmg: 70,
+    A4ChargedDefBonus: percent(charTalentTables.Itto.a4.p1),
+    C4AtkPercent: percent(charTalentTables.Itto.c4.p2),
+    C4DefPercent: percent(charTalentTables.Itto.c4.p1),
+    C6CritDmg: percent(charTalentTables.Itto.c6.p1),
 };
 
+// Burst: DEF -> ATK for Itto himself while Raging Oni King lasts.
+// Game data: Avatar_Itto_ElementalBurst UNIQUE_Avatar_Itto_ElementalBurst_Buff
+// writes Actor_AttackExtraDelta from FIGHT_PROP_NONEXTRA_DEFENSE x
+// Defence_Ratio (103.68% at burst 10), so the default premod read and extra
+// write are confirmed. GO reads input.total.def (total); the game reads
+// premod, and the same number either way while nothing writes extra DEF.
+// KQM snapshots Husk/Whiteblind/Gorou flat DEF into the burst. Premod DEF
+// writers (Columbina C2, Itto C4) count; see test/buffChainsItto.test.js and
+// the Itto__with_Columbina correction in teamConversionCharsBatch5a.
 const atkBuffPost = new PostEffectStatsDef({
     percent: Talents.getMulti({
         name: 'atk',
@@ -150,6 +161,10 @@ export const Itto = new DbObjectChar({
     origin: 'inazuma',
     talents: Talents,
     statTable: charTables.Itto,
+    // Every plain damage multiplier below scales on ATK and reads the total:
+    // the game computes these hits from FIGHT_PROP_CUR_ATTACK. atk* is
+    // already total, so no params. The A4 Kesagiri bonus (multipliers, not a
+    // hit) is covered where it is declared.
     features: [
         new FeatureDamageNormal({
             name: 'normal_hit_1',
@@ -251,6 +266,11 @@ export const Itto = new DbObjectChar({
                 }),
             ],
         }),
+        // Ushi's inherited HP display (100% of Max HP at every skill level).
+        // The game data names no premod/total read for it (the Oni Bull
+        // gadget carries Actor_MaxHPRatio, engine-internal inheritance); GO
+        // reads input.total.hp. Default kept; the same number either way
+        // while nothing writes extra HP (md/buff_chains.md).
         new FeaturePostEffectValue({
             category: 'skill',
             name: 'itto_hurls_ushi_hp',
@@ -318,6 +338,12 @@ export const Itto = new DbObjectChar({
         }),
     ],
     multipliers: [
+        // A4 Bloodline of the Crimson Oni: Kesagiri damage +35% of DEF.
+        // Game data: Avatar_Itto_PermanentSkill_2 Avatar_Itto_ExtraAttack_DamageUp
+        // is a ModifyDamageMixin with damageExtra [FIGHT_PROP_CUR_DEFENSE
+        // (total) x Defence_Ratio]. scaling: 'def*' already reads the total,
+        // so no params. GO reads input.premod.def; the game reads total, and
+        // the same number either way while nothing writes extra DEF.
         new FeatureMultiplier({
             scaling: 'def*',
             source: 'ascension4',
@@ -359,9 +385,16 @@ export const Itto = new DbObjectChar({
         },
         {
             conditions: [
+                // When Raging Oni King ends: all nearby party members, Itto included.
+                // Game data: Avatar_Itto_Constellation_4
+                // UNIQUE_Itto_Constellation_4_DefAndAtkBuff writes
+                // Actor_AttackRatio and Actor_DefenceRatio (both premod, no
+                // Extra). Conditions write premod by construction: default
+                // confirmed, no params.
                 new ConditionBoolean({
                     name: 'itto_jailhouse_bread_and_butter',
                     serializeId: 2,
+                    receivers: RECEIVERS.TEAM,
                     title: 'talent_name.arataki_itto_jailhouse_bread_and_butter',
                     description: 'talent_descr.arataki_itto_jailhouse_bread_and_butter',
                     stats: {
@@ -382,6 +415,9 @@ export const Itto = new DbObjectChar({
         },
         {
             conditions: [
+                // C6 flat +70% charged crit DMG (game: ModifyDamageMixin
+                // bonusCriticalHurt in Avatar_Itto_Constellation_6, no stat
+                // read): needs nothing.
                 new ConditionStatic({
                     title: 'talent_name.arataki_itto_arataki_itto_present',
                     description: 'talent_descr.arataki_itto_arataki_itto_present',
@@ -392,20 +428,5 @@ export const Itto = new DbObjectChar({
             ],
         },
     ]),
-    partyData: {
-        conditions: [
-            new ConditionBoolean({
-                name: 'party.itto_jailhouse_bread_and_butter',
-                serializeId: 1,
-                rotation: 'party',
-                title: 'talent_name.arataki_itto_jailhouse_bread_and_butter',
-                description: 'talent_descr.arataki_itto_jailhouse_bread_and_butter',
-                info: {constellation: 4},
-                stats: {
-                    def_percent: TalentValues.C4DefPercent,
-                    atk_percent: TalentValues.C4AtkPercent,
-                },
-            }),
-        ],
-    },
+    retiredParty: [[1, 'checkbox']],
 });

@@ -2,37 +2,36 @@ import fs from "fs";
 import path from "path";
 import { BuildData } from "../src/js/classes/Build/Data";
 import { CalcSet } from "../src/js/classes/CalcSet";
+import { Team } from "../src/js/classes/Team";
 import { FeatureDamageStellarSwirl } from "../src/js/classes/Feature2/Damage/StellarSwirl";
-import { Serializer } from "../src/js/classes/Serializer";
 import { Vodyanitsa } from "../src/js/db/Char/Vodyanitsa";
 import { DB } from "../src/js/db/DB";
 import { Rotation } from "../src/js/db/Features/Rotation";
 import { Reactions } from "../src/js/db/Features/Reactions";
 import { charTalentTables } from "../src/js/db/generated/CharTalentTables";
+import { finalStats, makeBuild, enemyChange } from "./support/team";
 
 global.DB = DB;
 
-function makePartyBuild(charName, settings = {}) {
-    const build = new CalcSet();
-    build.setChar(DB.Chars.get(charName));
-    build.setCharLevels({level: 90, ascension: 6, constellation: 0});
-    build.setEnemy(DB.Enemies.getFirst().getFirst());
-    build.setPartyChars([Vodyanitsa.getId()]);
-    build.setBuffsSettings({
-        vodyanitsa_char_skill_elemental: 10,
-        "party.vodyanitsa_song_of_ages_past": true,
-        ...settings,
+function makeTeamBuild(charName, carrierSettings = {}, constellation = 2) {
+    const receiver = makeBuild(charName);
+    const carrier = makeBuild('Vodyanitsa');
+    carrier.setCharLevels({level: 90, ascension: 6, constellation});
+    const team = Team.fromMember(receiver);
+    team.setMember(1, carrier);
+    carrier.setCharSettings({
+        vodyanitsa_song_of_ages_past: true,
+        ...carrierSettings,
     });
-    return build;
+    return {team, receiver, carrier};
 }
 
 function getFeature(name) {
     return Vodyanitsa.getFeatures().find((feature) => feature.getName() === name);
 }
 
-function getCondition(name, party = false) {
-    const conditions = party ? Vodyanitsa.getPartyConditions() : Vodyanitsa.getAllConditions();
-    return conditions.find((condition) => condition.getName() === name);
+function getCondition(name) {
+    return Vodyanitsa.getAllConditions().find((condition) => condition.getName() === name);
 }
 
 function applyConditions(data, conditions) {
@@ -43,12 +42,12 @@ function applyConditions(data, conditions) {
     }
 }
 
-test("Vodyanitsa is character 127 and is hidden by default", () => {
+test("Vodyanitsa is character 127 and is available by default", () => {
     expect(DB.Chars.get("Vodyanitsa")).toBe(Vodyanitsa);
     expect(DB.Chars.getById(127)).toBe(Vodyanitsa);
-    expect(DB.Chars.getKeys()).not.toContain("Vodyanitsa");
+    expect(DB.Chars.getByGameId(10000140)).toBe(Vodyanitsa);
+    expect(DB.Chars.getKeys()).toContain("Vodyanitsa");
     expect(DB.Chars.getKeys(true)).toContain("Vodyanitsa");
-    expect(DB.Chars.getByGameId(10000140)).toBeUndefined();
     expect(Vodyanitsa.getId()).toBe(127);
     expect(Vodyanitsa.getGameId()).toEqual([10000140]);
     const ids = DB.Chars.getKeys(true).map((key) => DB.Chars.get(key).getId());
@@ -74,7 +73,6 @@ test("Horn hits, healing, RES shred, and Burst resonance use source values", () 
     const damageData = new BuildData({
         char_level: 90,
         enemy_level: 90,
-        enemy_res_hydro: 0,
         char_skill_elemental: 10,
         char_skill_burst: 1,
     }, {
@@ -105,7 +103,6 @@ test("Horn hits, healing, RES shred, and Burst resonance use source values", () 
     const withState = burst.getResult(new BuildData({
         char_level: 90,
         enemy_level: 90,
-        enemy_res_hydro: 0,
         char_skill_burst: 1,
         vodyanitsa_song_of_ages_past: true,
     }, {
@@ -135,7 +132,6 @@ test("A4 Solo switches from capped Hydro/Cryo flat damage to Stellar Swirl flat 
     const directData = new BuildData({
         char_level: 90,
         enemy_level: 90,
-        enemy_res_hydro: 0,
         char_skill_attack: 1,
         char_ascension: 4,
         vodyanitsa_song_of_ages_past: true,
@@ -153,7 +149,6 @@ test("A4 Solo switches from capped Hydro/Cryo flat damage to Stellar Swirl flat 
     const staleSolo = new BuildData({
         char_level: 90,
         enemy_level: 90,
-        enemy_res_hydro: 0,
         char_skill_attack: 1,
         char_ascension: 4,
         vodyanitsa_lead_vocal: 25,
@@ -175,12 +170,12 @@ test("A4 Solo switches from capped Hydro/Cryo flat damage to Stellar Swirl flat 
         tags: ['stellarswirl_immediate'],
     });
     const stellarData = new BuildData({
-        enemy_res_anemo: 10,
         char_ascension: 4,
         vodyanitsa_song_of_ages_past: true,
         vodyanitsa_wandering_vortex: true,
         vodyanitsa_lead_vocal: 25,
     }, {
+        enemy__res_anemo: 0.1,
         hp_base: 100000,
         crit_rate_base: 1,
         crit_dmg_base: 0.5,
@@ -189,9 +184,8 @@ test("A4 Solo switches from capped Hydro/Cryo flat damage to Stellar Swirl flat 
     stellarData.multipliers = Vodyanitsa.getMultipliers();
 
     const stellar = stellarFeature.getResult(stellarData)["reaction.vodyanitsa_a4_test"];
-    const stellarBase = stellarFeature.getResult(new BuildData({
-        enemy_res_anemo: 10,
-    }, {
+    const stellarBase = stellarFeature.getResult(new BuildData({}, {
+        enemy__res_anemo: 0.1,
         crit_rate_base: 1,
         crit_dmg_base: 0.5,
         dmg_stellarswirl_special: 0.25,
@@ -203,7 +197,6 @@ test("A4 Solo switches from capped Hydro/Cryo flat damage to Stellar Swirl flat 
     const directAfterMutantData = new BuildData({
         char_level: 90,
         enemy_level: 90,
-        enemy_res_hydro: 0,
         char_skill_attack: 1,
         char_ascension: 4,
         vodyanitsa_song_of_ages_past: true,
@@ -218,47 +211,44 @@ test("A4 Solo switches from capped Hydro/Cryo flat damage to Stellar Swirl flat 
     expect(directAfterMutant.normal).toBeCloseTo(directBase * 0.5, 5);
 });
 
-test("party Chorus uses Vodyanitsa holder HP and switches to Stellar mode", () => {
+test("Lead Vocal uses Vodyanitsa HP and switches to Stellar mode", () => {
     const normal = getFeature("attack.normal_hit_1");
     const directData = new BuildData({
         char_level: 90,
         enemy_level: 90,
-        enemy_res_hydro: 0,
         char_skill_attack: 1,
-        "party.vodyanitsa_song_of_ages_past": true,
-        "party.vodyanitsa_chorus": 10,
+        char_ascension: 4,
+        vodyanitsa_lead_vocal: 25,
     }, {
-        vodyanitsa_hp_total: 100000,
+        hp_base: 100000,
     });
-    directData.multipliers = Vodyanitsa.getPartyMultipliers();
+    directData.multipliers = Vodyanitsa.getMultipliers();
     expect(normal.getResult(directData)["attack.normal_hit_1"].normal).toBeCloseTo(1750, 5);
 
     const stellarFeature = new FeatureDamageStellarSwirl({
         category: 'reaction',
-        name: 'vodyanitsa_party_a4_test',
+        name: 'vodyanitsa_lead_a4_test',
         element: 'anemo',
         tags: ['stellarswirl_immediate'],
     });
     const stellarData = new BuildData({
-        enemy_res_anemo: 0,
-        "party.vodyanitsa_song_of_ages_past": true,
-        "party.vodyanitsa_wandering_vortex": true,
-        "party.vodyanitsa_chorus": 10,
+        char_ascension: 4,
+        vodyanitsa_wandering_vortex: true,
+        vodyanitsa_lead_vocal: 25,
     }, {
-        vodyanitsa_hp_total: 100000,
+        hp_base: 100000,
     });
-    stellarData.multipliers = Vodyanitsa.getPartyMultipliers();
-    const stellar = stellarFeature.getResult(stellarData)["reaction.vodyanitsa_party_a4_test"];
+    stellarData.multipliers = Vodyanitsa.getMultipliers();
+    const stellar = stellarFeature.getResult(stellarData)["reaction.vodyanitsa_lead_a4_test"];
     const stellarBase = stellarFeature.getResult(new BuildData({
-        enemy_res_anemo: 0,
-    }, {}))["reaction.vodyanitsa_party_a4_test"];
+    }, {}))["reaction.vodyanitsa_lead_a4_test"];
     expect(stellar.normal - stellarBase.normal).toBeCloseTo(6500, 5);
 
     expect(getCondition("vodyanitsa_lead_vocal").getMaxStacks({})).toBe(25);
-    expect(getCondition("party.vodyanitsa_chorus", true).getMaxStacks({})).toBe(10);
+    expect(getCondition("vodyanitsa_chorus").getMaxStacks({})).toBe(10);
 });
 
-test("C1 derives flat ATK from Vodyanitsa HP for self and party", () => {
+test("C1 derives flat ATK from Vodyanitsa HP for self and team", () => {
     const local = new BuildData({
         char_constellation: 1,
         vodyanitsa_c1_healing: true,
@@ -269,14 +259,13 @@ test("C1 derives flat ATK from Vodyanitsa HP for self and party", () => {
     local.applyPostEffects();
     expect(local.stats.get("atk")).toBeCloseTo(400, 5);
 
-    const party = new BuildData({
-        "party.vodyanitsa_c1_healing": true,
-    }, {
-        vodyanitsa_hp_total: 50000,
-    });
-    party.postEffects = Vodyanitsa.getPartyPostEffects();
-    party.applyPostEffects();
-    expect(party.stats.get("atk")).toBeCloseTo(400, 5);
+    // The retired party row is now a real team: C1 ATK from her own HP total.
+    const {receiver, carrier} = makeTeamBuild('Barbara', {vodyanitsa_c1_healing: true}, 1);
+    const carrierStageZero = carrier.getBuildData().stats;
+    const carrierHp = carrierStageZero.get('hp_base') * (1 + carrierStageZero.get('hp_percent')) +
+        carrierStageZero.get('hp');
+    carrier.modifyBuffsSettings({'custom_buffs.hp': 50000 - carrierHp});
+    expect(finalStats(receiver).get("atk")).toBeCloseTo(400, 5);
 });
 
 test("C2 selects Hydro/Cryo CRIT DMG or Stellar Swirl CRIT DMG", () => {
@@ -307,15 +296,15 @@ test("C2 selects Hydro/Cryo CRIT DMG or Stellar Swirl CRIT DMG", () => {
     expect(mutant.stats.get("crit_dmg_stellarswirl")).toBe(60);
     expect(mutant.stats.get("dmg_stellarswirl")).toBe(0);
 
-    const party = new BuildData({
-        "party.vodyanitsa_song_of_ages_past": true,
-        "party.vodyanitsa_wandering_vortex": true,
-        "party.vodyanitsa_c2_horn_hit": true,
-    }, {});
-    applyConditions(party, Vodyanitsa.getPartyConditions());
-    expect(party.stats.get("crit_dmg_stellarswirl")).toBe(60);
-    expect(party.stats.get("dmg_stellarswirl")).toBe(0);
-    expect(party.stats.get("crit_dmg_hydro")).toBe(0);
+    // The retired party row is now a real team: the on-field receiver gets
+    // the Stellar Swirl share from the source state.
+    const {receiver} = makeTeamBuild('Barbara', {
+        vodyanitsa_wandering_vortex: true,
+        vodyanitsa_c2_horn_hit: true,
+    }, 2);
+    expect(finalStats(receiver).get("crit_dmg_stellarswirl")).toBeCloseTo(0.6, 10);
+    expect(finalStats(receiver).get("dmg_stellarswirl")).toBe(0);
+    expect(finalStats(receiver).get("crit_dmg_hydro")).toBe(0);
 });
 
 test.each([
@@ -323,14 +312,17 @@ test.each([
     ["Chongyun", "skill.skill_dmg", 0.5],
     ["Chongyun", "attack.normal_hit_1", 0],
     ["Diluc", "skill.skill_hit_1", 0],
-])("party C2 applies element-specific CRIT DMG to %s %s", (charName, featureName, bonus) => {
-    const build = makePartyBuild(charName);
+])("C2 applies element-specific CRIT DMG to %s %s", (charName, featureName, bonus) => {
+    const {receiver, carrier} = makeTeamBuild(charName, {}, 2);
     const feature = DB.Chars.get(charName).getFeatures()
         .find((item) => item.getName() === featureName);
-    const baseline = feature.getResult(build.getBuildData())[featureName];
+    const baseline = feature.getResult(receiver.getBuildData())[featureName];
 
-    build.modifyBuffsSettings({"party.vodyanitsa_c2_horn_hit": true});
-    const data = build.getBuildData();
+    carrier.setCharSettings({
+        vodyanitsa_song_of_ages_past: true,
+        vodyanitsa_c2_horn_hit: true,
+    });
+    const data = receiver.getBuildData();
     const buffed = feature.getResult(data)[featureName];
 
     expect(data.stats.get("crit_dmg_hydro")).toBe(0.5);
@@ -339,71 +331,83 @@ test.each([
     expect(buffed.normal).toBeCloseTo(baseline.normal, 5);
     expect(buffed.crit - baseline.crit).toBeCloseTo(baseline.normal * bonus, 5);
 
-    build.modifyBuffsSettings({"party.vodyanitsa_wandering_vortex": true});
-    expect(feature.getResult(build.getBuildData())[featureName].crit)
+    carrier.setCharSettings({
+        vodyanitsa_song_of_ages_past: true,
+        vodyanitsa_wandering_vortex: true,
+        vodyanitsa_c2_horn_hit: true,
+    });
+    expect(feature.getResult(receiver.getBuildData())[featureName].crit)
         .toBeCloseTo(baseline.crit, 5);
 
-    build.modifyBuffsSettings({
-        "party.vodyanitsa_song_of_ages_past": false,
-        "party.vodyanitsa_wandering_vortex": false,
+    carrier.setCharSettings({
+        vodyanitsa_song_of_ages_past: false,
+        vodyanitsa_wandering_vortex: false,
+        vodyanitsa_c2_horn_hit: true,
     });
-    expect(build.getBuildData().stats.get("crit_dmg_hydro")).toBe(0.5);
-    build.modifyBuffsSettings({"party.vodyanitsa_c2_horn_hit": false});
-    const inactive = build.getBuildData();
+    expect(receiver.getBuildData().stats.get("crit_dmg_hydro")).toBe(0.5);
+    carrier.setCharSettings({vodyanitsa_c2_horn_hit: false});
+    const inactive = receiver.getBuildData();
     expect(inactive.stats.get("crit_dmg_hydro")).toBe(0);
     expect(inactive.stats.get("crit_dmg_cryo")).toBe(0);
     expect(inactive.stats.get("crit_dmg_stellarswirl")).toBe(0);
 });
 
-test("party C2 increases Stellar Swirl critical hits without increasing noncritical damage", () => {
-    const build = makePartyBuild("Sucrose", {"party.vodyanitsa_wandering_vortex": true});
-    build.setCharSettings({allowed_stellarswirl: true});
+test("C2 increases Stellar Swirl critical hits without increasing noncritical damage", () => {
+    const {receiver, carrier} = makeTeamBuild('Sucrose', {vodyanitsa_wandering_vortex: true}, 2);
+    receiver.setCharSettings({allowed_stellarswirl: true});
     const feature = Reactions.find((item) => item.name === "stellarswirl_anemo_contribution");
-    const baseline = feature.getResult(build.getBuildData())[feature.getName()];
+    const baseline = feature.getResult(receiver.getBuildData())[feature.getName()];
 
-    build.modifyBuffsSettings({"party.vodyanitsa_c2_horn_hit": true});
-    const buffed = feature.getResult(build.getBuildData())[feature.getName()];
+    carrier.setCharSettings({
+        vodyanitsa_song_of_ages_past: true,
+        vodyanitsa_wandering_vortex: true,
+        vodyanitsa_c2_horn_hit: true,
+    });
+    const buffed = feature.getResult(receiver.getBuildData())[feature.getName()];
     expect(baseline.normal).toBeGreaterThan(0);
     expect(buffed.normal).toBeCloseTo(baseline.normal, 5);
     expect(buffed.crit - baseline.crit).toBeCloseTo(baseline.normal * 0.6, 5);
 });
 
-test.each([1, 10])("party C3 adds three levels to Vodyanitsa's level %i Skill RES shred and survives reload", (level) => {
-    const build = makePartyBuild("Barbara", {vodyanitsa_char_skill_elemental: level});
-    const baseline = build.getBuildData();
-    expect(baseline.stats.get("enemy_res_hydro"))
+test.each([1, 10])("C3 adds three levels to Vodyanitsa's level %i Skill RES shred and survives reload", (level) => {
+    const receiver = makeBuild("Barbara");
+    const carrier = makeBuild('Vodyanitsa');
+    carrier.setCharLevels({level: 90, ascension: 6, constellation: 2});
+    carrier.setCharSkills({attack: 1, elemental: level, burst: 1});
+    const team = Team.fromMember(receiver);
+    team.setMember(1, carrier);
+    carrier.setCharSettings({vodyanitsa_song_of_ages_past: true});
+    expect(enemyChange(receiver, "enemy_res_hydro"))
         .toBeCloseTo(-charTalentTables.Vodyanitsa.s2.p8[level - 1] / 100, 5);
 
-    build.modifyBuffsSettings({"party.vodyanitsa_constellation_3": true});
-    const buffed = build.getBuildData();
-    expect(buffed.settings.getLevel("vodyanitsa_char_skill_elemental")).toBe(level + 3);
-    expect(buffed.settings.getLevel("char_skill_elemental"))
-        .toBe(baseline.settings.getLevel("char_skill_elemental"));
+    carrier.setCharLevels({level: 90, ascension: 6, constellation: 3});
+    expect(carrier.getBuildData().settings.getLevel("char_skill_elemental")).toBe(level + 3);
     for (const element of ["hydro", "cryo"]) {
-        expect(buffed.stats.get("enemy_res_" + element))
+        expect(enemyChange(receiver, "enemy_res_" + element))
             .toBeCloseTo(-charTalentTables.Vodyanitsa.s2.p8[level + 2] / 100, 5);
     }
 
-    const restored = CalcSet.deserialize(Serializer.unpack(build.getHash()));
-    expect(restored.getBuildData().stats.get("enemy_res_hydro"))
-        .toBeCloseTo(buffed.stats.get("enemy_res_hydro"), 5);
-    expect(restored.getSettings()["party.vodyanitsa_constellation_3"]).toBeTruthy();
+    const copy = Team.deserialize(team.serialize());
+    expect(copy).not.toBeNull();
+    expect(enemyChange(copy.getMember(0), "enemy_res_hydro"))
+        .toBeCloseTo(enemyChange(receiver, "enemy_res_hydro"), 5);
+    expect(copy.getMember(1).getSettings()["vodyanitsa_song_of_ages_past"]).toBeTruthy();
 
-    build.modifyBuffsSettings({"party.vodyanitsa_constellation_3": false});
-    expect(build.getBuildData().stats.get("enemy_res_hydro"))
-        .toBeCloseTo(baseline.stats.get("enemy_res_hydro"), 5);
+    carrier.setCharSettings({vodyanitsa_song_of_ages_past: false});
+    expect(enemyChange(receiver, "enemy_res_hydro")).toBe(0);
 });
 
 test("self C3 RES reduction uses the raised Skill level on the first calculation", () => {
     const build = new CalcSet();
     build.setChar(Vodyanitsa);
+    Team.fromMember(build);
     build.setCharLevels({level: 90, ascension: 6, constellation: 3});
     build.setCharSkills({attack: 1, elemental: 10, burst: 1});
     build.setCharSettings({vodyanitsa_song_of_ages_past: true});
     const data = build.getBuildData();
     expect(data.settings.getLevel("char_skill_elemental")).toBe(13);
-    expect(data.stats.get("enemy_res_hydro")).toBeCloseTo(-charTalentTables.Vodyanitsa.s2.p8[12] / 100, 5);
-    expect(data.stats.get("enemy_res_cryo")).toBeCloseTo(data.stats.get("enemy_res_hydro"), 5);
+    expect(enemyChange(build, "enemy_res_hydro", data.stats)).toBeCloseTo(-charTalentTables.Vodyanitsa.s2.p8[12] / 100, 5);
+    expect(enemyChange(build, "enemy_res_cryo", data.stats)).toBeCloseTo(enemyChange(build, "enemy_res_hydro", data.stats), 5);
 });
 
 test("C4 models its low-HP healing branch and three independent HP stacks", () => {
@@ -438,56 +442,78 @@ test("C4 multiplies both parts of Skill healing alongside existing Healing Bonus
     expect(feature.getResult(data)[feature.getName()].normal).toBeCloseTo(baseline, 5);
 });
 
-test.each([false, true])("removed recipient control stays hidden and does not override C2 (party: %s)", (party) => {
-    const prefix = party ? "party." : "";
+test("removed recipient control stays hidden and does not override C2", () => {
     const data = new BuildData({
-        [prefix + "vodyanitsa_off_field"]: true,
-        [prefix + "vodyanitsa_c2_horn_hit"]: true,
+        vodyanitsa_off_field: true,
+        vodyanitsa_c2_horn_hit: true,
         char_constellation: 2,
     }, {});
-    const conditions = party ? Vodyanitsa.getPartyConditions() : Vodyanitsa.constellation.getConditions(2);
-    applyConditions(data, conditions);
+    applyConditions(data, Vodyanitsa.constellation.getConditions(2));
     expect(data.stats.get("crit_dmg_hydro")).toBe(50);
-    expect(getCondition(prefix + "vodyanitsa_off_field", party).isHidden(data.settings)).toBe(true);
+    expect(getCondition("vodyanitsa_off_field").isHidden(data.settings)).toBe(true);
+    // The retired party ID decodes but contributes nothing on its own.
+    const retired = Vodyanitsa.getLegacyPartyConditions().find((condition) => condition.getId() === 10);
+    expect(retired).toBeDefined();
+    expect(retired.isHidden({})).toBe(true);
+    const retiredData = new BuildData({
+        vodyanitsa_c2_horn_hit: true,
+        char_constellation: 2,
+    }, {});
+    applyConditions(retiredData, Vodyanitsa.getLegacyPartyConditions());
+    expect(retiredData.stats.get("crit_dmg_hydro")).toBe(0);
 });
 
 test.each([
-    ["skill.vesna_windborne_sword_lv2_spirit_blade_stellar", "anemo"],
-    ["burst.vesna_for_the_tsaritsa_stellar", "anemo"],
-    ["reaction.stellarswirl_vortex_1_contribution", "cryo"],
-])("party A4 adds flat damage to %s after Song of Ages Past expires", (name, element) => {
-    const build = makePartyBuild("Vesna", {
-        vodyanitsa_hp_total: 100000,
-        "party.vodyanitsa_song_of_ages_past": false,
-        "party.vodyanitsa_wandering_vortex": true,
-    });
-    build.setCharSettings({vesna_armed_for_action: true, vesna_radiance_stellarswirl: true});
+    ["skill.vesna_windborne_sword_lv2_spirit_blade_stellar", "anemo", 1],
+    ["burst.vesna_for_the_tsaritsa_stellar", "anemo", 1],
+    // A member's contribution at the first rank: 60% of it, flat damage included.
+    ["reaction.stellarswirl_vortex_1_contribution", "cryo", 0.6],
+])("A4 adds flat damage to %s after Song of Ages Past expires", (name, element, weight) => {
+    // The on-field receiver consumes Lead Vocal; Song of Ages Past stays
+    // off to prove the A4 share does not need it.
+    const {receiver, carrier} = makeTeamBuild('Vesna', {
+        vodyanitsa_song_of_ages_past: false,
+        vodyanitsa_wandering_vortex: true,
+    }, 6);
+    const carrierStageZero = carrier.getBuildData().stats;
+    const carrierHp = carrierStageZero.get('hp_base') * (1 + carrierStageZero.get('hp_percent')) +
+        carrierStageZero.get('hp');
+    carrier.modifyBuffsSettings({'custom_buffs.hp': 100000 - carrierHp});
+    receiver.setCharSettings({vesna_armed_for_action: true, vesna_radiance_stellarswirl: true});
+    receiver.team.enemy.setResistances({[element]: 0});
     const feature = [...DB.Chars.get("Vesna").getFeatures(), ...Reactions]
         .find((item) => item.getName() === name);
-    const baseline = feature.getResult(build.getBuildData())[name];
-    build.modifyBuffsSettings({"party.vodyanitsa_chorus": 10});
-    const data = build.getBuildData();
+    const baseline = feature.getResult(receiver.getBuildData())[name];
+    carrier.setCharSettings({
+        vodyanitsa_song_of_ages_past: false,
+        vodyanitsa_wandering_vortex: true,
+        vodyanitsa_lead_vocal: 25,
+        vodyanitsa_chorus: 10,
+    });
+    const data = receiver.getBuildData();
     const buffed = feature.getResult(data)[name];
     const res = data.getResistance(element) / 100;
     const resMultiplier = res < 0 ? 1 - res / 2 : 1 - res;
-    expect(buffed.normal - baseline.normal).toBeCloseTo(6500 * resMultiplier, 5);
+    expect(buffed.normal - baseline.normal).toBeCloseTo(6500 * weight * resMultiplier, 5);
 });
 
 test("builds saved with the removed recipient control still load without affecting damage", () => {
-    const build = makePartyBuild("Barbara", {
-        "party.vodyanitsa_song_of_ages_past": false,
-        "party.vodyanitsa_off_field": true,
-        "party.vodyanitsa_c2_horn_hit": true,
-        "party.vodyanitsa_c6_song_of_ages_past": true,
-    });
-    const restored = CalcSet.deserialize(Serializer.unpack(build.getHash()));
-    const data = restored.getBuildData();
-    expect(data.stats.get("crit_dmg_hydro")).toBe(0.5);
-    expect(data.stats.get("dmg_hydro")).toBe(0);
-    expect(data.stats.get("dmg_stellarswirl_special")).toBe(0);
+    const built = makeTeamBuild("Barbara", {
+        vodyanitsa_song_of_ages_past: false,
+        vodyanitsa_c2_horn_hit: true,
+    }, 6);
+    const {team, receiver, carrier} = built;
+    carrier.modifyBuffsSettings({'party.vodyanitsa_off_field': true});
+    const copy = Team.deserialize(team.serialize());
+    expect(copy).not.toBeNull();
+    const data = finalStats(copy.getMember(0));
+    expect(data.get("crit_dmg_hydro")).toBeCloseTo(0.5, 10);
+    expect(data.get("dmg_hydro")).toBe(0);
+    expect(data.get("dmg_stellarswirl_special")).toBe(0);
+    expect(copy.getMember(1).getSettings()['party.vodyanitsa_off_field']).toBeUndefined();
 });
 
-test("C6 adds party Hydro/Cryo DMG and Stellar Swirl elevation while Song of Ages Past is active", () => {
+test("C6 adds Hydro/Cryo DMG and Stellar Swirl elevation while Song of Ages Past is active", () => {
     const local = new BuildData({
         vodyanitsa_song_of_ages_past: true,
     }, {});
@@ -496,18 +522,16 @@ test("C6 adds party Hydro/Cryo DMG and Stellar Swirl elevation while Song of Age
     expect(local.stats.get("dmg_cryo")).toBe(60);
     expect(local.stats.get("dmg_stellarswirl_special")).toBe(25);
 
-    const party = new BuildData({
-        "party.vodyanitsa_song_of_ages_past": true,
-        "party.vodyanitsa_c6_song_of_ages_past": true,
-    }, {});
-    applyConditions(party, Vodyanitsa.getPartyConditions());
-    expect(party.stats.get("dmg_hydro")).toBe(60);
-    expect(party.stats.get("dmg_cryo")).toBe(60);
-    expect(party.stats.get("dmg_stellarswirl_special")).toBe(25);
+    // The retired party row is now a real team: Song of Ages Past carries
+    // the C6 share to the receiver, and nothing without it.
+    const {receiver, carrier} = makeTeamBuild('Barbara', {}, 6);
+    expect(finalStats(receiver).get("dmg_hydro")).toBeCloseTo(0.6, 10);
+    expect(finalStats(receiver).get("dmg_cryo")).toBeCloseTo(0.6, 10);
+    expect(finalStats(receiver).get("dmg_stellarswirl_special")).toBeCloseTo(0.25, 10);
 
-    const inactive = getCondition("party.vodyanitsa_c6_song_of_ages_past", true)
-        .getData({"party.vodyanitsa_c6_song_of_ages_past": true}).stats;
-    expect(inactive.get("dmg_hydro")).toBe(0);
+    carrier.setCharSettings({vodyanitsa_song_of_ages_past: false});
+    expect(finalStats(receiver).get("dmg_hydro")).toBe(0);
+    expect(finalStats(receiver).get("dmg_stellarswirl_special")).toBe(0);
 });
 
 test("Vodyanitsa uses only its reserved 860-889 Rotation block", () => {

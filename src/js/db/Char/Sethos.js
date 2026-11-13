@@ -17,8 +17,10 @@ import { FeatureDamageSkill } from "../../classes/Feature2/Damage/Skill";
 import { FeatureMultiplier } from "../../classes/Feature2/Multiplier";
 import { FeatureMultiplierTarget } from "../../classes/Feature2/Multiplier/Target";
 import { StatTable } from "../../classes/StatTable";
+import { RECEIVERS } from "../../classes/Team/Receivers";
 import { charTables } from "../generated/CharTables";
 import { charTalentTables } from "../generated/CharTalentTables";
+import { percent } from "../Params";
 import { ValueTable } from "../../classes/ValueTable";
 
 const Talents = new DbObjectTalents({
@@ -114,10 +116,11 @@ const Talents = new DbObjectTalents({
 });
 
 const TalentValues = {
-    A4MasteryBonus: 700,
-    C1CritRate: 15,
-    C2ElectroDmg: 15,
-    C4Mastery: 80,
+    A4MasteryBonus: percent(charTalentTables.Sethos.a4.p2),
+    C1CritRate: percent(charTalentTables.Sethos.c1.p1),
+    C2ElectroDmg: percent(charTalentTables.Sethos.c2.p1),
+    C4Mastery: charTalentTables.Sethos.c4.p1,
+    C2MaxStacks: charTalentTables.Sethos.c2.p2,
 };
 
 export const Sethos = new DbObjectChar({
@@ -412,7 +415,7 @@ export const Sethos = new DbObjectChar({
                 new ConditionStacks({
                     name: 'sethos_papyrus_scripture_of_silent_secrets',
                     serializeId: 3,
-                    maxStacks: 2,
+                    maxStacks: TalentValues.C2MaxStacks,
                     title: 'talent_name.sethos_papyrus_scripture_of_silent_secrets',
                     description: 'talent_descr.sethos_papyrus_scripture_of_silent_secrets',
                     stats: [
@@ -432,9 +435,11 @@ export const Sethos = new DbObjectChar({
         },
         {
             conditions: [
+                // C4: all nearby party members, Sethos included.
                 new ConditionBoolean({
                     name: 'sethos_beneficent_plumage',
                     serializeId: 4,
+                    receivers: RECEIVERS.TEAM,
                     title: 'talent_name.sethos_beneficent_plumage',
                     description: 'talent_descr.sethos_beneficent_plumage',
                     stats: {
@@ -461,19 +466,5 @@ export const Sethos = new DbObjectChar({
             ],
         },
     ]),
-    partyData: {
-        conditions: [
-            new ConditionBoolean({
-                name: 'sethos_beneficent_plumage',
-                serializeId: 1,
-                rotation: 'party',
-                title: 'talent_name.sethos_beneficent_plumage',
-                description: 'talent_descr.sethos_beneficent_plumage',
-                info: {constellation: 4},
-                stats: {
-                    mastery: TalentValues.C4Mastery,
-                },
-            }),
-        ],
-    },
+    retiredParty: [[1, 'checkbox']],
 });

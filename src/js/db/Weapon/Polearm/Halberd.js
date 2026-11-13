@@ -4,6 +4,8 @@ import { FeatureDamage } from "../../../classes/Feature2/Damage";
 import { FeatureMultiplier } from "../../../classes/Feature2/Multiplier";
 import { StatTable } from "../../../classes/StatTable";
 import { weaponStatTables } from "../../generated/WeaponStatTables";
+import { weaponPassiveTables } from "../../generated/WeaponPassiveTables";
+import { percent } from "../../Params";
 
 export const Halberd = new DbObjectWeapon({
     name: 'halberd',
@@ -18,7 +20,7 @@ export const Halberd = new DbObjectWeapon({
             title: 'talent_name.weapon_halberd',
             description: 'talent_descr.weapon_halberd',
             stats: [
-                new StatTable('text_percent_dmg', [160, 200, 240, 280, 320]),
+                new StatTable('text_percent_dmg', percent(weaponPassiveTables.Halberd.p1)),
             ]
         }),
     ],
@@ -28,7 +30,7 @@ export const Halberd = new DbObjectWeapon({
             multipliers: [
                 new FeatureMultiplier({
                     leveling: 'weapon_refine',
-                    values: new StatTable('halberd_dmg', [160, 200, 240, 280, 320]),
+                    values: new StatTable('halberd_dmg', percent(weaponPassiveTables.Halberd.p1)),
                 }),
             ],
         }),

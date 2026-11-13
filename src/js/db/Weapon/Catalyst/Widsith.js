@@ -6,6 +6,8 @@ import { ConditionStatic } from "../../../classes/Condition/Static";
 import { DbObjectWeapon } from "../../../classes/DbObject/Weapon";
 import { StatTable } from "../../../classes/StatTable";
 import { weaponStatTables } from "../../generated/WeaponStatTables";
+import { weaponPassiveTables } from "../../generated/WeaponPassiveTables";
+import { percent } from "../../Params";
 
 export const Widsith = new DbObjectWeapon({
     name: 'the_widsith',
@@ -73,7 +75,7 @@ export const Widsith = new DbObjectWeapon({
             title: 'talent_name.weapon_widsith_1',
             description: 'talent_descr.weapon_widsith_1',
             stats: [
-                new StatTable('atk_percent', [60, 75, 90, 105, 120]),
+                new StatTable('atk_percent', percent(weaponPassiveTables.Widsith.p1)),
             ],
             subConditions: [
                 new ConditionNot([
@@ -91,13 +93,13 @@ export const Widsith = new DbObjectWeapon({
             title: 'talent_name.weapon_widsith_2',
             description: 'talent_descr.weapon_widsith_2',
             stats: [
-                new StatTable('dmg_anemo', [48, 60, 72, 84, 96]),
-                new StatTable('dmg_electro', [48, 60, 72, 84, 96]),
-                new StatTable('dmg_pyro', [48, 60, 72, 84, 96]),
-                new StatTable('dmg_cryo', [48, 60, 72, 84, 96]),
-                new StatTable('dmg_hydro', [48, 60, 72, 84, 96]),
-                new StatTable('dmg_geo', [48, 60, 72, 84, 96]),
-                new StatTable('dmg_dendro', [48, 60, 72, 84, 96]),
+                new StatTable('dmg_anemo', percent(weaponPassiveTables.Widsith.p2)),
+                new StatTable('dmg_electro', percent(weaponPassiveTables.Widsith.p2)),
+                new StatTable('dmg_pyro', percent(weaponPassiveTables.Widsith.p2)),
+                new StatTable('dmg_cryo', percent(weaponPassiveTables.Widsith.p2)),
+                new StatTable('dmg_hydro', percent(weaponPassiveTables.Widsith.p2)),
+                new StatTable('dmg_geo', percent(weaponPassiveTables.Widsith.p2)),
+                new StatTable('dmg_dendro', percent(weaponPassiveTables.Widsith.p2)),
             ],
             subConditions: [
                 new ConditionNot([
@@ -114,7 +116,7 @@ export const Widsith = new DbObjectWeapon({
             title: 'talent_name.weapon_widsith_3',
             description: 'talent_descr.weapon_widsith_3',
             stats: [
-                new StatTable('mastery', [240, 300, 360, 420, 480]),
+                new StatTable('mastery', weaponPassiveTables.Widsith.p3),
             ],
             subConditions: [
                 new ConditionNot([

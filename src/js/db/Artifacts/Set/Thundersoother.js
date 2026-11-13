@@ -1,6 +1,8 @@
 import { ArtifactSet } from "../../../classes/ArtifactSet";
 import { ConditionEnemyStatus } from "../../../classes/Condition/Boolean/EnemyStatus";
 import { ConditionStatic } from "../../../classes/Condition/Static";
+import { artifactSetTables } from "../../generated/ArtifactSetTables";
+import { percent } from "../../Params";
 
 export const Thundersoother = new ArtifactSet({
     serializeId: 23,
@@ -19,7 +21,7 @@ export const Thundersoother = new ArtifactSet({
                     title: 'set_bonus.thundersoother_2',
                     description: 'set_descr.thundersoother_2',
                     stats: {
-                        res_electro: 40,
+                        res_electro: artifactSetTables.Thundersoother.pc2.res_electro,
                     },
                 })
             ],
@@ -35,7 +37,7 @@ export const Thundersoother = new ArtifactSet({
                     title: 'set_bonus.thundersoother_4',
                     description: 'set_descr.thundersoother_4',
                     stats: {
-                        dmg_all: 35,
+                        dmg_all: percent(artifactSetTables.Thundersoother.pc4.p1),
                     },
                     subConditions: [
                         new ConditionEnemyStatus({

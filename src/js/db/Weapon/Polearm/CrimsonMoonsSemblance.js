@@ -4,6 +4,8 @@ import { ConditionStaticRefine } from "../../../classes/Condition/Static/Refine"
 import { DbObjectWeapon } from "../../../classes/DbObject/Weapon";
 import { StatTable } from "../../../classes/StatTable";
 import { weaponStatTables } from "../../generated/WeaponStatTables";
+import { weaponPassiveTables } from "../../generated/WeaponPassiveTables";
+import { percent } from "../../Params";
 
 export const CrimsonMoonsSemblance = new DbObjectWeapon({
     name: 'crimson_moons_semblance',
@@ -21,14 +23,14 @@ export const CrimsonMoonsSemblance = new DbObjectWeapon({
             title: 'talent_name.crimson_moons_semblance',
             description: 'talent_descr.crimson_moons_semblance_1',
             stats: [
-                new StatTable('text_percent', [25]),
+                new StatTable('text_percent', [percent(weaponPassiveTables.CrimsonMoonsSemblance.p1[0])]),
             ],
         }),
         new ConditionStaticRefine({
             title: 'talent_name.crimson_moons_semblance',
             description: 'talent_descr.crimson_moons_semblance_2',
             stats: [
-                new StatTable('dmg_all', [12, 16, 20, 24, 28]),
+                new StatTable('dmg_all', percent(weaponPassiveTables.CrimsonMoonsSemblance.p3)),
             ],
             subConditions: [
                 new ConditionBooleanValue({
@@ -42,14 +44,14 @@ export const CrimsonMoonsSemblance = new DbObjectWeapon({
             title: 'talent_name.crimson_moons_semblance',
             description: 'talent_descr.crimson_moons_semblance_3',
             stats: [
-                new StatTable('text_percent', [30]),
-                new StatTable('dmg_all', [24, 32, 40, 48, 56]),
+                new StatTable('text_percent', [percent(weaponPassiveTables.CrimsonMoonsSemblance.p4[0])]),
+                new StatTable('dmg_all', percent(weaponPassiveTables.CrimsonMoonsSemblance.p5)),
             ],
             subConditions: [
                 new ConditionBooleanValue({
                     setting: 'common.bond_of_life',
                     cond: 'ge',
-                    value: 30,
+                    value: percent(weaponPassiveTables.CrimsonMoonsSemblance.p4[0]),
                 }),
             ],
         }),

@@ -9,6 +9,7 @@ import { Modal } from '../Modal';
 import { FeatureName } from './FeatureName';
 import { waitForCondition } from '../../Utils';
 import { Stats } from '../../classes/Stats';
+import { equipTeamArtifact } from '../../classes/ArtifactTeamInventory';
 
 let lang = new Lang();
 
@@ -125,9 +126,7 @@ class ArtifactTooltipWindow extends React.PureComponent {
             let build = this.props.app.currentSet().clone();
             let feat1 = build.calcFeatures(1)[this.state.feature];
 
-            build.setArtifact(art);
-            build.setArtifactsSettings(this.state.artSettings);
-            build.artifacts.removeInvalidSettings();
+            equipTeamArtifact(build, art, this.props.app.storage.artifacts);
 
             let feat2 = build.calcFeatures(1)[this.state.feature];
             let values = [];

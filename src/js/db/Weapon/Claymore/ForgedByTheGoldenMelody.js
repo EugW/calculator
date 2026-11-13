@@ -3,6 +3,8 @@ import { ConditionStaticRefine } from "../../../classes/Condition/Static/Refine"
 import { DbObjectWeapon } from "../../../classes/DbObject/Weapon";
 import { StatTable } from "../../../classes/StatTable";
 import { weaponStatTables } from "../../generated/WeaponStatTables";
+import { weaponPassiveTables } from "../../generated/WeaponPassiveTables";
+import { percent } from "../../Params";
 
 function goldenMelodyModes() {
     return [
@@ -12,7 +14,7 @@ function goldenMelodyModes() {
             serializeId: 1,
             conditions: [
                 new ConditionStaticRefine({
-                    stats: [new StatTable('atk_percent', [18, 22.5, 27, 31.5, 36])],
+                    stats: [new StatTable('atk_percent', percent(weaponPassiveTables.ForgedByTheGoldenMelody.p1))],
                 }),
             ],
         },
@@ -22,7 +24,7 @@ function goldenMelodyModes() {
             serializeId: 2,
             conditions: [
                 new ConditionStaticRefine({
-                    stats: [new StatTable('mastery', [120, 150, 180, 210, 240])],
+                    stats: [new StatTable('mastery', weaponPassiveTables.ForgedByTheGoldenMelody.p2)],
                 }),
             ],
         },
@@ -32,7 +34,7 @@ function goldenMelodyModes() {
             serializeId: 3,
             conditions: [
                 new ConditionStaticRefine({
-                    stats: [new StatTable('dmg_stellarglimmer', [28, 35, 42, 49, 56])],
+                    stats: [new StatTable('dmg_stellarglimmer', percent(weaponPassiveTables.ForgedByTheGoldenMelody.p3))],
                 }),
             ],
         },
@@ -52,9 +54,9 @@ export const ForgedByTheGoldenMelody = new DbObjectWeapon({
             title: 'talent_name.weapon_forged_by_the_golden_melody',
             description: 'talent_descr.weapon_forged_by_the_golden_melody',
             stats: [
-                new StatTable('text_percent_1', [18, 22.5, 27, 31.5, 36]),
-                new StatTable('text_number_2', [120, 150, 180, 210, 240]),
-                new StatTable('text_percent_3', [28, 35, 42, 49, 56]),
+                new StatTable('text_percent_1', percent(weaponPassiveTables.ForgedByTheGoldenMelody.p1)),
+                new StatTable('text_number_2', weaponPassiveTables.ForgedByTheGoldenMelody.p2),
+                new StatTable('text_percent_3', percent(weaponPassiveTables.ForgedByTheGoldenMelody.p3)),
             ],
         }),
         new ConditionDropdown({

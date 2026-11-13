@@ -4,6 +4,8 @@ import { ConditionStaticRefine } from "../../../classes/Condition/Static/Refine"
 import { DbObjectWeapon } from "../../../classes/DbObject/Weapon";
 import { StatTable } from "../../../classes/StatTable";
 import { weaponStatTables } from "../../generated/WeaponStatTables";
+import { weaponPassiveTables } from "../../generated/WeaponPassiveTables";
+import { percent } from "../../Params";
 
 export const SilvershowerHeartstrings = new DbObjectWeapon({
     name: 'silvershower_heartstrings',
@@ -28,7 +30,7 @@ export const SilvershowerHeartstrings = new DbObjectWeapon({
                     conditions: [
                         new ConditionStaticRefine({
                             stats: [
-                                new StatTable('hp_percent', [12, 15, 18, 21, 24]),
+                                new StatTable('hp_percent', percent(weaponPassiveTables.SilvershowerHeartstrings.p1)),
                             ],
                         }),
                     ],
@@ -40,7 +42,7 @@ export const SilvershowerHeartstrings = new DbObjectWeapon({
                     conditions: [
                         new ConditionStaticRefine({
                             stats: [
-                                new StatTable('hp_percent', [24, 30, 36, 42, 48]),
+                                new StatTable('hp_percent', percent(weaponPassiveTables.SilvershowerHeartstrings.p2)),
                             ],
                         }),
                     ],
@@ -52,7 +54,7 @@ export const SilvershowerHeartstrings = new DbObjectWeapon({
                     conditions: [
                         new ConditionStaticRefine({
                             stats: [
-                                new StatTable('hp_percent', [40, 50, 60, 70, 80]),
+                                new StatTable('hp_percent', percent(weaponPassiveTables.SilvershowerHeartstrings.p3)),
                             ],
                         }),
                     ],
@@ -67,7 +69,7 @@ export const SilvershowerHeartstrings = new DbObjectWeapon({
             value: 3,
             setting: 'weapon_silvershower_heartstrings',
             stats: [
-                new StatTable('crit_rate_burst', [28, 35, 42, 49, 56]),
+                new StatTable('crit_rate_burst', percent(weaponPassiveTables.SilvershowerHeartstrings.p7)),
             ],
         }),
     ],

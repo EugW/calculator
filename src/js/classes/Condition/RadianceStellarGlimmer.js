@@ -1,10 +1,14 @@
 import { Condition } from "../Condition";
+import { teamSettings } from "../Team/Scope";
+import { isTeamSetting } from "../Team/Settings";
 
 export const RADIANCE_STELLARCONDUCT = 'stellarconduct';
 export const RADIANCE_STELLARSWIRL = 'stellarswirl';
 
 export function getRadianceStellarGlimmerMode(settings, conductName, swirlName) {
-    if (settings[conductName]) {
+    // Mizuki's and Vesna's Conduct state is the team's Polestar Field.
+    let conduct = isTeamSetting(conductName) ? teamSettings(settings)[conductName] : settings[conductName];
+    if (conduct) {
         return RADIANCE_STELLARCONDUCT;
     }
     if (settings[swirlName]) {

@@ -17,11 +17,14 @@ import { FeatureHeal } from "../../classes/Feature2/Heal";
 import { FeatureMultiplier } from "../../classes/Feature2/Multiplier";
 import { FeatureMultiplierList } from "../../classes/Feature2/Multiplier/List";
 import { FeaturePostEffectValue } from "../../classes/Feature2/PostEffectValue";
+import { CHANNELS } from "../../classes/PostEffect/Channels";
 import { PostEffectStatsRecharge } from "../../classes/PostEffect/Stats/Recharge";
 import { StatTable } from "../../classes/StatTable";
 import { ValueTable } from "../../classes/ValueTable";
+import { RECEIVERS } from "../../classes/Team/Receivers";
 import { charTables } from "../generated/CharTables";
 import { charTalentTables } from "../generated/CharTalentTables";
+import { percent } from "../Params";
 
 const Talents = new DbObjectTalents({
     attack: {
@@ -122,10 +125,12 @@ const Talents = new DbObjectTalents({
 });
 
 const TalentValues = {
-    C2Damage: 50,
-    C4HealingRecv: 50,
-    C4Recharge: 30,
-    C6Heal: 4,
+    C2Damage: percent(charTalentTables.Dori.c2.p1),
+    C4HealingRecv: percent(charTalentTables.Dori.c4.p1),
+    C4Recharge: percent(charTalentTables.Dori.c4.p2),
+    C6Heal: percent(charTalentTables.Dori.c6.p2),
+    A4Energy: charTalentTables.Dori.a4.p1,
+    A4EnergyMax: charTalentTables.Dori.a4.p2,
 };
 
 export const Dori = new DbObjectChar({
@@ -270,6 +275,8 @@ export const Dori = new DbObjectChar({
         new FeatureDamageSkill({
             name: 'dori_special_franchise',
             element: 'electro',
+            // C2 Jinni Toop: 50% of ATK (game: Dori_Constellation_2,
+            // paramList 0.5). A damage hit reads the total and needs nothing.
             multipliers: [
                 new FeatureMultiplier({
                     source: 'constellation2',
@@ -284,8 +291,17 @@ export const Dori = new DbObjectChar({
             format: 'decimal',
             digits: 2,
             postEffect: new PostEffectStatsRecharge({
-                percent: new StatTable('', [5]),
-                statCap: new ValueTable([15]),
+                // Game data: Avatar_Dori_ElementalArt / ElementalArt_Bullet_Ball
+                // sets _ABILITY_Dori_ElementalArt_ReviveEnergy from
+                // FIGHT_PROP_CHARGE_EFFICIENCY (total ER), gated by
+                // Dori_PermanentSkill_2 (= A4; ProudSkill paramList [5, 15]).
+                // Same pattern as Alyosha's A4, opposite to Sara's Decorum and
+                // Raiden's restore (FIGHT_PROP_NONEXTRA_CHARGE_EFFICIENCY).
+                // GO reads input.total.enerRech_; KQM notes only that every
+                // point of ER counts, with no chain test.
+                reads: CHANNELS.TOTAL,
+                percent: new StatTable('', [TalentValues.A4Energy]),
+                statCap: new ValueTable([TalentValues.A4EnergyMax]),
             }),
             condition: new ConditionAscensionChar({ascension: 4}),
         }),
@@ -293,6 +309,9 @@ export const Dori = new DbObjectChar({
             category: 'skill',
             name: 'dori_sprinkling_weight',
             partyHeal: 1,
+            // C6 heal: 4% of Max HP (game: Avatar_Dori_Constellation_6,
+            // HealHP_OnHittingOthers, talent paramList 0.04). A heal reads
+            // the total and needs nothing; no ability writes extra HP.
             multipliers: [
                 new FeatureMultiplier({
                     scaling: 'hp*',
@@ -316,6 +335,9 @@ export const Dori = new DbObjectChar({
             category: 'burst',
             name: 'heal_dot',
             partyHeal: 1,
+            // Burst heal scales on Max HP (game: abilitySpecials HealHP
+            // params). A heal reads the total and needs nothing; no ability
+            // writes extra HP, so total == premod today.
             multipliers: [
                 new FeatureMultiplierList({
                     scaling: 'hp*',
@@ -377,8 +399,13 @@ export const Dori = new DbObjectChar({
                 new ConditionBoolean({
                     name: 'dori_discretionary_supplement_1',
                     serializeId: 1,
+                    receivers: RECEIVERS.TEAM,
                     title: 'talent_name.dori_discretionary_supplement',
                     description: 'talent_descr.dori_discretionary_supplement_1',
+                    // C4 buffs are flat (game:
+                    // Dori_Constellation_4_Buff_HealedAddUp writes
+                    // Actor_HealedAddDelta, no "Extra": premod). Conditions
+                    // are always premod: default confirmed, no params.
                     stats: {
                         healing_recv: TalentValues.C4HealingRecv,
                     },
@@ -386,8 +413,13 @@ export const Dori = new DbObjectChar({
                 new ConditionBoolean({
                     name: 'dori_discretionary_supplement_2',
                     serializeId: 2,
+                    receivers: RECEIVERS.TEAM,
                     title: 'talent_name.dori_discretionary_supplement',
                     description: 'talent_descr.dori_discretionary_supplement_2',
+                    // C4 buffs are flat (game:
+                    // Dori_Constellation_4_Buff_ChargeEfficiencyUp writes
+                    // Actor_ChargeEfficiencyDelta, no "Extra": premod).
+                    // Conditions are always premod: default confirmed.
                     stats: {
                         recharge: TalentValues.C4Recharge,
                     },
@@ -425,30 +457,5 @@ export const Dori = new DbObjectChar({
             ],
         },
     ]),
-    partyData: {
-        conditions: [
-            new ConditionBoolean({
-                name: 'party.dori_discretionary_supplement_1',
-                serializeId: 1,
-                rotation: 'party',
-                title: 'talent_name.dori_discretionary_supplement',
-                description: 'talent_descr.dori_discretionary_supplement_1',
-                info: {constellation: 4},
-                stats: {
-                    healing_recv: TalentValues.C4HealingRecv,
-                },
-            }),
-            new ConditionBoolean({
-                name: 'party.dori_discretionary_supplement_2',
-                serializeId: 2,
-                rotation: 'party',
-                title: 'talent_name.dori_discretionary_supplement',
-                description: 'talent_descr.dori_discretionary_supplement_2',
-                info: {constellation: 4},
-                stats: {
-                    recharge: TalentValues.C4Recharge,
-                },
-            }),
-        ],
-    },
+    retiredParty: [[1, 'checkbox'], [2, 'checkbox']],
 });

@@ -190,6 +190,15 @@ export class Dropdown extends React.Component {
         }
 
         if (this.optionsRef && this.state.opened) {
+            let bounds = null;
+            if (this.props.portal) {
+                // The width first: options that wrap (a feature dropdown) are measured at it.
+                bounds = this.currentRef.getBoundingClientRect();
+                const width = Math.max(190, bounds.width);
+                Object.assign(this.optionsRef.style, {width: width + 'px',
+                    left: Math.max(6, Math.min(bounds.left, window.innerWidth - width - 6)) + 'px'});
+            }
+
             let itemsHeight = this.getItemsHeight();
             let maxHeight = this.state.maxHeight || this.props.height || MAX_HEIGHT;
             let height = Math.min(itemsHeight, maxHeight) + 30;
@@ -202,12 +211,9 @@ export class Dropdown extends React.Component {
                 this.optionsRef.classList.remove('up');
             }
 
-            if (this.props.portal) {
-                const bounds = this.currentRef.getBoundingClientRect();
-                const width = Math.max(190, bounds.width);
+            if (bounds) {
                 const up = bounds.bottom + height > window.innerHeight && bounds.top > height;
-                Object.assign(this.optionsRef.style, {width: width + 'px',
-                    left: Math.max(6, Math.min(bounds.left, window.innerWidth - width - 6)) + 'px',
+                Object.assign(this.optionsRef.style, {
                     top: up ? 'auto' : bounds.bottom + 2 + 'px',
                     bottom: up ? window.innerHeight - bounds.top + 2 + 'px' : 'auto'});
             }
@@ -276,7 +282,7 @@ export class Dropdown extends React.Component {
         }
 
         const optionsNode = <div ref={obj => {this.optionsRef = obj;}}
-            className={'dropdown-options' + (this.props.portal ? ' dropdown-portal ' + (this.props.portalClassName || '') : '')}>
+            className={'dropdown-options' + (this.props.portal ? ' dropdown-portal ' + (isFeatureDropdown ? 'feature-dropdown ' : '') + (this.props.portalClassName || '') : '')}>
             <SimpleBar ref={obj => {this.bar = obj;}}
                 style={{maxHeight: this.state.maxHeight || this.props.height || 350}} autoHide={true}>
                 {options}

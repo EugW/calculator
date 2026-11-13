@@ -193,6 +193,7 @@ export class ArtifactStoragePool extends React.Component {
                         items={this.itemsFiltered}
                         highlightStat={this.props.sortByStat}
                         equippedHashes={this.props.equippedHashes}
+                        teammateArtifacts={this.props.teammateArtifacts}
                         savedHashes={this.props.savedHashes}
                         onClick={this.props.onArtifactClick}
                         onEdit={this.props.onArtifactEdit}

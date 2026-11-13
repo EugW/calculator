@@ -1,5 +1,7 @@
 import { ArtifactSet } from "../../../classes/ArtifactSet";
 import { ConditionStatic } from "../../../classes/Condition/Static";
+import { artifactSetTables } from "../../generated/ArtifactSetTables";
+import { percent } from "../../Params";
 
 export const ResolutionofSojourner = new ArtifactSet({
     serializeId: 19,
@@ -18,7 +20,7 @@ export const ResolutionofSojourner = new ArtifactSet({
                     title: 'set_bonus.resolution_of_sojourner_2',
                     description: 'set_descr.resolution_of_sojourner_2',
                     stats: {
-                        atk_percent: 18,
+                        atk_percent: artifactSetTables.ResolutionofSojourner.pc2.atk_percent,
                     },
                 })
             ],
@@ -30,7 +32,7 @@ export const ResolutionofSojourner = new ArtifactSet({
                     title: 'set_bonus.resolution_of_sojourner_4',
                     description: 'set_descr.resolution_of_sojourner_4',
                     stats: {
-                        crit_rate_charged: 30,
+                        crit_rate_charged: percent(artifactSetTables.ResolutionofSojourner.pc4.p1),
                     },
                 })
             ],

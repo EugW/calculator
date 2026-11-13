@@ -3,6 +3,8 @@ import { ConditionStaticRefine } from "../../../classes/Condition/Static/Refine"
 import { DbObjectWeapon } from "../../../classes/DbObject/Weapon";
 import { StatTable } from "../../../classes/StatTable";
 import { weaponStatTables } from "../../generated/WeaponStatTables";
+import { weaponPassiveTables } from "../../generated/WeaponPassiveTables";
+import { percent } from "../../Params";
 
 export const AmosBow = new DbObjectWeapon({
     name: 'amos_bow',
@@ -17,8 +19,8 @@ export const AmosBow = new DbObjectWeapon({
             title: 'talent_name.weapon_amos_bow',
             description: 'talent_descr.weapon_amos_bow_passive',
             stats: [
-                new StatTable('dmg_normal', [12, 15, 18, 21, 24]),
-                new StatTable('dmg_charged', [12, 15, 18, 21, 24]),
+                new StatTable('dmg_normal', percent(weaponPassiveTables.AmosBow.p1)),
+                new StatTable('dmg_charged', percent(weaponPassiveTables.AmosBow.p1)),
             ],
         }),
         new ConditionStacks({
@@ -29,8 +31,8 @@ export const AmosBow = new DbObjectWeapon({
             maxStacks: 5,
             levelSetting: 'weapon_refine',
             stats: [
-                new StatTable('dmg_normal', [8, 10, 12, 14, 16]),
-                new StatTable('dmg_charged', [8, 10, 12, 14, 16]),
+                new StatTable('dmg_normal', percent(weaponPassiveTables.AmosBow.p2)),
+                new StatTable('dmg_charged', percent(weaponPassiveTables.AmosBow.p2)),
             ],
         })
     ],

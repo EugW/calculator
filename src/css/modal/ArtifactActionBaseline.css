@@ -1,0 +1,11 @@
+.artifact-baseline-modal.dialog { z-index: 1511; }
+.artifact-baseline-modal.dialog-back { z-index: 1510; }
+.artifact-baseline-modal .dialog-content { max-height: calc(100dvh - 150px); overflow-y: auto; }
+.baseline-values { display: flex; flex-wrap: wrap; gap: 12px 24px; margin: 16px 0; }
+.baseline-changes { max-height: 40dvh; overflow: auto; margin-bottom: 12px; }
+.baseline-changes table { width: 100%; border-collapse: collapse; text-align: left; }
+.baseline-changes th, .baseline-changes td { padding: 8px; border-bottom: 1px solid #777; }
+.baseline-piece { display: flex; flex-direction: column; gap: 8px; }
+.baseline-piece .artifact-list-box { width: 100%; min-width: 180px; }
+.baseline-exclusions { margin-bottom: 12px; color: #f4d399; }
+.artifact-baseline-modal .controls-bar { margin-top: 16px; }

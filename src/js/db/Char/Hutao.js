@@ -17,12 +17,15 @@ import { FeatureHeal } from "../../classes/Feature2/Heal";
 import { FeatureMultiplier } from "../../classes/Feature2/Multiplier";
 import { FeatureMultiplierTarget } from "../../classes/Feature2/Multiplier/Target";
 import { FeaturePostEffectValue } from "../../classes/Feature2/PostEffectValue";
+import { CHANNELS } from "../../classes/PostEffect/Channels";
 import { PostEffectStats } from "../../classes/PostEffect/Stats";
 import { PostEffectStatsHP } from "../../classes/PostEffect/Stats/HP";
+import { RECEIVERS } from "../../classes/Team/Receivers";
 import { StatTable } from "../../classes/StatTable";
 import { ValueTable } from "../../classes/ValueTable";
 import { charTables } from "../generated/CharTables";
 import { charTalentTables } from "../generated/CharTalentTables";
+import { percent } from "../Params";
 
 const Talents = new DbObjectTalents({
     attack: {
@@ -134,15 +137,26 @@ const Talents = new DbObjectTalents({
 
 const TalentValues = {
     SkillMaxBonus: 400,
-    A1CritRate: 12,
-    A4PyroDmg: 33,
-    C2SkillHpBonus: 10,
-    C4CritRate: 12,
-    C6CritRate: 100,
-    C6Resistance: 200,
+    A1CritRate: percent(charTalentTables.Hutao.a1.p1),
+    A4PyroDmg: percent(charTalentTables.Hutao.a4.p2),
+    C2SkillHpBonus: percent(charTalentTables.Hutao.c2.p1),
+    C4CritRate: percent(charTalentTables.Hutao.c4.p1),
+    C6CritRate: percent(charTalentTables.Hutao.c6.p4),
+    C6Resistance: percent(charTalentTables.Hutao.c6.p3),
 };
 
 const atkBuffPost = new PostEffectStatsHP({
+    // Game data: Avatar_Hutao_CrimsonPlum onAbilityStart sets
+    // _ABILITY_Hutao_CrimsonPlum_AttackDelta as [FIGHT_PROP_MAX_HP,
+    // CrimsonPlum_MAXHP_To_AttackDelta_Factor, MUL] (total), capped by
+    // [FIGHT_PROP_BASE_ATTACK, CrimsonPlum_MAX_AttackDelta_Factor, MUL]
+    // (base); UNIQUE_Hutao_CrimsonPlum_Main_Handler writes
+    // Actor_AttackExtraDelta (extra, default). FIGHT_PROP_MAX_HP is the
+    // total marker (md/buff_chains.md), as for Baizhu/Candace/Chevreuse/
+    // Columbina; same number as premod while no ability writes extra HP.
+    // GO reads input.premod.hp here (supporting evidence only; the data
+    // says total). KQM Hu Tao has no EM/ATK/HP/ER buff-chain test.
+    reads: CHANNELS.TOTAL,
     percent: Talents.getMulti({
         name: 'atk',
         from: 'skill.hutao_atk_bonus',
@@ -153,6 +167,8 @@ const atkBuffPost = new PostEffectStatsHP({
         new ConditionBoolean({name: 'hutao_paramita_papilio'}),
     ],
     statCapPost: new PostEffectStats({
+        // Cap reads FIGHT_PROP_BASE_ATTACK (base); from 'atk_base' needs
+        // nothing.
         from: 'atk_base',
         percent: new StatTable('atk_percent', [TalentValues.SkillMaxBonus]),
     }),
@@ -169,6 +185,16 @@ export const Hutao = new DbObjectChar({
     origin: 'liyue',
     talents: Talents,
     statTable: charTables.Hutao,
+    // Talent hits (normal/charged/plunge/skill Blood Blossom/burst) read the
+    // total by construction: the game uses plain damagePercentage with no
+    // FIGHT_PROP read (Avatar_Hutao_CrimsonPlum, Avatar_Hutao_VermilionBite);
+    // scaling 'atk*'/'hp*' in a FeatureMultiplier reads the total and needs
+    // nothing. The burst heals (FeatureHeal scaling 'hp*') read the total by
+    // construction; the game heals with HealHP amountByCasterMaxHPRatio
+    // VermilionBite_HPRestore(/LowHP) in
+    // UNIQUE_Hutao_VermilionBite_LifeRestore_Count. GO uses dmgNode('atk', ...)
+    // and customHealNode(prod(input.total.hp, ...)) (total) for all of these.
+    // KQM Hu Tao has no buff-chain test.
     features: [
         new FeatureDamageNormal({
             name: 'normal_hit_1',
@@ -305,11 +331,15 @@ export const Hutao = new DbObjectChar({
                 }),
             ],
         }),
+        // Display of the skill ATK post-effect above; it follows that
+        // post-effect's channels and needs nothing of its own.
         new FeaturePostEffectValue({
             category: 'skill',
             name: 'hutao_atk_bonus',
             postEffect: atkBuffPost,
         }),
+        // Display of the cap point (HP at which 400% base ATK binds); the
+        // post-effect reads atk_base only and needs nothing.
         new FeaturePostEffectValue({
             category: 'skill',
             name: 'hutao_max_hp_bonus',
@@ -369,6 +399,13 @@ export const Hutao = new DbObjectChar({
     postEffects: [
         atkBuffPost,
     ],
+    // A1 (Flutter By) and A4 (Sanguine Rouge) are flat toggles: the game
+    // writes Actor_CriticalDelta (UNIQUE_Hutao_CrimsonPlum_PermanentSkill_
+    // CriticalUp, gated by Avatar_Hutao_PermanentSkill_1) and
+    // Actor_FireAddHurtDelta (Hutao_PermanentSkill_2_FireAddHurtUp, gated by
+    // the HP-ratio threshold Hutao_PermanentSkill_2_HPRatio) from flat
+    // specials, with no stat read. Flat conditions are always premod and
+    // need nothing.
     conditions: [
         new ConditionConstellation({
             constellation: 3,
@@ -389,10 +426,27 @@ export const Hutao = new DbObjectChar({
             },
         }),
         new ConditionStatic({
+            isHidden: true,
             title: 'talent_name.hu_tao_flutter_by',
             description: 'talent_descr.hu_tao_flutter_by',
             stats: {
                 text_percent: TalentValues.A1CritRate,
+            },
+            info: {ascension: 1},
+            subConditions: [
+                new ConditionAscensionChar({ascension: 1}),
+            ],
+        }),
+        // When Paramita Papilio ends, all allies except Hu Tao gain CRIT.
+        new ConditionBoolean({
+            name: 'hu_tao_flutter_by',
+            serializeId: 4,
+            receivers: RECEIVERS.OTHERS,
+            title: 'talent_name.hu_tao_flutter_by',
+            description: 'talent_descr.hu_tao_flutter_by',
+            stats: {
+                text_percent: TalentValues.A1CritRate,
+                crit_rate: TalentValues.A1CritRate,
             },
             info: {ascension: 1},
             subConditions: [
@@ -414,6 +468,13 @@ export const Hutao = new DbObjectChar({
         }),
     ],
     multipliers: [
+        // C2 Ominous Rainfall: Blood Blossom DMG +10% Max HP. Game data:
+        // UNIQUE_Hutao_CrimsonPlum_Debuff onThinkInterval attackProperty
+        // damageExtra [FIGHT_PROP_MAX_HP,
+        // CrimsonPlum_Debuff_Constellation_LifeBonus_Factor, MUL] (total;
+        // Talent Hutao_Constellation_2 paramList [0.1]). A hit component with
+        // scaling 'hp*' reads the total by construction and needs nothing.
+        // GO computes prod(input.total.hp, ...) (total) for it.
         new FeatureMultiplier({
             scaling: 'hp*',
             source: 'constellation2',
@@ -426,6 +487,8 @@ export const Hutao = new DbObjectChar({
     ],
     constellation: new DbObjectConstellation([
         {
+            // C1 Crimson Bouquet (charged attacks cost no stamina in Paramita
+            // Papilio): no stat read, needs nothing.
             conditions: [
                 new ConditionStatic({
                     title: 'talent_name.hu_tao_crimson_bouquet',
@@ -438,6 +501,12 @@ export const Hutao = new DbObjectChar({
         },
         {
             conditions: [
+                // C2 display only (10% Max HP Blood Blossom): the real bonus
+                // is the multipliers entry above (game: damageExtra x
+                // FIGHT_PROP_MAX_HP, total). text_percent has no extra lane
+                // and needs nothing. C2 also lets the burst apply Blood
+                // Blossom (CrimsonPlum_Constellation_LifeBonus_Handler):
+                // no stat read.
                 new ConditionStatic({
                     title: 'talent_name.hu_tao_ominous_rainfall',
                     description: 'talent_descr.hu_tao_ominous_rainfall',
@@ -450,11 +519,33 @@ export const Hutao = new DbObjectChar({
         {},
         {
             conditions: [
+                // C4 Garden of Eternal Rest: defeating a Blood-Blossomed enemy
+                // grants 12% CRIT to nearby allies (Hu Tao excluded). Game
+                // data: UNIQUE_Hutao_CrimsonPlum_Debuff_Constellation_2 writes
+                // Actor_CriticalDelta from the flat
+                // CrimsonPlum_Debuff_Constellation_Kill_Critical_Delta
+                // (Talent Hutao_Constellation_4 paramList [0.12, 15]), gated
+                // by Avatar_Hutao_Constellation_Kill. Flat conditions are
+                // always premod and need nothing.
                 new ConditionStatic({
+                    isHidden: true,
                     title: 'talent_name.hu_tao_garden_of_eternal_rest',
                     description: 'talent_descr.hu_tao_garden_of_eternal_rest',
                     stats: {
                         text_percent: TalentValues.C4CritRate,
+                    },
+                }),
+                // Defeating a Blood-Blossomed enemy raises nearby allies'
+                // CRIT, Hu Tao excluded.
+                new ConditionBoolean({
+                    name: 'hu_tao_garden_of_eternal_rest',
+                    serializeId: 5,
+                    receivers: RECEIVERS.OTHERS,
+                    title: 'talent_name.hu_tao_garden_of_eternal_rest',
+                    description: 'talent_descr.hu_tao_garden_of_eternal_rest',
+                    stats: {
+                        text_percent: TalentValues.C4CritRate,
+                        crit_rate: TalentValues.C4CritRate,
                     },
                 }),
             ],
@@ -470,6 +561,14 @@ export const Hutao = new DbObjectChar({
         },
         {
             conditions: [
+                // C6 Butterfly's Embrace: flat +100% CRIT and +200% all RES at
+                // low HP. Game data: Avatar_Hutao_Constellation_Limbo_Trigger
+                // (UNIQUE_Hutao_Constellation_Limbo_Trigger_Handler) writes
+                // Actor_CriticalDelta and Actor_*SubHurtDelta from flat
+                // specials (Talent Hutao_Constellation_6 paramList
+                // [0.25, 10, 2, 1]), triggered by the HP-ratio threshold
+                // Hutao_Constellation_Limbo_HPRatio. Flat conditions are
+                // always premod and need nothing.
                 new ConditionBoolean({
                     name: 'hu_tao_butterflys_embrace',
                     serializeId: 3,
@@ -490,33 +589,6 @@ export const Hutao = new DbObjectChar({
             ],
         },
     ]),
-    partyData: {
-        conditions: [
-            new ConditionBoolean({
-                name: 'party.hu_tao_flutter_by',
-                serializeId: 1,
-                rotation: 'party',
-                title: 'talent_name.hu_tao_flutter_by',
-                description: 'talent_descr.hu_tao_flutter_by',
-                info: {ascension: 1},
-                stats: {
-                    text_percent: TalentValues.A1CritRate,
-                    crit_rate: TalentValues.A1CritRate,
-                },
-            }),
-            new ConditionBoolean({
-                name: 'party.hu_tao_garden_of_eternal_rest',
-                serializeId: 2,
-                rotation: 'party',
-                title: 'talent_name.hu_tao_garden_of_eternal_rest',
-                description: 'talent_descr.hu_tao_garden_of_eternal_rest',
-                info: {constellation: 4},
-                stats: {
-                    text_percent: TalentValues.C4CritRate,
-                    crit_rate: TalentValues.C4CritRate,
-                },
-            }),
-        ],
-    },
+    retiredParty: [[1, 'checkbox'], [2, 'checkbox']],
 });
 

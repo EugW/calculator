@@ -1,26 +1,15 @@
 import { Stats } from "../Stats";
 import { Condition } from "../Condition";
+import { partyView } from "../Team/Party";
 
 export class ConditionCalcMoonsign extends Condition {
     getData(settings) {
         let moonsign_count = 0;
 
         if (this.isActive(settings) && settings && settings.char_id) {
-            // Check current character
-            let mainChar = DB.Chars.getById(settings.char_id);
-            if (mainChar && mainChar.getOrigin() === 'nodkrai') {
-                ++moonsign_count;
-            }
-
-            // Check party characters
-            for (const name of ['party_char_1', 'party_char_2', 'party_char_3']) {
-                const char_id = settings[name] || '';
-                if (!char_id) continue;
-
-                let char = DB.Chars.getById(char_id);
-                if (!char) continue;
-
-                if (char.getOrigin() === 'nodkrai') {
+            let view = partyView(settings);
+            for (const member of [view.self, ...view.others]) {
+                if (member.origin === 'nodkrai') {
                     ++moonsign_count;
                 }
             }

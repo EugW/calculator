@@ -1,5 +1,6 @@
 import { Artifact } from "../Artifact";
 import { getMainStatCombinations } from "../Generator/Artifacts";
+import { serializeWorkerMember } from "../Team";
 import { WorkerFactory } from "../WorkerFactory";
 
 const MAX_WORKERS = 1;
@@ -58,7 +59,7 @@ export class WorkerFactoryArtifactsGenerator extends WorkerFactory {
             parts.push(part);
         }
 
-        data.build = data.build.serialize();
+        data.build = serializeWorkerMember(data.build);
 
         let result = [];
         for (let part of parts) {

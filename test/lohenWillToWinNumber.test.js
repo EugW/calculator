@@ -1,5 +1,10 @@
 import { BuildData } from "../src/js/classes/Build/Data";
 import { Lohen } from "../src/js/db/Char/Lohen";
+import { Team } from "../src/js/classes/Team";
+import { DB } from "../src/js/db/DB";
+import { makeBuild } from "./support/team";
+
+global.DB = DB;
 
 function getWillToWinCondition() {
     return Lohen.getConditions().find((condition) => {
@@ -26,7 +31,6 @@ function getFeatureDamage(name, settings = {}) {
     const data = new BuildData({
         char_level: 90,
         enemy_level: 90,
-        enemy_res_cryo: 0,
         char_constellation: 1,
         char_skill_elemental: 13,
         char_skill_burst: 13,
@@ -59,43 +63,27 @@ test("Lohen High Spirits grants a separate Elemental Skill level bonus", () => {
 });
 
 test("Lohen Unhealing Thorn requires at least half of current Will to Win max", () => {
-    global.DB = {
-        Chars: {
-            getById(id) {
-                return id === 1 ? {name: "durin"} : null;
-            },
-        },
-    };
+    const lohen = makeBuild('Lohen');
+    const durin = makeBuild('Durin');
+    durin.setCharSettings({durin_witch_homework: true});
+    const team = Team.fromMember(lohen);
+    team.setMember(1, durin);
+    const condition = getCondition('lohen_unhealing_thorn');
 
-    const condition = getCondition("lohen_unhealing_thorn");
-    const baseSettings = {
-        char_name: "lohen",
-        lohen_unhealing_thorn: true,
-        lohen_witch_homework: true,
-        party_char_1: 1,
-        "party.durin_witch_homework": true,
-    };
+    for (const [constellation, willToWin, expected] of [
+        [0, 49, false], [0, 50, true], [1, 149, false], [1, 150, true],
+    ]) {
+        lohen.setCharLevels({level: 90, ascension: 6, constellation});
+        lohen.setCharSettings({
+            lohen_unhealing_thorn: true,
+            lohen_witch_homework: true,
+            lohen_will_to_win: willToWin,
+        });
+        expect(condition.isActive(lohen.getBuildData().settings)).toBe(expected);
+    }
+    durin.setCharSettings({durin_witch_homework: false});
+    expect(condition.isActive(lohen.getBuildData().settings)).toBe(false);
 
-    expect(condition.isActive({
-        ...baseSettings,
-        char_constellation: 0,
-        lohen_will_to_win: 49,
-    })).toBe(false);
-    expect(condition.isActive({
-        ...baseSettings,
-        char_constellation: 0,
-        lohen_will_to_win: 50,
-    })).toBe(true);
-    expect(condition.isActive({
-        ...baseSettings,
-        char_constellation: 1,
-        lohen_will_to_win: 149,
-    })).toBe(false);
-    expect(condition.isActive({
-        ...baseSettings,
-        char_constellation: 1,
-        lohen_will_to_win: 150,
-    })).toBe(true);
 });
 
 test("Lohen Evilsbane Blade is uncategorized Cryo damage", () => {

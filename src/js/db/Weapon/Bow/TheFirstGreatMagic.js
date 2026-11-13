@@ -5,14 +5,16 @@ import { ConditionStaticRefineFirstMagic } from "../../../classes/Condition/Stat
 import { DbObjectWeapon } from "../../../classes/DbObject/Weapon";
 import { StatTable } from "../../../classes/StatTable";
 import { weaponStatTables } from "../../generated/WeaponStatTables";
+import { weaponPassiveTables } from "../../generated/WeaponPassiveTables";
+import { percent } from "../../Params";
 
-let atk_table_1 = [16, 20, 24, 28, 32];
-let atk_table_2 = [32, 40, 48, 56, 64];
-let atk_table_3 = [48, 60, 72, 84, 96];
+let atk_table_1 = percent(weaponPassiveTables.TheFirstGreatMagic.p2);
+let atk_table_2 = percent(weaponPassiveTables.TheFirstGreatMagic.p3);
+let atk_table_3 = percent(weaponPassiveTables.TheFirstGreatMagic.p4);
 
-let ms_table_1 = [4, 6, 8, 10, 12];
-let ms_table_2 = [7, 9, 11, 13, 15];
-let ms_table_3 = [10, 12, 14, 16, 18];
+let ms_table_1 = percent(weaponPassiveTables.TheFirstGreatMagic.p5);
+let ms_table_2 = percent(weaponPassiveTables.TheFirstGreatMagic.p6);
+let ms_table_3 = percent(weaponPassiveTables.TheFirstGreatMagic.p7);
 
 export const TheFirstGreatMagic = new DbObjectWeapon({
     name: 'the_first_great_magic',
@@ -28,7 +30,7 @@ export const TheFirstGreatMagic = new DbObjectWeapon({
             title: 'talent_name.weapon_the_first_great_magic_1',
             description: 'talent_descr.weapon_the_first_great_magic_1',
             stats: [
-                new StatTable('dmg_charged', [16, 20, 24, 28, 32]),
+                new StatTable('dmg_charged', percent(weaponPassiveTables.TheFirstGreatMagic.p1)),
             ],
         }),
         new ConditionStaticRefineFirstMagic({

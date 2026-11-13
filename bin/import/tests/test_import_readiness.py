@@ -17,8 +17,12 @@ if str(LEGACY_IMPORT_DIR) not in sys.path:
 
 import source_config
 from char_common import (
+    format_param,
     normalize_proud_group,
     normalize_proud_param_description,
+    passive_block_keys,
+    talent_config_links,
+    trim_params,
 )
 
 
@@ -179,6 +183,161 @@ class ProudSkillTests(unittest.TestCase):
             normalize_proud_param_description(14339, source),
             'Elemental Burst Spirit Blade DMG/Stellar Spirit Blade DMG|'
             '{param1:F1P}/{param2:F1P}',
+        )
+
+
+class PassiveParamTests(unittest.TestCase):
+    """Raw passive and constellation params of CharTalentTables.js."""
+
+    def test_params_print_as_the_shortest_matching_decimal(self):
+        # The Excel tables print 32-bit floats as doubles.
+        self.assertEqual(format_param(0.004000000189989805), '0.004')
+        self.assertEqual(format_param(1.100000023841858), '1.1')
+        self.assertEqual(format_param(-0.15000000596046448), '-0.15')
+        self.assertEqual(format_param(2800), '2800')
+        self.assertEqual(format_param(30000.0), '30000')
+        # '%.4f' would round this ratio per point of ATK to 0.
+        self.assertEqual(format_param(3.5000000934815034e-05), '0.000035')
+        # A dump that prints the short decimal itself gives the same text.
+        self.assertEqual(format_param(3.5e-05), '0.000035')
+        self.assertEqual(format_param(5e-06), '0.000005')
+        self.assertEqual(format_param(0.15), '0.15')
+
+    def test_only_the_zero_tail_is_trimmed(self):
+        self.assertEqual(trim_params([0.5, 0, 0.006, 0, 0]), [0.5, 0, 0.006])
+        self.assertEqual(trim_params([0, 0, 0]), [])
+
+    def test_passive_blocks_are_keyed_by_how_they_unlock(self):
+        depot = {
+            'inherentProudSkillOpens': [
+                {'proudSkillGroupId': 9521, 'needAvatarPromoteLevel': 1},
+                {'proudSkillGroupId': 9522, 'needAvatarPromoteLevel': 4},
+                {'proudSkillGroupId': 9523},
+                {'proudSkillGroupId': 9524},
+                {},
+            ],
+            'specialProudSkillOpens': [{'proudSkillGroupId': 9551}, {}],
+        }
+        self.assertEqual(
+            passive_block_keys(depot),
+            [('a1', 9521), ('a4', 9522), ('a0', 9523), ('a0_2', 9524), ('sp', 9551)],
+        )
+
+    def test_special_passives_are_read_under_an_obfuscated_name(self):
+        # The 7.2 release dump: the list and its fields carry other names.
+        depot = {
+            'id': 3801,
+            'inherentProudSkillOpens': [
+                {'proudSkillGroupId': 3821, 'needAvatarPromoteLevel': 1},
+                {},
+            ],
+            'skills': [10386, 10387, 0, 0],
+            'LHFOOPMJHBN': [
+                {
+                    'proudSkillGroupId': 3851,
+                    'FINHFCNILNN': 'SPECIAL_PROUD_SKILL_OPEN_CONDITION_TYPE_QUEST_FINISH',
+                    'HGNPCIHMABD': [1000502],
+                },
+                {},
+            ],
+        }
+        self.assertEqual(passive_block_keys(depot), [('a1', 3821), ('sp', 3851)])
+
+        # A depot without special passives has the list empty.
+        depot['LHFOOPMJHBN'] = [{}, {}]
+        self.assertEqual(passive_block_keys(depot), [('a1', 3821)])
+
+        # Two candidate lists cannot be told apart.
+        depot['LHFOOPMJHBN'] = [{'proudSkillGroupId': 3851}]
+        depot['ABCDEFGHIJK'] = [{'proudSkillGroupId': 3852}]
+        with self.assertRaisesRegex(ValueError, '3801'):
+            passive_block_keys(depot)
+
+    def test_a_zero_param_ratio_is_the_default(self):
+        entries = [
+            {
+                '$type': 'ModifyAbility',
+                'abilityName': 'Avatar_X_Skill',
+                'paramDelta': '%1',
+                'paramRatio': 0,
+                'paramSpecial': 'Rate',
+            },
+        ]
+        self.assertEqual(
+            talent_config_links(entries),
+            (['Avatar_X_Skill'], {1: [('Avatar_X_Skill', 'Rate', '')]}),
+        )
+
+    def test_talent_config_names_the_parameter_each_position_feeds(self):
+        entries = [
+            {'$type': 'AddAbility', 'abilityName': 'Avatar_X_Talent_6'},
+            {
+                '$type': 'ModifyAbility',
+                'abilityName': 'Avatar_X_Talent_6',
+                'paramDelta': '%1',
+                'paramSpecial': 'Rate',
+            },
+            # The same position twice does not repeat.
+            {
+                '$type': 'ModifyAbility',
+                'abilityName': 'Avatar_X_Talent_6',
+                'paramDelta': '%1',
+                'paramSpecial': 'Rate',
+            },
+            {
+                '$type': 'ModifyAbility',
+                'abilityName': 'Avatar_X_Skill',
+                'paramDelta': '-%2',
+                'paramSpecial': 'cdDelta',
+            },
+            {
+                '$type': 'ModifyAbility',
+                'abilityName': 'Avatar_X_Skill',
+                'paramDelta': '%3',
+                'paramRatio': -0.9900000095367432,
+                'paramSpecial': 'MaxCharge',
+            },
+            # A constant delta takes no position.
+            {
+                '$type': 'ModifyAbility',
+                'abilityName': 'Avatar_X_Skill',
+                'paramDelta': 2,
+                'paramSpecial': 'MaxCount',
+            },
+            {'$type': 'AddTalentExtraLevel', 'talentIndex': 2, 'extraLevel': 3},
+        ]
+        (abilities, targets) = talent_config_links(entries)
+        self.assertEqual(abilities, ['Avatar_X_Talent_6', 'Avatar_X_Skill'])
+        self.assertEqual(
+            targets,
+            {
+                1: [('Avatar_X_Talent_6', 'Rate', '')],
+                2: [('Avatar_X_Skill', 'cdDelta', 'subtracted')],
+                3: [('Avatar_X_Skill', 'MaxCharge', 'paramRatio -0.99')],
+            },
+        )
+
+    def test_obfuscated_talent_config_fields_are_read(self):
+        entries = [
+            {
+                '$type': 'GMOELNAHCOH',
+                'IJFENBIJGLJ': '%2',
+                'LDACNDBDKBA': 'NormalAttack_02_DamagePercentage',
+                'NCCKLDFFDOH': 'Avatar_PlayerBoy_NormalAttack_DamageHandler',
+            },
+        ]
+        self.assertEqual(
+            talent_config_links(entries),
+            (
+                ['Avatar_PlayerBoy_NormalAttack_DamageHandler'],
+                {
+                    2: [(
+                        'Avatar_PlayerBoy_NormalAttack_DamageHandler',
+                        'NormalAttack_02_DamagePercentage',
+                        '',
+                    )],
+                },
+            ),
         )
 
 

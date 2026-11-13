@@ -329,7 +329,7 @@ export function isPercent(stat) {
         return true;
     }
 
-    if (stat.match(/^(bond_of_life|stamina|recovery|duration|atk_speed|move_speed|healing|recharge|crit_|dmg_|enemy_|res_|.*bonus_|.*shield|.*_multi)/)) {
+    if (stat.match(/^(bond_of_life|stamina|recovery|duration|atk_speed|move_speed|healing|recharge|crit_|dmg_|enemy_|def_ignore|res_|.*bonus_|.*shield|.*_multi)/)) {
         return true;
     }
 

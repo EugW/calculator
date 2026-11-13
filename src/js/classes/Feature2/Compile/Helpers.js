@@ -1,6 +1,7 @@
 import { REAL_TOTAL } from "../../../db/Constants";
 import { isPercent, Stats } from "../../Stats";
-import { CDivide, CMin, CMulti, CSum, CVar } from "./Types/Block";
+import { EXTRA_SUFFIX } from "../../PostEffect/Channels";
+import { CDivide, CMin, CMulti, CSubtract, CSum, CVar } from "./Types/Block";
 import { CConst, CStat, CStatTotal, CVarValue } from "./Types/Item";
 
 /**
@@ -9,6 +10,10 @@ import { CConst, CStat, CStatTotal, CVarValue } from "./Types/Item";
  * @returns {CStat}
  */
 export function makeStatItem(stat, stats) {
+    if (stat.endsWith('~')) {
+        return makeStatPremodItem(stat.slice(0, -1).replace('*', ''), stats);
+    }
+
     if (stat.indexOf('*') > 0) {
         return makeStatTotalItem(stat.replace('*', ''), stats);
     }
@@ -39,6 +44,31 @@ export function makeStatTotalItem(stat, stats) {
         percentValue: stats.get(stat + '_percent'),
         flatValue: stats.get(stat),
     });
+}
+
+/**
+ * The premod total of a stat: its total without the extra part that total
+ * writes left in its extra lanes (PostEffect/Channels). Written `stat~` where
+ * a stat is named by a string (`scaling: 'recharge~'`).
+ *
+ * @param {string} stat such as 'mastery' or 'atk'
+ * @param {Stats} stats
+ * @returns {CBlock}
+ */
+export function makeStatPremodItem(stat, stats) {
+    let extra = makeStatItem(stat + EXTRA_SUFFIX, stats);
+    if (REAL_TOTAL.includes(stat)) {
+        // base × (1 + percent) + flat, less base × extra percent + extra flat
+        extra = new CSum([
+            new CMulti([
+                makeStatItem(stat + '_base', stats),
+                makeStatItem(stat + '_percent' + EXTRA_SUFFIX, stats),
+            ]),
+            extra,
+        ]);
+    }
+
+    return new CSubtract([makeStatTotalItem(stat, stats), extra], {comment: stat + ' premod'});
 }
 
 /**

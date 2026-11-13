@@ -3,9 +3,7 @@ import { ConditionAscensionChar } from "../../classes/Condition/Ascension/Char";
 import { ConditionBoolean } from "../../classes/Condition/Boolean";
 import { ConditionBooleanLevels } from "../../classes/Condition/Boolean/Levels";
 import { ConditionConstellation } from "../../classes/Condition/Constellation";
-import { ConditionNumber } from "../../classes/Condition/Number";
 import { ConditionNumberShenhe } from "../../classes/Condition/Number/Shenhe";
-import { ConditionNumberTalent } from "../../classes/Condition/Number/Talent";
 import { ConditionStatic } from "../../classes/Condition/Static";
 import { DbObjectChar } from "../../classes/DbObject/Char";
 import { DbObjectConstellation } from "../../classes/DbObject/Constellation";
@@ -20,11 +18,13 @@ import { FeatureDamageSkill } from "../../classes/Feature2/Damage/Skill";
 import { FeatureMultiplier } from "../../classes/Feature2/Multiplier";
 import { FeatureMultiplierTarget } from "../../classes/Feature2/Multiplier/Target";
 import { FeaturePostEffectValue } from "../../classes/Feature2/PostEffectValue";
-import { PostEffectStats } from "../../classes/PostEffect/Stats";
 import { PostEffectStatsAtk } from "../../classes/PostEffect/Stats/Atk";
 import { StatTable } from "../../classes/StatTable";
+import { RECEIVERS } from "../../classes/Team/Receivers";
 import { charTables } from "../generated/CharTables";
 import { charTalentTables } from "../generated/CharTalentTables";
+import { percent } from "../Params";
+import { CHANNELS } from "../../classes/PostEffect/Channels";
 
 const Talents = new DbObjectTalents({
     attack: {
@@ -138,6 +138,12 @@ const Talents = new DbObjectTalents({
         ],
     },
 });
+
+const A1CryoDmg = percent(charTalentTables.Shenhe.a1.p1);
+const A4PressDmg = percent(charTalentTables.Shenhe.a4.p1);
+const A4HoldDmg = percent(charTalentTables.Shenhe.a4.p3);
+const C4DmgBonus = percent(charTalentTables.Shenhe.c4.p1);
+const C4MaxStacks = charTalentTables.Shenhe.c4.p2;
 
 export const Shenhe = new DbObjectChar({
     name: 'shenhe',
@@ -267,7 +273,14 @@ export const Shenhe = new DbObjectChar({
             category: 'skill',
             name: 'shenhe_dmg_bonus',
             postEffect: new PostEffectStatsAtk({
-                global: true,
+                // Icy Quill display value: ATK x talent ratio. Game data:
+                // Avatar_Shenhe_ElementalArt_Attack_L/H
+                // (UNIQUE_Shenhe_ElementalArt_L/H_Buff and the C6 Talent_Buff
+                // variants) size the bonus with damageExtra on
+                // FIGHT_PROP_CUR_ATTACK (total) x Attack2ExtraRatio, so the
+                // total read is declared. GO reads input.total.atk; KQM finds
+                // quills dynamic (live ATK counts), with no premod/total test.
+                reads: CHANNELS.TOTAL,
                 levelSetting: 'char_skill_elemental',
                 percent: Talents.getMulti({
                     name: '',
@@ -296,7 +309,16 @@ export const Shenhe = new DbObjectChar({
         }),
     ],
     multipliers: [
+        // Icy Quill: all nearby party members. The delivered flat DMG bonus
+        // reads Shenhe's total ATK: game data sizes it with damageExtra on
+        // FIGHT_PROP_CUR_ATTACK (total) x Attack2ExtraRatio in
+        // Avatar_Shenhe_ElementalArt_Attack_L/H (UNIQUE_Shenhe_ElementalArt_L/H_Buff
+        // and the C6 Talent_Buff variants). The default 'atk*' scaling already
+        // reads the total, so no params; GO reads input.total.atk. The write
+        // is flat base DMG (no attribute, no extra lane). KQM: quills are
+        // dynamic, with no premod/total interaction test.
         new FeatureMultiplier({
+            receivers: RECEIVERS.TEAM,
             leveling: 'char_skill_elemental',
             source: 'talent_elemental',
             values: Talents.get('skill.shenhe_dmg_bonus'),
@@ -330,6 +352,7 @@ export const Shenhe = new DbObjectChar({
         new ConditionBooleanLevels({
             name: 'shenhe_talisman_spirit',
             serializeId: 2,
+            receivers: RECEIVERS.TEAM,
             title: 'talent_name.shenhe_divine_maidens_deliverance',
             description: 'talent_descr.shenhe_talisman_spirit',
             levelSetting: 'char_skill_burst',
@@ -349,10 +372,11 @@ export const Shenhe = new DbObjectChar({
         new ConditionStatic({
             name: 'shenhe_deific_embrace',
             serializeId: 4,
+            receivers: RECEIVERS.TEAM,
             title: 'talent_name.shenhe_deific_embrace',
             description: 'talent_descr.shenhe_deific_embrace',
             stats: {
-                dmg_cryo: 15,
+                dmg_cryo: A1CryoDmg,
             },
             info: {ascension: 1},
             subConditions: [
@@ -363,11 +387,12 @@ export const Shenhe = new DbObjectChar({
         new ConditionBoolean({
             name: 'shenhe_spirit_seal_press',
             serializeId: 5,
+            receivers: RECEIVERS.TEAM,
             title: 'talent_name.shenhe_spirit_seal_press',
             description: 'talent_descr.shenhe_spirit_communion_seal_1',
             stats: {
-                dmg_skill: 15,
-                dmg_burst: 15,
+                dmg_skill: A4PressDmg,
+                dmg_burst: A4PressDmg,
             },
             info: {ascension: 4},
             subConditions: [
@@ -377,12 +402,13 @@ export const Shenhe = new DbObjectChar({
         new ConditionBoolean({
             name: 'shenhe_spirit_seal_hold',
             serializeId: 6,
+            receivers: RECEIVERS.TEAM,
             title: 'talent_name.shenhe_spirit_seal_hold',
             description: 'talent_descr.shenhe_spirit_communion_seal_2',
             stats: {
-                dmg_normal: 15,
-                dmg_charged: 15,
-                dmg_plunge: 15,
+                dmg_normal: A4HoldDmg,
+                dmg_charged: A4HoldDmg,
+                dmg_plunge: A4HoldDmg,
             },
             info: {ascension: 4},
             subConditions: [
@@ -402,6 +428,7 @@ export const Shenhe = new DbObjectChar({
         {
             conditions: [
                 new ConditionStatic({
+                    receivers: RECEIVERS.TEAM,
                     title: 'talent_name.shenhe_centered_spirit',
                     description: 'talent_descr.shenhe_centered_spirit',
                     stats: {
@@ -431,9 +458,9 @@ export const Shenhe = new DbObjectChar({
                     serializeId: 7,
                     title: 'talent_name.shenhe_insight',
                     description: 'talent_descr.shenhe_insight',
-                    max: 50,
+                    max: C4MaxStacks,
                     stats: {
-                        text_percent_dmg: 5,
+                        text_percent_dmg: C4DmgBonus,
                     },
                 }),
             ],
@@ -448,176 +475,5 @@ export const Shenhe = new DbObjectChar({
             ],
         },
     ]),
-    partyData: {
-        loadStats: {
-            stats: ['atk_total'],
-            settings: ['char_skill_elemental', 'char_skill_burst'],
-        },
-        conditions: [
-            new ConditionNumber({
-                name: 'shenhe_atk_total',
-                title: 'talent_name.stats_total_atk',
-                partyStat: 'atk_total',
-                serializeId: 1,
-                rotation: 'party',
-                max: 10000,
-            }),
-            new ConditionNumberTalent({
-                name: 'shenhe_char_skill_elemental',
-                title: 'talent_name.stats_level_skill',
-                partySetting: 'char_skill_elemental',
-                serializeId: 2,
-            }),
-            new ConditionNumberTalent({
-                name: 'shenhe_char_skill_burst',
-                title: 'talent_name.stats_level_burst',
-                partySetting: 'char_skill_burst',
-                serializeId: 3,
-            }),
-            new Condition({
-                settings: {
-                    shenhe_char_skill_elemental_bonus: 3,
-                },
-                subConditions: [
-                    new ConditionBoolean({
-                        name: 'party.shenhe_constellation_3',
-                    }),
-                ],
-            }),
-            new Condition({
-                settings: {
-                    shenhe_char_skill_burst_bonus: 3,
-                },
-                subConditions: [
-                    new ConditionBoolean({
-                        name: 'party.shenhe_constellation_5',
-                    }),
-                ],
-            }),
-            new ConditionBoolean({
-                name: 'party.shenhe_icy_quill',
-                serializeId: 4,
-                rotation: 'party',
-                title: 'talent_name.shenhe_icy_quill',
-                description: 'talent_descr.shenhe_icy_quill',
-            }),
-            new ConditionBoolean({
-                name: 'party.shenhe_spirit_field',
-                serializeId: 9,
-                title: 'talent_name.shenhe_spirit_field',
-            }),
-            new ConditionBooleanLevels({
-                name: 'party.shenhe_talisman_spirit',
-                serializeId: 8,
-                rotation: 'party',
-                title: 'talent_name.shenhe_talisman_spirit',
-                description: 'talent_descr.shenhe_talisman_spirit',
-                levelSetting: 'shenhe_char_skill_burst',
-                stats: [
-                    Talents.getMulti({
-                        name: 'enemy_res_phys',
-                        from: 'burst.shenhe_res_decrease',
-                        multi: -1,
-                    }),
-                    Talents.getMulti({
-                        name: 'enemy_res_cryo',
-                        from: 'burst.shenhe_res_decrease',
-                        multi: -1,
-                    }),
-                ],
-            }),
-            new ConditionBoolean({
-                name: 'party.shenhe_deific_embrace',
-                serializeId: 5,
-                rotation: 'party',
-                title: 'talent_name.shenhe_deific_embrace',
-                description: 'talent_descr.shenhe_deific_embrace',
-                stats: {
-                    dmg_cryo: 15,
-                },
-                info: {ascension: 1},
-                subConditions: [
-                    new ConditionBoolean({
-                        name: 'party.shenhe_spirit_field',
-                    }),
-                ],
-            }),
-            new ConditionBoolean({
-                name: 'party.shenhe_spirit_seal_press',
-                serializeId: 6,
-                rotation: 'party',
-                title: 'talent_name.shenhe_spirit_seal_press',
-                description: 'talent_descr.shenhe_spirit_communion_seal_1',
-                stats: {
-                    dmg_skill: 15,
-                    dmg_burst: 15,
-                },
-                info: {ascension: 4},
-            }),
-            new ConditionBoolean({
-                name: 'party.shenhe_spirit_seal_hold',
-                serializeId: 7,
-                rotation: 'party',
-                title: 'talent_name.shenhe_spirit_seal_hold',
-                description: 'talent_descr.shenhe_spirit_communion_seal_2',
-                stats: {
-                    dmg_normal: 15,
-                    dmg_charged: 15,
-                    dmg_plunge: 15,
-                },
-                info: {ascension: 4},
-            }),
-            new ConditionBoolean({
-                name: 'party.shenhe_centered_spirit',
-                serializeId: 10,
-                title: 'talent_name.shenhe_centered_spirit',
-                description: 'talent_descr.shenhe_centered_spirit',
-                stats: {
-                    crit_dmg_cryo: 15,
-                },
-                info: {constellation: 2},
-                subConditions: [
-                    new ConditionBoolean({
-                        name: 'party.shenhe_spirit_field',
-                    }),
-                ],
-            }),
-            new ConditionBoolean({
-                name: 'party.shenhe_constellation_3',
-                serializeId: 11,
-                title: 'talent_name.shenhe_seclusion',
-                description: 'talent_descr.char_constellation_skill',
-                info: {
-                    constellation: 3,
-                },
-            }),
-            new ConditionBoolean({
-                name: 'party.shenhe_constellation_5',
-                serializeId: 12,
-                title: 'talent_name.shenhe_divine_attainment',
-                description: 'talent_descr.char_constellation_burst',
-                info: {
-                    constellation: 5,
-                },
-                subConditions: [
-                    new ConditionBoolean({
-                        name: 'party.shenhe_constellation_3',
-                    }),
-                ],
-            }),
-        ],
-        multipliers: [
-            new FeatureMultiplier({
-                scaling: 'shenhe_atk_total',
-                leveling: 'shenhe_char_skill_elemental',
-                source: 'shenhe',
-                values: Talents.get('skill.shenhe_dmg_bonus'),
-                condition: new ConditionBoolean({name: 'party.shenhe_icy_quill'}),
-                target: new FeatureMultiplierTarget({
-                    damageElements: ['cryo'],
-                    damageTypes: ['normal', 'charged', 'plunge', 'skill', 'burst'],
-                }),
-            }),
-        ],
-    },
+    retiredParty: [[1, 'number'], [2, 'number'], [3, 'number'], [4, 'checkbox'], [5, 'checkbox'], [6, 'checkbox'], [7, 'checkbox'], [8, 'checkbox'], [9, 'checkbox'], [10, 'checkbox'], [11, 'checkbox'], [12, 'checkbox']],
 });

@@ -1,6 +1,7 @@
 import { Artifact } from "../Artifact";
 import { normalizeArtifactOptimizerSettings } from "../ArtifactOptimizerSettings";
 import { ArtifactsSuggestSort } from "../ArtifactsSuggestSort";
+import { serializeWorkerMember } from "../Team";
 import {
     DEFAULT_OPTIMIZER_RESULT_LIMIT,
     finalizeOptimizerResults,
@@ -173,7 +174,7 @@ export class WorkerFactorySuggestArtifacts extends WorkerFactory {
         }
 
 
-        data.calcset = data.calcset.serialize();
+        data.calcset = serializeWorkerMember(data.calcset);
         data.settings = Object.assign(
             {},
             data.settings || {},

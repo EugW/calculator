@@ -1,6 +1,7 @@
 import { Artifact } from '../src/js/classes/Artifact';
 import { ArtifactsSuggest } from '../src/js/classes/ArtifactsSuggest';
 import { CalcSet } from '../src/js/classes/CalcSet';
+import { Team } from '../src/js/classes/Team';
 import { DB } from '../src/js/db/DB';
 import { makeArtifactOptimizerSettings } from '../src/js/classes/ArtifactOptimizerSettings';
 import { actionProbabilityBlocks, blockRollDistributions } from '../src/js/classes/ArtifactActionProbability';
@@ -158,7 +159,7 @@ test('Full replacement-aware predictions match the old PMF through the actual CP
     const action = reshape(3, 2, ['crit_dmg', 'hp']);
     const build = new CalcSet();
     build.setChar(DB.Chars.get('Jean'));
-    build.setEnemy(DB.Enemies.getFirst().getFirst());
+    Team.fromMember(build);
     const mains = {flower: 'hp', plume: 'atk', sands: 'atk_percent', circlet: 'crit_dmg'};
     const inventory = Object.entries(mains).map(([slot, main]) => new Artifact(5, 20, slot, 'GladiatorFinale', main, []));
     inventory.push(action.artifact);
@@ -167,7 +168,7 @@ test('Full replacement-aware predictions match the old PMF through the actual CP
     inventory.push(new Artifact(5, 20, 'circlet', 'WandererTroupe', 'crit_rate', []));
     const feature = 'attack.normal_hit_1';
     const options = {build, artifacts: inventory, featureName: feature, featureType: 'average', useGPU: false, limit: 20,
-        settings: makeArtifactOptimizerSettings(build, inventory)};
+        settings: makeArtifactOptimizerSettings()};
     const baseline = new ArtifactsSuggest(options);
     baseline.prepare();
     const baseValue = baseline.getResult()[0].value;

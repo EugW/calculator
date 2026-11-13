@@ -5,11 +5,13 @@ import { ConditionStaticRefineCrimsonPlumage } from "../../../classes/Condition/
 import { DbObjectWeapon } from "../../../classes/DbObject/Weapon";
 import { StatTable } from "../../../classes/StatTable";
 import { weaponStatTables } from "../../generated/WeaponStatTables";
+import { weaponPassiveTables } from "../../generated/WeaponPassiveTables";
+import { percent } from "../../Params";
 
-const charged_table_1 = [20, 25, 30, 35, 40];
-const charged_table_2 = [48, 60, 72, 84, 96];
-const burst_table_1 = [10, 12.5, 15, 17.5, 20];
-const burst_table_2 = [24, 30, 36, 42, 48];
+const charged_table_1 = percent(weaponPassiveTables.AstralVulturesCrimsonPlumage.p3);
+const charged_table_2 = percent(weaponPassiveTables.AstralVulturesCrimsonPlumage.p4);
+const burst_table_1 = percent(weaponPassiveTables.AstralVulturesCrimsonPlumage.p5);
+const burst_table_2 = percent(weaponPassiveTables.AstralVulturesCrimsonPlumage.p6);
 
 export const AstralVulturesCrimsonPlumage = new DbObjectWeapon({
     name: 'astral_vultures_crimson_plumage',
@@ -27,7 +29,7 @@ export const AstralVulturesCrimsonPlumage = new DbObjectWeapon({
             title: 'talent_name.weapon_astral_vultures_crimson_plumage',
             description: 'talent_descr.weapon_astral_vultures_crimson_plumage_1',
             stats: [
-                new StatTable('atk_percent', [24, 30, 36, 42, 48]),
+                new StatTable('atk_percent', percent(weaponPassiveTables.AstralVulturesCrimsonPlumage.p1)),
             ],
         }),
         new ConditionStaticRefineCrimsonPlumage({

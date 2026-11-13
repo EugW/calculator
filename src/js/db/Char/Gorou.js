@@ -2,10 +2,10 @@ import { Condition } from "../../classes/Condition";
 import { ConditionAnd } from "../../classes/Condition/And";
 import { ConditionAscensionChar } from "../../classes/Condition/Ascension/Char";
 import { ConditionBoolean } from "../../classes/Condition/Boolean";
-import { ConditionBooleanLevels } from "../../classes/Condition/Boolean/Levels";
+import { ConditionOnField } from "../../classes/Condition/Field";
 import { ConditionConstellation } from "../../classes/Condition/Constellation";
 import { ConditionElementsCount } from "../../classes/Condition/ElementsCount";
-import { ConditionNumberTalent } from "../../classes/Condition/Number/Talent";
+import { ConditionReceiver } from "../../classes/Condition/Receiver";
 import { ConditionStatic } from "../../classes/Condition/Static";
 import { ConditionStaticLevel } from "../../classes/Condition/Static/Level";
 import { DbObjectChar } from "../../classes/DbObject/Char";
@@ -24,8 +24,10 @@ import { FeatureMultiplierTarget } from "../../classes/Feature2/Multiplier/Targe
 import { FeatureStatic } from "../../classes/Feature2/Static";
 import { StatTable } from "../../classes/StatTable";
 import { ValueTable } from "../../classes/ValueTable";
+import { RECEIVERS } from "../../classes/Team/Receivers";
 import { charTables } from "../generated/CharTables";
 import { charTalentTables } from "../generated/CharTalentTables";
+import { percent } from "../Params";
 
 const Talents = new DbObjectTalents({
     attack: {
@@ -119,14 +121,18 @@ const Talents = new DbObjectTalents({
 
 const TalentValues = {
     SkillGeoBonus: 15,
-    A1DefBonus: 25,
-    A4SkillDefScale: 156,
-    A4BurstDefScale: 15.6,
-    C4Heal: 50,
-    C6CritDmgGeo1: 10,
+    A1DefBonus: percent(charTalentTables.Gorou.a1.p1),
+    A4SkillDefScale: percent(charTalentTables.Gorou.a4.p1),
+    A4BurstDefScale: percent(charTalentTables.Gorou.a4.p2),
+    C4Heal: percent(charTalentTables.Gorou.c4.p1),
+    C6CritDmgGeo1: percent(charTalentTables.Gorou.c6.p1),
     C6CritDmgGeo2: 10,
     C6CritDmgGeo3: 20,
 };
+
+const activeReceiver = new ConditionReceiver({
+    condition: new ConditionOnField(),
+});
 
 export const Gorou = new DbObjectChar({
     name: 'gorou',
@@ -307,6 +313,7 @@ export const Gorou = new DbObjectChar({
         new ConditionBoolean({
             name: 'gorou_heedless_of_the_wind_and_weather',
             serializeId: 2,
+            receivers: RECEIVERS.TEAM,
             title: 'talent_name.gorou_heedless_of_the_wind_and_weather',
             description: 'talent_descr.gorou_heedless_of_the_wind_and_weather',
             stats: {
@@ -332,13 +339,17 @@ export const Gorou = new DbObjectChar({
             description: 'talent_descr.gorou_generals_war_banner',
         }),
         new ConditionStaticLevel({
+            receivers: RECEIVERS.TEAM,
             title: 'talent_name.gorou_standing_firm',
             description: 'talent_descr.gorou_standing_firm',
             levelSetting: 'char_skill_elemental',
             stats: [
                 Talents.getAlias('skill.gorou_def_bonus', 'def'),
             ],
-            condition: new ConditionBoolean({name: 'gorou_generals_war_banner'}),
+            condition: new ConditionAnd([
+                new ConditionBoolean({name: 'gorou_generals_war_banner'}),
+                activeReceiver,
+            ]),
         }),
         new ConditionStatic({
             title: 'talent_name.gorou_impregnable',
@@ -349,6 +360,7 @@ export const Gorou = new DbObjectChar({
             ]),
         }),
         new ConditionStatic({
+            receivers: RECEIVERS.TEAM,
             title: 'talent_name.gorou_crunch',
             description: 'talent_descr.gorou_crunch',
             stats: {
@@ -357,6 +369,7 @@ export const Gorou = new DbObjectChar({
             condition: new ConditionAnd([
                 new ConditionBoolean({name: 'gorou_generals_war_banner'}),
                 new ConditionElementsCount({element: 'geo', count: 3}),
+                activeReceiver,
             ]),
         }),
     ],
@@ -405,12 +418,14 @@ export const Gorou = new DbObjectChar({
                     description: 'talent_descr.gorou_mountainous_fealty',
                 }),
                 new Condition({
+                    receivers: RECEIVERS.TEAM,
                     stats: {
                         crit_dmg_geo: TalentValues.C6CritDmgGeo1,
                     },
                     condition: new ConditionBoolean({name: 'gorou_generals_war_banner'}),
                 }),
                 new Condition({
+                    receivers: RECEIVERS.TEAM,
                     stats: {
                         crit_dmg_geo: TalentValues.C6CritDmgGeo2,
                     },
@@ -420,6 +435,7 @@ export const Gorou = new DbObjectChar({
                     ]),
                 }),
                 new Condition({
+                    receivers: RECEIVERS.TEAM,
                     stats: {
                         crit_dmg_geo: TalentValues.C6CritDmgGeo3,
                     },
@@ -431,114 +447,5 @@ export const Gorou = new DbObjectChar({
             ],
         },
     ]),
-    partyData: {
-        loadStats: {
-            settings: ['char_skill_elemental'],
-        },
-        conditions: [
-            new ConditionNumberTalent({
-                name: 'gorou_char_skill_elemental',
-                title: 'talent_name.stats_level_skill',
-                partySetting: 'char_skill_elemental',
-                serializeId: 1,
-            }),
-            new ConditionBoolean({
-                name: 'party.gorou_fierce_as_fire',
-                serializeId: 5,
-                title: 'talent_name.gorou_fierce_as_fire',
-                description: 'talent_descr.char_constellation_skill',
-                settings: {
-                    gorou_char_skill_elemental_bonus: 3,
-                },
-                info: {constellation: 3},
-            }),
-            new ConditionBoolean({
-                name: 'party.gorou_generals_war_banner',
-                serializeId: 2,
-                rotation: 'party',
-                title: 'talent_name.gorou_generals_war_banner',
-                description: 'talent_descr.gorou_generals_war_banner',
-            }),
-            new ConditionBooleanLevels({
-                name: 'party.gorou_standing_firm',
-                serializeId: 6,
-                rotation: 'party',
-                title: 'talent_name.gorou_standing_firm',
-                description: 'talent_descr.gorou_standing_firm',
-                levelSetting: 'gorou_char_skill_elemental',
-                stats: [
-                    Talents.getAlias('skill.gorou_def_bonus', 'def'),
-                ],
-                condition: new ConditionBoolean({name: 'party.gorou_generals_war_banner'}),
-            }),
-            new ConditionStatic({
-                title: 'talent_name.gorou_impregnable',
-                description: 'talent_descr.gorou_impregnable',
-                condition: new ConditionAnd([
-                    new ConditionBoolean({name: 'party.gorou_generals_war_banner'}),
-                    new ConditionElementsCount({element: 'geo', count: 2}),
-                ]),
-            }),
-            new ConditionStatic({
-                title: 'talent_name.gorou_crunch',
-                description: 'talent_descr.gorou_crunch',
-                stats: {
-                    dmg_geo: TalentValues.SkillGeoBonus,
-                },
-                condition: new ConditionAnd([
-                    new ConditionBoolean({name: 'party.gorou_generals_war_banner'}),
-                    new ConditionElementsCount({element: 'geo', count: 3}),
-                ]),
-            }),
-            new ConditionBoolean({
-                name: 'party.gorou_heedless_of_the_wind_and_weather',
-                serializeId: 3,
-                title: 'talent_name.gorou_heedless_of_the_wind_and_weather',
-                description: 'talent_descr.gorou_heedless_of_the_wind_and_weather',
-                rotation: 'party',
-                info: {ascension: 1},
-                stats: {
-                    def_percent: TalentValues.A1DefBonus,
-                },
-            }),
-            new ConditionBoolean({
-                name: 'party.gorou_mountainous_fealty',
-                serializeId: 4,
-                title: 'talent_name.gorou_mountainous_fealty',
-                description: 'talent_descr.gorou_mountainous_fealty',
-                rotation: 'party',
-                info: {constellation: 6},
-                condition: new ConditionBoolean({name: 'party.gorou_fierce_as_fire'}),
-            }),
-            new Condition({
-                stats: {
-                    crit_dmg_geo: TalentValues.C6CritDmgGeo1,
-                },
-                condition: new ConditionAnd([
-                    new ConditionBoolean({name: 'party.gorou_mountainous_fealty'}),
-                    new ConditionBoolean({name: 'party.gorou_fierce_as_fire'}),
-                ]),
-            }),
-            new Condition({
-                stats: {
-                    crit_dmg_geo: TalentValues.C6CritDmgGeo2,
-                },
-                condition: new ConditionAnd([
-                    new ConditionBoolean({name: 'party.gorou_mountainous_fealty'}),
-                    new ConditionBoolean({name: 'party.gorou_fierce_as_fire'}),
-                    new ConditionElementsCount({element: 'geo', count: 2}),
-                ]),
-            }),
-            new Condition({
-                stats: {
-                    crit_dmg_geo: TalentValues.C6CritDmgGeo3,
-                },
-                condition: new ConditionAnd([
-                    new ConditionBoolean({name: 'party.gorou_mountainous_fealty'}),
-                    new ConditionBoolean({name: 'party.gorou_fierce_as_fire'}),
-                    new ConditionElementsCount({element: 'geo', count: 3}),
-                ]),
-            }),
-        ],
-    },
+    retiredParty: [[1, 'number'], [2, 'checkbox'], [3, 'checkbox'], [4, 'checkbox'], [5, 'checkbox'], [6, 'checkbox']],
 });

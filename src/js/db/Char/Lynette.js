@@ -3,6 +3,7 @@ import { ConditionAscensionChar } from "../../classes/Condition/Ascension/Char";
 import { ConditionBoolean } from "../../classes/Condition/Boolean";
 import { ConditionBooleanLevels } from "../../classes/Condition/Boolean/Levels";
 import { ConditionCalcElements } from "../../classes/Condition/CalcElements";
+import { ConditionConstellation } from "../../classes/Condition/Constellation";
 import { ConditionStatic } from "../../classes/Condition/Static";
 import { DbObjectChar } from "../../classes/DbObject/Char";
 import { DbObjectConstellation } from "../../classes/DbObject/Constellation";
@@ -15,9 +16,12 @@ import { FeatureDamagePlungeCollision } from "../../classes/Feature2/Damage/Plun
 import { FeatureDamagePlungeShockWave } from "../../classes/Feature2/Damage/Plunge/ShockWave";
 import { FeatureDamageSkill } from "../../classes/Feature2/Damage/Skill";
 import { FeatureMultiplier } from "../../classes/Feature2/Multiplier";
+import { PostEffectStatsStatic } from "../../classes/PostEffect/Stats/Static";
 import { StatTable } from "../../classes/StatTable";
+import { RECEIVERS } from "../../classes/Team/Receivers";
 import { charTables } from "../generated/CharTables";
 import { charTalentTables } from "../generated/CharTalentTables";
+import { percent } from "../Params";
 
 
 const Talents = new DbObjectTalents({
@@ -129,9 +133,22 @@ const Talents = new DbObjectTalents({
     },
 });
 
-const A1AtkBonus = [8, 12, 16, 20];
-const A4BurstBonus = 15;
-const C6AnemoBonus = 20;
+const A1AtkBonus = [percent(charTalentTables.Lynette.a1.p2), percent(charTalentTables.Lynette.a1.p3), percent(charTalentTables.Lynette.a1.p4), percent(charTalentTables.Lynette.a1.p5)];
+const A4BurstBonus = percent(charTalentTables.Lynette.a4.p1);
+const C6AnemoBonus = percent(charTalentTables.Lynette.c6.p1);
+
+// C6 Watchful Eye: Anemo DMG +20% after the skill. Game data:
+// Avatar_Linette_Constellation_6 / Avatar_Linette_Constellation_6_DamageUp
+// writes Actor_WindAddHurtExtraDelta: a flat bonus in the extra part, so it
+// is a post-effect (a condition's stats are always premod;
+// md/buff_chains.md).
+const c6AnemoDmgPost = new PostEffectStatsStatic({
+    percent: new StatTable('dmg_anemo', [C6AnemoBonus]),
+    conditions: [
+        new ConditionConstellation({constellation: 6}),
+        new ConditionBoolean({name: 'lynette_watchful_eye'}),
+    ],
+});
 
 export const Lynette = new DbObjectChar({
     name: 'lynette',
@@ -384,6 +401,7 @@ export const Lynette = new DbObjectChar({
         new ConditionBooleanLevels({
             name: 'lynette_sophisticated_synergy',
             serializeId: 1,
+            receivers: RECEIVERS.TEAM,
             title: 'talent_name.lynette_sophisticated_synergy',
             description: 'talent_descr.lynette_sophisticated_synergy',
             levelSetting: 'party_elements_count_level',
@@ -409,6 +427,9 @@ export const Lynette = new DbObjectChar({
                 new ConditionAscensionChar({ascension: 4}),
             ],
         }),
+    ],
+    postEffects: [
+        c6AnemoDmgPost,
     ],
     constellation: new DbObjectConstellation([
         {
@@ -465,9 +486,9 @@ export const Lynette = new DbObjectChar({
                     serializeId: 3,
                     title: 'talent_name.lynette_watchful_eye',
                     description: 'talent_descr.lynette_watchful_eye',
-                    stats: {
-                        dmg_anemo: C6AnemoBonus,
-                    },
+                    // The Anemo DMG is c6AnemoDmgPost (an extra write); shown
+                    // here for the description.
+                    displayStats: {dmg_anemo: C6AnemoBonus},
                     settings: {
                         attack_infusion_anemo: 1,
                     },
@@ -475,22 +496,5 @@ export const Lynette = new DbObjectChar({
             ],
         },
     ]),
-    partyData: {
-        conditions: [
-            new ConditionCalcElements({}),
-            new ConditionBooleanLevels({
-                name: 'party.lynette_sophisticated_synergy',
-                serializeId: 1,
-                rotation: 'party',
-                title: 'talent_name.lynette_sophisticated_synergy',
-                description: 'talent_descr.lynette_sophisticated_synergy',
-                levelSetting: 'party_elements_count_level',
-                info: {ascension: 1},
-                stats: [
-                    new StatTable('text_number', [1, 2, 3, 4]),
-                    new StatTable('atk_percent', A1AtkBonus),
-                ],
-            }),
-        ],
-    },
+    retiredParty: [[1, 'checkbox']],
 });

@@ -1,4 +1,5 @@
 import { Condition } from "../Condition";
+import { teamElements } from "../Team/Party";
 
 export class ConditionResonance extends Condition {
     getType() {
@@ -16,10 +17,7 @@ export class ConditionResonance extends Condition {
         let elementsCount = {};
         let isDuo = false;
 
-        for (const name of ['char_element', 'resonance_element_1', 'resonance_element_2', 'resonance_element_3']) {
-            const element = settings[name];
-            if (!element) continue;
-
+        for (const element of teamElements(settings)) {
             if (!elementsCount[element]) {
                 elementsCount[element] = 1;
             } else {

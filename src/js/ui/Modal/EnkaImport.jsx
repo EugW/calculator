@@ -1,6 +1,7 @@
 import React from "react";
 // import "../../../../css/Components/Dialog/ArtifactGenerator.css"
 
+import { LoadToSlot } from "../Components/Character/LoadToSlot";
 import { DialogContainer } from "../Components/Dialog/Container";
 import { EnkaApp } from "../Components/Enka";
 import { Lang } from "../Lang";
@@ -32,6 +33,9 @@ export class EnkaImportComponent extends React.Component {
         };
     }
 
+    /**
+     * @param {string} [uid]
+     */
     show(uid) {
         if (uid) {
             this.component.handleLoadUid(uid);
@@ -43,12 +47,6 @@ export class EnkaImportComponent extends React.Component {
 
     handleClose() {
         this.setState({isVisible: false});
-    }
-
-    applyCalcSet(set) {
-        UI.ConfirmWindow.show('modal.confirm', 'enka_import.confirm_load_char', () => {
-            this.props.app.replaceSet(set.clone());
-        });
     }
 
     saveCalcSet(set) {
@@ -84,7 +82,8 @@ export class EnkaImportComponent extends React.Component {
                 <EnkaApp
                     ref={obj => { this.component = obj; }}
                     addToCompare={(set) => this.addToCompare(set)}
-                    applyCalcSet={(set) => this.applyCalcSet(set)}
+                    // The window stays open, so one showcase fills every slot.
+                    loadControls={(set) => <LoadToSlot app={this.props.app} build={set} onLoad={() => this.forceUpdate()} />}
                     saveCalcSet={(set) => this.saveCalcSet(set)}
                     saveAllCharacters={(chars) => this.saveAllCharacters(chars)}
                     saveAllArtifacts={(arts) => this.saveAllArtifacts(arts)}

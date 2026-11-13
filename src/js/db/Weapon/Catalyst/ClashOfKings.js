@@ -2,6 +2,8 @@ import { ConditionBooleanRefine } from "../../../classes/Condition/Boolean/Refin
 import { DbObjectWeapon } from "../../../classes/DbObject/Weapon";
 import { StatTable } from "../../../classes/StatTable";
 import { weaponStatTables } from "../../generated/WeaponStatTables";
+import { weaponPassiveTables } from "../../generated/WeaponPassiveTables";
+import { percent } from "../../Params";
 
 export const ClashOfKings = new DbObjectWeapon({
     name: 'clash_of_kings',
@@ -18,8 +20,8 @@ export const ClashOfKings = new DbObjectWeapon({
             title: 'talent_name.weapon_clash_of_kings',
             description: 'talent_descr.weapon_clash_of_kings',
             stats: [
-                new StatTable('atk_percent', [20, 25, 30, 35, 40]),
-                new StatTable('mastery', [100, 125, 150, 175, 200]),
+                new StatTable('atk_percent', percent(weaponPassiveTables.ClashOfKings.p1)),
+                new StatTable('mastery', weaponPassiveTables.ClashOfKings.p2),
             ],
         }),
     ],

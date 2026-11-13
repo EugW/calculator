@@ -1,6 +1,8 @@
 import { ArtifactSet } from "../../../classes/ArtifactSet";
 import { ConditionBooleanWeaponType } from "../../../classes/Condition/Boolean/WeaponType";
 import { ConditionStatic } from "../../../classes/Condition/Static";
+import { artifactSetTables } from "../../generated/ArtifactSetTables";
+import { percent } from "../../Params";
 
 export const WandererTroupe = new ArtifactSet({
     serializeId: 27,
@@ -19,7 +21,7 @@ export const WandererTroupe = new ArtifactSet({
                     title: 'set_bonus.wanderers_troupe_2',
                     description: 'set_descr.wanderers_troupe_2',
                     stats: {
-                        mastery: 80,
+                        mastery: artifactSetTables.WandererTroupe.pc2.mastery,
                     },
                 })
             ],
@@ -31,7 +33,7 @@ export const WandererTroupe = new ArtifactSet({
                     title: 'set_bonus.wanderers_troupe_4',
                     description: 'set_descr.wanderers_troupe_4',
                     stats: {
-                        dmg_charged: 35,
+                        dmg_charged: percent(artifactSetTables.WandererTroupe.pc4.p1),
                     },
                     conditions: new ConditionBooleanWeaponType({types: ['bow', 'catalyst']}),
                 })

@@ -1,5 +1,9 @@
 import { Condition } from "../../Condition";
+import { enemyScope } from "../../Team/Scope";
 
+/**
+ * Whether the team's enemy is affected by one of the given elements.
+ */
 export class ConditionEnemyStatus extends Condition {
     isActive(settings) {
         let result = this.checkSubconditions(settings);
@@ -8,10 +12,10 @@ export class ConditionEnemyStatus extends Condition {
             return false;
         }
 
-        let status = settings['common.enemy_status'];
+        let status = enemyScope(settings)['common.enemy_status'];
 
         if (status && this.params.status && Array.isArray(this.params.status)) {
-            result = this.params.status.includes(settings['common.enemy_status']);
+            result = this.params.status.includes(status);
         } else {
             result = false;
         }

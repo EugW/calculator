@@ -3,6 +3,13 @@
     align-items: center;
 }
 
+/* The member (or the enemy, the team) whose hits or steps the next dropdown lists. */
+.rotation-feature-modal .controls-bar .item.rotation-member {
+    flex: 0 0 170px;
+    max-width: 40%;
+    min-width: 0;
+}
+
 /* Mobile: allow dropdown to overflow and scroll properly */
 .narrow .rotation-feature-modal .dialog-content {
     overflow: visible;

@@ -6,7 +6,7 @@ import { toBeEmptyArray } from "../../src/js/test/matchers";
 let list = [
     {name: 'Chars',         object: DB.Chars,               type: ''},
     {name: 'Chars cond',    object: DB.Chars,               type: 'charcond'},
-    {name: 'Chars party',   object: DB.Chars,               type: 'charparty'},
+    {name: 'Legacy character IDs',   object: DB.Chars,               type: 'charparty'},
     {name: 'Artifact sets', object: DB.Artifacts.Sets,      type: ''},
     {name: 'Artifact cond', object: DB.Artifacts.Sets,      type: 'artset'},
     {name: 'Weapons',       object: DB.Weapons,             type: 'tree'},
@@ -100,7 +100,7 @@ function getItems(data) {
         for (const charId of data.object.getKeys()) {
             let char = data.object.get(charId);
 
-            for (const cond of char.getPartyConditions()) {
+            for (const cond of char.getLegacyPartyConditions()) {
                 if (!cond.isSerializable()) {
                     continue;
                 }

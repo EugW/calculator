@@ -4,6 +4,7 @@ import { FeatureCompiler } from "../Feature2/Compiler";
 import { PostEffect } from "../PostEffect";
 import { Stats } from "../Stats";
 import { BuildSettings } from "./Settings";
+import { enemyStatName } from "../Team/EnemyStats";
 
 export class BuildData {
     constructor(settings, stats) {
@@ -55,7 +56,7 @@ export class BuildData {
     }
 
     applyPostEffects(opts) {
-        for (let treeItems of this.postEffectTreeByPriority()) {
+        for (let treeItems of this.postEffectTreeByPriority(opts)) {
             let compiler = new FeatureCompiler(new CBlock([]), treeItems);
             let statFunc = compiler.compilePostTree({dontProcessStats: true});
 
@@ -66,7 +67,8 @@ export class BuildData {
             }
         }
 
-        this.postEffects = [];
+        this.postEffects = opts?.maxPriority === undefined ? []
+            : this.postEffects.filter((effect) => effect.getPriority() > opts.maxPriority);
     }
 
     postEffectByPriority(opts) {
@@ -77,7 +79,7 @@ export class BuildData {
 
         for (let item of items) {
             let priority = item.getPriority();
-            if (opts.maxPriority && priority > opts.maxPriority) {
+            if (opts.maxPriority !== undefined && priority > opts.maxPriority) {
                 continue;
             }
 
@@ -111,7 +113,7 @@ export class BuildData {
     }
 
     getResistance(element) {
-        return this.settings.get('enemy_res_'+ element) + this.stats.get('enemy_res_'+ element) * 100;
+        return this.stats.get(enemyStatName('enemy_res_'+ element)) * 100;
     }
 
     clone() {

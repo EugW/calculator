@@ -1,85 +1,38 @@
 import { ConditionBoolean } from "../../classes/Condition/Boolean";
-import { ConditionEnemyStatus } from "../../classes/Condition/Boolean/EnemyStatus";
+import { ConditionShielded } from "../../classes/Condition/Field";
 import { ConditionBooleanResonanceEnabled } from "../../classes/Condition/Boolean/ResonanceEnabled";
 import { ConditionBooleanValue } from "../../classes/Condition/Boolean/Value";
-import { ConditionCalcMoonsign } from "../../classes/Condition/CalcMoonsign";
-import { ConditionChars } from "../../classes/Condition/Chars";
-import { ConditionCustomBuffs } from "../../classes/Condition/CustomBuffs";
-import { ConditionDropdownElement } from "../../classes/Condition/Dropdown/Element";
+import { ConditionDropdownTeamMember } from "../../classes/Condition/Dropdown/TeamMember";
+import { ConditionEnemyStatus } from "../../classes/Condition/Boolean/EnemyStatus";
 import { ConditionHexereiResonance } from "../../classes/Condition/HexereiResonance";
+import { ConditionNot } from "../../classes/Condition/Not";
 import { ConditionNumber } from "../../classes/Condition/Number";
-import { ConditionNumberLunarBuff } from "../../classes/Condition/Number/LunarBuff";
+import { ConditionReceiver } from "../../classes/Condition/Receiver";
 import { ConditionResonance } from "../../classes/Condition/Resonance";
 import { ConditionStatic } from "../../classes/Condition/Static";
 import { ConditionStaticLevel } from "../../classes/Condition/Static/Level";
 import { DbObjectBuff } from "../../classes/DbObject/Buff";
 import { StatTable } from "../../classes/StatTable";
 
-const elementValues = [
-    {
-        value: 'cryo',
-        serializeId: 1,
-    },
-    {
-        value: 'electro',
-        serializeId: 2,
-    },
-    {
-        value: 'hydro',
-        serializeId: 3,
-    },
-    {
-        value: 'pyro',
-        serializeId: 4,
-    },
-    {
-        value: 'anemo',
-        serializeId: 5,
-    },
-    {
-        value: 'geo',
-        serializeId: 6,
-    },
-    {
-        value: 'dendro',
-        serializeId: 7,
-    },
-];
+// Ascendant Gleam: two or more Moonsign characters in the team.
+export const condAscendantGleam = new ConditionBooleanValue({
+    setting: 'party_moonsign',
+    cond: 'ge',
+    value: 2,
+});
 
+/**
+ * The party: the team's own effects and toggles. They belong to the team,
+ * not to a member: the team evaluates them once and delivers them to every
+ * member (see TeamEvaluation.resolveParty). Their plain reads are the
+ * team's settings; a read of the receiving member goes through
+ * ConditionReceiver. Member parts of the old list are in Buffs/Member.
+ */
 export const ElementalResonance = new DbObjectBuff({
     name: 'elemental_resonance',
     type: 'elemental_resonance',
+    party: true,
     conditions: [
-        new ConditionDropdownElement({
-            name: 'old_resonance_element_1',
-            serializeId: 1,
-            values: elementValues,
-            isHidden: true,
-        }),
-        new ConditionDropdownElement({
-            name: 'old_resonance_element_2',
-            serializeId: 2,
-            values: elementValues,
-            isHidden: true,
-        }),
-        new ConditionDropdownElement({
-            name: 'old_resonance_element_3',
-            serializeId: 3,
-            values: elementValues,
-            isHidden: true,
-        }),
-        new ConditionChars({
-            name: 'party_chars',
-            serializeId: 17,
-            isHidden: true,
-        }),
-        new ConditionCustomBuffs({
-            name: 'custom_buffs',
-            serializeId: 24,
-            isHidden: true,
-        }),
-        // Calculate moonsign level from party composition
-        new ConditionCalcMoonsign({}),
         new ConditionStatic({
             title: 'buffs_name.resonance_cryo',
             description: 'buffs_descr.resonance_cryo',
@@ -222,10 +175,8 @@ export const ElementalResonance = new DbObjectBuff({
                 new ConditionBooleanResonanceEnabled(),
             ],
         }),
-        new ConditionBoolean({
-            name: 'common.char_status_shield',
-            serializeId: 5,
-            rotation: 'buffs',
+        // Whether this member is shielded follows the team's on-field shield.
+        new ConditionStatic({
             title: 'buffs_name.resonance_geo_shield',
             description: 'buffs_descr.resonance_geo_shield',
             stats: {
@@ -244,12 +195,16 @@ export const ElementalResonance = new DbObjectBuff({
                 new ConditionResonance({
                     element: 'geo',
                 }),
+                new ConditionReceiver({
+                    condition: new ConditionShielded(),
+                }),
                 new ConditionBooleanResonanceEnabled(),
             ],
         }),
         new ConditionBoolean({
             name: 'buffs.resonance_geo_attack',
             serializeId: 6,
+            teamSerializeId: 5,
             rotation: 'buffs',
             title: 'buffs_name.resonance_geo_attack',
             description: 'buffs_descr.resonance_geo_attack',
@@ -274,8 +229,6 @@ export const ElementalResonance = new DbObjectBuff({
             ],
         }),
         new ConditionStatic({
-            name: 'common.char_status_shield',
-            rotation: 'buffs',
             title: 'buffs_name.resonance_dendro',
             description: 'buffs_descr.resonance_dendro_1',
             stats: {
@@ -300,6 +253,7 @@ export const ElementalResonance = new DbObjectBuff({
         new ConditionBoolean({
             name: 'buffs.resonance_dendro_1',
             serializeId: 22,
+            teamSerializeId: 6,
             rotation: 'buffs',
             title: 'buffs_name.resonance_dendro',
             description: 'buffs_descr.resonance_dendro_2',
@@ -325,6 +279,7 @@ export const ElementalResonance = new DbObjectBuff({
         new ConditionBoolean({
             name: 'buffs.resonance_dendro_2',
             serializeId: 23,
+            teamSerializeId: 7,
             rotation: 'buffs',
             title: 'buffs_name.resonance_dendro',
             description: 'buffs_descr.resonance_dendro_3',
@@ -373,31 +328,38 @@ export const ElementalResonance = new DbObjectBuff({
                 new ConditionBooleanResonanceEnabled(),
             ],
         }),
-        // Ascendant Gleam: Non-Moonsign character buff (0-36% Lunar Reaction DMG)
-        new ConditionNumberLunarBuff({
-            name: 'buffs.ascendant_gleam_buff',
-            serializeId: 25,
-            title: 'buffs_name.ascendant_gleam_buff',
-            description: 'buffs_descr.ascendant_gleam_buff',
-            max: 36,
-            hideCondition: [
-                new ConditionBooleanValue({
-                    setting: 'party_moonsign',
-                    cond: 'lt',
-                    value: 2,
-                }),
-            ],
-            subConditions: [
-                new ConditionBooleanValue({
-                    setting: 'party_moonsign',
-                    cond: 'ge',
-                    value: 2,
-                }),
-            ],
+        // Moonsign: Ascendant Gleam: after a non-Moonsign member uses an
+        // Elemental Skill or Burst, the party's Lunar Reaction DMG increases
+        // for 20s based on that member's stats, up to 36%. The bonus does not
+        // stack: the most recent cast replaces it, so the team chooses the
+        // one member it comes from.
+        new ConditionDropdownTeamMember({
+            name: 'ascendant_gleam_source',
+            serializeId: 80,
+            teamSerializeId: 10,
+            title: 'buffs_name.ascendant_gleam_source',
+            description: 'buffs_descr.ascendant_gleam_source',
+            excludeOrigins: ['nodkrai'],
+            // The source of an effect, not a receiver: a virtual character
+            // of the party can be it.
+            allowVirtual: true,
+            hideCondition: [new ConditionNot([condAscendantGleam])],
+        }),
+        // Only the on-field character can be protected. Geo Resonance, sets
+        // and weapons read it through ConditionShielded.
+        new ConditionBoolean({
+            name: 'on_field_shield',
+            // The member's own shield switch used this ID.
+            serializeId: 5,
+            teamSerializeId: 9,
+            rotation: 'buffs',
+            title: 'buffs_name.on_field_shield',
+            description: 'buffs_descr.on_field_shield',
         }),
         new ConditionBoolean({
             name: 'polestar_field',
             serializeId: 70,
+            teamSerializeId: 2,
             rotation: 'buffs',
             title: 'talent_name.n11330003',
             description: 'talent_descr.n11330003',
@@ -408,6 +370,7 @@ export const ElementalResonance = new DbObjectBuff({
         new ConditionNumber({
             name: 'polestar_included_hits',
             serializeId: 71,
+            teamSerializeId: 3,
             rotation: 'buffs',
             title: 'talent_name.polestar_included_hits',
             description: 'talent_descr.polestar_included_hits',
@@ -434,6 +397,7 @@ export const ElementalResonance = new DbObjectBuff({
         new ConditionNumber({
             name: 'stellarswirl_vortex_triggers',
             serializeId: 78,
+            teamSerializeId: 4,
             rotation: 'buffs',
             title: 'talent_name.stellarswirl_vortex_triggers',
             description: 'talent_descr.stellarswirl_vortex_triggers',
@@ -444,7 +408,10 @@ export const ElementalResonance = new DbObjectBuff({
             forceSettings: true,
             hideInactive: true,
             subConditions: [
-                new ConditionBoolean({name: 'allowed_stellarswirl'}),
+                // Shown when the viewed member can trigger Stellar Swirl.
+                new ConditionReceiver({
+                    condition: new ConditionBoolean({name: 'allowed_stellarswirl'}),
+                }),
             ],
         }),
         // Hexerei Resonance: Active when 2+ Hexerei-capable characters are in party
@@ -464,6 +431,7 @@ export const ElementalResonance = new DbObjectBuff({
         new ConditionBoolean({
             name: 'buffs.only_full_party_resonance',
             serializeId: 20,
+            teamSerializeId: 8,
             title: 'buffs_name.only_full_party_resonance',
             description: 'buffs_descr.only_full_party_resonances',
             hideInactive: true,

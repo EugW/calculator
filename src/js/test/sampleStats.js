@@ -42,11 +42,5 @@ export const sampleSettings = {
     "enemy_res_electro": 10,
     "enemy_res_dendro": 10,
     "common.enemy_status": 0,
-    "enemy_type": "",
-    "party_char_1": 0,
-    "resonance_element_1": "",
-    "party_char_2": 0,
-    "resonance_element_2": "",
-    "party_char_3": 0,
-    "resonance_element_3": ""
+    "enemy_type": ""
 };

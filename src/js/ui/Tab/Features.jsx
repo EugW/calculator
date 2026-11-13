@@ -18,7 +18,7 @@ import { BlockRemark } from '../Components/TextBlocks';
 
 let lang = new Lang();
 
-const REACTION_ITEMS = [
+export const REACTION_ITEMS = [
     {value: '', text: lang.get('feature_reaction.none')},
     {value: 'melt', text: lang.get('feature_reaction.melt')},
     {value: 'vaporize', text: lang.get('feature_reaction.vaporize')},
@@ -31,6 +31,7 @@ export class FeaturesTab extends Tab {
 
         this.id = 'features';
         this.rightRab = false;
+        this.title = 'tab_header.features';
     }
 
     refresh() {
@@ -63,22 +64,21 @@ class FeaturesView extends React.Component {
             view: '',
             feature: props.feature,
             reaction: '',
-            isCrit: false,
         };
     }
 
     getFeaturesDropdown() {
-        return Feature2.buildDropdown(this.props.app.currentSet());
+        return Feature2.buildDropdown(this.props.app.view());
     }
 
     getFeaturesDetailsDropdown() {
-        return Feature2.buildDropdown(this.props.app.currentSet(), {
+        return Feature2.buildDropdown(this.props.app.view(), {
             checkCallback: (f) => {return f.hasDetails();},
         });
     }
 
     getFeatureItems() {
-        let build = this.props.app.currentSet();
+        let build = this.props.app.view();
         let buildData = build.getBuildData();
         let featuresHash = build.getFeaturesHash(buildData);
         let tree = Feature.getTree(featuresHash);
@@ -173,10 +173,6 @@ class FeaturesView extends React.Component {
         this.setState({reaction: reaction});
     }
 
-    handleCritMode(isCrit) {
-        this.setState({isCrit: isCrit});
-    }
-
     handleViewChange(name) {
         this.setState({view: name});
     }
@@ -222,7 +218,7 @@ class FeaturesView extends React.Component {
     }
 
     getContentDetail() {
-        let build = this.props.app.currentSet();
+        let build = this.props.app.view();
         let dropdownItems = this.getFeaturesDetailsDropdown();
         let feature = build.getFeatureByName(this.state.feature);
         let selectedFeature = this.state.feature;
@@ -241,7 +237,7 @@ class FeaturesView extends React.Component {
 
         let item;
         if (feature) {
-            item = <FeatureViewTree build={build} feature={feature} reaction={this.state.reaction} isCrit={this.state.isCrit} />;
+            item = <FeatureViewTree build={build} feature={feature} reaction={this.state.reaction} />;
         }
 
         return (
@@ -261,9 +257,11 @@ class FeaturesView extends React.Component {
                             onChange={(item) => this.handleReaction(item.value)}
                         />
                         <TitledButton
-                            icon={this.state.isCrit ? "icon-ok" : "icon-cancel"}
-                            title={lang.get('stat.crit_dmg')}
-                            onClick={() => this.handleCritMode(!this.state.isCrit)}
+                            icon="icon-ok"
+                            title={lang.get('features_view.graph')}
+                            tooltip={lang.get('features_view.graph_open')}
+                            disabled={!feature}
+                            onClick={() => UI.DamageGraphModal.show(selectedFeature, this.state.reaction)}
                         />
                     </ControlsBar>
                 </FullHeightStatic>

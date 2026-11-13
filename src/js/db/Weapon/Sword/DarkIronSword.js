@@ -2,6 +2,8 @@ import { ConditionBooleanRefine } from "../../../classes/Condition/Boolean/Refin
 import { DbObjectWeapon } from "../../../classes/DbObject/Weapon";
 import { StatTable } from "../../../classes/StatTable";
 import { weaponStatTables } from "../../generated/WeaponStatTables";
+import { weaponPassiveTables } from "../../generated/WeaponPassiveTables";
+import { percent } from "../../Params";
 
 export const DarkIronSword = new DbObjectWeapon({
     name: 'dark_iron_sword',
@@ -18,7 +20,7 @@ export const DarkIronSword = new DbObjectWeapon({
             title: 'talent_name.weapon_dark_iron_sword',
             description: 'talent_descr.weapon_dark_iron_sword',
             stats: [
-                new StatTable('atk_percent', [20, 25, 30, 35, 40]),
+                new StatTable('atk_percent', percent(weaponPassiveTables.DarkIronSword.p1)),
             ],
         })
     ],

@@ -128,16 +128,12 @@ export class EnkaApp extends React.Component {
                     items={this.state.characters}
                     statDetails={true}
                     artifactDetails={true}
+                    sideControls={this.props.loadControls}
                     buttons={[
                         {
                             icon: 'gi-share-overwrite',
                             tooltip: UI.Lang.get('enka_import.save_char'),
                             callback: (set) => this.props.saveCalcSet(set),
-                        },
-                        {
-                            icon: 'gi-share-load',
-                            tooltip: UI.Lang.get('enka_import.load_char'),
-                            callback: (set) => this.props.applyCalcSet(set),
                         },
                     ]}
                 />

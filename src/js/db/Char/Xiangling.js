@@ -1,3 +1,6 @@
+import { ConditionAnd } from "../../classes/Condition/And";
+import { ConditionDropdownTeamMember } from "../../classes/Condition/Dropdown/TeamMember";
+import { ConditionSelectedReceiver } from "../../classes/Condition/SelectedReceiver";
 import { Condition } from "../../classes/Condition";
 import { ConditionAscensionChar } from "../../classes/Condition/Ascension/Char";
 import { ConditionBoolean } from "../../classes/Condition/Boolean";
@@ -15,9 +18,11 @@ import { FeatureDamagePlungeCollision } from "../../classes/Feature2/Damage/Plun
 import { FeatureDamagePlungeShockWave } from "../../classes/Feature2/Damage/Plunge/ShockWave";
 import { FeatureDamageSkill } from "../../classes/Feature2/Damage/Skill";
 import { FeatureMultiplier } from "../../classes/Feature2/Multiplier";
+import { RECEIVERS } from "../../classes/Team/Receivers";
 import { StatTable } from "../../classes/StatTable";
 import { charTables } from "../generated/CharTables";
 import { charTalentTables } from "../generated/CharTalentTables";
+import { percent } from "../Params";
 
 const Talents = new DbObjectTalents({
     attack: {
@@ -108,6 +113,13 @@ const Talents = new DbObjectTalents({
         ],
     },
 });
+
+const A1FlameRange = percent(charTalentTables.Xiangling.a1.p1);
+const A4Atk = percent(charTalentTables.Xiangling.a4.p1);
+const C1PyroRes = -percent(charTalentTables.Xiangling.c1.p1);
+const C2Dmg = percent(charTalentTables.Xiangling.c2.p3);
+const C4Duration = percent(charTalentTables.Xiangling.c4.p1);
+const C6PyroDmg = percent(charTalentTables.Xiangling.c6.p1);
 
 export const Xiangling = new DbObjectChar({
     name: 'xiangling',
@@ -207,7 +219,7 @@ export const Xiangling = new DbObjectChar({
             multipliers: [
                 new FeatureMultiplier({
                     leveling: 'char_skill_attack',
-                    values: new StatTable('xiangling_oil_meets_fire', [75]),
+                    values: new StatTable('xiangling_oil_meets_fire', [C2Dmg]),
                 }),
             ],
             condition: new ConditionConstellation({constellation: 2}),
@@ -295,7 +307,7 @@ export const Xiangling = new DbObjectChar({
             title: 'talent_name.xiangling_crossfire',
             description: 'talent_descr.xiangling_crossfire',
             stats: {
-                text_percent: 20,
+                text_percent: A1FlameRange,
             },
             info: {ascension: 1},
             subConditions: [
@@ -307,13 +319,27 @@ export const Xiangling = new DbObjectChar({
             serializeId: 1,
             title: 'talent_name.xiangling_beware_its_super_hot',
             description: 'talent_descr.xiangling_beware_its_super_hot',
-            stats: {
-                atk_percent: 10,
-            },
             info: {ascension: 4},
+            displayStats: {atk_percent: A4Atk},
             subConditions: [
                 new ConditionAscensionChar({ascension: 4}),
             ],
+        }),
+        new ConditionDropdownTeamMember({
+            name: 'xiangling_beware_receiver',
+            serializeId: 4,
+            title: 'buffs_name.selected_receiver',
+            description: 'buffs_descr.selected_receiver',
+        }),
+        new Condition({
+            isHidden: true,
+            receivers: RECEIVERS.TEAM,
+            condition: new ConditionAnd([
+                new ConditionBoolean({name: 'xiangling_beware'}),
+                new ConditionSelectedReceiver({name: 'xiangling_beware_receiver'}),
+                new ConditionAscensionChar({ascension: 4}),
+            ]),
+            stats: {atk_percent: A4Atk},
         }),
     ],
     constellation: new DbObjectConstellation([
@@ -322,10 +348,11 @@ export const Xiangling = new DbObjectChar({
                 new ConditionBoolean({
                     name: 'xiangling_crispy',
                     serializeId: 2,
+                    receivers: RECEIVERS.TEAM,
                     title: 'talent_name.xiangling_crispy_outside_tender_inside',
                     description: 'talent_descr.xiangling_crispy_outside_tender_inside',
                     stats: {
-                        enemy_res_pyro: -15,
+                        enemy_res_pyro: C1PyroRes,
                     },
                 }),
             ],
@@ -336,7 +363,7 @@ export const Xiangling = new DbObjectChar({
                     title: 'talent_name.xiangling_oil_meets_fire',
                     description: 'talent_descr.xiangling_oil_meets_fire',
                     stats: {
-                        text_percent_dmg: 75,
+                        text_percent_dmg: C2Dmg,
                     },
                 }),
             ],
@@ -356,7 +383,7 @@ export const Xiangling = new DbObjectChar({
                     title: 'talent_name.xiangling_slowbake',
                     description: 'talent_descr.xiangling_slowbake',
                     stats: {
-                        text_percent: 40,
+                        text_percent: C4Duration,
                     },
                 }),
             ],
@@ -375,52 +402,17 @@ export const Xiangling = new DbObjectChar({
                 new ConditionBoolean({
                     name: 'xiangling_condensed_pyronado',
                     serializeId: 3,
+                    receivers: RECEIVERS.TEAM,
                     title: 'talent_name.xiangling_condensed_pyronado',
                     description: 'talent_descr.xiangling_condensed_pyronado',
                     stats: {
-                        dmg_pyro: 15,
+                        dmg_pyro: C6PyroDmg,
                     },
                 }),
             ],
         },
     ]),
-    partyData: {
-        conditions: [
-            new ConditionBoolean({
-                name: 'party.xiangling_beware',
-                serializeId: 1,
-                rotation: 'party',
-                title: 'talent_name.xiangling_beware_its_super_hot',
-                description: 'talent_descr.xiangling_beware_its_super_hot',
-                info: {ascension: 2},
-                stats: {
-                    atk_percent: 10,
-                },
-            }),
-            new ConditionBoolean({
-                name: 'party.xiangling_crispy',
-                serializeId: 2,
-                rotation: 'party',
-                title: 'talent_name.xiangling_crispy_outside_tender_inside',
-                description: 'talent_descr.xiangling_crispy_outside_tender_inside',
-                info: {constellation: 1},
-                stats: {
-                    enemy_res_pyro: -15,
-                },
-            }),
-            new ConditionBoolean({
-                name: 'party.xiangling_condensed_pyronado',
-                serializeId: 3,
-                rotation: 'party',
-                title: 'talent_name.xiangling_condensed_pyronado',
-                description: 'talent_descr.xiangling_condensed_pyronado',
-                info: {constellation: 6},
-                stats: {
-                    dmg_pyro: 15,
-                },
-            }),
-        ],
-    },
+    retiredParty: [[1, 'checkbox'], [2, 'checkbox'], [3, 'checkbox']],
 });
 
 

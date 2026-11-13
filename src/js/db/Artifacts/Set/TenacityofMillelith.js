@@ -1,6 +1,10 @@
 import { ArtifactSet } from "../../../classes/ArtifactSet";
+import { Condition } from "../../../classes/Condition";
 import { ConditionBoolean } from "../../../classes/Condition/Boolean";
 import { ConditionStatic } from "../../../classes/Condition/Static";
+import { RECEIVERS } from "../../../classes/Team/Receivers";
+import { artifactSetTables } from "../../generated/ArtifactSetTables";
+import { percent } from "../../Params";
 
 export const TenacityofMillelith = new ArtifactSet({
     serializeId: 28,
@@ -19,7 +23,7 @@ export const TenacityofMillelith = new ArtifactSet({
                     title: 'set_bonus.tenacity_of_the_millelith_2',
                     description: 'set_descr.tenacity_of_the_millelith_2',
                     stats: {
-                        hp_percent: 20,
+                        hp_percent: artifactSetTables.TenacityofMillelith.pc2.hp_percent,
                     },
                 }),
             ],
@@ -33,9 +37,15 @@ export const TenacityofMillelith = new ArtifactSet({
                     title: 'set_bonus.tenacity_of_the_millelith_4',
                     description: 'set_descr.tenacity_of_the_millelith_4',
                     stats: {
-                        text_percent: 30,
-                        text_percent2: 20,
+                        text_percent: percent(artifactSetTables.TenacityofMillelith.pc4.p2),
+                        text_percent2: percent(artifactSetTables.TenacityofMillelith.pc4.p1),
                     },
+                }),
+                new Condition({
+                    receivers: RECEIVERS.TEAM,
+                    stack: 'tenacity_of_the_millelith_4',
+                    condition: new ConditionBoolean({name: 'set.tenacity_of_the_millelith_4'}),
+                    stats: {shield: percent(artifactSetTables.TenacityofMillelith.pc4.p2), atk_percent: percent(artifactSetTables.TenacityofMillelith.pc4.p1)},
                 }),
             ],
         },

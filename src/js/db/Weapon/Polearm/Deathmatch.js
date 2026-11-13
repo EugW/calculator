@@ -4,6 +4,8 @@ import { ConditionStaticRefine } from "../../../classes/Condition/Static/Refine"
 import { DbObjectWeapon } from "../../../classes/DbObject/Weapon";
 import { StatTable } from "../../../classes/StatTable";
 import { weaponStatTables } from "../../generated/WeaponStatTables";
+import { weaponPassiveTables } from "../../generated/WeaponPassiveTables";
+import { percent } from "../../Params";
 
 export const Deathmatch = new DbObjectWeapon({
     name: 'deathmatch',
@@ -32,8 +34,8 @@ export const Deathmatch = new DbObjectWeapon({
             title: 'talent_name.weapon_deathmatch_1',
             description: 'talent_descr.weapon_deathmatch_1',
             stats: [
-                new StatTable('atk_percent', [16, 20, 24, 28, 32]),
-                new StatTable('def_percent', [16, 20, 24, 28, 32]),
+                new StatTable('atk_percent', percent(weaponPassiveTables.Deathmatch.p3)),
+                new StatTable('def_percent', percent(weaponPassiveTables.Deathmatch.p4)),
             ],
             subConditions: [
                 new ConditionBoolean({
@@ -48,7 +50,7 @@ export const Deathmatch = new DbObjectWeapon({
             title: 'talent_name.weapon_deathmatch_2',
             description: 'talent_descr.weapon_deathmatch_2',
             stats: [
-                new StatTable('atk_percent', [24, 30, 36, 42, 48]),
+                new StatTable('atk_percent', percent(weaponPassiveTables.Deathmatch.p2)),
             ],
         }),
     ],

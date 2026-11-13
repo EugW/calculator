@@ -3,6 +3,8 @@ import { ConditionBoolean } from "../../../classes/Condition/Boolean";
 import { ConditionBooleanValue } from "../../../classes/Condition/Boolean/Value";
 import { ConditionCalcMoonsign } from "../../../classes/Condition/CalcMoonsign";
 import { ConditionStatic } from "../../../classes/Condition/Static";
+import { artifactSetTables } from "../../generated/ArtifactSetTables";
+import { percent } from "../../Params";
 
 export const AubadeOfMorningstarAndMoon = new ArtifactSet({
     serializeId: 58,
@@ -21,7 +23,7 @@ export const AubadeOfMorningstarAndMoon = new ArtifactSet({
                     title: 'set_bonus.aubade_of_morningstar_and_moon_2',
                     description: 'set_descr.aubade_of_morningstar_and_moon_2',
                     stats: {
-                        mastery: 80,
+                        mastery: artifactSetTables.AubadeOfMorningstarAndMoon.pc2.mastery,
                     },
                 })
             ],
@@ -38,7 +40,7 @@ export const AubadeOfMorningstarAndMoon = new ArtifactSet({
                     title: 'set_bonus.aubade_of_morningstar_and_moon_4',
                     description: 'set_descr.aubade_of_morningstar_and_moon_4_1',
                     stats: {
-                        dmg_reaction_lunar: 20,
+                        dmg_reaction_lunar: percent(artifactSetTables.AubadeOfMorningstarAndMoon.pc4.p1),
                     },
                 }),
                 // Additional +40% when Moonsign level >= 2 (Ascendant Gleam)
@@ -46,7 +48,7 @@ export const AubadeOfMorningstarAndMoon = new ArtifactSet({
                     title: 'set_bonus.aubade_of_morningstar_and_moon_4',
                     description: 'set_descr.aubade_of_morningstar_and_moon_4_2',
                     stats: {
-                        dmg_reaction_lunar: 40,
+                        dmg_reaction_lunar: percent(artifactSetTables.AubadeOfMorningstarAndMoon.pc4.p2),
                     },
                     subConditions: [
                         new ConditionBoolean({name: 'set.aubade_of_morningstar_and_moon_4'}),

@@ -1,11 +1,17 @@
+import { ConditionReceiver } from "../../classes/Condition/Receiver";
+import { ConditionDropdownTeamMember } from "../../classes/Condition/Dropdown/TeamMember";
+import { ConditionSelectedReceiver } from "../../classes/Condition/SelectedReceiver";
 import { Condition } from "../../classes/Condition";
 import { ConditionAnd } from "../../classes/Condition/And";
 import { ConditionAscensionChar } from "../../classes/Condition/Ascension/Char";
 import { ConditionBoolean } from "../../classes/Condition/Boolean";
+import { ConditionOnField } from "../../classes/Condition/Field";
+import { ConditionBooleanDropdownValue } from "../../classes/Condition/Boolean/DropdownValue";
 import { ConditionConstellation } from "../../classes/Condition/Constellation";
 import { ConditionDropdownElement } from "../../classes/Condition/Dropdown/Element";
 import { ConditionHexereiResonance } from "../../classes/Condition/HexereiResonance";
 import { ConditionNot } from "../../classes/Condition/Not";
+import { ConditionOr } from "../../classes/Condition/Or";
 import { ConditionStatic } from "../../classes/Condition/Static";
 import { DbObjectChar } from "../../classes/DbObject/Char";
 import { DbObjectConstellation } from "../../classes/DbObject/Constellation";
@@ -19,9 +25,11 @@ import { FeatureDamagePlungeShockWave } from "../../classes/Feature2/Damage/Plun
 import { FeatureDamageSkill } from "../../classes/Feature2/Damage/Skill";
 import { FeatureMultiplier } from "../../classes/Feature2/Multiplier";
 import { FeatureMultiplierVentiWindsunder } from "../../classes/Feature2/Multiplier/VentiWindsunder";
+import { RECEIVERS } from "../../classes/Team/Receivers";
 import { StatTable } from "../../classes/StatTable";
 import { charTables } from "../generated/CharTables";
 import { charTalentTables } from "../generated/CharTalentTables";
+import { percent } from "../Params";
 
 const Talents = new DbObjectTalents({
     attack: {
@@ -121,8 +129,6 @@ const Talents = new DbObjectTalents({
 
 const condWitchHomeworkOn = new ConditionBoolean({name: 'venti_witch_homework'});
 const condWitchHomeworkOff = new ConditionNot([condWitchHomeworkOn]);
-const condPartyWitchHomeworkOn = new ConditionBoolean({name: 'party.venti_witch_homework'});
-const condPartyWitchHomeworkOff = new ConditionNot([condPartyWitchHomeworkOn]);
 const condHexereiResonanceOn = new ConditionHexereiResonance({});
 
 const condVentiWindsunderArrows = new ConditionBoolean({
@@ -139,6 +145,10 @@ const condVentiWindsunderArrows = new ConditionBoolean({
     },
     info: {hexerei: true},
 });
+
+const C1HomingDmg = charTalentTables.Venti.c1.p1;
+const SpDmgBonus = percent(charTalentTables.Venti.sp.p1);
+const C6CritDmg = percent(charTalentTables.Venti.c6.p1);
 
 export const Venti = new DbObjectChar({
     name: 'venti',
@@ -312,7 +322,7 @@ export const Venti = new DbObjectChar({
             multipliers: [
                 new FeatureMultiplier({
                     // Buffed C1: 2 homing arrows, each 20% of Windsunder Arrow DMG.
-                    scalingMultiplier: 0.2,
+                    scalingMultiplier: C1HomingDmg,
                     scalingSource: 'constellation1_buffed',
                     leveling: 'char_skill_attack',
                     values: Talents.get('attack.charged_aimed'),
@@ -438,10 +448,24 @@ export const Venti = new DbObjectChar({
                 condWitchHomeworkOn,
                 condHexereiResonanceOn,
             ]),
-            stats: {
-                dmg_all: 50,
-            },
             info: {hexerei: true},
+        }),
+        new ConditionDropdownTeamMember({
+            name: 'venti_secret_rite_4s_receiver',
+            serializeId: 10,
+            title: 'buffs_name.selected_receiver',
+            description: 'buffs_descr.selected_receiver',
+        }),
+        new Condition({
+            isHidden: true,
+            receivers: RECEIVERS.TEAM,
+            condition: new ConditionAnd([
+                new ConditionBoolean({name: 'venti_secret_rite_4s'}),
+                new ConditionSelectedReceiver({name: 'venti_secret_rite_4s_receiver'}),
+                condWitchHomeworkOn,
+                condHexereiResonanceOn,
+            ]),
+            stats: {dmg_all: SpDmgBonus},
         }),
         condVentiWindsunderArrows,
         new ConditionStatic({
@@ -489,6 +513,7 @@ export const Venti = new DbObjectChar({
                 new ConditionBoolean({
                     name: 'venti_breeze',
                     serializeId: 1,
+                    receivers: RECEIVERS.TEAM,
                     title: 'talent_name.venti_breeze_of_reminiscence',
                     description: 'talent_descr.venti_breeze_of_reminiscence_1',
                     hideCondition: [condWitchHomeworkOn],
@@ -501,6 +526,7 @@ export const Venti = new DbObjectChar({
                 new ConditionBoolean({
                     name: 'venti_breeze',
                     serializeId: 1,
+                    receivers: RECEIVERS.TEAM,
                     title: 'talent_name.venti_breeze_of_reminiscence',
                     description: 'talent_descr.venti_breeze_of_reminiscence_1_buffed',
                     hideCondition: [condWitchHomeworkOff],
@@ -513,6 +539,7 @@ export const Venti = new DbObjectChar({
                 new ConditionBoolean({
                     name: 'venti_breeze_2',
                     serializeId: 2,
+                    receivers: RECEIVERS.TEAM,
                     title: 'talent_name.venti_breeze_of_reminiscence',
                     description: 'talent_descr.venti_breeze_of_reminiscence_2',
                     hideCondition: [condWitchHomeworkOn],
@@ -528,6 +555,7 @@ export const Venti = new DbObjectChar({
                 new ConditionBoolean({
                     name: 'venti_breeze_2',
                     serializeId: 2,
+                    receivers: RECEIVERS.TEAM,
                     title: 'talent_name.venti_breeze_of_reminiscence',
                     description: 'talent_descr.venti_breeze_of_reminiscence_2_buffed',
                     hideCondition: [condWitchHomeworkOff],
@@ -571,6 +599,18 @@ export const Venti = new DbObjectChar({
                         dmg_anemo: 25,
                     },
                 }),
+                new Condition({
+                    isHidden: true,
+                    receivers: RECEIVERS.OTHERS,
+                    condition: new ConditionAnd([
+                        condWitchHomeworkOn,
+                        new ConditionBoolean({name: 'venti_hurricane'}),
+                        new ConditionReceiver({
+                            condition: new ConditionOnField(),
+                        }),
+                    ]),
+                    stats: {dmg_anemo: 25},
+                }),
             ],
         },
         {
@@ -587,6 +627,7 @@ export const Venti = new DbObjectChar({
                 new ConditionBoolean({
                     name: 'venti_storm',
                     serializeId: 4,
+                    receivers: RECEIVERS.TEAM,
                     title: 'talent_name.venti_storm_of_defiance',
                     description: 'talent_descr.venti_storm_of_defiance_1',
                     hideCondition: [condWitchHomeworkOn],
@@ -598,6 +639,7 @@ export const Venti = new DbObjectChar({
                 new ConditionBoolean({
                     name: 'venti_storm',
                     serializeId: 4,
+                    receivers: RECEIVERS.TEAM,
                     title: 'talent_name.venti_storm_of_defiance',
                     description: 'talent_descr.venti_storm_of_defiance_1_buffed',
                     hideCondition: [condWitchHomeworkOff],
@@ -609,6 +651,7 @@ export const Venti = new DbObjectChar({
                 new ConditionDropdownElement({
                     name: 'venti_storm_element',
                     serializeId: 5,
+                    receivers: RECEIVERS.TEAM,
                     title: 'talent_name.venti_storm_of_defiance',
                     description: 'talent_descr.venti_storm_of_defiance_2',
                     hideCondition: [condWitchHomeworkOn],
@@ -650,6 +693,7 @@ export const Venti = new DbObjectChar({
                 new ConditionDropdownElement({
                     name: 'venti_storm_element',
                     serializeId: 5,
+                    receivers: RECEIVERS.TEAM,
                     title: 'talent_name.venti_storm_of_defiance',
                     description: 'talent_descr.venti_storm_of_defiance_2_buffed',
                     hideCondition: [condWitchHomeworkOff],
@@ -664,7 +708,6 @@ export const Venti = new DbObjectChar({
                             conditions: [
                                 new Condition({stats: {
                                     enemy_res_cryo: -20,
-                                    crit_dmg: 100,
                                 }}),
                             ],
                         },
@@ -674,7 +717,6 @@ export const Venti = new DbObjectChar({
                             conditions: [
                                 new Condition({stats: {
                                     enemy_res_electro: -20,
-                                    crit_dmg: 100,
                                 }}),
                             ],
                         },
@@ -684,7 +726,6 @@ export const Venti = new DbObjectChar({
                             conditions: [
                                 new Condition({stats: {
                                     enemy_res_hydro: -20,
-                                    crit_dmg: 100,
                                 }}),
                             ],
                         },
@@ -694,218 +735,30 @@ export const Venti = new DbObjectChar({
                             conditions: [
                                 new Condition({stats: {
                                     enemy_res_pyro: -20,
-                                    crit_dmg: 100,
                                 }}),
                             ],
                         },
                     ],
                 }),
+                // Storm of Defiance also grants Venti himself 100% CRIT DMG
+                // against affected opponents; that part is not shared.
+                new Condition({
+                    stats: {
+                        crit_dmg: C6CritDmg,
+                    },
+                    condition: new ConditionAnd([
+                        condWitchHomeworkOn,
+                        new ConditionBoolean({name: 'venti_storm'}),
+                        new ConditionOr([
+                            new ConditionBooleanDropdownValue({name: 'venti_storm_element', value: 'cryo'}),
+                            new ConditionBooleanDropdownValue({name: 'venti_storm_element', value: 'electro'}),
+                            new ConditionBooleanDropdownValue({name: 'venti_storm_element', value: 'hydro'}),
+                            new ConditionBooleanDropdownValue({name: 'venti_storm_element', value: 'pyro'}),
+                        ]),
+                    ]),
+                }),
             ],
         },
     ]),
-    partyData: {
-        conditions: [
-            new ConditionBoolean({
-                name: 'party.venti_witch_homework',
-                serializeId: 6,
-                rotation: 'party',
-                title: 'talent_name.venti_temporal_winds_eulogy',
-                description: 'talent_descr.venti_temporal_winds_eulogy',
-                info: {hexerei: true},
-            }),
-            new ConditionBoolean({
-                name: 'party.venti_secret_rite_4s',
-                serializeId: 7,
-                rotation: 'party',
-                title: 'talent_name.venti_hexerei_secret_rite',
-                hideCondition: [condPartyWitchHomeworkOff],
-                condition: new ConditionAnd([
-                    condPartyWitchHomeworkOn,
-                    condHexereiResonanceOn,
-                ]),
-                stats: {
-                    dmg_all: 50,
-                },
-                info: {hexerei: true},
-            }),
-            new ConditionBoolean({
-                name: 'party.venti_breeze',
-                serializeId: 1,
-                rotation: 'party',
-                title: 'talent_name.venti_breeze_of_reminiscence',
-                description: 'talent_descr.venti_breeze_of_reminiscence_1',
-                hideCondition: [condPartyWitchHomeworkOn],
-                condition: condPartyWitchHomeworkOff,
-                stats: {
-                    enemy_res_anemo: -12,
-                    enemy_res_phys: -12,
-                },
-                info: {constellation: 2},
-            }),
-            new ConditionBoolean({
-                name: 'party.venti_breeze',
-                serializeId: 1,
-                rotation: 'party',
-                title: 'talent_name.venti_breeze_of_reminiscence',
-                description: 'talent_descr.venti_breeze_of_reminiscence_1_buffed',
-                hideCondition: [condPartyWitchHomeworkOff],
-                condition: condPartyWitchHomeworkOn,
-                stats: {
-                    enemy_res_anemo: -24,
-                    enemy_res_phys: -24,
-                },
-                info: {constellation: 2},
-            }),
-            new ConditionBoolean({
-                name: 'party.venti_breeze_2',
-                serializeId: 2,
-                rotation: 'party',
-                title: 'talent_name.venti_breeze_of_reminiscence',
-                description: 'talent_descr.venti_breeze_of_reminiscence_2',
-                hideCondition: [condPartyWitchHomeworkOn],
-                condition: new ConditionAnd([
-                    condPartyWitchHomeworkOff,
-                    new ConditionBoolean({name: 'party.venti_breeze'}),
-                ]),
-                stats: {
-                    enemy_res_anemo: -12,
-                    enemy_res_phys: -12,
-                },
-                info: {constellation: 2},
-            }),
-            new ConditionBoolean({
-                name: 'party.venti_hurricane',
-                serializeId: 5,
-                rotation: 'party',
-                title: 'talent_name.venti_hurricane_of_freedom',
-                description: 'talent_descr.venti_hurricane_of_freedom_buffed',
-                hideCondition: [condPartyWitchHomeworkOff],
-                condition: condPartyWitchHomeworkOn,
-                stats: {
-                    dmg_anemo: 25,
-                },
-                info: {constellation: 4},
-            }),
-            new ConditionBoolean({
-                name: 'party.venti_storm',
-                serializeId: 3,
-                rotation: 'party',
-                title: 'talent_name.venti_storm_of_defiance',
-                description: 'talent_descr.venti_storm_of_defiance_1',
-                hideCondition: [condPartyWitchHomeworkOn],
-                condition: condPartyWitchHomeworkOff,
-                info: {constellation: 6},
-                stats: {
-                    enemy_res_anemo: -20,
-                },
-            }),
-            new ConditionBoolean({
-                name: 'party.venti_storm',
-                serializeId: 3,
-                rotation: 'party',
-                title: 'talent_name.venti_storm_of_defiance',
-                description: 'talent_descr.venti_storm_of_defiance_1_buffed',
-                hideCondition: [condPartyWitchHomeworkOff],
-                condition: condPartyWitchHomeworkOn,
-                info: {constellation: 6},
-                stats: {
-                    enemy_res_anemo: -20,
-                },
-            }),
-            new ConditionDropdownElement({
-                name: 'party.venti_storm_element',
-                serializeId: 4,
-                rotation: 'party',
-                title: 'talent_name.venti_storm_of_defiance',
-                description: 'talent_descr.venti_storm_of_defiance_2',
-                hideCondition: [condPartyWitchHomeworkOn],
-                condition: new ConditionAnd([
-                    condPartyWitchHomeworkOff,
-                    new ConditionBoolean({
-                        name: 'party.venti_storm',
-                    }),
-                ]),
-                values: [
-                    {
-                        value: 'cryo',
-                        serializeId: 1,
-                        conditions: [
-                            new Condition({stats: {enemy_res_cryo: -20}}),
-                        ],
-                    },
-                    {
-                        value: 'electro',
-                        serializeId: 2,
-                        conditions: [
-                            new Condition({stats: {enemy_res_electro: -20}}),
-                        ],
-                    },
-                    {
-                        value: 'hydro',
-                        serializeId: 3,
-                        conditions: [
-                            new Condition({stats: {enemy_res_hydro: -20}}),
-                        ],
-                    },
-                    {
-                        value: 'pyro',
-                        serializeId: 4,
-                        conditions: [
-                            new Condition({stats: {enemy_res_pyro: -20}}),
-                        ],
-                    },
-                ],
-                info: {
-                    constellation: 6,
-                },
-            }),
-            new ConditionDropdownElement({
-                name: 'party.venti_storm_element',
-                serializeId: 4,
-                rotation: 'party',
-                title: 'talent_name.venti_storm_of_defiance',
-                description: 'talent_descr.venti_storm_of_defiance_2_buffed',
-                hideCondition: [condPartyWitchHomeworkOff],
-                condition: new ConditionAnd([
-                    condPartyWitchHomeworkOn,
-                    new ConditionBoolean({
-                        name: 'party.venti_storm',
-                    }),
-                ]),
-                values: [
-                    {
-                        value: 'cryo',
-                        serializeId: 1,
-                        conditions: [
-                            new Condition({stats: {enemy_res_cryo: -20}}),
-                        ],
-                    },
-                    {
-                        value: 'electro',
-                        serializeId: 2,
-                        conditions: [
-                            new Condition({stats: {enemy_res_electro: -20}}),
-                        ],
-                    },
-                    {
-                        value: 'hydro',
-                        serializeId: 3,
-                        conditions: [
-                            new Condition({stats: {enemy_res_hydro: -20}}),
-                        ],
-                    },
-                    {
-                        value: 'pyro',
-                        serializeId: 4,
-                        conditions: [
-                            new Condition({stats: {enemy_res_pyro: -20}}),
-                        ],
-                    },
-                ],
-                info: {
-                    constellation: 6,
-                },
-            }),
-        ],
-    },
+    retiredParty: [[1, 'checkbox'], [2, 'checkbox'], [3, 'checkbox'], [4, 'dropdown'], [5, 'checkbox'], [6, 'checkbox'], [7, 'checkbox']],
 });

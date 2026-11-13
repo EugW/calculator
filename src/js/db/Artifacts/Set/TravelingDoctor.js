@@ -1,5 +1,6 @@
 import { ArtifactSet } from "../../../classes/ArtifactSet";
 import { ConditionStatic } from "../../../classes/Condition/Static";
+import { artifactSetTables } from "../../generated/ArtifactSetTables";
 
 export const TravelingDoctor = new ArtifactSet({
     serializeId: 25,
@@ -19,7 +20,7 @@ export const TravelingDoctor = new ArtifactSet({
                     description: 'set_descr.traveling_doctor_2',
                     settings: {},
                     stats: {
-                        healing_recv: 20,
+                        healing_recv: artifactSetTables.TravelingDoctor.pc2.healing_recv,
                     },
                 })
             ],

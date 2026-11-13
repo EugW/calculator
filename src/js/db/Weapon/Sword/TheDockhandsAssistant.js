@@ -2,6 +2,7 @@ import { ConditionStacks } from "../../../classes/Condition/Stacks";
 import { DbObjectWeapon } from "../../../classes/DbObject/Weapon";
 import { StatTable } from "../../../classes/StatTable";
 import { weaponStatTables } from "../../generated/WeaponStatTables";
+import { weaponPassiveTables } from "../../generated/WeaponPassiveTables";
 
 export const TheDockhandsAssistant = new DbObjectWeapon({
     name: 'the_dockhands_assistant',
@@ -20,8 +21,8 @@ export const TheDockhandsAssistant = new DbObjectWeapon({
             maxStacks: 3,
             levelSetting: 'weapon_refine',
             stats: [
-                new StatTable('mastery', [40, 50, 60, 70, 80]),
-                new StatTable('text_decimal', [2, 2.5, 3, 3.5, 4]),
+                new StatTable('mastery', weaponPassiveTables.TheDockhandsAssistant.p5),
+                new StatTable('text_decimal', weaponPassiveTables.TheDockhandsAssistant.p4),
             ],
         }),
     ],

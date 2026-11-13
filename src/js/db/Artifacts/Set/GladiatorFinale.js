@@ -1,6 +1,8 @@
 import { ArtifactSet } from "../../../classes/ArtifactSet";
 import { ConditionBooleanWeaponType } from "../../../classes/Condition/Boolean/WeaponType";
 import { ConditionStatic } from "../../../classes/Condition/Static";
+import { artifactSetTables } from "../../generated/ArtifactSetTables";
+import { percent } from "../../Params";
 
 export const GladiatorFinale = new ArtifactSet({
     serializeId: 11,
@@ -19,7 +21,7 @@ export const GladiatorFinale = new ArtifactSet({
                     title: 'set_bonus.gladiators_finale_2',
                     description: 'set_descr.gladiators_finale_2',
                     stats: {
-                        atk_percent: 18,
+                        atk_percent: artifactSetTables.GladiatorFinale.pc2.atk_percent,
                     },
                 })
             ],
@@ -31,7 +33,7 @@ export const GladiatorFinale = new ArtifactSet({
                     title: 'set_bonus.gladiators_finale_4',
                     description: 'set_descr.gladiators_finale_4',
                     stats: {
-                        dmg_normal: 35,
+                        dmg_normal: percent(artifactSetTables.GladiatorFinale.pc4.p1),
                     },
                     subConditions: [
                         new ConditionBooleanWeaponType({types: ['sword', 'claymore', 'polearm']}),

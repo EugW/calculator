@@ -1,0 +1,14 @@
+category;name;rus;eng
+artifact_profile;title;Бонусы комплектов;Set bonuses
+artifact_profile;description;Настройки бонусов этого персонажа для всех комплектов. Шаги ротации меняют их с указанного момента.;This member’s bonus settings for every set. Rotation steps change them from that point onward.
+artifact_profile;changed;Персонаж или его настройки изменились. Закройте окно и откройте его снова.;The member or profile changed. Close and reopen this window.
+artifact_profile;allow_1;Разрешить 1 предмет;Allow 1-piece
+artifact_profile;allow_2;Разрешить 2 предмета;Allow 2-piece
+artifact_profile;allow_3;Разрешить 3 предмета;Allow 3-piece
+artifact_profile;allow_4;Разрешить 4 предмета;Allow 4-piece
+artifact_profile;allow_5;Разрешить 5 предметов;Allow 5-piece
+artifact_profile;allow_help;Запрет 2 предметов исключает и сборки с 4 предметами этого комплекта.;Disallowing 2 pieces also excludes builds with 4 pieces of that set.
+artifact_profile;allow_all;Разрешить все;Allow all
+artifact_profile;disallow_all;Запретить все;Disallow all
+artifact_profile;edit;Настроить бонусы комплекта;Edit set bonuses
+artifact_profile;stale;Контекст расчёта изменился. Результаты показаны с исходными настройками. Повторите подбор перед применением.;The calculation context changed. Results use the original settings. Run the search again before applying a result.

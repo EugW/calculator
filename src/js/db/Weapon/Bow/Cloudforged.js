@@ -2,6 +2,7 @@ import { ConditionStacks } from "../../../classes/Condition/Stacks";
 import { DbObjectWeapon } from "../../../classes/DbObject/Weapon";
 import { StatTable } from "../../../classes/StatTable";
 import { weaponStatTables } from "../../generated/WeaponStatTables";
+import { weaponPassiveTables } from "../../generated/WeaponPassiveTables";
 
 export const Cloudforged = new DbObjectWeapon({
     name: 'cloudforged',
@@ -20,7 +21,7 @@ export const Cloudforged = new DbObjectWeapon({
             maxStacks: 2,
             levelSetting: 'weapon_refine',
             stats: [
-                new StatTable('mastery', [40, 50, 60, 70, 80]),
+                new StatTable('mastery', weaponPassiveTables.Cloudforged.p1),
             ],
         }),
     ],

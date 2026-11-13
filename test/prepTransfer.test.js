@@ -1,6 +1,8 @@
 import { Worker } from 'worker_threads';
+import { serializeWorkerMember } from '../src/js/classes/Team';
 import { Artifact } from '../src/js/classes/Artifact';
 import { CalcSet } from '../src/js/classes/CalcSet';
+import { Team } from '../src/js/classes/Team';
 import { DB } from '../src/js/db/DB';
 import { evaluateArtifactActionCandidate } from '../src/js/classes/ArtifactActionPrep';
 import { normalizeArtifactRVFilters } from '../src/js/classes/ArtifactUsefulRV';
@@ -13,11 +15,11 @@ global.DB = DB;
 test('candidate transfers GPU inputs and retains the state needed for f64 rescore and gallery', async () => {
     const build = new CalcSet();
     build.setChar(DB.Chars.get('Jean'));
-    build.setEnemy(DB.Enemies.getFirst().getFirst());
+    Team.fromMember(build);
     const inventory = Object.entries({flower: 'hp', plume: 'atk', sands: 'atk_percent', goblet: 'dmg_phys', circlet: 'crit_dmg'})
         .map(([slot, main]) => new Artifact(5, 20, slot, 'GladiatorFinale', main, []));
     const input = {kind: 'craft', set: 'GladiatorFinale', feature: 'stats.crit_dmg', baseValue: 1,
-        build: build.serialize(), inventory: inventory.map(art => art.serialize()),
+        build: serializeWorkerMember(build), inventory: inventory.map(art => art.serialize()),
         inventoryHashes: inventory.map(art => art.getHash()), group: {slot: 'flower'},
         craftAffixes: {flower: {mainStat: 'hp', substats: ['crit_dmg', 'def']}},
         rvFilters: normalizeArtifactRVFilters(), topologySpecs: [], retainOutcomes: true};

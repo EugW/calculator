@@ -3,13 +3,18 @@ import { CalcObjectBuffs } from "../src/js/classes/CalcObject/Buffs";
 import { FeatureMultiplierStellarSwirl } from "../src/js/classes/Feature2/Multiplier/StellarSwirl";
 import { Sandrone } from "../src/js/db/Char/Sandrone";
 import { DB } from "../src/js/db/DB";
+import { Team } from "../src/js/classes/Team";
+import { makeBuild, teamOf } from "./support/team";
 
 global.DB = DB;
 
 const vortexName = "stellarswirl_vortex_triggers";
 
+// The shared input belongs to the party (the team's own effects), not to a
+// member's buffs.
 function getSharedVortexCondition() {
-    return new CalcObjectBuffs().getConditions()
+    expect(new CalcObjectBuffs().getConditions().some((condition) => condition.getName() === vortexName)).toBe(false);
+    return DB.Buffs.get('ElementalResonance').getConditions()
         .filter((condition) => condition.getName() === vortexName);
 }
 
@@ -21,7 +26,7 @@ function applyConditions(data, conditions) {
     }
 }
 
-test("Stellar Vortex uses exactly one global Party setup input", () => {
+test("Stellar Vortex uses exactly one shared team input", () => {
     const shared = getSharedVortexCondition();
     expect(shared).toHaveLength(1);
 
@@ -35,7 +40,6 @@ test("Stellar Vortex uses exactly one global Party setup input", () => {
 
     const characterCopies = DB.Chars.getList(true).flatMap((character) => [
         ...character.getAllConditions(),
-        ...character.getPartyConditions(),
     ]).filter((condition) => condition.getName() === vortexName);
     expect(characterCopies).toEqual([]);
 });
@@ -48,24 +52,21 @@ test("Sandrone alone enables the shared Stellar Vortex input", () => {
     expect(getSharedVortexCondition()[0].checkSubconditions(data.settings)).toBe(true);
 });
 
-test("shared Stellar Vortex triggers round-trip through global Buff ID 78", () => {
-    const buffs = new CalcObjectBuffs();
-    const settings = {
-        allowed_stellarswirl: 1,
-        stellarswirl_vortex_triggers: 4,
-    };
+test("shared Stellar Vortex triggers round-trip with the team", () => {
+    const source = makeBuild('Sandrone');
+    const receiver = makeBuild('Barbara');
+    const team = Team.fromMember(source);
+    team.setMember(1, receiver);
+    team.setSettings({...team.getSettings(), stellarswirl_vortex_triggers: 4});
 
-    const encoded = buffs.serialize(settings);
-    const vortexIndex = encoded.indexOf(78);
-    expect(vortexIndex).toBeGreaterThan(0);
-    expect(encoded.slice(vortexIndex, vortexIndex + 2)).toEqual([78, 4]);
-
-    const restored = CalcObjectBuffs.deserialize([...encoded]);
-    expect(restored.getSettings()).toMatchObject({
-        stellarswirl_vortex_triggers: 4,
-    });
-    expect(restored.serialize({...restored.getSettings(), allowed_stellarswirl: 1}))
-        .toEqual(encoded);
+    const encoded = team.serialize();
+    const restored = Team.deserialize([...encoded]);
+    expect(restored.getSettings().stellarswirl_vortex_triggers).toBe(4);
+    for (const member of restored.getMembers()) {
+        expect(teamOf(member).stellarswirl_vortex_triggers).toBe(4);
+        expect(member.buffs.getSettings().stellarswirl_vortex_triggers).toBeUndefined();
+    }
+    expect(restored.serialize()).toEqual(encoded);
 });
 
 test.each([

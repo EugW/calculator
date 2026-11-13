@@ -2,6 +2,7 @@
 /data/strings/generated/*.csv whitespace=cr-at-eol
 /data/raw/char_texts.txt text eol=lf
 /data/raw/weapon_texts.txt text eol=lf
+/data/raw/ability_channels.txt text eol=lf
 /data/strings_casino/weapon_names.csv text eol=lf
 
 /new_bin/import_char2.py text eol=lf

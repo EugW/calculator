@@ -12,8 +12,6 @@ function damage(name, settings = {}) {
     const data = new BuildData({
         char_level: 90,
         enemy_level: 90,
-        enemy_res_anemo: 0,
-        enemy_res_pyro: 0,
         char_skill_attack: 1,
         ...settings,
     }, {

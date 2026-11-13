@@ -2,6 +2,8 @@ import { ConditionBooleanRefine } from "../../../classes/Condition/Boolean/Refin
 import { DbObjectWeapon } from "../../../classes/DbObject/Weapon";
 import { StatTable } from "../../../classes/StatTable";
 import { weaponStatTables } from "../../generated/WeaponStatTables";
+import { weaponPassiveTables } from "../../generated/WeaponPassiveTables";
+import { percent } from "../../Params";
 
 export const Emberwell = new DbObjectWeapon({
     name: 'emberwell',
@@ -18,7 +20,7 @@ export const Emberwell = new DbObjectWeapon({
             title: 'talent_name.weapon_emberwell',
             description: 'talent_descr.weapon_emberwell_1',
             stats: [
-                new StatTable('atk_percent', [16, 20, 24, 28, 32]),
+                new StatTable('atk_percent', percent(weaponPassiveTables.Emberwell.p1)),
             ],
         }),
         new ConditionBooleanRefine({
@@ -27,7 +29,7 @@ export const Emberwell = new DbObjectWeapon({
             title: 'talent_name.weapon_emberwell',
             description: 'talent_descr.weapon_emberwell_2',
             stats: [
-                new StatTable('dmg_stellarglimmer', [16, 20, 24, 28, 32]),
+                new StatTable('dmg_stellarglimmer', percent(weaponPassiveTables.Emberwell.p3)),
             ],
         }),
     ],

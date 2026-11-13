@@ -1,4 +1,5 @@
 import { Stats } from "../../../Stats";
+import { teamElements } from "../../../Team/Party";
 import { ConditionStaticRefine } from "../Refine";
 
 export class ConditionStaticRefineWaveridingWhirl extends ConditionStaticRefine {
@@ -9,10 +10,7 @@ export class ConditionStaticRefineWaveridingWhirl extends ConditionStaticRefine 
     getElementsCount(settings) {
         let level = 0;
 
-        for (const name of ['char_element', 'resonance_element_1', 'resonance_element_2', 'resonance_element_3']) {
-            const element = settings[name] || '';
-            if (!element) continue;
-
+        for (const element of teamElements(settings)) {
             if (element == 'hydro') {
                 ++level;
             }

@@ -2,6 +2,7 @@ import { Artifact } from "../src/js/classes/Artifact";
 import { ArtifactsSuggest } from "../src/js/classes/ArtifactsSuggest";
 import { getPostEffectStatDependencyClosure } from "../src/js/classes/Build/Data";
 import { CalcSet } from "../src/js/classes/CalcSet";
+import { Team } from "../src/js/classes/Team";
 import { CPostEffect } from "../src/js/classes/Feature2/Compile/Types/Block";
 import { CStat } from "../src/js/classes/Feature2/Compile/Types/Item";
 import { Stats } from "../src/js/classes/Stats";
@@ -24,7 +25,7 @@ function makeBuild(opts = {}) {
     const char = DB.Chars.get('Jean');
 
     build.setChar(char);
-    build.setEnemy(DB.Enemies.getFirst().getFirst());
+    Team.fromMember(build);
 
     if (opts.xiphos) {
         build.setWeapon(DB.Weapons.get('sword').get('XiphosMoonlight'));

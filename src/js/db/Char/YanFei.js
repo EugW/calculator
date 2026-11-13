@@ -21,6 +21,7 @@ import { FeatureShield } from "../../classes/Feature2/Shield";
 import { StatTable } from "../../classes/StatTable";
 import { charTables } from "../generated/CharTables";
 import { charTalentTables } from "../generated/CharTalentTables";
+import { percent, times } from "../Params";
 
 const Talents = new DbObjectTalents({
     attack: {
@@ -135,6 +136,15 @@ const scarletSealsCnt = [
     },
 ];
 
+const A1PyroDmg = percent(charTalentTables.YanFei.a1.p1);
+const A4BlazingEye = percent(charTalentTables.YanFei.a4.p1);
+const C1StaminaReduction = -percent(charTalentTables.YanFei.c1.p1);
+const C2CritRate = percent(charTalentTables.YanFei.c2.p2);
+const C2HpThreshold = percent(charTalentTables.YanFei.c2.p1);
+const C4ShieldHp = percent(charTalentTables.YanFei.c4.p1);
+const A1PyroDmgSeals = times(percent(charTalentTables.YanFei.a1.p1), [1, 2, 3, 4]);
+const C1StaminaReductionSeals = times(percent(charTalentTables.YanFei.c1.p1), [-1, -2, -3, -4]);
+
 export const YanFei = new DbObjectChar({
     name: 'yanfei',
     serializeId: 34,
@@ -226,7 +236,7 @@ export const YanFei = new DbObjectChar({
             multipliers: [
                 new FeatureMultiplier({
                     source: 'ascension4',
-                    values: new StatTable('yanfei_blazing_eye', [80]),
+                    values: new StatTable('yanfei_blazing_eye', [A4BlazingEye]),
                 }),
             ],
             condition:  new ConditionAscensionChar({ascension: 4}),
@@ -283,7 +293,7 @@ export const YanFei = new DbObjectChar({
                 new FeatureMultiplier({
                     scaling: 'hp*',
                     source: 'constellation4',
-                    values: new StatTable('yanfei_shield', [45]),
+                    values: new StatTable('yanfei_shield', [C4ShieldHp]),
                 }),
             ],
             condition: new ConditionConstellation({constellation: 4}),
@@ -321,7 +331,7 @@ export const YanFei = new DbObjectChar({
         new ConditionLevels({
             levelSetting: 'yanfei_scarlet_seal',
             stats: [
-                new StatTable('stamina_consume_charged', [10, 20, 30, 40]),
+                new StatTable('stamina_consume_charged', C1StaminaReductionSeals),
             ],
             subConditions: [
                 new ConditionBoolean({name: 'yanfei_scarlet_seal'}),
@@ -331,7 +341,7 @@ export const YanFei = new DbObjectChar({
         new ConditionLevels({
             levelSetting: 'yanfei_scarlet_seal',
             stats: [
-                new StatTable('dmg_pyro', [5, 10, 15, 20]),
+                new StatTable('dmg_pyro', A1PyroDmgSeals),
             ],
             info: {ascension: 1},
             subConditions: [
@@ -343,7 +353,7 @@ export const YanFei = new DbObjectChar({
             title: 'talent_name.yanfei_proviso',
             description: 'talent_descr.yanfei_proviso',
             stats: {
-                text_percent_dmg: 5,
+                text_percent_dmg: A1PyroDmg,
             },
             info: {ascension: 1},
             subConditions: [
@@ -354,7 +364,7 @@ export const YanFei = new DbObjectChar({
             title: 'talent_name.yanfei_blazing_eye',
             description: 'talent_descr.yanfei_blazing_eye',
             stats: {
-                text_percent_dmg: 80,
+                text_percent_dmg: A4BlazingEye,
             },
             info: {ascension: 4},
             subConditions: [
@@ -369,7 +379,7 @@ export const YanFei = new DbObjectChar({
                     title: 'talent_name.yanfei_the_law_knows_no_kindness',
                     description: 'talent_descr.yanfei_the_law_knows_no_kindness',
                     stats: {
-                        text_percent: 10,
+                        text_percent: C1StaminaReduction,
                     }
                 }),
             ],
@@ -382,8 +392,8 @@ export const YanFei = new DbObjectChar({
                     title: 'talent_name.yanfei_right_of_final_interpretation',
                     description: 'talent_descr.yanfei_right_of_final_interpretation',
                     stats: {
-                        crit_rate_charged: 20,
-                        text_percent_hp: 50,
+                        crit_rate_charged: C2CritRate,
+                        text_percent_hp: C2HpThreshold,
                     },
                 }),
             ],
@@ -403,7 +413,7 @@ export const YanFei = new DbObjectChar({
                     title: 'talent_name.yanfei_supreme_amnesty',
                     description: 'talent_descr.yanfei_supreme_amnesty',
                     stats: {
-                        text_percent_hp: 45,
+                        text_percent_hp: C4ShieldHp,
                     },
                 }),
             ],

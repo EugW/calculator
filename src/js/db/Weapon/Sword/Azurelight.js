@@ -2,6 +2,8 @@ import { ConditionStaticRefine } from "../../../classes/Condition/Static/Refine"
 import { DbObjectWeapon } from "../../../classes/DbObject/Weapon";
 import { StatTable } from "../../../classes/StatTable";
 import { weaponStatTables } from "../../generated/WeaponStatTables";
+import { weaponPassiveTables } from "../../generated/WeaponPassiveTables";
+import { percent } from "../../Params";
 import { ConditionBooleanRefine } from "../../../classes/Condition/Boolean/Refine";
 import { ConditionBoolean } from "../../../classes/Condition/Boolean";
 
@@ -36,7 +38,7 @@ export const Azurelight = new DbObjectWeapon({
             title: 'talent_name.weapon_azurelight',
             description: 'talent_descr.weapon_azurelight',
             stats: [
-                new StatTable('atk_percent', [24, 30, 36, 42, 48]),
+                new StatTable('atk_percent', percent(weaponPassiveTables.Azurelight.p1)),
             ],
         }),
         new ConditionBooleanRefine({
@@ -45,8 +47,8 @@ export const Azurelight = new DbObjectWeapon({
             title: 'talent_name.weapon_azurelight',
             description: 'talent_descr.weapon_azurelight_2',
             stats: [
-                new StatTable('atk_percent', [24, 30, 36, 42, 48]),
-                new StatTable('crit_dmg', [40, 50, 60, 70, 80]),
+                new StatTable('atk_percent', percent(weaponPassiveTables.Azurelight.p3)),
+                new StatTable('crit_dmg', percent(weaponPassiveTables.Azurelight.p4)),
             ],
             condition: new ConditionBoolean({name: 'weapon_azurelight_1'}),
         }),

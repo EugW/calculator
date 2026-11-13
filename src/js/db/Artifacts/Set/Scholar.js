@@ -1,5 +1,6 @@
 import { ArtifactSet } from "../../../classes/ArtifactSet";
 import { ConditionStatic } from "../../../classes/Condition/Static";
+import { artifactSetTables } from "../../generated/ArtifactSetTables";
 
 export const Scholar = new ArtifactSet({
     serializeId: 21,
@@ -18,7 +19,7 @@ export const Scholar = new ArtifactSet({
                     title: 'set_bonus.scholar_2',
                     description: 'set_descr.scholar_2',
                     stats: {
-                        recharge: 20,
+                        recharge: artifactSetTables.Scholar.pc2.recharge,
                     },
                 })
             ],

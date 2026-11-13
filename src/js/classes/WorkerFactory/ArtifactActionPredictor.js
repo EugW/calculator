@@ -1,4 +1,13 @@
 import { WorkerFactory } from '../WorkerFactory';
+import { serializeWorkerMember } from '../Team';
+
+/**
+ * Runs {operation: 'baseline'} (the optimized build a prediction measures
+ * gains from, see computeArtifactActionBaseline) or a prediction, which may
+ * take that baseline as `baseline`. getResult() is the baseline record or
+ * the prediction's result, by the run's operation. The prediction checks a
+ * baseline's version and fingerprint when it takes it.
+ */
 
 export class WorkerFactoryArtifactActionPredictor extends WorkerFactory {
     createWorker() {
@@ -12,7 +21,8 @@ export class WorkerFactoryArtifactActionPredictor extends WorkerFactory {
     }
 
     getWorkersPayload(data) {
-        return [{...data, build: data.build.serialize(), inventory: data.inventory.map(artifact => artifact.serialize()),
+        this.operation = data.operation === 'baseline' ? 'baseline' : 'predict';
+        return [{...data, build: serializeWorkerMember(data.build), inventory: data.inventory.map(artifact => artifact.serialize()),
             ...(data.reshapeTargets !== undefined ? {reshapeTargets: data.reshapeTargets.map(target => ({
                 id: target.id, slot: target.slot ?? target.artifact?.slot,
                 artifact: target.artifact?.serialize() ?? null, selectedSubstats: target.selectedSubstats,
@@ -21,7 +31,8 @@ export class WorkerFactoryArtifactActionPredictor extends WorkerFactory {
     }
 
     getResult() {
-        return this.workers[0].result.result;
+        let data = this.workers[0].result;
+        return this.operation === 'baseline' ? data.baseline : data.result;
     }
 
     onMessage(index, data, generation = this.runGeneration) {
@@ -32,7 +43,13 @@ export class WorkerFactoryArtifactActionPredictor extends WorkerFactory {
             this.progressCallback?.(data.progress);
             return;
         }
-        if (!Array.isArray(data.result?.rows)) throw new Error('Invalid artifact action worker result');
+        if (this.operation === 'baseline') {
+            if (typeof data.baseline?.fingerprint !== 'string' || !Number.isFinite(data.baseline?.value)) {
+                throw new Error('Invalid artifact action baseline');
+            }
+        } else if (!Array.isArray(data.result?.rows)) {
+            throw new Error('Invalid artifact action worker result');
+        }
         super.onMessage(index, data, generation);
     }
 }

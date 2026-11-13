@@ -2,6 +2,8 @@ import { ConditionStacks } from "../../../classes/Condition/Stacks";
 import { DbObjectWeapon } from "../../../classes/DbObject/Weapon";
 import { StatTable } from "../../../classes/StatTable";
 import { weaponStatTables } from "../../generated/WeaponStatTables";
+import { weaponPassiveTables } from "../../generated/WeaponPassiveTables";
+import { percent } from "../../Params";
 
 export const MappaMare = new DbObjectWeapon({
     name: 'mappa_mare',
@@ -20,13 +22,13 @@ export const MappaMare = new DbObjectWeapon({
             maxStacks: 2,
             levelSetting: 'weapon_refine',
             stats: [
-                new StatTable('dmg_anemo', [8, 10, 12, 14, 16]),
-                new StatTable('dmg_geo', [8, 10, 12, 14, 16]),
-                new StatTable('dmg_pyro', [8, 10, 12, 14, 16]),
-                new StatTable('dmg_electro', [8, 10, 12, 14, 16]),
-                new StatTable('dmg_hydro', [8, 10, 12, 14, 16]),
-                new StatTable('dmg_cryo', [8, 10, 12, 14, 16]),
-                new StatTable('dmg_dendro', [8, 10, 12, 14, 16]),
+                new StatTable('dmg_anemo', percent(weaponPassiveTables.MappaMare.p1)),
+                new StatTable('dmg_geo', percent(weaponPassiveTables.MappaMare.p1)),
+                new StatTable('dmg_pyro', percent(weaponPassiveTables.MappaMare.p1)),
+                new StatTable('dmg_electro', percent(weaponPassiveTables.MappaMare.p1)),
+                new StatTable('dmg_hydro', percent(weaponPassiveTables.MappaMare.p1)),
+                new StatTable('dmg_cryo', percent(weaponPassiveTables.MappaMare.p1)),
+                new StatTable('dmg_dendro', percent(weaponPassiveTables.MappaMare.p1)),
             ],
         }),
     ]

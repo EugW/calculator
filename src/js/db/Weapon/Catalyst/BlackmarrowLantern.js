@@ -4,6 +4,8 @@ import { ConditionStaticRefine } from "../../../classes/Condition/Static/Refine"
 import { DbObjectWeapon } from "../../../classes/DbObject/Weapon";
 import { StatTable } from "../../../classes/StatTable";
 import { weaponStatTables } from "../../generated/WeaponStatTables";
+import { weaponPassiveTables } from "../../generated/WeaponPassiveTables";
+import { percent } from "../../Params";
 
 export const BlackmarrowLantern = new DbObjectWeapon({
     name: 'blackmarrow_lantern',
@@ -14,23 +16,30 @@ export const BlackmarrowLantern = new DbObjectWeapon({
     weapon: 'catalyst',
     statTable: weaponStatTables.BlackmarrowLantern,
     conditions: [
+        // Calculate moonsign level from party composition
         new ConditionCalcMoonsign({}),
         new ConditionStaticRefine({
             title: 'talent_name.weapon_blackmarrow_lantern',
             description: 'talent_descr.weapon_blackmarrow_lantern_1',
             stats: [
-                new StatTable('dmg_reaction_bloom', [48, 60, 72, 84, 96]),
-                new StatTable('dmg_reaction_lunarbloom', [12, 15, 18, 21, 24]),
+                new StatTable('dmg_reaction_bloom', percent(weaponPassiveTables.BlackmarrowLantern.p1)),
+                new StatTable('dmg_reaction_lunarbloom', percent(weaponPassiveTables.BlackmarrowLantern.p2)),
             ],
         }),
-        // Moonsign: Ascendant Gleam: additional Lunar-Bloom DMG.
+        // Additional Lunar-Bloom DMG when Moonsign level >= 2 (Ascendant Gleam)
         new ConditionStaticRefine({
             title: 'talent_name.weapon_blackmarrow_lantern',
             description: 'talent_descr.weapon_blackmarrow_lantern_2',
             stats: [
-                new StatTable('dmg_reaction_lunarbloom', [12, 15, 18, 21, 24]),
+                new StatTable('dmg_reaction_lunarbloom', percent(weaponPassiveTables.BlackmarrowLantern.p3)),
             ],
-            condition: new ConditionBooleanValue({setting: 'party_moonsign', cond: 'ge', value: 2}),
+            subConditions: [
+                new ConditionBooleanValue({
+                    setting: 'party_moonsign',
+                    cond: 'ge',
+                    value: 2,
+                }),
+            ],
         }),
     ],
 });

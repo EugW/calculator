@@ -5,6 +5,8 @@ import { FeatureMultiplierTarget } from "../../../classes/Feature2/Multiplier/Ta
 import { StatTable } from "../../../classes/StatTable";
 import { ValueTable } from "../../../classes/ValueTable";
 import { weaponStatTables } from "../../generated/WeaponStatTables";
+import { weaponPassiveTables } from "../../generated/WeaponPassiveTables";
+import { percent } from "../../Params";
 
 export const RedhornStonethresher = new DbObjectWeapon({
     name: 'redhorn_stonethresher',
@@ -19,9 +21,9 @@ export const RedhornStonethresher = new DbObjectWeapon({
             title: 'talent_name.weapon_redhorn_stonethresher',
             description: 'talent_descr.weapon_redhorn_stonethresher',
             stats: [
-                new StatTable('def_percent', [28, 35, 42, 49, 56]),
-                new StatTable('normal_base_def_percent', [40, 50, 60, 70, 80]),
-                new StatTable('charged_base_def_percent', [40, 50, 60, 70, 80]),
+                new StatTable('def_percent', weaponPassiveTables.RedhornStonethresher.def_percent),
+                new StatTable('normal_base_def_percent', percent(weaponPassiveTables.RedhornStonethresher.p2)),
+                new StatTable('charged_base_def_percent', percent(weaponPassiveTables.RedhornStonethresher.p2)),
             ],
         }),
     ],
@@ -30,7 +32,7 @@ export const RedhornStonethresher = new DbObjectWeapon({
             scaling: 'def*',
             source: 'weapon',
             leveling: 'weapon_refine',
-            values: new ValueTable([40, 50, 60, 70, 80]),
+            values: new ValueTable(percent(weaponPassiveTables.RedhornStonethresher.p2)),
             target: new FeatureMultiplierTarget({
                 damageTypes: ['normal', 'charged'],
             }),

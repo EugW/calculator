@@ -7,6 +7,8 @@ import { FeatureMultiplierTarget } from "../../../classes/Feature2/Multiplier/Ta
 import { StatTable } from "../../../classes/StatTable";
 import { ValueTable } from "../../../classes/ValueTable";
 import { weaponStatTables } from "../../generated/WeaponStatTables";
+import { weaponPassiveTables } from "../../generated/WeaponPassiveTables";
+import { percent } from "../../Params";
 
 export const HuntersPath = new DbObjectWeapon({
     name: 'hunters_path',
@@ -21,13 +23,13 @@ export const HuntersPath = new DbObjectWeapon({
             title: 'talent_name.at_the_end_of_the_beast_paths',
             description: 'talent_descr.at_the_end_of_the_beast_paths_1',
             stats: [
-                new StatTable('dmg_anemo', [12, 15, 18, 21, 24]),
-                new StatTable('dmg_geo', [12, 15, 18, 21, 24]),
-                new StatTable('dmg_pyro', [12, 15, 18, 21, 24]),
-                new StatTable('dmg_electro', [12, 15, 18, 21, 24]),
-                new StatTable('dmg_hydro', [12, 15, 18, 21, 24]),
-                new StatTable('dmg_cryo', [12, 15, 18, 21, 24]),
-                new StatTable('dmg_dendro', [12, 15, 18, 21, 24]),
+                new StatTable('dmg_anemo', percent(weaponPassiveTables.HuntersPath.p1)),
+                new StatTable('dmg_geo', percent(weaponPassiveTables.HuntersPath.p1)),
+                new StatTable('dmg_pyro', percent(weaponPassiveTables.HuntersPath.p1)),
+                new StatTable('dmg_electro', percent(weaponPassiveTables.HuntersPath.p1)),
+                new StatTable('dmg_hydro', percent(weaponPassiveTables.HuntersPath.p1)),
+                new StatTable('dmg_cryo', percent(weaponPassiveTables.HuntersPath.p1)),
+                new StatTable('dmg_dendro', percent(weaponPassiveTables.HuntersPath.p1)),
             ],
         }),
         new ConditionBooleanRefine({
@@ -36,7 +38,7 @@ export const HuntersPath = new DbObjectWeapon({
             title: 'talent_name.at_the_end_of_the_beast_paths',
             description: 'talent_descr.at_the_end_of_the_beast_paths_2',
             stats: [
-                new StatTable('text_percent', [160, 200, 240, 280, 320]),
+                new StatTable('text_percent', percent(weaponPassiveTables.HuntersPath.p2)),
             ],
         }),
     ],
@@ -45,7 +47,7 @@ export const HuntersPath = new DbObjectWeapon({
             scaling: 'mastery*',
             leveling: 'weapon_refine',
             source: 'weapon',
-            values: new ValueTable([160, 200, 240, 280, 320]),
+            values: new ValueTable(percent(weaponPassiveTables.HuntersPath.p2)),
             condition: new ConditionBoolean({name: 'weapon_hunters_path'}),
             target: new FeatureMultiplierTarget({
                 damageTypes: ['charged'],

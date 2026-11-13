@@ -1,3 +1,5 @@
+import { teamSize } from "../../Team/Party";
+import { teamSettings } from "../../Team/Scope";
 import { ConditionBoolean } from "../Boolean";
 
 export class ConditionBooleanResonanceEnabled extends ConditionBoolean {
@@ -7,7 +9,7 @@ export class ConditionBooleanResonanceEnabled extends ConditionBoolean {
 
     isActive(settings) {
         let result = true;
-        if (settings['buffs.only_full_party_resonance'] && settings.party_size < 4) {
+        if (teamSettings(settings)['buffs.only_full_party_resonance'] && teamSize(settings) < 4) {
             result = false;
         }
         return this.params.invert ? !result : result;

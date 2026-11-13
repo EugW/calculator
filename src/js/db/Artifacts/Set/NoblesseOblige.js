@@ -1,6 +1,10 @@
 import { ArtifactSet } from "../../../classes/ArtifactSet";
+import { Condition } from "../../../classes/Condition";
 import { ConditionBoolean } from "../../../classes/Condition/Boolean";
 import { ConditionStatic } from "../../../classes/Condition/Static";
+import { RECEIVERS } from "../../../classes/Team/Receivers";
+import { artifactSetTables } from "../../generated/ArtifactSetTables";
+import { percent } from "../../Params";
 
 export const NoblesseOblige = new ArtifactSet({
     serializeId: 18,
@@ -19,7 +23,7 @@ export const NoblesseOblige = new ArtifactSet({
                     title: 'set_bonus.noblesse_oblige_2',
                     description: 'set_descr.noblesse_oblige_2',
                     stats: {
-                        dmg_burst: 20,
+                        dmg_burst: percent(artifactSetTables.NoblesseOblige.pc2.p1),
                     },
                 }),
             ],
@@ -33,8 +37,14 @@ export const NoblesseOblige = new ArtifactSet({
                     title: 'set_bonus.noblesse_oblige_4',
                     description: 'set_descr.noblesse_oblige_4',
                     stats: {
-                        text_percent: 20,
+                        text_percent: percent(artifactSetTables.NoblesseOblige.pc4.p1),
                     },
+                }),
+                new Condition({
+                    receivers: RECEIVERS.TEAM,
+                    stack: 'noblesse_oblige_4',
+                    condition: new ConditionBoolean({name: 'set.noblesse_oblige_4'}),
+                    stats: {atk_percent: percent(artifactSetTables.NoblesseOblige.pc4.p1)},
                 }),
             ],
         },

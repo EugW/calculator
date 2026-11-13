@@ -1,4 +1,5 @@
 import { Stats } from "../../Stats";
+import { teamElements } from "../../Team/Party";
 import { ConditionStatic } from "../Static";
 
 export class ConditionStaticZibaiA4 extends ConditionStatic {
@@ -8,10 +9,7 @@ export class ConditionStaticZibaiA4 extends ConditionStatic {
         let geoCount = 0;
         let hydroCount = 0;
 
-        for (const name of ['char_element', 'resonance_element_1', 'resonance_element_2', 'resonance_element_3']) {
-            const element = settings[name] || '';
-            if (!element) continue;
-
+        for (const element of teamElements(settings)) {
             if (element === 'geo') {
                 geoCount++;
             } else if (element === 'hydro') {

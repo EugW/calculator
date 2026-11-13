@@ -1,10 +1,13 @@
 import { Condition } from "../../classes/Condition";
 import { ConditionCalcMoonsign } from "../../classes/Condition/CalcMoonsign";
+import { ConditionAnd } from "../../classes/Condition/And";
 import { ConditionAscensionChar } from "../../classes/Condition/Ascension/Char";
 import { ConditionBoolean } from "../../classes/Condition/Boolean";
-import { ConditionBooleanLevels } from "../../classes/Condition/Boolean/Levels";
+import { ConditionOnField } from "../../classes/Condition/Field";
 import { ConditionConstellation } from "../../classes/Condition/Constellation";
+import { ConditionReceiver } from "../../classes/Condition/Receiver";
 import { ConditionStatic } from "../../classes/Condition/Static";
+import { ConditionStaticLevel } from "../../classes/Condition/Static/Level";
 import { DbObjectChar } from "../../classes/DbObject/Char";
 import { DbObjectConstellation } from "../../classes/DbObject/Constellation";
 import { DbObjectTalents } from "../../classes/DbObject/Talents";
@@ -16,8 +19,15 @@ import { FeatureDamagePlungeShockWave } from "../../classes/Feature2/Damage/Plun
 import { FeatureDamageSkill } from "../../classes/Feature2/Damage/Skill";
 import { FeatureMultiplier } from "../../classes/Feature2/Multiplier";
 import { StatTable } from "../../classes/StatTable";
+import { RECEIVERS } from "../../classes/Team/Receivers";
 import { charTables } from "../generated/CharTables";
 import { charTalentTables } from "../generated/CharTalentTables";
+import { percent } from "../Params";
+
+// "Active" members are the on-field one; the team owns field state.
+const activeRecipient = new ConditionReceiver({
+    condition: new ConditionOnField(),
+});
 
 const Talents = new DbObjectTalents({
     attack: {
@@ -96,12 +106,12 @@ const Talents = new DbObjectTalents({
     },
 });
 
-const A4EmScale = 50;
-const C1Em = 80;
-const C2AtkScale = 25;
-const C2EmScale = 100;
-const C6DmgBonus = 15;
-const C6DmgBonusAscendant = 20;
+const A4EmScale = percent(charTalentTables.Aino.a4.p1);
+const C1Em = charTalentTables.Aino.c1.p1;
+const C2AtkScale = percent(charTalentTables.Aino.c2.p1);
+const C2EmScale = percent(charTalentTables.Aino.c2.p2);
+const C6DmgBonus = percent(charTalentTables.Aino.c6.p1);
+const C6DmgBonusAscendant = percent(charTalentTables.Aino.c6.p2);
 
 
 
@@ -245,12 +255,17 @@ export const Aino = new DbObjectChar({
 
     ],
     conditions: [
+        // Aino unlocks Lunar-Bloom for the whole team (merged with the old
+        // partyData copy).
         new Condition({
+            receivers: RECEIVERS.TEAM,
             settings: {
                 allowed_lunarbloom: 1,
             },
         }),
-        new ConditionCalcMoonsign(),
+        // Moonsign level comes from the real team; every Moonsign member
+        // delivers the same values, so this needs no stack key.
+        new ConditionCalcMoonsign({receivers: RECEIVERS.TEAM}),
         new ConditionStatic({
             title: 'talent_name.aino_modular_efficiency_protocol',
             description: 'talent_descr.aino_modular_efficiency_protocol',
@@ -277,6 +292,9 @@ export const Aino = new DbObjectChar({
     constellation: new DbObjectConstellation([
         {
             conditions: [
+                // C1: "her Elemental Mastery will be increased by 80. The
+                // Elemental Mastery of other nearby active party members will
+                // be increased by 80": the other members while on-field.
                 new ConditionBoolean({
                     name: 'aino_the_theory_of_ashfield_equilibrium',
                     serializeId: 1,
@@ -285,6 +303,17 @@ export const Aino = new DbObjectChar({
                     stats: {
                         mastery: C1Em,
                     },
+                }),
+                new Condition({
+                    isHidden: true,
+                    receivers: RECEIVERS.OTHERS,
+                    stats: {
+                        mastery: C1Em,
+                    },
+                    condition: new ConditionAnd([
+                        new ConditionBoolean({name: 'aino_the_theory_of_ashfield_equilibrium'}),
+                        activeRecipient,
+                    ]),
                 }),
             ],
         },
@@ -328,12 +357,25 @@ export const Aino = new DbObjectChar({
         },
         {
             conditions: [
-                new ConditionBooleanLevels({
+                // C6: reaction DMG "from nearby active characters": whoever is
+                // on-field, Aino included. The saved control has no receiver
+                // check, so it is kept when Aino is off-field; the hidden
+                // delivery checks the receiver. The Ascendant Gleam tier
+                // comes from the source's live Moonsign.
+                new ConditionBoolean({
                     name: 'aino_the_burden_of_creative_genius',
                     serializeId: 2,
                     title: 'talent_name.aino_the_burden_of_creative_genius',
                     description: 'talent_descr.aino_the_burden_of_creative_genius',
+                }),
+                new ConditionStaticLevel({
+                    isHidden: true,
+                    receivers: RECEIVERS.TEAM,
                     levelSetting: 'party_moonsign',
+                    condition: new ConditionAnd([
+                        new ConditionBoolean({name: 'aino_the_burden_of_creative_genius'}),
+                        activeRecipient,
+                    ]),
                     stats: [
                         new StatTable('dmg_reaction_lunarbloom', [C6DmgBonus, C6DmgBonus + C6DmgBonusAscendant]),
                         new StatTable('dmg_reaction_lunarcharged', [C6DmgBonus, C6DmgBonus + C6DmgBonusAscendant]),
@@ -345,37 +387,5 @@ export const Aino = new DbObjectChar({
             ],
         },
     ]),
-    partyData: {
-        conditions: [
-            new Condition({settings: {allowed_lunarbloom: 1}}),
-            new ConditionBoolean({
-                name: 'party.aino_the_theory_of_ashfield_equilibrium',
-                serializeId: 1,
-                title: 'talent_name.aino_the_theory_of_ashfield_equilibrium',
-                description: 'talent_descr.aino_the_theory_of_ashfield_equilibrium',
-                info: {constellation: 1},
-                rotation: 'party',
-                stats: {
-                    mastery: C1Em,
-                },
-            }),
-            new ConditionCalcMoonsign(),
-            new ConditionBooleanLevels({
-                name: 'party_aino_c6_burst',
-                serializeId: 2,
-                title: 'talent_name.aino_the_burden_of_creative_genius',
-                description: 'talent_descr.aino_the_burden_of_creative_genius',
-                info: {constellation: 6},
-                rotation: 'party',
-                levelSetting: 'party_moonsign',
-                stats: [
-                     new StatTable('dmg_reaction_lunarbloom', [C6DmgBonus, C6DmgBonus + C6DmgBonusAscendant]),
-                     new StatTable('dmg_reaction_lunarcharged', [C6DmgBonus, C6DmgBonus + C6DmgBonusAscendant]),
-                     new StatTable('dmg_reaction_bloom', [C6DmgBonus, C6DmgBonus + C6DmgBonusAscendant]),
-                     new StatTable('dmg_reaction_electrocharged', [C6DmgBonus, C6DmgBonus + C6DmgBonusAscendant]),
-                     new StatTable('dmg_reaction_lunarcrystallize', [C6DmgBonus, C6DmgBonus + C6DmgBonusAscendant]),
-                ],
-            }),
-        ],
-    },
+    retiredParty: [[1, 'checkbox'], [2, 'checkbox']],
 });

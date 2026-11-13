@@ -12,7 +12,6 @@ let lang = new Lang();
 
 let list = [
     {name: 'Chars cond',    object: DB.Chars,               type: 'charcond'},
-    {name: 'Chars party',   object: DB.Chars,               type: 'charparty'},
     {name: 'Artifact cond', object: DB.Artifacts.Sets,      type: 'artset'},
     {name: 'Weapons',       object: DB.Weapons,             type: 'tree'},
 ];
@@ -67,21 +66,6 @@ function getItems(data) {
             let char = data.object.get(charId);
 
             for (const cond of char.getAllConditions()) {
-                for (let str of [cond.params.title, cond.params.description]) {
-                    if (!str) continue;
-
-                    let lang_str = lang.get(str);
-                    if (lang_str == str) {
-                        result[str] = 1;
-                    }
-                }
-            }
-        }
-    } else if (data.type == 'charparty') {
-        for (const charId of data.object.getKeys(1)) {
-            let char = data.object.get(charId);
-
-            for (const cond of char.getPartyConditions()) {
                 for (let str of [cond.params.title, cond.params.description]) {
                     if (!str) continue;
 

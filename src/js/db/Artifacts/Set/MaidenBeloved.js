@@ -1,6 +1,10 @@
 import { ArtifactSet } from "../../../classes/ArtifactSet";
+import { Condition } from "../../../classes/Condition";
 import { ConditionBoolean } from "../../../classes/Condition/Boolean";
 import { ConditionStatic } from "../../../classes/Condition/Static";
+import { RECEIVERS } from "../../../classes/Team/Receivers";
+import { artifactSetTables } from "../../generated/ArtifactSetTables";
+import { percent } from "../../Params";
 
 export const MaidenBeloved = new ArtifactSet({
     serializeId: 16,
@@ -19,7 +23,7 @@ export const MaidenBeloved = new ArtifactSet({
                     title: 'set_bonus.maiden_beloved_2',
                     description: 'set_descr.maiden_beloved_2',
                     stats: {
-                        healing: 15,
+                        healing: artifactSetTables.MaidenBeloved.pc2.healing,
                     },
                 }),
             ],
@@ -33,9 +37,15 @@ export const MaidenBeloved = new ArtifactSet({
                     title: 'set_bonus.maiden_beloved_4',
                     description: 'set_descr.maiden_beloved_4',
                     stats: {
-                        text_percent: 20,
-                        healing_recv: 20,
+                        text_percent: percent(artifactSetTables.MaidenBeloved.pc4.p1),
+                        healing_recv: percent(artifactSetTables.MaidenBeloved.pc4.p1),
                     },
+                }),
+                new Condition({
+                    receivers: RECEIVERS.TEAM,
+                    stack: 'maiden_beloved_4',
+                    condition: new ConditionBoolean({name: 'set.maiden_beloved_4'}),
+                    stats: {healing_recv: percent(artifactSetTables.MaidenBeloved.pc4.p1)},
                 }),
             ],
         },

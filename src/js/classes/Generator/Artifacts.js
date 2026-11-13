@@ -1,5 +1,4 @@
 import { Artifact } from "../Artifact";
-import { Condition } from "../Condition";
 import { FeatureCompiler } from "../Feature2/Compiler";
 import { isPercent, Stats } from "../Stats";
 
@@ -24,8 +23,10 @@ export class ArtifactGenerator {
     prepare() {
         this.applySets();
 
-        let feature = this.build.getFeatureByName(this.featureName);
-        this.buildData = this.build.getBuildData();
+        // One view: the feature and its data read one evaluation of the team.
+        let view = this.build.view();
+        this.buildData = view.getBuildData();
+        let feature = view.getFeatureByName(this.featureName, this.buildData);
         let postItems = this.buildData.getActivePostEffectsTree();
 
         let tree = feature.getTree(this.buildData);
@@ -95,19 +96,11 @@ export class ArtifactGenerator {
         this.build.clearArtifacts();
         let stats = ['hp', 'atk'];
 
+        // Set effects read the member's set-bonus profile.
         for (let slot of DB.Artifacts.Slots.getKeys()) {
             let art = new Artifact(5, 20, slot, sets.shift() || '', stats.shift() || '', []);
             this.build.setArtifact(art);
         }
-
-        let artConditions = this.build.getConditions({objects: 'artifacts'});
-        let allSettings = Condition.allConditionsOn(artConditions);
-
-        if (this.settings.required_sets_settings) {
-            allSettings = Object.assign(allSettings, this.settings.required_sets_settings);
-        }
-
-        this.build.setArtifactsSettings(allSettings);
     }
 
     makeTestObject(combination, stats) {
@@ -655,9 +648,9 @@ export class StatDistributor {
 }
 
 export function getMainStatCombinations(params) {
-    let build = params.build.clone();
-    let feature = params.build.getFeatureByName(params.feature);
-    let buildData = build.getBuildData();
+    let view = params.build.view();
+    let buildData = view.getBuildData();
+    let feature = view.getFeatureByName(params.feature, buildData);
     let usedStats = feature.getUsedStats(buildData);
 
     let statsBySlot = {

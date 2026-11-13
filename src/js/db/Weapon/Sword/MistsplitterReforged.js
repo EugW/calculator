@@ -3,6 +3,8 @@ import { ConditionStaticRefine } from "../../../classes/Condition/Static/Refine"
 import { DbObjectWeapon } from "../../../classes/DbObject/Weapon";
 import { StatTable } from "../../../classes/StatTable";
 import { weaponStatTables } from "../../generated/WeaponStatTables";
+import { weaponPassiveTables } from "../../generated/WeaponPassiveTables";
+import { percent } from "../../Params";
 
 export const MistsplitterReforged = new DbObjectWeapon({
     name: 'mistsplitter_reforged',
@@ -31,13 +33,13 @@ export const MistsplitterReforged = new DbObjectWeapon({
             title: 'talent_name.weapon_mistsplitters_reforged',
             description: 'talent_descr.weapon_mistsplitters_reforged_1',
             stats: [
-                new StatTable('dmg_anemo', [12, 15, 18, 21, 24]),
-                new StatTable('dmg_geo', [12, 15, 18, 21, 24]),
-                new StatTable('dmg_pyro', [12, 15, 18, 21, 24]),
-                new StatTable('dmg_electro', [12, 15, 18, 21, 24]),
-                new StatTable('dmg_hydro', [12, 15, 18, 21, 24]),
-                new StatTable('dmg_cryo', [12, 15, 18, 21, 24]),
-                new StatTable('dmg_dendro', [12, 15, 18, 21, 24]),
+                new StatTable('dmg_anemo', percent(weaponPassiveTables.MistsplitterReforged.p1)),
+                new StatTable('dmg_geo', percent(weaponPassiveTables.MistsplitterReforged.p1)),
+                new StatTable('dmg_pyro', percent(weaponPassiveTables.MistsplitterReforged.p1)),
+                new StatTable('dmg_electro', percent(weaponPassiveTables.MistsplitterReforged.p1)),
+                new StatTable('dmg_hydro', percent(weaponPassiveTables.MistsplitterReforged.p1)),
+                new StatTable('dmg_cryo', percent(weaponPassiveTables.MistsplitterReforged.p1)),
+                new StatTable('dmg_dendro', percent(weaponPassiveTables.MistsplitterReforged.p1)),
             ],
         }),
         new ConditionDropdown({
@@ -54,7 +56,7 @@ export const MistsplitterReforged = new DbObjectWeapon({
                     conditions: [
                         new ConditionStaticRefine({
                             stats: [
-                                new StatTable('dmg_own', [8, 10, 12, 14, 16]),
+                                new StatTable('dmg_own', percent(weaponPassiveTables.MistsplitterReforged.p2)),
                             ],
                         }),
                     ],
@@ -66,7 +68,7 @@ export const MistsplitterReforged = new DbObjectWeapon({
                     conditions: [
                         new ConditionStaticRefine({
                             stats: [
-                                new StatTable('dmg_own', [16, 20, 24, 28, 32]),
+                                new StatTable('dmg_own', percent(weaponPassiveTables.MistsplitterReforged.p3)),
                             ],
                         }),
                     ],
@@ -78,7 +80,7 @@ export const MistsplitterReforged = new DbObjectWeapon({
                     conditions: [
                         new ConditionStaticRefine({
                             stats: [
-                                new StatTable('dmg_own', [28, 35, 42, 49, 56]),
+                                new StatTable('dmg_own', percent(weaponPassiveTables.MistsplitterReforged.p4)),
                             ],
                         }),
                     ],

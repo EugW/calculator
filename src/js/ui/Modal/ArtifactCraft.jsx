@@ -6,7 +6,7 @@ import '../../../css/Components/Modal/ArtifactCraft.css';
 import { Feature2 } from '../../classes/Feature2';
 import { ACTION_SLOTS, CRAFT_COST } from '../../classes/ArtifactActionProbability';
 import { artifactCraftAffixOptions, changeArtifactCraftAffix, getArtifactCraftAffixes } from '../../classes/ArtifactCraftAffixes';
-import { WorkerFactoryArtifactActionPredictor } from '../../classes/WorkerFactory/ArtifactActionPredictor';
+import { ArtifactActionBaselineFlow } from './ArtifactActionBaselineFlow';
 import { Accordion, AccordionItem } from '../Components/Accordion';
 import { ArtifactActionAdvancedSettings, ArtifactActionProgress, ArtifactActionRVSummary, formatExpectedGain, formatExpectedGainPercent, mergeActionProgress } from '../Components/ArtifactActionControls';
 import { ControlsBar, ControlsBarDivider } from '../Components/ControlsBar';
@@ -43,7 +43,7 @@ export class ArtifactCraftModal extends React.Component {
         this.state = {isVisible: false, stage: 'parameters', set: '', craftAffixes: {}, slots: [...ACTION_SLOTS],
             feature: props.app.getFeature(), featureType: 'average', fourLineChance: 34, preserveTopology: true, rvFilters: normalizeArtifactRVFilters(),
             progress: {}, result: null, historyEntry: null, error: ''};
-        this.factory = new WorkerFactoryArtifactActionPredictor({
+        this.factory = new ArtifactActionBaselineFlow(this, {
             callback: result => {
                 this.factory.dispose();
                 this.saveHistory(result);
@@ -64,17 +64,18 @@ export class ArtifactCraftModal extends React.Component {
         this.setState({isVisible: false, stage: 'parameters', result: null, historyEntry: null, progress: {}});
     }
     invalidate() {
-        if (this.state.historyEntry) return;
-        if (this.state.isVisible && (this.state.stage === 'progress' || this.state.result)) {
+        if (this.factory.applying || this.state.historyEntry) return;
+        if (this.state.isVisible && (['progress', 'baseline'].includes(this.state.stage) || this.state.result)) {
             this.factory.dispose();
             this.setState({stage: 'parameters', result: null, progress: {}, error: t('stale'), feature: this.props.app.getFeature()});
         }
     }
     change(values) { this.setState({...values, error: '', result: null}); }
     saveHistory(result) {
-        this.props.app.storage.actionHistory.saveRun({kind: 'craft', feature: this.state.feature,
-            featureType: this.state.featureType,
-            context: {set: this.state.set, slots: this.state.slots.slice()}, result}).catch(() => {});
+        const snapshot = result.runSnapshot;
+        this.props.app.storage.actionHistory.saveRun({kind: 'craft', feature: snapshot.feature,
+            featureType: snapshot.featureType,
+            context: {set: snapshot.set, slots: snapshot.craftSlots.slice()}, result}).catch(() => {});
     }
     openHistoryEntry(entry, result) {
         this.showHistoryEntry(entry, result);
@@ -109,7 +110,7 @@ export class ArtifactCraftModal extends React.Component {
         return DB.Artifacts.Sets.get(this.state.set)?.maxRarity === 5 && this.state.slots.length > 0;
     }
     start() {
-        if (!this.canStart() || this.state.stage === 'progress') return;
+        if (!this.canStart() || this.state.stage !== 'parameters') return;
         let rvFilters;
         try { rvFilters = normalizeArtifactRVFilters(this.state.rvFilters); }
         catch (error) { this.setState({error: errorText(error.message)}); return; }
@@ -134,7 +135,7 @@ export class ArtifactCraftModal extends React.Component {
         const set = DB.Artifacts.Sets.get(this.state.set);
         return <>
             <ControlsBar>
-                <Dropdown barClass="resizable" items={Feature2.buildDropdown(this.props.app.currentSet())}
+                <Dropdown barClass="resizable" items={Feature2.buildDropdown(this.props.app.view())}
                     selected={this.state.feature} onChange={item => this.change({feature: item.value})} />
                 <Dropdown barClass="feature-type" items={['normal', 'crit', 'average'].map(value => ({value, text: lang.get('pool_view.type_' + value)}))}
                     selected={this.state.featureType} onChange={item => this.change({featureType: item.value})} />
@@ -229,7 +230,7 @@ export class ArtifactCraftModal extends React.Component {
     render() {
         const {isVisible, stage} = this.state;
         const outcomeRow = this.state.result?.rows.find(row => row.slot === this.state.outcomeRow);
-        return <><DialogContainer addClass="artifact-action-modal artifact-craft-modal" width={stage === 'progress' ? 500 : 1000} centered isVisible={isVisible}
+        return <><DialogContainer addClass="artifact-action-modal artifact-craft-modal" width={stage === 'progress' ? 500 : 1000} centered isVisible={isVisible && stage !== 'baseline'}
             title={lang.get('tab_header.artifact_craft')} closeCallback={() => this.close()}>
             {isVisible && <FullHeight>
                 <FullHeightScrollable maxHeight="calc(100dvh - 210px)">
@@ -249,6 +250,7 @@ export class ArtifactCraftModal extends React.Component {
                 </ControlsBar></FullHeightStatic>
             </FullHeight>}
         </DialogContainer>
+            {this.factory.renderBaseline()}
             {isVisible && stage === 'results' && outcomeRow?.outcomeDetails &&
                 <ArtifactActionOutcomesModal key={outcomeRow.slot} kind="craft" row={outcomeRow} result={this.state.result}
                     onClose={() => this.setState({outcomeRow: null})} />}

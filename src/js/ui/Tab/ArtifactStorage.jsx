@@ -2,12 +2,13 @@ import React from 'react';
 import "../../../css/Components/Tab/ArtifactStorage.css"
 
 import { ArtifactStoragePool } from './ArtifactStorage/Pool';
-import { Condition } from '../../classes/Condition';
 import { Feature2 } from '../../classes/Feature2';
 import { Lang } from '../Lang';
 import { ReactTab } from '../Components/Tab';
 import { Tab } from "../Tab";
 import { WorkerFactoryArtifactsSort } from '../../classes/WorkerFactory/ArtifactsSort';
+import { serializeWorkerMember } from '../../classes/Team';
+import { copyWithInventoryArtifacts, equipTeamArtifact, teamArtifactOwnership } from '../../classes/ArtifactTeamInventory';
 
 let lang = new Lang();
 
@@ -78,11 +79,12 @@ export class ArtifactsPoolView extends React.Component {
         let equipped = this.equippedHashes();
 
         if (equipped.includes(art.getHash())) {
-            this.props.app.removeArtifact(art);
+            this.props.app.removeArtifact(this.props.app.currentSet().getArtifacts()[art.getSlot()]);
         } else {
-            let settings = this.getSettingsForArt(art);
-            this.props.app.currentSet().setArtifact(art);
-            this.props.app.setArtifactsSettings(settings);
+            // Set effects read the member's set-bonus profile: equipping
+            // changes pieces only.
+            equipTeamArtifact(this.props.app.currentSet(), art, this.storage);
+            this.props.app.refresh();
         }
     }
 
@@ -126,8 +128,7 @@ export class ArtifactsPoolView extends React.Component {
             return;
         }
 
-        let artSettings = this.getSettingsForArt(art);
-        UI.TooltipArtifact.show(art, this.state.feature, artSettings);
+        UI.TooltipArtifact.show(art, this.state.feature);
     }
 
     handleCreateArtifact() {
@@ -163,7 +164,7 @@ export class ArtifactsPoolView extends React.Component {
     }
 
     dataFeaturesItems() {
-        return Feature2.buildDropdown(this.props.app.currentSet());
+        return Feature2.buildDropdown(this.props.app.view());
     }
 
     allowedArtifactsList() {
@@ -197,7 +198,7 @@ export class ArtifactsPoolView extends React.Component {
             sortByStat: this.state.sortByStat,
             feature: this.state.feature,
             featureType: 'average',
-            calcSet: this.props.app.currentSet().serialize(),
+            calcSet: serializeWorkerMember(copyWithInventoryArtifacts(this.props.app.currentSet(), this.storage)),
         });
     }
 
@@ -235,39 +236,15 @@ export class ArtifactsPoolView extends React.Component {
     }
 
     equippedHashes() {
-        let result = [];
-        let artifacts = this.props.app.getArtifacts();
+        return [...teamArtifactOwnership(this.props.app.currentSet(), this.storage).equipped];
+    }
 
-        for (let slot of Object.keys(artifacts)) {
-            let art = artifacts[slot];
-            if (art) {
-                result.push(art.getHash());
-            }
-        }
-
-        return result;
+    teammateArtifacts() {
+        return Object.fromEntries(teamArtifactOwnership(this.props.app.currentSet(), this.storage).teammates);
     }
 
     savedHashes() {
         return this.props.app.storage.char.savedHashes(this.props.app.storage.artifacts);
-    }
-
-    getSettingsForArt(art) {
-        let build = this.props.app.currentSet().clone();
-        let currentSettings = build.artifacts.getSettings();
-
-        // Init all turned off existed settings
-        let conditions = build.getConditions({objects: 'artifacts'});
-        let result = Condition.allConditionsOff(conditions);
-        Object.assign(result, currentSettings);
-
-        // Turn on all new art settings
-        build.setArtifact(art);
-        conditions = build.getConditions({objects: 'artifacts'});
-        let artSettingsOn = Condition.allConditionsOn(conditions);
-        result = Object.assign({}, artSettingsOn, result);
-
-        return result;
     }
 
     render() {
@@ -280,6 +257,7 @@ export class ArtifactsPoolView extends React.Component {
                     sortByStat={this.state.sortByStat}
                     features={this.dataFeaturesItems()}
                     equippedHashes={this.equippedHashes()}
+                    teammateArtifacts={this.teammateArtifacts()}
                     savedHashes={this.savedHashes()}
                     groups={this.storage.listGroups()}
                     onFeatureChange={(item) => this.handleFeature(item)}

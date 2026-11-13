@@ -2,9 +2,10 @@ import { Condition } from "../../classes/Condition";
 import { ConditionAnd } from "../../classes/Condition/And";
 import { ConditionAscensionChar } from "../../classes/Condition/Ascension/Char";
 import { ConditionBoolean } from "../../classes/Condition/Boolean";
+import { ConditionOnField } from "../../classes/Condition/Field";
 import { ConditionConstellation } from "../../classes/Condition/Constellation";
-import { ConditionNumber } from "../../classes/Condition/Number";
 import { ConditionStatic } from "../../classes/Condition/Static";
+import { ConditionReceiver } from "../../classes/Condition/Receiver";
 import { DbObjectChar } from "../../classes/DbObject/Char";
 import { DbObjectConstellation } from "../../classes/DbObject/Constellation";
 import { DbObjectTalents } from "../../classes/DbObject/Talents";
@@ -20,12 +21,14 @@ import { FeatureMultiplierList } from "../../classes/Feature2/Multiplier/List";
 import { FeaturePostEffectValue } from "../../classes/Feature2/PostEffectValue";
 import { FeatureReactionLunarChargedLike } from "../../classes/Feature2/Reaction/Transformative/Lunar/ChargedLike";
 import { FeatureShield } from "../../classes/Feature2/Shield";
-import { PostEffectStats } from "../../classes/PostEffect/Stats";
+import { CHANNELS } from "../../classes/PostEffect/Channels";
 import { PostEffectStatsAtk } from "../../classes/PostEffect/Stats/Atk";
 import { StatTable } from "../../classes/StatTable";
+import { RECEIVERS } from "../../classes/Team/Receivers";
 import { ValueTable } from "../../classes/ValueTable";
 import { charTables } from "../generated/CharTables";
 import { charTalentTables } from "../generated/CharTalentTables";
+import { percent } from "../Params";
 
 const Talents = new DbObjectTalents({
     attack: {
@@ -122,26 +125,74 @@ const Talents = new DbObjectTalents({
     links: [11160001],
 });
 
-const PassiveLunarScale = 0.7;
-const PassiveLunarScaleCap = 14;
-const A1Dmg = 65;
-const A4EmScale = 6;
-const C1AtkScale = 2.5;
-const C1AtkScaleCap = 50;
-const C2Dmg = 300;
-const C6Dmg = 135;
+const PassiveLunarScale = percent(charTalentTables.Ineffa.a0.p1);
+const PassiveLunarScaleCap = percent(charTalentTables.Ineffa.a0.p2);
+const A1Dmg = percent(charTalentTables.Ineffa.a1.p1);
+const A4EmScale = percent(charTalentTables.Ineffa.a4.p1);
+const C1AtkScale = percent(charTalentTables.Ineffa.c1.p1);
+const C1AtkScaleCap = percent(charTalentTables.Ineffa.c1.p2);
+const C2Dmg = percent(charTalentTables.Ineffa.c2.p1);
+const C6Dmg = percent(charTalentTables.Ineffa.c6.p1);
 
 const emBuffPost = new PostEffectStatsAtk({
+    // A4 Panoramic Permutation, self copy: 6% of Ineffa's live ATK as EM.
+    // Game data: Avatar_Ineffa_PermanentSkill_2 (Ineffa_P1_Self) reads
+    // FIGHT_PROP_NONEXTRA_ATTACK (premod) into AttackCache and writes
+    // Actor_ElemMasteryExtraDelta (extra), so the default premod read and
+    // extra write are confirmed. GO reads input.premod.atk; KQM has no
+    // premod/total interaction test for Ineffa. Premod ATK writers
+    // (Columbina C2, Chevreuse A4) count; extra ATK (Bennett burst) does not.
     percent: new StatTable('mastery', [A4EmScale / 100]),
     condition: new ConditionBoolean({name: 'ineffa_panoramic_permutation_protocol'}),
 });
 
+// Panoramic Permutation also raises the active member's Mastery from the
+// source's live ATK. Ineffa keeps her own copy above, so the delivery
+// excludes the source and only reaches members while they are on-field.
+// It carries its own ascension gate; the saved source toggle stays clean.
+const emBuffPostActive = new PostEffectStatsAtk({
+    // Same A4 effect for the active member: 6% of Ineffa's live ATK as EM.
+    // Game data: the same Avatar_Ineffa_PermanentSkill_2 ability
+    // (Ineffa_P1_Other, re-applied from FIGHT_PROP_NONEXTRA_ATTACK by
+    // Ineffa_P1_Other_Father) into Actor_ElemMasteryExtraDelta, so the
+    // default premod read and extra write are confirmed.
+    receivers: RECEIVERS.OTHERS,
+    percent: new StatTable('mastery', [A4EmScale / 100]),
+    conditions: [
+        new ConditionBoolean({name: 'ineffa_panoramic_permutation_protocol'}),
+        new ConditionAscensionChar({ascension: 4}),
+        new ConditionReceiver({
+            condition: new ConditionOnField(),
+        }),
+    ],
+});
+
 const lunarPost = new PostEffectStatsAtk({
+    // Moonsign Benediction Assemblage Hub: live ATK feeds the Lunar-Charged
+    // base damage ratio (0.7% per 100 ATK, cap 14%). Game data:
+    // Avatar_Ineffa_ElementalBurst sets it with
+    // SetNewElementReactionBaseDamageRatioParam (AttackTransferRatio x 0.01
+    // for MoonShock, Ineffa_PermanentSkill_3 in ConfigTalent_Ineffa), which
+    // names no premod/total read. In-game test (md/buff_chains.md): at 938
+    // ATK a Lunar-Charged tick did 4,037, and 4,319 in Bennett's burst
+    // (x 1.14 / 1.0657): it reads the total ATK, as GO does.
+    receivers: RECEIVERS.TEAM,
+    reads: CHANNELS.TOTAL,
     percent: new StatTable('lunarcharged_multi', [PassiveLunarScale / 100]),
     statCap: new ValueTable([PassiveLunarScaleCap]),
 });
 
 const lunarPost2 = new PostEffectStatsAtk({
+    // C1 Rectifying Processor: 2.5% of live ATK as Lunar-Charged DMG
+    // (cap 50%). Game data: Avatar_Ineffa_ElementalArt
+    // (UNIQUE_Ineffa_Talent_1_Real_Caster) reads FIGHT_PROP_NONEXTRA_ATTACK
+    // (premod) into AttackCache and scales ReactionUpCache by TransferRatio
+    // (0.025 at C1 through Ineffa_Constellation_1 in ConfigTalent_Ineffa,
+    // capped by MaxReactionUp) into Actor_ElemReactMoonShockDelta, so the
+    // default premod read is confirmed (the write target has no extra lane).
+    // GO reads input.total.atk, a supporting guess only; the traced game
+    // expression is preferred. KQM has no test.
+    receivers: RECEIVERS.TEAM,
     percent: new StatTable('dmg_reaction_lunarcharged', [C1AtkScale / 100]),
     statCap: new ValueTable([C1AtkScaleCap]),
     condition: new ConditionAnd([
@@ -161,6 +212,14 @@ export const Ineffa = new DbObjectChar({
     origin: 'nodkrai',
     talents: Talents,
     statTable: charTables.Ineffa,
+    // Every 'atk*' scaling below reads the total ATK: the game sizes
+    // Birgitta's Discharge (AttackRatioP1 x FIGHT_PROP_CUR_ATTACK in
+    // Avatar_Ineffa_ElementalArt_Relay_MoveController), the skill shield
+    // (MasteryCache x MasteryTranferRatio from FIGHT_PROP_CUR_ATTACK in
+    // Avatar_Ineffa_ElementalArt), C2 (T2AttackRatio x FIGHT_PROP_CUR_ATTACK
+    // in Avatar_Ineffa_Burst_T2_Attacker) and C6 (T6AttackRatio x
+    // FIGHT_PROP_CUR_ATTACK in Ineffa_Talent_6) from total ATK
+    // (GO: dmgNode('atk', ...)). atk* is already total, so no params.
     features: [
         new FeatureDamageNormal({
             multipliers: [
@@ -350,7 +409,10 @@ export const Ineffa = new DbObjectChar({
         }),
     ],
     conditions: [
+        // Ineffa unlocks Lunar-Charged for the whole team (merged with the
+        // old partyData copy).
         new Condition({
+            receivers: RECEIVERS.TEAM,
             settings: {
                 allowed_lunarcharged: 1,
             },
@@ -386,6 +448,7 @@ export const Ineffa = new DbObjectChar({
     ],
     postEffects: [
         emBuffPost,
+        emBuffPostActive,
         lunarPost,
         lunarPost2,
     ],
@@ -453,68 +516,5 @@ export const Ineffa = new DbObjectChar({
             ],
         },
     ]),
-    partyData: {
-        loadStats: {
-            stats: ['atk_total'],
-        },
-        conditions: [
-            new Condition({settings: {allowed_lunarcharged: 1}}),
-            new ConditionNumber({
-                name: 'ineffa_atk_total',
-                title: 'talent_name.stats_total_atk',
-                partyStat: 'atk_total',
-                serializeId: 1,
-                rotation: 'party',
-                max: 10000,
-            }),
-            new ConditionStatic({
-                title: 'talent_name.ineffa_assemblage_hub',
-                description: 'talent_descr.ineffa_assemblage_hub',
-                stats: {
-                    text_percent: PassiveLunarScale,
-                    text_percent_max: PassiveLunarScaleCap,
-                },
-            }),
-            new ConditionBoolean({
-                name: 'party.ineffa_panoramic_permutation_protocol',
-                serializeId: 2,
-                title: 'talent_name.ineffa_panoramic_permutation_protocol',
-                description: 'talent_descr.ineffa_panoramic_permutation_protocol',
-                info: {ascension: 4},
-                rotation: 'party',
-                stats: {
-                    text_percent: A4EmScale,
-                },
-            }),
-            new ConditionBoolean({
-                name: 'party.ineffa_rectifying_processor',
-                serializeId: 3,
-                title: 'talent_name.ineffa_rectifying_processor',
-                description: 'talent_descr.ineffa_rectifying_processor',
-                info: {constellation: 1},
-                stats: {
-                    text_percent: C1AtkScale,
-                    text_percent_max: C1AtkScaleCap,
-                },
-            }),
-        ],
-        postEffects: [
-            new PostEffectStats({
-                from: 'ineffa_atk_total',
-                percent: new StatTable('mastery', [A4EmScale / 100]),
-                condition: new ConditionBoolean({name: 'party.ineffa_panoramic_permutation_protocol'}),
-            }),
-            new PostEffectStats({
-                from: 'ineffa_atk_total',
-                percent: new StatTable('lunarcharged_multi', [PassiveLunarScale / 100]),
-                statCap: new ValueTable([PassiveLunarScaleCap]),
-            }),
-            new PostEffectStats({
-                from: 'ineffa_atk_total',
-                percent: new StatTable('dmg_reaction_lunarcharged', [C1AtkScale / 100]),
-                statCap: new ValueTable([C1AtkScaleCap]),
-                condition: new ConditionBoolean({name: 'party.ineffa_rectifying_processor'}),
-            }),
-        ],
-    },
+    retiredParty: [[1, 'number'], [2, 'checkbox'], [3, 'checkbox']],
 });

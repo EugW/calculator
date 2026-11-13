@@ -76,6 +76,16 @@
     background-color: #734949AA;
 }
 
+.artifact-list-box.equipped-teammate {
+    box-shadow: inset 0 0 0 2px #6ca2c8;
+}
+
+.artifact-list-box .equipped.teammate {
+    border-radius: 50%;
+    background: #263b4b;
+    outline: 1px solid #6ca2c8;
+}
+
 .artifact-list-box.hidden {
     display: none;
 }

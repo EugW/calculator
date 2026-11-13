@@ -2,6 +2,7 @@ import { Condition } from "../../classes/Condition";
 import { ConditionAnd } from "../../classes/Condition/And";
 import { ConditionAscensionChar } from "../../classes/Condition/Ascension/Char";
 import { ConditionBoolean } from "../../classes/Condition/Boolean";
+import { ConditionTeam } from "../../classes/Condition/Team";
 import { ConditionBooleanValue } from "../../classes/Condition/Boolean/Value";
 import { ConditionConstellation } from "../../classes/Condition/Constellation";
 import { ConditionNot } from "../../classes/Condition/Not";
@@ -23,12 +24,14 @@ import { FeatureDamageStellarConduct } from "../../classes/Feature2/Damage/Stell
 import { FeatureDamageStellarSwirl } from "../../classes/Feature2/Damage/StellarSwirl";
 import { FeatureMultiplier } from "../../classes/Feature2/Multiplier";
 import { FeaturePostEffectValue } from "../../classes/Feature2/PostEffectValue";
-import { PostEffectStats } from "../../classes/PostEffect/Stats";
+import { CHANNELS } from "../../classes/PostEffect/Channels";
 import { PostEffectStatsAtk } from "../../classes/PostEffect/Stats/Atk";
+import { RECEIVERS } from "../../classes/Team/Receivers";
 import { StatTable } from "../../classes/StatTable";
 import { ValueTable } from "../../classes/ValueTable";
 import { charTables } from "../generated/CharTables";
 import { charTalentTables } from "../generated/CharTalentTables";
+import { percent, plus } from "../Params";
 
 const Talents = new DbObjectTalents({
     attack: {
@@ -121,21 +124,21 @@ const Talents = new DbObjectTalents({
     links: [11330001, 11330002, 11330003],
 });
 
-const A1RefinedPrismMultiplier = 4;
-const A1RefinedTacticsPerStack = 10;
-const A4EmScale = 8;
-const A4EmCap = 160;
-const LightBaseScale = 0.7;
-const LightBaseCap = 14;
-const C1StellarGlimmerDmg = 30;
-const C2CondensedBeamCritDmg = 40;
-const C2CondensedBeamCritDmgStack = 20;
-const C4CannonDmg = 125;
-const C4CannonSwirlDmg = 187.5;
-const C6ClusterDmg = 100;
-const C6ClusterConductDmg = 80;
-const C6ClusterSwirlDmg = 120;
-const C6StellarGlimmerElevation = 20;
+const A1RefinedPrismMultiplier = plus(1, charTalentTables.Sandrone.a1.p1);
+const A1RefinedTacticsPerStack = percent(charTalentTables.Sandrone.a1.p2);
+const A4EmScale = percent(charTalentTables.Sandrone.a4.p1);
+const A4EmCap = charTalentTables.Sandrone.a4.p2;
+const LightBaseScale = percent(charTalentTables.Sandrone.a0.p1);
+const LightBaseCap = percent(charTalentTables.Sandrone.a0.p2);
+const C1StellarGlimmerDmg = percent(charTalentTables.Sandrone.c1.p1);
+const C2CondensedBeamCritDmg = percent(charTalentTables.Sandrone.c2.p1);
+const C2CondensedBeamCritDmgStack = percent(charTalentTables.Sandrone.c2.p2);
+const C4CannonDmg = percent(charTalentTables.Sandrone.c4.p1);
+const C4CannonSwirlDmg = percent(charTalentTables.Sandrone.c4.p3);
+const C6ClusterDmg = percent(charTalentTables.Sandrone.c6.p1);
+const C6ClusterConductDmg = percent(charTalentTables.Sandrone.c6.p2);
+const C6ClusterSwirlDmg = percent(charTalentTables.Sandrone.c6.p4);
+const C6StellarGlimmerElevation = percent(charTalentTables.Sandrone.c6.p3);
 
 const radianceConductName = 'sandrone_radiance_stellarconduct';
 const radianceSwirlName = 'sandrone_radiance_stellarswirl';
@@ -167,12 +170,33 @@ const a1RefinedPrismSwirlCondition = new ConditionAnd([
 ]);
 
 const a4EmPost = new PostEffectStatsAtk({
+    // A Lady's Code of Conduct: 8% of ATK as EM (cap 160).
+    // Game data: Avatar_Marionette_PermanentSkill_2
+    // (Avatar_Marionette_PermanentSkill_2_Driver) reads
+    // FIGHT_PROP_NONEXTRA_ATTACK (premod) x TransRatio into MasteryUpCache
+    // (cap MaxMasteryUp; ProudSkill 1332201 [0.08, 160]) and writes
+    // Actor_ElemMasteryExtraDelta (extra) via MarionetteP2MasteryUp, so the
+    // default premod read and extra write are confirmed. GO reads
+    // input.premod.atk; KQM has no premod/total interaction test for
+    // Sandrone. Premod ATK writers (Columbina C2, Chevreuse A4) count;
+    // extra ATK (Bennett burst) does not.
     percent: new StatTable('mastery', [A4EmScale / 100]),
     statCap: new ValueTable([A4EmCap]),
     condition: new ConditionAscensionChar({ascension: 4}),
 });
 
 const lightBasePost = new PostEffectStatsAtk({
+    // Light of Rationalisme stellar base bonus, TEAM: 0.7% of ATK per 100
+    // (cap 14%) as stellarglimmer_multi. Game data:
+    // Avatar_MarionetteNew_ElementalBurst sets it with
+    // SetNewElementReactionBaseDamageRatioParam (AttackTransferRatio x 0.01,
+    // caps Min/MaxTransRatio; ProudSkill 1332301 [0.007, 0.14] via
+    // MarionetteNew_PermanentSkill_3), which names no premod/total read.
+    // The same call reads the total ATK in game (Ineffa's Benediction,
+    // in-game test: md/buff_chains.md): extra ATK (Bennett's burst)
+    // counts, as in GO (input.total.atk).
+    receivers: RECEIVERS.TEAM,
+    reads: CHANNELS.TOTAL,
     percent: new StatTable('stellarglimmer_multi', [LightBaseScale / 100]),
     statCap: new ValueTable([LightBaseCap]),
 });
@@ -188,6 +212,13 @@ export const Sandrone = new DbObjectChar({
     origin: 'snezhnaya',
     talents: Talents,
     statTable: charTables.Sandrone,
+    // Talent damage hits read the total ATK: the game scales them from
+    // FIGHT_PROP_CUR_ATTACK (e.g. Avatar_MarionetteNew_T4 DamageRatio /
+    // SwirlDamageRatio, the P1/bullet StarSC/StarSwirl ratios). Damage
+    // multipliers (A1's 400% prism and +10%/Refined Tactics stack) need
+    // nothing. stellarglimmer_multi below is a reaction base bonus with no
+    // extra lane, so its scaling is total by construction; only its ATK
+    // read is channelled (unresolved, default kept above).
     features: [
         new FeatureDamageNormal({
             multipliers: [
@@ -450,6 +481,8 @@ export const Sandrone = new DbObjectChar({
             ],
             condition: radianceSwirlCondition,
         }),
+        // Displays of a4EmPost / lightBasePost; they follow their
+        // post-effects' channels, need nothing.
         new FeaturePostEffectValue({
             category: 'other',
             name: 'sandrone_a_ladys_code_of_conduct',
@@ -548,7 +581,9 @@ export const Sandrone = new DbObjectChar({
         }),
     ],
     conditions: [
-        new Condition({settings: {
+        new Condition({
+            receivers: RECEIVERS.TEAM,
+            settings: {
             allowed_stellarconduct: 1,
             allowed_stellarswirl: 1,
         }}),
@@ -582,7 +617,7 @@ export const Sandrone = new DbObjectChar({
                 text_percent: LightBaseScale,
                 text_percent_max: LightBaseCap,
             },
-            condition: new ConditionBoolean({name: 'polestar_field'}),
+            condition: new ConditionTeam({condition: new ConditionBoolean({name: 'polestar_field'})}),
         }),
         new ConditionBoolean({
             name: radianceSwirlName,
@@ -636,9 +671,17 @@ export const Sandrone = new DbObjectChar({
     constellation: new DbObjectConstellation([
         {
             conditions: [
+                // C1 Morrow: "all party members deal 30% increased Stellar
+                // Glimmer reaction DMG" (TEAM, manual assumption).
+                // Game data: MarionetteNew_Constellation_1 adds
+                // Avatar_MarionetteNew_T1 (MarionetteNew_Talent_1_Buff writes
+                // the flat DamageUpRatio 0.3 into
+                // Actor_ElemReactStarSConduct/Swirl*Delta, no stat read):
+                // flat conditions (premod) need nothing.
                 new ConditionBoolean({
                     name: 'sandrone_morrow_after_the_golden_dusk',
                     serializeId: 6,
+                    receivers: RECEIVERS.TEAM,
                     title: 'talent_name.sandrone_morrow_after_the_golden_dusk',
                     description: 'talent_descr.sandrone_morrow_after_the_golden_dusk',
                     stats: {
@@ -649,6 +692,11 @@ export const Sandrone = new DbObjectChar({
         },
         {
             conditions: [
+                // C2: flat +40% beam CRIT DMG plus +20%/beam to 3 stacks.
+                // Game data: MarionetteNew_Constellation_2 adds
+                // Avatar_MarionetteNew_T2 (ModifyDamageMixin bonusCriticalHurt
+                // from DamageUpRatio / DamageUpRatioPerLayer, params
+                // [0.4, 0.2], no stat read): flat conditions need nothing.
                 new ConditionBoolean({
                     name: 'sandrone_an_heiress_gazed_into_the_looking_glass',
                     serializeId: 7,
@@ -687,6 +735,10 @@ export const Sandrone = new DbObjectChar({
         },
         {
             conditions: [
+                // C4: 125% / 187.5% ATK coordinated hits (game:
+                // MarionetteNew_Constellation_4 adds Avatar_MarionetteNew_T4,
+                // DamageRatio / SwirlDamageRatio x FIGHT_PROP_CUR_ATTACK,
+                // total): plain damage hits need nothing.
                 new ConditionStatic({
                     title: 'talent_name.sandrone_in_knowledge_lies_the_worlds_true_ground',
                     description: 'talent_descr.sandrone_in_knowledge_lies_the_worlds_true_ground',
@@ -708,6 +760,11 @@ export const Sandrone = new DbObjectChar({
         },
         {
             conditions: [
+                // C6: flat +20 Stellar Glimmer elevate (game:
+                // MarionetteNew_Constellation_6 adds Avatar_MarionetteNew_T6,
+                // flat BuffRatio 0.2) plus 100% / 80% / 120% ATK cluster hits
+                // (ExtraAttackBullet_Loop ratios x FIGHT_PROP_CUR_ATTACK,
+                // total): flat conditions and damage hits need nothing.
                 new ConditionStatic({
                     title: 'talent_name.sandrone_narcissus_wakes_her_eyes_upon_the_dawn',
                     description: 'talent_descr.sandrone_narcissus_wakes_her_eyes_upon_the_dawn',
@@ -724,49 +781,5 @@ export const Sandrone = new DbObjectChar({
         a4EmPost,
         lightBasePost,
     ],
-    partyData: {
-        loadStats: {
-            stats: ['atk_total'],
-        },
-        conditions: [
-            new Condition({settings: {
-                allowed_stellarconduct: 1,
-                allowed_stellarswirl: 1,
-            }}),
-            new ConditionNumber({
-                name: 'sandrone_atk_total',
-                title: 'talent_name.stats_total_atk',
-                partyStat: 'atk_total',
-                serializeId: 1,
-                rotation: 'party',
-                max: 10000,
-            }),
-            new ConditionStatic({
-                title: 'talent_name.sandrone_light_of_rationalisme',
-                description: 'talent_descr.sandrone_light_of_rationalisme',
-                stats: {
-                    text_percent: LightBaseScale,
-                    text_percent_max: LightBaseCap,
-                },
-            }),
-            new ConditionBoolean({
-                name: 'party.sandrone_morrow_after_the_golden_dusk',
-                serializeId: 2,
-                title: 'talent_name.sandrone_morrow_after_the_golden_dusk',
-                description: 'talent_descr.sandrone_morrow_after_the_golden_dusk',
-                info: {constellation: 1},
-                rotation: 'party',
-                stats: {
-                    dmg_stellarglimmer: C1StellarGlimmerDmg,
-                },
-            }),
-        ],
-        postEffects: [
-            new PostEffectStats({
-                from: 'sandrone_atk_total',
-                percent: new StatTable('stellarglimmer_multi', [LightBaseScale / 100]),
-                statCap: new ValueTable([LightBaseCap]),
-            }),
-        ],
-    },
+    retiredParty: [[1, 'number'], [2, 'checkbox']],
 });

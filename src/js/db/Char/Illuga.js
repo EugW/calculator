@@ -2,12 +2,14 @@ import { Condition } from "../../classes/Condition";
 import { ConditionAnd } from "../../classes/Condition/And";
 import { ConditionAscensionChar } from "../../classes/Condition/Ascension/Char";
 import { ConditionBoolean } from "../../classes/Condition/Boolean";
+import { ConditionOnField } from "../../classes/Condition/Field";
 import { ConditionBooleanLevels } from "../../classes/Condition/Boolean/Levels";
+import { ConditionBooleanValue } from "../../classes/Condition/Boolean/Value";
 import { ConditionCalcElementsIlluga } from "../../classes/Condition/CalcElementsIlluga";
+import { ConditionCalcMoonsign } from "../../classes/Condition/CalcMoonsign";
 import { ConditionConstellation } from "../../classes/Condition/Constellation";
 import { ConditionNot } from "../../classes/Condition/Not";
-import { ConditionNumber } from "../../classes/Condition/Number";
-import { ConditionNumberTalent } from "../../classes/Condition/Number/Talent";
+import { ConditionReceiver } from "../../classes/Condition/Receiver";
 import { ConditionStatic } from "../../classes/Condition/Static";
 import { DbObjectChar } from "../../classes/DbObject/Char";
 import { DbObjectConstellation } from "../../classes/DbObject/Constellation";
@@ -20,9 +22,11 @@ import { FeatureDamagePlungeShockWave } from "../../classes/Feature2/Damage/Plun
 import { FeatureDamageSkill } from "../../classes/Feature2/Damage/Skill";
 import { FeatureMultiplier } from "../../classes/Feature2/Multiplier";
 import { FeatureMultiplierTarget } from "../../classes/Feature2/Multiplier/Target";
+import { RECEIVERS } from "../../classes/Team/Receivers";
 import { StatTable } from "../../classes/StatTable";
 import { charTables } from "../generated/CharTables";
 import { charTalentTables } from "../generated/CharTalentTables";
+import { percent } from "../Params";
 
 const Talents = new DbObjectTalents({
     attack: {
@@ -125,25 +129,43 @@ const Talents = new DbObjectTalents({
 });
 
 // A1 Lightkeeper's Oath bonuses
-const A1CritRate = 5;
-const A1CritDmg = 10;
-const A1MoonsignEM = 50;
+const A1CritRate = percent(charTalentTables.Illuga.a1.p1);
+const A1CritDmg = percent(charTalentTables.Illuga.a1.p2);
+const A1MoonsignEM = charTalentTables.Illuga.a1.p5;
 
 // C6 enhanced Lightkeeper's Oath bonuses
-const C6CritRate = 10;
-const C6CritDmg = 30;
-const C6MoonsignEM = 80;
+const C6CritRate = percent(charTalentTables.Illuga.c6.p1);
+const C6CritDmg = percent(charTalentTables.Illuga.c6.p2);
+const C6MoonsignEM = charTalentTables.Illuga.c6.p5;
 
 // C2 Aedon scaling
-const C2AedonEM = 400;
-const C2AedonDEF = 200;
+const C2AedonEM = percent(charTalentTables.Illuga.c2.p1);
+const C2AedonDEF = percent(charTalentTables.Illuga.c2.p2);
 
 // C4 DEF bonus
-const C4DefBonus = 200;
+const C4DefBonus = charTalentTables.Illuga.c4.p1;
 
 // A4 party scaling (1/2/3 Hydro or Geo)
-const A4GeoDmgScale = [7, 14, 24];
-const A4LunarScale = [48, 96, 160];
+const A4GeoDmgScale = [percent(charTalentTables.Illuga.a4.p1), percent(charTalentTables.Illuga.a4.p2), percent(charTalentTables.Illuga.a4.p3)];
+const A4LunarScale = [percent(charTalentTables.Illuga.a4.p4), percent(charTalentTables.Illuga.a4.p5), percent(charTalentTables.Illuga.a4.p6)];
+
+// "Other nearby party members" and "nearby active party members" exclude the
+// source; the on-field member is a receiver field-state check on the hidden
+// delivery, not a manual assumption.
+const activeRecipient = new ConditionReceiver({
+    condition: new ConditionOnField(),
+});
+
+/**
+ * Moonsign: Ascendant Gleam, in the source's settings: the gate of the
+ * Lightkeeper's Oath EM bonus. The old model applied it without the gate;
+ * the recorded baseline checks force it open to reproduce that recording.
+ */
+export const illugaAscendantGleam = new ConditionBooleanValue({
+    setting: 'party_moonsign',
+    cond: 'ge',
+    value: 2,
+});
 
 export const Illuga = new DbObjectChar({
     name: 'illuga',
@@ -314,7 +336,14 @@ export const Illuga = new DbObjectChar({
         }),
     ],
     conditions: [
-        // A1: Lightkeeper's Oath - self buff after Skill/Burst (Geo CRIT Rate/DMG + Moonsign EM)
+        // Moonsign level comes from the real team (gates the Oath EM bonus
+        // below); every Moonsign member delivers the same values, so this
+        // needs no stack key.
+        new ConditionCalcMoonsign({receivers: RECEIVERS.TEAM}),
+        // A1: Lightkeeper's Oath after Skill/Burst. "Other nearby party
+        // members will gain the Lightkeeper's Oath effect": Illuga himself
+        // does not (the old model gave it to him too). The hidden deliveries
+        // below carry the effect; C6's toggle replaces this one.
         new ConditionBoolean({
             name: 'illuga_lightkeepers_oath',
             serializeId: 1,
@@ -323,14 +352,40 @@ export const Illuga = new DbObjectChar({
             info: {ascension: 1},
             rotation: 'self',
             hideInactive: true,
+            condition: new ConditionAnd([
+                new ConditionAscensionChar({ascension: 1}),
+                new ConditionNot([new ConditionConstellation({constellation: 6})]),
+            ]),
+        }),
+        // A1: "other nearby party members will gain the Lightkeeper's Oath
+        // effect ... For Geo DMG dealt to opponents, CRIT Rate increases by
+        // 5% and CRIT DMG increases by 10%" (before C6).
+        new Condition({
+            isHidden: true,
+            receivers: RECEIVERS.OTHERS,
             stats: {
                 crit_rate_geo: A1CritRate,
                 crit_dmg_geo: A1CritDmg,
+            },
+            condition: new ConditionAnd([
+                new ConditionAscensionChar({ascension: 1}),
+                new ConditionNot([new ConditionConstellation({constellation: 6})]),
+                new ConditionBoolean({name: 'illuga_lightkeepers_oath'}),
+            ]),
+        }),
+        // A1 Moonsign: Ascendant Gleam EM for the other members, gated on the
+        // delivery (the saved control is kept in any team).
+        new Condition({
+            isHidden: true,
+            receivers: RECEIVERS.OTHERS,
+            stats: {
                 mastery: A1MoonsignEM,
             },
             condition: new ConditionAnd([
                 new ConditionAscensionChar({ascension: 1}),
                 new ConditionNot([new ConditionConstellation({constellation: 6})]),
+                new ConditionBoolean({name: 'illuga_lightkeepers_oath'}),
+                illugaAscendantGleam,
             ]),
         }),
         // Burst: Nightingale's Song active
@@ -369,6 +424,77 @@ export const Illuga = new DbObjectChar({
         }),
     ],
     partyConditions: [],
+    multipliers: [
+        // Burst: Nightingale's Song consumes 1 stack when Geo DMG of nearby
+        // active members hits, increasing the DMG from Illuga's live EM and
+        // burst level (merged with the old typed party copies).
+        new FeatureMultiplier({
+            receivers: RECEIVERS.OTHERS,
+            scaling: 'mastery*',
+            leveling: 'char_skill_burst',
+            source: 'illuga_nightingales_song',
+            values: Talents.get('burst.illuga_geo_dmg_bonus'),
+            target: new FeatureMultiplierTarget({
+                damageElements: ['geo'],
+                tagsExclude: ['lunarcrystallize_reaction'],
+            }),
+            condition: new ConditionAnd([
+                new ConditionBoolean({name: 'illuga_nightingales_song'}),
+                activeRecipient,
+            ]),
+        }),
+        // Nightingale's Song: Lunar-Crystallize increase from live EM/burst.
+        new FeatureMultiplier({
+            receivers: RECEIVERS.OTHERS,
+            scaling: 'mastery*',
+            leveling: 'char_skill_burst',
+            source: 'illuga_nightingales_song',
+            values: Talents.get('burst.illuga_lunar_crystallize_bonus'),
+            target: new FeatureMultiplierTarget({
+                tags: ['lunarcrystallize_reaction'],
+                options: ['reaction_flat'],
+            }),
+            condition: new ConditionAnd([
+                new ConditionBoolean({name: 'illuga_nightingales_song'}),
+                activeRecipient,
+            ]),
+        }),
+        // A4: Demonhunter's Dusk enhances Nightingale's Song by the live
+        // Hydro/Geo team count (source scope): Geo DMG increase.
+        new FeatureMultiplier({
+            receivers: RECEIVERS.OTHERS,
+            scaling: 'mastery*',
+            leveling: 'illuga_hydro_geo_count',
+            source: 'illuga_demonhunters_dusk',
+            values: new StatTable('illuga_a4_geo_dmg_bonus', [0, ...A4GeoDmgScale]),
+            target: new FeatureMultiplierTarget({
+                damageElements: ['geo'],
+                tagsExclude: ['lunarcrystallize_reaction'],
+            }),
+            condition: new ConditionAnd([
+                new ConditionAscensionChar({ascension: 4}),
+                new ConditionBoolean({name: 'illuga_demonhunters_dusk'}),
+                activeRecipient,
+            ]),
+        }),
+        // A4: Lunar-Crystallize increase by the live Hydro/Geo team count.
+        new FeatureMultiplier({
+            receivers: RECEIVERS.OTHERS,
+            scaling: 'mastery*',
+            leveling: 'illuga_hydro_geo_count',
+            source: 'illuga_demonhunters_dusk',
+            values: new StatTable('illuga_a4_lunar_crystallize_bonus', [0, ...A4LunarScale]),
+            target: new FeatureMultiplierTarget({
+                tags: ['lunarcrystallize_reaction'],
+                options: ['reaction_flat'],
+            }),
+            condition: new ConditionAnd([
+                new ConditionAscensionChar({ascension: 4}),
+                new ConditionBoolean({name: 'illuga_demonhunters_dusk'}),
+                activeRecipient,
+            ]),
+        }),
+    ],
     constellation: new DbObjectConstellation([
         // C1: Gullinkambi - Energy restoration (passive, not calculated)
         {
@@ -402,8 +528,29 @@ export const Illuga = new DbObjectChar({
                 }),
             ],
         },
-        // C4: Skoll - DEF bonus (applied via partyData)
-        {},
+        // C4: "nearby active party members will have their DEF increased by
+        // 200": the on-field member, Illuga included.
+        {
+            conditions: [
+                new ConditionBoolean({
+                    name: 'illuga_c4_def',
+                    serializeId: 4,
+                    title: 'talent_name.illuga_solarhunting_wolf',
+                    description: 'talent_descr.illuga_solarhunting_wolf',
+                }),
+                new Condition({
+                    isHidden: true,
+                    receivers: RECEIVERS.TEAM,
+                    stats: {
+                        def: C4DefBonus,
+                    },
+                    condition: new ConditionAnd([
+                        new ConditionBoolean({name: 'illuga_c4_def'}),
+                        activeRecipient,
+                    ]),
+                }),
+            ],
+        },
         // C5: Svadilfari - Skill +3
         {
             conditions: [
@@ -417,6 +564,8 @@ export const Illuga = new DbObjectChar({
         // C6: Nightmare Orioles - Enhanced Lightkeeper's Oath (applied via toggleable condition)
         {
             conditions: [
+                // "Enhances the Lightkeeper's Oath effect ... You must first
+                // unlock the Ascension Talent": the Oath control from C6 on.
                 new ConditionBoolean({
                     name: 'illuga_lightkeepers_oath_c6',
                     serializeId: 6,
@@ -424,194 +573,36 @@ export const Illuga = new DbObjectChar({
                     description: 'talent_descr.illuga_nightmare_orioles',
                     rotation: 'self',
                     hideInactive: true,
+                    condition: new ConditionAscensionChar({ascension: 1}),
+                }),
+                // C6 CRIT for the other members, in place of A1's values.
+                new Condition({
+                    isHidden: true,
+                    receivers: RECEIVERS.OTHERS,
                     stats: {
                         crit_rate_geo: C6CritRate,
                         crit_dmg_geo: C6CritDmg,
+                    },
+                    condition: new ConditionAnd([
+                        new ConditionAscensionChar({ascension: 1}),
+                        new ConditionBoolean({name: 'illuga_lightkeepers_oath_c6'}),
+                    ]),
+                }),
+                // C6 Moonsign: Ascendant Gleam EM for the other members.
+                new Condition({
+                    isHidden: true,
+                    receivers: RECEIVERS.OTHERS,
+                    stats: {
                         mastery: C6MoonsignEM,
                     },
+                    condition: new ConditionAnd([
+                        new ConditionAscensionChar({ascension: 1}),
+                        new ConditionBoolean({name: 'illuga_lightkeepers_oath_c6'}),
+                        illugaAscendantGleam,
+                    ]),
                 }),
             ],
         },
     ]),
-    partyData: {
-        loadStats: {
-            stats: ['mastery'],
-            settings: ['char_skill_burst'],
-        },
-        conditions: [
-            // Illuga's EM input
-            new ConditionNumber({
-                name: 'illuga_mastery',
-                title: 'talent_name.stats_total_mastery',
-                partyStat: 'mastery',
-                serializeId: 1,
-                rotation: 'party',
-                max: 1500,
-            }),
-            // A1: Lightkeeper's Oath party toggle
-            new ConditionBoolean({
-                name: 'party.illuga_lightkeepers_oath',
-                serializeId: 4,
-                title: 'talent_name.illuga_torchforgers_covenant',
-                description: 'talent_descr.illuga_torchforgers_covenant',
-                info: {ascension: 1},
-                rotation: 'party',
-                stats: {
-                    text_crit_rate_geo: A1CritRate,
-                    text_crit_dmg_geo: A1CritDmg,
-                    text_mastery: A1MoonsignEM,
-                },
-            }),
-            // C6: Enhanced Lightkeeper's Oath (sub-toggle under A1)
-            new ConditionBoolean({
-                name: 'party.illuga_lightkeepers_oath_c6',
-                serializeId: 9,
-                title: 'talent_name.illuga_nightmare_orioles',
-                description: 'talent_descr.illuga_nightmare_orioles',
-                info: {constellation: 6},
-                rotation: 'party',
-                stats: {
-                    text_crit_rate_geo: C6CritRate,
-                    text_crit_dmg_geo: C6CritDmg,
-                    text_mastery: C6MoonsignEM,
-                },
-                subConditions: [
-                    new ConditionBoolean({name: 'party.illuga_lightkeepers_oath'}),
-                ],
-            }),
-            // A1 stats (applied when A1 is ON and C6 is OFF)
-            new Condition({
-                stats: {
-                    crit_rate_geo: A1CritRate,
-                    crit_dmg_geo: A1CritDmg,
-                    mastery: A1MoonsignEM,
-                },
-                condition: new ConditionAnd([
-                    new ConditionBoolean({name: 'party.illuga_lightkeepers_oath'}),
-                    new ConditionNot([new ConditionBoolean({name: 'party.illuga_lightkeepers_oath_c6'})]),
-                ]),
-            }),
-            // C6 stats (applied when both A1 and C6 are ON)
-            new Condition({
-                stats: {
-                    crit_rate_geo: C6CritRate,
-                    crit_dmg_geo: C6CritDmg,
-                    mastery: C6MoonsignEM,
-                },
-                condition: new ConditionAnd([
-                    new ConditionBoolean({name: 'party.illuga_lightkeepers_oath'}),
-                    new ConditionBoolean({name: 'party.illuga_lightkeepers_oath_c6'}),
-                ]),
-            }),
-            // C4: Party DEF bonus
-            new ConditionBoolean({
-                name: 'party.illuga_c4_def',
-                serializeId: 6,
-                title: 'talent_name.illuga_solarhunting_wolf',
-                description: 'talent_descr.illuga_solarhunting_wolf',
-                info: {constellation: 4},
-                rotation: 'party',
-                stats: {
-                    def: C4DefBonus,
-                },
-            }),
-            // Burst level input for Nightingale's Song scaling
-            new ConditionNumberTalent({
-                name: 'illuga_char_skill_burst',
-                serializeId: 8,
-                title: 'talent_name.stats_level_burst',
-                partySetting: 'char_skill_burst',
-            }),
-            // C3: Burst level +3
-            new ConditionBoolean({
-                name: 'party.illuga_constellation_3',
-                serializeId: 10,
-                title: 'talent_name.illuga_earthshaking_maw',
-                description: 'talent_descr.char_constellation_burst',
-                info: {constellation: 3},
-                settings: {
-                    illuga_char_skill_burst_bonus: 3,
-                },
-            }),
-            // Nightingale's Song toggle (Geo DMG bonus based on EM)
-            new ConditionBoolean({
-                name: 'party.illuga_nightingales_song',
-                serializeId: 7,
-                title: 'talent_name.illuga_shadowless_reflection',
-                description: 'talent_descr.illuga_shadowless_reflection',
-                rotation: 'party',
-            }),
-            // A4: Demonhunter's Dusk - party element count
-            new ConditionCalcElementsIlluga({}),
-            // A4: Demonhunter's Dusk toggle
-            new ConditionBooleanLevels({
-                name: 'party.illuga_demonhunters_dusk',
-                serializeId: 11,
-                title: 'talent_name.illuga_demonhunters_dusk',
-                description: 'talent_descr.illuga_demonhunters_dusk',
-                info: {ascension: 4},
-                rotation: 'party',
-                levelSetting: 'illuga_hydro_geo_count',
-                stats: [
-                    new StatTable('text_number', [0, 1, 2, 3]),
-                    new StatTable('text_percent_em', [0, ...A4GeoDmgScale]),
-                ],
-                subConditions: [
-                    new ConditionBoolean({name: 'party.illuga_nightingales_song'}),
-                ],
-            }),
-        ],
-        multipliers: [
-            // Nightingale's Song: Geo DMG flat bonus based on EM
-            // Formula: EM × (71.4% at L13) = EM × 0.714 → 1071 flat damage at 1500 EM
-            new FeatureMultiplier({
-                scaling: 'illuga_mastery',
-                leveling: 'illuga_char_skill_burst',
-                source: 'illuga_nightingales_song',
-                values: Talents.get('burst.illuga_geo_dmg_bonus'),
-                target: new FeatureMultiplierTarget({
-                    damageElements: ['geo'],
-                    tagsExclude: ['lunarcrystallize_reaction'],
-                }),
-                condition: new ConditionBoolean({name: 'party.illuga_nightingales_song'}),
-            }),
-            // Nightingale's Song: Lunar-Crystallize flat bonus based on EM
-            // Formula: EM × (480.1% at L13) = EM × 4.801 → 7201 flat damage at 1500 EM
-            new FeatureMultiplier({
-                scaling: 'illuga_mastery',
-                leveling: 'illuga_char_skill_burst',
-                source: 'illuga_nightingales_song',
-                values: Talents.get('burst.illuga_lunar_crystallize_bonus'),
-                target: new FeatureMultiplierTarget({
-                    tags: ['lunarcrystallize_reaction'],
-                }),
-                condition: new ConditionBoolean({name: 'party.illuga_nightingales_song'}),
-            }),
-            // A4: Demonhunter's Dusk - Geo DMG flat bonus based on EM and party count
-            // Formula: EM × (7%/14%/24%) for 1/2/3 Hydro or Geo party members
-            new FeatureMultiplier({
-                scaling: 'illuga_mastery',
-                leveling: 'illuga_hydro_geo_count',
-                source: 'illuga_demonhunters_dusk',
-                values: new StatTable('illuga_a4_geo_dmg_bonus', [0, ...A4GeoDmgScale]),
-                target: new FeatureMultiplierTarget({
-                    damageElements: ['geo'],
-                    tagsExclude: ['lunarcrystallize_reaction'],
-                }),
-                condition: new ConditionBoolean({name: 'party.illuga_demonhunters_dusk'}),
-            }),
-            // A4: Demonhunter's Dusk - Lunar-Crystallize flat bonus based on EM and party count
-            // Formula: EM × (48%/96%/160%) for 1/2/3 Hydro or Geo party members
-            new FeatureMultiplier({
-                scaling: 'illuga_mastery',
-                leveling: 'illuga_hydro_geo_count',
-                source: 'illuga_demonhunters_dusk',
-                values: new StatTable('illuga_a4_lunar_crystallize_bonus', [0, ...A4LunarScale]),
-                target: new FeatureMultiplierTarget({
-                    tags: ['lunarcrystallize_reaction'],
-                }),
-                condition: new ConditionBoolean({name: 'party.illuga_demonhunters_dusk'}),
-            }),
-        ],
-    },
+    retiredParty: [[1, 'number'], [4, 'checkbox'], [6, 'checkbox'], [7, 'checkbox'], [8, 'number'], [9, 'checkbox'], [10, 'checkbox'], [11, 'checkbox']],
 });

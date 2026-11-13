@@ -4,6 +4,7 @@ import { Serializer } from "./Serializer";
 import { StorageItemArtifacts } from "./StorageItem/Artifacts";
 import { StorageItemArtifactActionHistory } from "./StorageItem/ArtifactActionHistory";
 import { StorageItemChar } from "./StorageItem/Char";
+import { StorageItemTeam } from "./StorageItem/Team";
 import { StorageItemRotation } from "./StorageItem/Rotation";
 import { StorageItemSettings } from "./StorageItem/Settings";
 import { Syncronize } from "./StorageItem/Syncronize";
@@ -16,6 +17,7 @@ export class Storage {
             typeof localStorage == 'undefined' ? null : localStorage,
         );
         this.char = new StorageItemChar();
+        this.team = new StorageItemTeam();
         this.rotation = new StorageItemRotation();
         this.artifacts = new StorageItemArtifacts();
         this.actionHistory = new StorageItemArtifactActionHistory();
@@ -35,6 +37,7 @@ export class Storage {
         opts = Object.assign({}, opts);
 
         this.char.fromBackup(backup.getChars(), opts.addChars);
+        this.team.fromBackup(backup.getTeams(), opts.addTeams);
         this.rotation.fromBackup(backup.getRotations(), opts.addRotations);
 
         // FIXME

@@ -18,8 +18,10 @@ import { FeatureMultiplierList } from "../../classes/Feature2/Multiplier/List";
 import { FeatureShield } from "../../classes/Feature2/Shield";
 import { StatTable } from "../../classes/StatTable";
 import { ValueTable } from "../../classes/ValueTable";
+import { RECEIVERS } from "../../classes/Team/Receivers";
 import { charTables } from "../generated/CharTables";
 import { charTalentTables } from "../generated/CharTalentTables";
+import { percent } from "../Params";
 
 const Talents = new DbObjectTalents({
     attack: {
@@ -131,6 +133,11 @@ const Talents = new DbObjectTalents({
         ],
     },
 });
+
+const A1Shield = percent(charTalentTables.Thoma.a1.p1);
+const A1MaxStacks = charTalentTables.Thoma.a1.p3;
+const A4HpDmg = percent(charTalentTables.Thoma.a4.p1);
+const C6Dmg = percent(charTalentTables.Thoma.c6.p1);
 
 export const Thoma = new DbObjectChar({
     name: 'thoma',
@@ -278,7 +285,7 @@ export const Thoma = new DbObjectChar({
                 new FeatureMultiplier({
                     scaling: 'hp*',
                     source: 'ascension4',
-                    values: new ValueTable([2.2]),
+                    values: new ValueTable([A4HpDmg]),
                     condition: new ConditionAscensionChar({ascension: 4}),
                 }),
             ],
@@ -301,9 +308,9 @@ export const Thoma = new DbObjectChar({
             serializeId: 1,
             title: 'talent_name.thoma_imbricated_armor',
             description: 'talent_descr.thoma_imbricated_armor',
-            maxStacks: 5,
+            maxStacks: A1MaxStacks,
             stats: [
-                new StatTable('shield', [5]),
+                new StatTable('shield', [A1Shield]),
             ],
             info: {ascension: 1},
             subConditions: [
@@ -314,7 +321,7 @@ export const Thoma = new DbObjectChar({
             title: 'talent_name.thoma_flaming_assault',
             description: 'talent_descr.thoma_flaming_assault',
             stats: {
-                text_percent: 2.2,
+                text_percent: A4HpDmg,
             },
             info: {ascension: 4},
             conditions: [
@@ -370,32 +377,17 @@ export const Thoma = new DbObjectChar({
                 new ConditionBoolean({
                     name: 'thoma_burning_heart',
                     serializeId: 3,
+                    receivers: RECEIVERS.TEAM,
                     title: 'talent_name.thoma_burning_heart',
                     description: 'talent_descr.thoma_burning_heart',
                     stats: {
-                        dmg_normal: 15,
-                        dmg_charged: 15,
-                        dmg_plunge: 15,
+                        dmg_normal: C6Dmg,
+                        dmg_charged: C6Dmg,
+                        dmg_plunge: C6Dmg,
                     },
                 }),
             ],
         },
     ]),
-    partyData: {
-        conditions: [
-            new ConditionBoolean({
-                name: 'party.thoma_burning_heart',
-                serializeId: 1,
-                rotation: 'party',
-                title: 'talent_name.thoma_burning_heart',
-                description: 'talent_descr.thoma_burning_heart',
-                info: {constellation: 6},
-                stats: {
-                    dmg_normal: 15,
-                    dmg_charged: 15,
-                    dmg_plunge: 15,
-                },
-            }),
-        ],
-    },
+    retiredParty: [[1, 'checkbox']],
 });

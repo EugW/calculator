@@ -1,4 +1,5 @@
 import { Stats } from "../../Stats";
+import { teamElements } from "../../Team/Party";
 import { ConditionStatic } from "../Static";
 
 export class ConditionDefendersWill extends ConditionStatic {
@@ -25,10 +26,7 @@ export class ConditionDefendersWill extends ConditionStatic {
         });
 
         let elements = {};
-        for (const name of ['char_element', 'resonance_element_1', 'resonance_element_2', 'resonance_element_3']) {
-            const element = settings[name] || '';
-            if (!element) continue;
-
+        for (const element of teamElements(settings)) {
             if (!elements[element]) {
                 elements[element] = 0;
             }

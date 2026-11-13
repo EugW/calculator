@@ -4,6 +4,8 @@ import { FeatureDamage } from "../../../classes/Feature2/Damage";
 import { FeatureMultiplier } from "../../../classes/Feature2/Multiplier";
 import { StatTable } from "../../../classes/StatTable";
 import { weaponStatTables } from "../../generated/WeaponStatTables";
+import { weaponPassiveTables } from "../../generated/WeaponPassiveTables";
+import { percent } from "../../Params";
 
 export const DebateClub = new DbObjectWeapon({
     name: 'debate_club',
@@ -18,7 +20,7 @@ export const DebateClub = new DbObjectWeapon({
             title: 'talent_name.weapon_debate_club',
             description: 'talent_descr.weapon_debate_club',
             stats: [
-                new StatTable('text_percent_dmg', [60, 75, 90, 105, 120]),
+                new StatTable('text_percent_dmg', percent(weaponPassiveTables.DebateClub.p1)),
             ],
         }),
     ],
@@ -28,7 +30,7 @@ export const DebateClub = new DbObjectWeapon({
             multipliers: [
                 new FeatureMultiplier({
                     leveling: 'weapon_refine',
-                    values: new StatTable('debate_club_aoe', [60, 75, 90, 105, 120]),
+                    values: new StatTable('debate_club_aoe', percent(weaponPassiveTables.DebateClub.p1)),
                 }),
             ],
         }),

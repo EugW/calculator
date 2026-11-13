@@ -3,6 +3,8 @@ import { ConditionStaticRefine } from "../../../classes/Condition/Static/Refine"
 import { DbObjectWeapon } from "../../../classes/DbObject/Weapon";
 import { StatTable } from "../../../classes/StatTable";
 import { weaponStatTables } from "../../generated/WeaponStatTables";
+import { weaponPassiveTables } from "../../generated/WeaponPassiveTables";
+import { percent } from "../../Params";
 
 export const BloodsoakedRuins = new DbObjectWeapon({
     name: 'bloodsoaked_ruins',
@@ -19,7 +21,7 @@ export const BloodsoakedRuins = new DbObjectWeapon({
             title: 'talent_name.weapon_bloodsoaked_ruins',
             description: 'talent_descr.weapon_bloodsoaked_ruins_1',
             stats: [
-                new StatTable('dmg_reaction_lunarcharged', [36, 48, 60, 72, 84]),
+                new StatTable('dmg_reaction_lunarcharged', percent(weaponPassiveTables.BloodsoakedRuins.p2)),
             ],
         }),
         new ConditionBooleanRefine({
@@ -28,8 +30,8 @@ export const BloodsoakedRuins = new DbObjectWeapon({
             title: 'talent_name.weapon_bloodsoaked_ruins',
             description: 'talent_descr.weapon_bloodsoaked_ruins_2',
             stats: [
-                new StatTable('crit_dmg', [28, 35, 42, 49, 56]),
-                new StatTable('text_energy', [12, 13, 14, 15, 16]),
+                new StatTable('crit_dmg', percent(weaponPassiveTables.BloodsoakedRuins.p4)),
+                new StatTable('text_energy', weaponPassiveTables.BloodsoakedRuins.p5),
             ],
         }),
     ],

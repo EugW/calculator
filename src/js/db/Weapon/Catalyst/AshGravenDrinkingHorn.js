@@ -4,6 +4,8 @@ import { FeatureDamage } from "../../../classes/Feature2/Damage";
 import { FeatureMultiplier } from "../../../classes/Feature2/Multiplier";
 import { StatTable } from "../../../classes/StatTable";
 import { weaponStatTables } from "../../generated/WeaponStatTables";
+import { weaponPassiveTables } from "../../generated/WeaponPassiveTables";
+import { percent } from "../../Params";
 
 export const AshGravenDrinkingHorn = new DbObjectWeapon({
     name: 'ash_graven_drinking_horn',
@@ -18,7 +20,7 @@ export const AshGravenDrinkingHorn = new DbObjectWeapon({
             title: 'talent_name.weapon_ash_graven_drinking_horn',
             description: 'talent_descr.weapon_ash_graven_drinking_horn',
             stats: [
-                new StatTable('text_percent_dmg', [40, 50, 60, 70, 80]),
+                new StatTable('text_percent_dmg', percent(weaponPassiveTables.AshGravenDrinkingHorn.p1)),
             ],
         }),
     ],
@@ -29,7 +31,7 @@ export const AshGravenDrinkingHorn = new DbObjectWeapon({
                 new FeatureMultiplier({
                     scaling: 'hp*',
                     leveling: 'weapon_refine',
-                    values: new StatTable('ash_graven_drinking_horn_dmg', [40, 50, 60, 70, 80]),
+                    values: new StatTable('ash_graven_drinking_horn_dmg', percent(weaponPassiveTables.AshGravenDrinkingHorn.p1)),
                 }),
             ],
         }),

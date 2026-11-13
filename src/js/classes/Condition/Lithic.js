@@ -1,5 +1,6 @@
 import { Condition } from "../Condition";
 import { Stats } from "../Stats";
+import { partyView } from "../Team/Party";
 
 export class ConditionLithic extends Condition {
     getType() {
@@ -7,22 +8,8 @@ export class ConditionLithic extends Condition {
     }
 
     getData(settings) {
-        let stacks = 0;
-        if (settings.char_origin == 'liyue') {
-            ++stacks;
-        }
-
-        for (let i = 1; i <= 3; ++i) {
-            let charId = settings['party_char_'+ i];
-            if (!charId) {
-                continue;
-            }
-
-            const char = DB.Chars.getById(charId);
-            if (char.origin == 'liyue') {
-                ++stacks;
-            }
-        }
+        let view = partyView(settings);
+        let stacks = [view.self, ...view.others].filter((member) => member.origin == 'liyue').length;
 
         return {
             settings: {weapon_lithic_stacks: stacks},

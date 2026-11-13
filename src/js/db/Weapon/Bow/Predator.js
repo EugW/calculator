@@ -6,6 +6,8 @@ import { ConditionStatic } from "../../../classes/Condition/Static";
 import { DbObjectWeapon } from "../../../classes/DbObject/Weapon";
 import { StatTable } from "../../../classes/StatTable";
 import { weaponStatTables } from "../../generated/WeaponStatTables";
+import { weaponPassiveTables } from "../../generated/WeaponPassiveTables";
+import { percent } from "../../Params";
 
 export const Predator = new DbObjectWeapon({
     name: 'predator',
@@ -27,7 +29,7 @@ export const Predator = new DbObjectWeapon({
             title: 'weapon_name.predator',
             description: 'talent_descr.weapon_predator_1',
             stats: {
-                atk: 66,
+                atk: weaponPassiveTables.Predator.p3[0],
             },
             subConditions: [
                 new ConditionBooleanChar({
@@ -46,8 +48,8 @@ export const Predator = new DbObjectWeapon({
             description: 'talent_descr.weapon_predator_2',
             maxStacks: 2,
             stats: [
-                new StatTable('dmg_normal', [10]),
-                new StatTable('dmg_charged', [10]),
+                new StatTable('dmg_normal', [percent(weaponPassiveTables.Predator.p1[0])]),
+                new StatTable('dmg_charged', [percent(weaponPassiveTables.Predator.p1[0])]),
             ],
             subConditions: [
                 new ConditionBoolean({

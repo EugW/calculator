@@ -1,10 +1,13 @@
 import { CHARACTER_MAX_POSSIBLE_HP } from "../Constants";
 import { charTables } from "../generated/CharTables";
 import { charTalentTables } from "../generated/CharTalentTables";
+import { percent } from "../Params";
 import { Condition } from "../../classes/Condition";
+import { ConditionAnd } from "../../classes/Condition/And";
 import { ConditionAscensionChar } from "../../classes/Condition/Ascension/Char";
 import { ConditionBoolean } from "../../classes/Condition/Boolean";
-import { ConditionNumber } from "../../classes/Condition/Number";
+import { ConditionOnField } from "../../classes/Condition/Field";
+import { ConditionReceiver } from "../../classes/Condition/Receiver";
 import { ConditionStatic } from "../../classes/Condition/Static";
 import { DbObjectChar } from "../../classes/DbObject/Char";
 import { DbObjectConstellation } from "../../classes/DbObject/Constellation";
@@ -20,8 +23,9 @@ import { FeatureMultiplier } from "../../classes/Feature2/Multiplier";
 import { FeatureMultiplierList } from "../../classes/Feature2/Multiplier/List";
 import { FeaturePostEffectValue } from "../../classes/Feature2/PostEffectValue";
 import { FeatureShield } from "../../classes/Feature2/Shield";
-import { PostEffectStats } from "../../classes/PostEffect/Stats";
+import { CHANNELS } from "../../classes/PostEffect/Channels";
 import { PostEffectStatsHP } from "../../classes/PostEffect/Stats/HP";
+import { RECEIVERS } from "../../classes/Team/Receivers";
 import { StatTable } from "../../classes/StatTable";
 
 const Talents = new DbObjectTalents({
@@ -117,17 +121,35 @@ const Talents = new DbObjectTalents({
     },
 });
 
-const A4AtkSpd = 0.0005;
-const A4AtkSpdCap = 20;
-const C2ShieldBonus = 25;
-const C6AtkSpeed = 10;
+const A4AtkSpd = percent(charTalentTables.Dahlia.a4.p1);
+const A4AtkSpdCap = percent(charTalentTables.Dahlia.a4.p2);
+const C2ShieldBonus = percent(charTalentTables.Dahlia.c2.p1);
+const C6AtkSpeed = percent(charTalentTables.Dahlia.c6.p1);
+
+// Prayer of Well-Wrought Joy raises the ATK SPD of the active affected
+// member from Dahlia's Max HP.
+const activeReceiver = new ConditionReceiver({
+    condition: new ConditionOnField(),
+});
 
 const buffAtkSpeed = new PostEffectStatsHP({
+    receivers: RECEIVERS.TEAM,
+    // Game data: Avatar_Dahlia_PermanentSkill_2_OnCurAvatar computes
+    // SetGlobalValue _ABILITY_Dahlia_AttackSpeedBuff as
+    // [FIGHT_PROP_MAX_HP, HpToSpeed_Ratio, MUL] capped by MaxAttackSpeed
+    // (ProudSkill 1152201 Dahlia_PermanentSkill_2 params [5e-06, 0.2]: 0.5%
+    // per 1000 HP, cap 20%). FIGHT_PROP_MAX_HP is the total marker
+    // (md/buff_chains.md), as for Baizhu/Candace/Chevreuse/Columbina; the same
+    // number as premod while no ability writes extra HP. GO reads
+    // input.total.hp. KQM Dahlia has no EM/ATK/HP/ER buff-chain test.
+    // atk_speed has no extra lane, so the default extra (total) write is kept.
+    reads: CHANNELS.TOTAL,
     percent: new StatTable('atk_speed', [A4AtkSpd]),
     statCap: new StatTable('', [A4AtkSpdCap]),
     conditions: [
         new ConditionAscensionChar({ascension: 4}),
         new ConditionBoolean({name: 'dahlia_prayer_of_well_wrought_joy'}),
+        activeReceiver,
     ],
 });
 
@@ -142,6 +164,16 @@ export const Dahlia = new DbObjectChar({
     origin: 'mondstadt',
     talents: Talents,
     statTable: charTables.Dahlia,
+    // Talent hits read the total by construction (FeatureDamage* multipliers
+    // with no stat input scale on ATK; the game uses ModifyDamageMixin with a
+    // plain damagePercentage, no FIGHT_PROP read) and need nothing. The burst
+    // shield (FeatureShield scaling 'hp*') reads the total HP by construction;
+    // the game builds it in UNIQUE_Dahlia_ElementBurst_Shield_Team_A/B with
+    // GlobalMainShieldMixin (Shield_HpValue, maxShieldByHPRatio
+    // Shield_MaxHpRatio, no FIGHT_PROP marker). GO uses shieldNodeTalent('hp',
+    // ...) (total) for it. A1 (Benison on Frozen, gated by
+    // Dahlia_PermanentSkill_1) and A3 (movement speed, PermanentSkill_3) read
+    // no stat. The FeaturePostEffectValue below only displays buffAtkSpeed.
     features: [
         new FeatureDamageNormal({
             name: 'normal_hit_1',
@@ -341,6 +373,8 @@ export const Dahlia = new DbObjectChar({
     constellation: new DbObjectConstellation([
         {
             conditions: [
+                // C1 restores flat energy (ReviveElemEnergy value EnergyValue,
+                // Talent Dahlia_Constellation_1 paramList [2.5]): no stat read.
                 new ConditionStatic({
                     title: 'talent_name.dahlia_infallible_procession',
                     description: 'talent_descr.dahlia_infallible_procession',
@@ -349,9 +383,14 @@ export const Dahlia = new DbObjectChar({
         },
         {
             conditions: [
+                // C2 Shield Strength +25% (Avatar_Dahlia_Constellation_2 writes
+                // Actor_ShieldCostMinusRatio from the flat ShieldMinusRatio,
+                // Talent Dahlia_Constellation_2 params [0.25, 12]): a flat
+                // toggle, always premod, needs nothing.
                 new ConditionBoolean({
                     name: 'dahlia_revelation_of_mercy',
                     serializeId: 2,
+                    receivers: RECEIVERS.TEAM,
                     title: 'talent_name.dahlia_revelation_of_mercy',
                     description: 'talent_descr.dahlia_revelation_of_mercy',
                     stats: {
@@ -388,6 +427,10 @@ export const Dahlia = new DbObjectChar({
         },
         {
             conditions: [
+                // C6 flat +10% ATK SPD (Avatar_Dahlia_Constellation_6 writes
+                // Animator_AttackSpeedRatio from the flat Extra_AtkSpeedRatio,
+                // Talent Dahlia_Constellation_6 paramList [0.1]): flat toggles,
+                // always premod, need nothing. atk_speed has no extra lane.
                 new ConditionBoolean({
                     name: 'dahlia_you_shall_go_out_with_joy',
                     serializeId: 3,
@@ -397,61 +440,21 @@ export const Dahlia = new DbObjectChar({
                         atk_speed: C6AtkSpeed,
                     },
                 }),
+                // Favonian Favor raises the active affected character's ATK
+                // SPD; Dahlia keeps his own copy above.
+                new Condition({
+                    isHidden: true,
+                    receivers: RECEIVERS.OTHERS,
+                    stats: {
+                        atk_speed: C6AtkSpeed,
+                    },
+                    condition: new ConditionAnd([
+                        new ConditionBoolean({name: 'dahlia_you_shall_go_out_with_joy'}),
+                        activeReceiver,
+                    ]),
+                }),
             ],
         },
     ]),
-    partyData: {
-        loadStats: {
-            stats: ['hp_total'],
-        },
-        conditions: [
-            new ConditionNumber({
-                name: 'dahlia_max_hp',
-                title: 'talent_name.stats_total_hp',
-                partyStat: 'hp_total',
-                serializeId: 1,
-                max: CHARACTER_MAX_POSSIBLE_HP,
-                class: "gi-inputs-5digit",
-            }),
-            new ConditionBoolean({
-                name: 'party.dahlia_prayer_of_well_wrought_joy',
-                serializeId: 2,
-                title: 'talent_name.dahlia_prayer_of_well_wrought_joy',
-                description: 'talent_descr.dahlia_prayer_of_well_wrought_joy',
-                info: {ascension: 4},
-            }),
-            new ConditionBoolean({
-                name: 'party.dahlia_revelation_of_mercy',
-                serializeId: 3,
-                title: 'talent_name.dahlia_revelation_of_mercy',
-                description: 'talent_descr.dahlia_revelation_of_mercy',
-                rotation: 'party',
-                info: {constellation: 2},
-                stats: {
-                    shield: C2ShieldBonus,
-                },
-            }),
-            new ConditionBoolean({
-                name: 'party.dahlia_you_shall_go_out_with_joy',
-                serializeId: 4,
-                title: 'talent_name.dahlia_you_shall_go_out_with_joy',
-                description: 'talent_descr.dahlia_you_shall_go_out_with_joy',
-                rotation: 'party',
-                info: {constellation: 6},
-                stats: {
-                    atk_speed: C6AtkSpeed,
-                },
-            }),
-        ],
-        postEffects: [
-            new PostEffectStats({
-                from: 'dahlia_max_hp',
-                percent: new StatTable('atk_speed', [A4AtkSpd]),
-                statCap: new StatTable('', [A4AtkSpdCap]),
-                conditions: [
-                    new ConditionBoolean({name: 'party.dahlia_prayer_of_well_wrought_joy'}),
-                ],
-            }),
-        ],
-    },
+    retiredParty: [[1, 'number'], [2, 'checkbox'], [3, 'checkbox'], [4, 'checkbox']],
 });

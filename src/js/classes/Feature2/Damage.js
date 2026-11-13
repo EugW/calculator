@@ -9,6 +9,8 @@ import { FeatureMultiplierReactionMeltReverse } from "./Multiplier/Reaction/Ampl
 import { FeatureMultiplierReactionVaporizeForvard } from "./Multiplier/Reaction/Amplifying/Vaporize/Forvard";
 import { FeatureMultiplierReactionVaporizeReverse } from "./Multiplier/Reaction/Amplifying/Vaporize/Reverse";
 import { makeStatItem } from "./Compile/Helpers";
+import { enemyScope } from "../Team/Scope";
+import { enemyStatName } from "../Team/EnemyStats";
 
 const REACTION_MULTI = {
     'vaporize_hydro': FeatureMultiplierReactionVaporizeForvard,
@@ -153,11 +155,11 @@ export class FeatureDamage extends Feature2 {
      * @returns {Array.<string>}
      */
     getStatsDefIgnore(data) {
-        let result = ['enemy_def_ignore'];
+        let result = ['def_ignore'];
 
         let damageType = this.getDamageType(data);
         if (damageType && damageType != 'none') {
-            result.push('enemy_def_ignore_'+ damageType);
+            result.push('def_ignore_'+ damageType);
         }
 
         return result;
@@ -168,15 +170,9 @@ export class FeatureDamage extends Feature2 {
      * @returns {CBlock}
      */
     getResistanceMultiplier(data) {
-        let statName = 'enemy_res_' + this.getElement(data);
-
+        // The enemy's total RES: its base and every change (Team/EnemyStats).
         return new CResistanceValue([
-            new CConst({
-                value: data.settings.get(statName) / 100,
-                comment: 'base_res',
-                percent: true,
-            }),
-            makeStatItem(statName, data.stats),
+            makeStatItem(enemyStatName('enemy_res_' + this.getElement(data)), data.stats),
         ], {percent: true});
     }
 
@@ -191,7 +187,7 @@ export class FeatureDamage extends Feature2 {
         ]);
         let target = new CSum([
             new CConst({value: 100}),
-            new CConst({value: data.settings.enemy_level, comment: 'enemy_level'}),
+            new CConst({value: enemyScope(data.settings).enemy_level, comment: 'enemy_level'}),
         ]);
 
         return new CDivide([
@@ -202,7 +198,7 @@ export class FeatureDamage extends Feature2 {
                     new CSubtract([
                         new CConst({value: 1}),
                         new CMin([
-                            makeStatItem('enemy_def_reduce', data.stats),
+                            makeStatItem(enemyStatName('enemy_def_reduce'), data.stats),
                             new CConst({value: 0.9, comment: 'def_reduce_cap'}),
                         ]),
                     ]),

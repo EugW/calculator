@@ -1,5 +1,7 @@
 import { ArtifactSet } from "../../../classes/ArtifactSet";
 import { ConditionStatic } from "../../../classes/Condition/Static";
+import { artifactSetTables } from "../../generated/ArtifactSetTables";
+import { percent } from "../../Params";
 
 export const ThunderingFury = new ArtifactSet({
     serializeId: 22,
@@ -19,7 +21,7 @@ export const ThunderingFury = new ArtifactSet({
                     description: 'set_descr.thundering_fury_2',
                     settings: {},
                     stats: {
-                        dmg_electro: 15,
+                        dmg_electro: artifactSetTables.ThunderingFury.pc2.dmg_electro,
                     },
                 })
             ],
@@ -32,13 +34,13 @@ export const ThunderingFury = new ArtifactSet({
                     description: 'set_descr.thundering_fury_4',
                     settings: {},
                     stats: {
-                        dmg_reaction_overloaded: 40,
-                        dmg_reaction_electrocharged: 40,
-                        dmg_reaction_superconduct: 40,
-                        dmg_reaction_hyperbloom: 40,
-                        dmg_reaction_aggravate: 20,
-                        dmg_reaction_lunarcharged: 20,
-                        dmg_stellarconduct: 20,
+                        dmg_reaction_overloaded: percent(artifactSetTables.ThunderingFury.pc4.p1),
+                        dmg_reaction_electrocharged: percent(artifactSetTables.ThunderingFury.pc4.p1),
+                        dmg_reaction_superconduct: percent(artifactSetTables.ThunderingFury.pc4.p1),
+                        dmg_reaction_hyperbloom: percent(artifactSetTables.ThunderingFury.pc4.p1),
+                        dmg_reaction_aggravate: percent(artifactSetTables.ThunderingFury.pc4.p3),
+                        dmg_reaction_lunarcharged: percent(artifactSetTables.ThunderingFury.pc4.p4),
+                        dmg_stellarconduct: percent(artifactSetTables.ThunderingFury.pc4.p4),
                     },
                 }),
             ],

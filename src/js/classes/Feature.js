@@ -1,3 +1,5 @@
+import { enemyScope } from "./Team/Scope";
+
 const MAX_LEVEL = 110;
 
 export class Feature {
@@ -95,7 +97,7 @@ export class Feature {
     }
 
     getDefIgnore(allStats, settings) {
-        return Math.min(1, allStats.get('enemy_def_ignore') / 100);
+        return Math.min(1, allStats.get('def_ignore') / 100);
     }
 
     getDefMultiplier(allStats, settings) {
@@ -105,7 +107,7 @@ export class Feature {
 
     levelMultiplier(allStats, settings) {
         let source = settings.char_level;
-        let target = settings.enemy_level;
+        let target = enemyScope(settings).enemy_level;
 
         if (source && target) {
             if (source < 1) source = 1;
@@ -177,11 +179,13 @@ export class Feature {
     resistanceMultiplier(allStats, settings) {
         let element = this.getElement(allStats, settings);
 
-        if (settings['enemy_immune_'+ element]) {
+        let enemy = enemyScope(settings);
+        if (enemy['enemy_immune_'+ element]) {
             return 0;
         }
 
-        let resistance = (settings['enemy_res_'+ element] || 0) + allStats.get('enemy_res_'+ element);
+        // The enemy's total RES: its base and every change.
+        let resistance = allStats.get('enemy_res_'+ element);
 
         resistance = resistance/100;
         let multiplier = 1;

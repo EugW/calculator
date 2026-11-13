@@ -4,6 +4,8 @@ import { FeatureDamage } from "../../../classes/Feature2/Damage";
 import { FeatureMultiplier } from "../../../classes/Feature2/Multiplier";
 import { StatTable } from "../../../classes/StatTable";
 import { weaponStatTables } from "../../generated/WeaponStatTables";
+import { weaponPassiveTables } from "../../generated/WeaponPassiveTables";
+import { percent } from "../../Params";
 
 export const EyeOfPerception = new DbObjectWeapon({
     name: 'eye_of_perception',
@@ -18,9 +20,9 @@ export const EyeOfPerception = new DbObjectWeapon({
             title: 'talent_name.weapon_eye_of_perception',
             description: 'talent_descr.weapon_eye_of_perception',
             stats: [
-                new StatTable('text_percent_dmg', [240, 270, 300, 330, 360]),
-                new StatTable('text_percent_chance', [50]),
-                new StatTable('text_cd', [12, 11, 10, 9, 8]),
+                new StatTable('text_percent_dmg', percent(weaponPassiveTables.EyeofPerception.p3)),
+                new StatTable('text_percent_chance', [percent(weaponPassiveTables.EyeofPerception.p1[0])]),
+                new StatTable('text_cd', weaponPassiveTables.EyeofPerception.p4),
             ],
         }),
     ],
@@ -30,7 +32,7 @@ export const EyeOfPerception = new DbObjectWeapon({
             multipliers: [
                 new FeatureMultiplier({
                     leveling: 'weapon_refine',
-                    values: new StatTable('eye_of_perception_bolt', [240, 270, 300, 330, 360]),
+                    values: new StatTable('eye_of_perception_bolt', percent(weaponPassiveTables.EyeofPerception.p3)),
                 }),
             ],
         }),

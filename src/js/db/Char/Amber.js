@@ -1,5 +1,6 @@
 import { charTables } from "../generated/CharTables";
 import { charTalentTables } from "../generated/CharTalentTables";
+import { percent } from "../Params";
 import { Condition } from "../../classes/Condition";
 import { ConditionAscensionChar } from "../../classes/Condition/Ascension/Char";
 import { ConditionBoolean } from "../../classes/Condition/Boolean";
@@ -9,6 +10,7 @@ import { DbObjectChar } from "../../classes/DbObject/Char";
 import { DbObjectConstellation } from "../../classes/DbObject/Constellation";
 import { DbObjectTalents } from "../../classes/DbObject/Talents";
 import { StatTable } from "../../classes/StatTable";
+import { RECEIVERS } from "../../classes/Team/Receivers";
 import { FeatureDamageNormal } from "../../classes/Feature2/Damage/Normal";
 import { FeatureMultiplier } from "../../classes/Feature2/Multiplier";
 import { FeatureDamageChargedAimed } from "../../classes/Feature2/Damage/Charged/Aimed";
@@ -101,14 +103,14 @@ const Talents = new DbObjectTalents({
 });
 
 const TalentValues = {
-    A1BurstCritRate: 10,
-    A1BurstAoe: 30,
-    A4AtkBonus: 15,
-    C1ArrowDmg: 20,
-    C2DamageBonus: 200,
+    A1BurstCritRate: percent(charTalentTables.Amber.a1.p1),
+    A1BurstAoe: percent(charTalentTables.Amber.a1.p2),
+    A4AtkBonus: percent(charTalentTables.Amber.a4.p1),
+    C1ArrowDmg: percent(charTalentTables.Amber.c1.p1),
+    C2DamageBonus: percent(charTalentTables.Amber.c2.p1),
     C4SkillCd: 20,
-    C6AtkBonus: 15,
-    C6SpeedBonus: 15,
+    C6AtkBonus: percent(charTalentTables.Amber.c6.p2),
+    C6SpeedBonus: percent(charTalentTables.Amber.c6.p1),
 };
 
 export const Amber = new DbObjectChar({
@@ -367,9 +369,11 @@ export const Amber = new DbObjectChar({
         },
         {
             conditions: [
+                // Fiery Rain increases all party members' Movement SPD and ATK.
                 new ConditionBoolean({
                     name: 'amber_wildfire',
                     serializeId: 2,
+                    receivers: RECEIVERS.TEAM,
                     title: 'talent_name.amber_wildfire',
                     description: 'talent_descr.amber_wildfire',
                     stats: {
@@ -380,22 +384,5 @@ export const Amber = new DbObjectChar({
             ],
         },
     ]),
-    partyData: {
-        conditions: [
-            new ConditionBoolean({
-                name: 'party.amber_wildfire',
-                serializeId: 1,
-                rotation: 'party',
-                title: 'talent_name.amber_wildfire',
-                description: 'talent_descr.amber_wildfire',
-                stats: {
-                    atk_percent: TalentValues.C6AtkBonus,
-                    move_speed: TalentValues.C6SpeedBonus,
-                },
-                info: {
-                    constellation: 6,
-                },
-            }),
-        ],
-    },
+    retiredParty: [[1, 'checkbox']],
 });

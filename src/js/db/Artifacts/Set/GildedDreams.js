@@ -4,6 +4,8 @@ import { ConditionCalcElements } from "../../../classes/Condition/CalcElements";
 import { ConditionStatic } from "../../../classes/Condition/Static";
 import { ConditionStaticLevel } from "../../../classes/Condition/Static/Level";
 import { StatTable } from "../../../classes/StatTable";
+import { artifactSetTables } from "../../generated/ArtifactSetTables";
+import { percent, times } from "../../Params";
 
 export const GildedDreams = new ArtifactSet({
     serializeId: 40,
@@ -22,7 +24,7 @@ export const GildedDreams = new ArtifactSet({
                     title: 'set_bonus.gilded_dreams_2',
                     description: 'set_descr.gilded_dreams_2',
                     stats: {
-                        mastery: 80,
+                        mastery: artifactSetTables.GildedDreams.pc2.mastery,
                     },
                 }),
             ],
@@ -36,8 +38,8 @@ export const GildedDreams = new ArtifactSet({
                     title: 'set_bonus.gilded_dreams_4',
                     description: 'set_descr.gilded_dreams_4_1',
                     stats: {
-                        text_percent: 14,
-                        text_value: 50,
+                        text_percent: percent(artifactSetTables.GildedDreams.pc4.p1),
+                        text_value: artifactSetTables.GildedDreams.pc4.p2,
                     },
                 }),
                 new ConditionCalcElements({}),
@@ -47,8 +49,8 @@ export const GildedDreams = new ArtifactSet({
                     levelSetting: 'party_elements_same',
                     fromZero: true,
                     stats: [
-                        new StatTable('text_percent', [14]),
-                        new StatTable('atk_percent', [0, 14, 28, 42]),
+                        new StatTable('text_percent', [percent(artifactSetTables.GildedDreams.pc4.p1)]),
+                        new StatTable('atk_percent', times(percent(artifactSetTables.GildedDreams.pc4.p1), [0, 1, 2, 3])),
                         new StatTable('text_value', [0.001, 1, 2, 3]),
                     ],
                     subConditions: [
@@ -62,8 +64,8 @@ export const GildedDreams = new ArtifactSet({
                     levelSetting: 'party_elements_different',
                     fromZero: true,
                     stats: [
-                        new StatTable('text_value', [50]),
-                        new StatTable('mastery', [0, 50, 100, 150]),
+                        new StatTable('text_value', [artifactSetTables.GildedDreams.pc4.p2]),
+                        new StatTable('mastery', times(artifactSetTables.GildedDreams.pc4.p2, [0, 1, 2, 3])),
                         new StatTable('text_value2', [0.001, 1, 2, 3]),
                     ],
                     subConditions: [

@@ -19,6 +19,7 @@ import { FeatureMultiplier } from "../../classes/Feature2/Multiplier";
 import { FeaturePostEffectValue } from "../../classes/Feature2/PostEffectValue";
 import { PostEffectStats } from "../../classes/PostEffect/Stats";
 import { StatTable } from "../../classes/StatTable";
+import { RECEIVERS } from "../../classes/Team/Receivers";
 import { charTables } from "../generated/CharTables";
 import { charTalentTables } from "../generated/CharTalentTables";
 
@@ -131,6 +132,11 @@ export const Xingqiu = new DbObjectChar({
     origin: 'liyue',
     talents: Talents,
     statTable: charTables.Xingqiu,
+    // Talent hits (normal/charged/plunge, skill, burst) are plain ATK-scaled
+    // damage with no FIGHT_PROP stat read: damage multipliers read the total
+    // by construction and need nothing. GO uses dmgNode('atk', ...) for all
+    // of them. C4's 1.5x is a scalingMultiplier on the skill hits, not a stat
+    // input. KQM has no EM/ATK/HP/ER buff-chain test for his hits.
     features: [
         new FeatureDamageNormal({
             multipliers: [
@@ -347,12 +353,19 @@ export const Xingqiu = new DbObjectChar({
                 }),
             ],
         }),
+        // Rain-Sword damage reduction display: game data
+        // (Avatar_Xingqiu_PhantomShield onAbilityStart) computes the
+        // Hydro-derived part as FIGHT_PROP_NONEXTRA_WATER_ADD_HURT (premod)
+        // x WaterAddHurt2SubHurtRatio (0.2), plus BaseSubHurtDelta (talent).
+        // KQM: it does not count Kazuha's A4 (extra Hydro DMG). GO reads
+        // input.premod.hydro_dmg_. Premod read: 'dmg_hydro~' (the default
+        // reads is premod, so no params).
         new FeaturePostEffectValue({
             category: 'skill',
             name: 'dmg_reduction',
             format: 'percent',
             postEffect: new PostEffectStats({
-                from: 'dmg_hydro',
+                from: 'dmg_hydro~',
                 percent: new StatTable('', [0.2]),
                 levelSetting: 'char_skill_elemental',
                 flatBonus: Talents.getMulti({
@@ -362,6 +375,12 @@ export const Xingqiu = new DbObjectChar({
                 }),
             }),
         }),
+        // A1 Hydropathic heal: game data (UNIQUE_Xingqiu_PhantomShield_*
+        // HealHP) restores amountByCasterMaxHPRatio HealOnShieldBreak (6% of
+        // Max HP; engine-internal, no NONEXTRA/CUR marker). Talent heals read
+        // the total, and GO prods input.total.hp: scaling 'hp*' already reads
+        // the total by construction, no params. KQM has no buff-chain test
+        // for it.
         new FeatureHeal({
             category: 'skill',
             multipliers: [
@@ -403,6 +422,9 @@ export const Xingqiu = new DbObjectChar({
                 new ConditionAscensionChar({ascension: 1}),
             ],
         }),
+        // A4 Blades Amidst Raindrops: flat +20% Hydro DMG (game text). Flat
+        // conditions are always premod: default confirmed, no params. GO
+        // writes it under premod.
         new ConditionStatic({
             title: 'talent_name.xingqiu_blades_amidst_raindrops',
             description: 'talent_descr.xingqiu_blades_amidst_raindrops',
@@ -433,6 +455,7 @@ export const Xingqiu = new DbObjectChar({
                 new ConditionBoolean({
                     name: 'xingqiu_rainbow_upon_the_azure_sky',
                     serializeId: 1,
+                    receivers: RECEIVERS.TEAM,
                     title: 'talent_name.xingqiu_rainbow_upon_the_azure_sky',
                     description: 'talent_descr.xingqiu_rainbow_upon_the_azure_sky_2',
                     stats: {
@@ -473,19 +496,5 @@ export const Xingqiu = new DbObjectChar({
             ],
         }
     ]),
-    partyData: {
-        conditions: [
-            new ConditionBoolean({
-                name: 'party.xingqiu_rainbow_upon_the_azure_sky',
-                serializeId: 1,
-                rotation: 'party',
-                title: 'talent_name.xingqiu_rainbow_upon_the_azure_sky',
-                description: 'talent_descr.xingqiu_rainbow_upon_the_azure_sky_2',
-                info: {constellation: 2},
-                stats: {
-                    enemy_res_hydro: -15,
-                },
-            }),
-        ],
-    },
+    retiredParty: [[1, 'checkbox']],
 });

@@ -12,7 +12,7 @@ const PERCENT_STATS = ['recharge', 'crit_rate', 'crit_dmg', 'healing', 'healing_
 const DAMAGE_BONUS_STATS = [
     'dmg_all', 'dmg_anemo', 'dmg_cryo', 'dmg_dendro', 'dmg_electro', 'dmg_geo', 'dmg_hydro', 'dmg_pyro', 'dmg_phys',
     'dmg_normal', 'dmg_charged', 'dmg_plunge', 'dmg_skill', 'dmg_burst',
-    'enemy_def_reduce', 'enemy_def_ignore',
+    'def_ignore',
     'dmg_reaction_lunar', 'dmg_reaction_lunarbloom', 'dmg_reaction_lunarcharged', 'dmg_reaction_lunarcrystallize',
     'lunarcharged_multi', 'lunarbloom_multi', 'lunarcrystallize_multi',
     'dmg_lunar_special', 'dmg_lunarcharged_special', 'dmg_lunarbloom_special', 'dmg_lunarcrystallize_special',

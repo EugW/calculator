@@ -1,7 +1,6 @@
 import { Condition } from "../../classes/Condition";
 import { ConditionAscensionChar } from "../../classes/Condition/Ascension/Char";
 import { ConditionBoolean } from "../../classes/Condition/Boolean";
-import { ConditionNumber } from "../../classes/Condition/Number";
 import { ConditionStatic } from "../../classes/Condition/Static";
 import { ConditionCalcElements } from "../../classes/Condition/CalcElements";
 import { DbObjectChar } from "../../classes/DbObject/Char";
@@ -11,12 +10,11 @@ import { PostEffectStatsDef } from "../../classes/PostEffect/Stats/Def";
 import { StatTable } from "../../classes/StatTable";
 import { charTables } from "../generated/CharTables";
 import { charTalentTables } from "../generated/CharTalentTables";
+import { percent } from "../Params";
 import { ConditionStaticYunJin } from "../../classes/Condition/Static/YunJin";
-import { ConditionBooleanYunJin } from "../../classes/Condition/Boolean/YunJin";
-import { ConditionNumberTalent } from "../../classes/Condition/Number/Talent";
 import { ValueTable } from "../../classes/ValueTable";
+import { RECEIVERS } from "../../classes/Team/Receivers";
 import { FeatureMultiplierTarget } from "../../classes/Feature2/Multiplier/Target";
-import { ConditionAnd } from "../../classes/Condition/And";
 import { FeatureMultiplier } from "../../classes/Feature2/Multiplier";
 import { FeatureDamagePlungeShockWave } from "../../classes/Feature2/Damage/Plunge/ShockWave";
 import { FeatureDamagePlungeCollision } from "../../classes/Feature2/Damage/Plunge/Collision";
@@ -28,6 +26,7 @@ import { FeatureShield } from "../../classes/Feature2/Shield";
 import { FeatureMultiplierList } from "../../classes/Feature2/Multiplier/List";
 import { FeatureDamageBurst } from "../../classes/Feature2/Damage/Burst";
 import { FeaturePostEffectValue } from "../../classes/Feature2/PostEffectValue";
+import { CHANNELS } from "../../classes/PostEffect/Channels";
 
 const Talents = new DbObjectTalents({
     attack: {
@@ -142,6 +141,14 @@ const Talents = new DbObjectTalents({
         ],
     },
 });
+
+const A4Bonus1 = percent(charTalentTables.YunJin.a4.p1);
+const A4Bonus2 = percent(charTalentTables.YunJin.a4.p2);
+const A4Bonus3 = percent(charTalentTables.YunJin.a4.p3);
+const A4Bonus4 = percent(charTalentTables.YunJin.a4.p4);
+const C2NormalDmg = percent(charTalentTables.YunJin.c2.p1);
+const C4Def = percent(charTalentTables.YunJin.c4.p1);
+const C6AtkSpeed = percent(charTalentTables.YunJin.c6.p1);
 
 export const YunJin = new DbObjectChar({
     name: 'yun_jin',
@@ -301,6 +308,10 @@ export const YunJin = new DbObjectChar({
                 }),
             ],
         }),
+        // Opening Flourish hits: game sizes them with damageExtra on
+        // FIGHT_PROP_CUR_DEFENSE (total) in Avatar_Yunjin_ElementalArt_Strike.
+        // Damage hits read the total by construction (scaling 'def*'), so no
+        // params.
         new FeatureDamageSkill({
             element: 'geo',
             multipliers: [
@@ -311,6 +322,8 @@ export const YunJin = new DbObjectChar({
                 }),
             ],
         }),
+        // Charged hits: same FIGHT_PROP_CUR_DEFENSE (total) damageExtra as the
+        // press hit; scaling 'def*' reads the total by construction.
         new FeatureDamageSkill({
             element: 'geo',
             multipliers: [
@@ -321,6 +334,7 @@ export const YunJin = new DbObjectChar({
                 }),
             ],
         }),
+        // Level-2 charged hit: same total-DEF damageExtra; needs nothing.
         new FeatureDamageSkill({
             element: 'geo',
             multipliers: [
@@ -331,6 +345,9 @@ export const YunJin = new DbObjectChar({
                 }),
             ],
         }),
+        // Opening Flourish shield: game builds it in an EliteShieldMixin from
+        // Yunjin_ElementalArt_Shield_HPRatio/Base (no FIGHT_PROP read); scaling
+        // 'hp*' reads the total by construction, so no params.
         new FeatureShield({
             category: 'skill',
             element: 'geo',
@@ -355,25 +372,49 @@ export const YunJin = new DbObjectChar({
             category: 'burst',
             name: 'yunjin_dmg_bonus',
             postEffect: new PostEffectStatsDef({
+                // Flying Cloud Flag Formation display value: Normal Attack DMG
+                // bonus from Yun Jin's DEF. Game data sizes it with damageExtra
+                // on FIGHT_PROP_CUR_DEFENSE (total) x
+                // Yunjin_ElementalBurst_Buff_ExtraDamage_DefRatio, plus the A4
+                // term on the same FIGHT_PROP_CUR_DEFENSE (total) x
+                // Yunjin_ElementalBurst_Buff_ExtraDamage_ElementNum, in
+                // Avatar_Yunjin_ElementalBurst_Buff
+                // (UNIQUE_Avatar_Yunjin_ElementalBurst_Buff,
+                // ModifyDamageCountMixin), so the total read is declared. GO
+                // reads input.premod.def for the same bonus; the game data is
+                // explicit (CUR, not NONEXTRA), so it wins. No ability writes
+                // extra DEF, so premod and total DEF agree today. KQM Yun Jin
+                // has no premod/total interaction test (burst does not
+                // snapshot: live DEF counts). The write is a talent DMG bonus
+                // (no extra lane), so no writes param.
+                reads: CHANNELS.TOTAL,
                 percent: Talents.getMulti({
                     name: '',
                     from: 'burst.yunjin_dmg_bonus',
                     multi: 0.01,
                 }),
                 levelSetting: 'char_skill_burst',
-                percentBonus: new StatTable('', [0.025, 0.05, 0.075, 0.115]),
+                percentBonus: new StatTable('', [A4Bonus1 / 100, A4Bonus2 / 100, A4Bonus3 / 100, A4Bonus4 / 100]),
                 percentBonusLevel: 'yunjin_traditionalist_stacks',
             }),
         }),
     ],
     multipliers: [
+        // Cliffbreaker's Banner: Normal Attack DMG bonus for the team from
+        // Yun Jin's DEF and burst level, plus Breaking Conventions by element
+        // count.
+        // Delivered flat bonus: the game computes it from FIGHT_PROP_CUR_DEFENSE
+        // (total) in Avatar_Yunjin_ElementalBurst_Buff (see the display value
+        // above). scaling 'def*' already reads the total, so no params; GO
+        // reads input.premod.def for the same bonus (game data wins).
         new FeatureMultiplier({
+            receivers: RECEIVERS.TEAM,
             scaling: 'def*',
             leveling: 'char_skill_burst',
             source: 'talent_burst',
             values: Talents.get('burst.yunjin_dmg_bonus'),
             bonusLeveling: 'yunjin_traditionalist_stacks',
-            bonusValues: new ValueTable([2.5, 5, 7.5, 11.5]),
+            bonusValues: new ValueTable([A4Bonus1, A4Bonus2, A4Bonus3, A4Bonus4]),
             target: new FeatureMultiplierTarget({
                 damageTypes: ['normal'],
             }),
@@ -388,6 +429,7 @@ export const YunJin = new DbObjectChar({
             title: 'talent_name.yunjin_flag',
             description: 'talent_descr.yunjin_flag',
         }),
+        // A1 True to Oneself: charged-form timing on being hit; reads no stat.
         new ConditionStatic({
             title: 'talent_name.yun_jin_true_to_oneself',
             description: 'talent_descr.yun_jin_true_to_oneself',
@@ -396,6 +438,9 @@ export const YunJin = new DbObjectChar({
                 new ConditionAscensionChar({ascension: 1}),
             ],
         }),
+        // A4 Breaking Conventions: extra bonus by party element count (the
+        // Yunjin_ElementalBurst_Buff_ExtraDamage_ElementNum term, still scaled
+        // on FIGHT_PROP_CUR_DEFENSE above); reads no stat itself.
         new ConditionStaticYunJin({
             title: 'talent_name.yun_jin_breaking_conventions',
             description: 'talent_descr.yun_jin_breaking_conventions',
@@ -408,6 +453,8 @@ export const YunJin = new DbObjectChar({
     constellation: new DbObjectConstellation([
         {
             conditions: [
+                // C1 Thespian Gallop: -18% skill CD; C3/C5 raise talent levels.
+                // None reads a stat.
                 new ConditionStatic({
                     title: 'talent_name.yun_jin_thespian_gallop',
                     description: 'talent_descr.yun_jin_thespian_gallop',
@@ -416,13 +463,19 @@ export const YunJin = new DbObjectChar({
         },
         {
             conditions: [
+                // C2 Myriad Mise-En-Scene: flat 15% Normal Attack DMG for the
+                // team. Game data sets Yunjin_Constellation_2_Buff_DamagePercentageRatio
+                // (talent paramList [0.15, 12]) with no stat read
+                // (UNIQUE_Avatar_Yunjin_Constellation_2_Buff, ModifyDamageMixin).
+                // Flat toggles write premod by construction; needs nothing.
                 new ConditionBoolean({
                     name: 'yunjin_myriad',
                     serializeId: 2,
+                    receivers: RECEIVERS.TEAM,
                     title: 'talent_name.yun_jin_myriad_mise_en_scene',
                     description: 'talent_descr.yun_jin_myriad_mise_en_scene',
                     stats: {
-                        dmg_normal: 15,
+                        dmg_normal: C2NormalDmg,
                     },
                 }),
             ],
@@ -438,13 +491,18 @@ export const YunJin = new DbObjectChar({
         },
         {
             conditions: [
+                // C4 Flower and a Fighter: +20% DEF for 12s on Crystallize.
+                // Game data writes Actor_DefenceRatio (no "Extra", i.e. premod)
+                // in UNIQUE_Yunjin_CrystallizeAddDef (talent paramList [0.2, 12]);
+                // GO puts it under premod. Conditions are always premod, so no
+                // params. KQM notes the DEF does not apply to the triggering hit.
                 new ConditionBoolean({
                     name: 'yunjin_flower',
                     serializeId: 3,
                     title: 'talent_name.yun_jin_flower_and_a_fighter',
                     description: 'talent_descr.yun_jin_flower_and_a_fighter',
                     stats: {
-                        def_percent: 20,
+                        def_percent: C4Def,
                     },
                 }),
             ],
@@ -460,12 +518,16 @@ export const YunJin = new DbObjectChar({
         },
         {
             conditions: [
+                // C6 Decorous Harmony: +12% Normal ATK SPD under the banner.
+                // Game data writes Animator_AttackSpeedRatio (talent paramList
+                // [0.12]) with no stat read; flat toggle, needs nothing.
                 new ConditionStatic({
                     title: 'talent_name.yun_jin_decorous_harmony',
                     description: 'talent_descr.yun_jin_decorous_harmony',
+                    receivers: RECEIVERS.TEAM,
                     stats: {
-                        atk_speed_normal: 12,
-                        text_percent: 12,
+                        atk_speed_normal: C6AtkSpeed,
+                        text_percent: C6AtkSpeed,
                     },
                     subConditions: [
                         new ConditionBoolean({name: 'yunjin_flag'}),
@@ -474,110 +536,5 @@ export const YunJin = new DbObjectChar({
             ],
         },
     ]),
-    partyData: {
-        loadStats: {
-            stats: ['def_total'],
-            settings: ['char_skill_elemental'],
-        },
-        conditions: [
-            new ConditionCalcElements({}),
-            new ConditionNumber({
-                name: 'yunjin_def_total',
-                title: 'talent_name.stats_total_def',
-                partyStat: 'def_total',
-                serializeId: 1,
-                rotation: 'party',
-                max: 10000,
-            }),
-            new ConditionNumberTalent({
-                name: 'yunjin_char_skill_burst',
-                title: 'talent_name.stats_level_burst',
-                partySetting: 'char_skill_burst',
-                serializeId: 2,
-            }),
-            new ConditionBoolean({
-                name: 'party.yunjin_flag',
-                serializeId: 3,
-                rotation: 'party',
-                title: 'talent_name.yunjin_flag',
-                description: 'talent_descr.yunjin_flag',
-            }),
-            new ConditionBooleanYunJin({
-                name: 'party.yunjin_traditionalist',
-                serializeId: 4,
-                rotation: 'party',
-                title: 'talent_name.yun_jin_breaking_conventions',
-                description: 'talent_descr.yun_jin_breaking_conventions',
-                info: {
-                    ascension: 4,
-                },
-            }),
-            new ConditionBoolean({
-                name: 'party.yunjin_myriad',
-                serializeId: 5,
-                rotation: 'party',
-                title: 'talent_name.yun_jin_myriad_mise_en_scene',
-                description: 'talent_descr.yun_jin_myriad_mise_en_scene',
-                stats: {
-                    dmg_normal: 15,
-                },
-                info: {
-                    constellation: 2,
-                },
-            }),
-            new ConditionBoolean({
-                name: 'party.yunjin_constellation_3',
-                serializeId: 6,
-                title: 'talent_name.yun_jin_seafaring_general',
-                description: 'talent_descr.char_constellation_burst',
-                settings: {
-                    yunjin_char_skill_burst_bonus: 3,
-                },
-                info: {
-                    constellation: 3,
-                },
-            }),
-            new ConditionBoolean({
-                name: 'party.yunjin_decorous_harmony',
-                serializeId: 7,
-                title: 'talent_name.yun_jin_decorous_harmony',
-                description: 'talent_descr.yun_jin_decorous_harmony',
-                info: {
-                    constellation: 6,
-                },
-                stats: {
-                    text_percent: 12,
-                },
-                subConditions: [
-                    new ConditionBoolean({name: 'party.yunjin_constellation_3'}),
-                ],
-            }),
-            new Condition({
-                stats: {
-                    atk_speed_normal: 12,
-                },
-                subConditions: [
-                    new ConditionBoolean({name: 'party.yunjin_flag'}),
-                    new ConditionBoolean({name: 'party.yunjin_decorous_harmony'}),
-                ],
-            }),
-        ],
-        multipliers: [
-            new FeatureMultiplier({
-                scaling: 'yunjin_def_total',
-                leveling: 'yunjin_char_skill_burst',
-                source: 'yun_jin',
-                values: Talents.get('burst.yunjin_dmg_bonus'),
-                bonusLeveling: 'yunjin_traditionalist_stacks',
-                bonusValues: new ValueTable([2.5, 5, 7.5, 11.5]),
-                target: new FeatureMultiplierTarget({
-                    damageTypes: ['normal'],
-                }),
-                condition: new ConditionAnd([
-                    new ConditionBoolean({name: 'yunjin_def_total'}),
-                    new ConditionBoolean({name: 'party.yunjin_flag'}),
-                ]),
-            }),
-        ]
-    },
+    retiredParty: [[1, 'number'], [2, 'number'], [3, 'checkbox'], [4, 'checkbox'], [5, 'checkbox'], [6, 'checkbox'], [7, 'checkbox']],
 });

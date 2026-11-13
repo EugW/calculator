@@ -1,5 +1,4 @@
 category;name;rus;eng
-tooltip;share_load;Загрузить сохранение;Load saved character
 tooltip;share_overwite;Перезаписать сохранение;Overwrite saved character
 tooltip;share_delete;Удалить сохранение;Delete saved character
 tooltip;share_save;Сохранить персонажа;Save character

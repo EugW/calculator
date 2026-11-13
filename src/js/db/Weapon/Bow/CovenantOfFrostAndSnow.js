@@ -2,6 +2,7 @@ import { ConditionBooleanRefine } from "../../../classes/Condition/Boolean/Refin
 import { DbObjectWeapon } from "../../../classes/DbObject/Weapon";
 import { StatTable } from "../../../classes/StatTable";
 import { weaponStatTables } from "../../generated/WeaponStatTables";
+import { weaponPassiveTables } from "../../generated/WeaponPassiveTables";
 
 export const CovenantOfFrostAndSnow = new DbObjectWeapon({
     name: 'covenant_of_frost_and_snow',
@@ -18,7 +19,7 @@ export const CovenantOfFrostAndSnow = new DbObjectWeapon({
             title: 'talent_name.weapon_covenant_of_frost_and_snow',
             description: 'talent_descr.weapon_covenant_of_frost_and_snow',
             stats: [
-                new StatTable('mastery', [120, 150, 180, 210, 240]),
+                new StatTable('mastery', weaponPassiveTables.CovenantOfFrostAndSnow.p1),
             ],
         }),
     ],

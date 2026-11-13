@@ -5,3 +5,53 @@
     background-color: #ECE5D8;
     background-image: url("../../../images/icons/tab_share_2_dark.png");
 }
+
+/* Saved teams: the Teams mode of My characters. */
+.saved-teams {
+    margin-right: 15px;
+}
+
+.saved-team {
+    padding: 8px 5px;
+    border-bottom: 1px solid #4B505E;
+}
+
+.saved-team-name {
+    font-size: 18px;
+    overflow-wrap: anywhere;
+}
+
+.saved-team-line {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    margin: 6px 0;
+}
+
+.saved-team-line .item-icon {
+    margin: 0;
+}
+
+.saved-team-empty-slot {
+    width: 60px;
+    height: 60px;
+    box-sizing: border-box;
+    border: 1px dashed #4B505E;
+    border-radius: 50%;
+}
+
+.saved-team-load {
+    width: 36px;
+    height: 36px;
+    flex-shrink: 0;
+    border-radius: 50%;
+    background-color: #ECE5D8;
+    background-position: center;
+    background-repeat: no-repeat;
+    cursor: pointer;
+}
+
+.saved-teams-empty {
+    margin: 10px 5px;
+    color: #9B9FA8;
+}

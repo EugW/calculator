@@ -4,6 +4,8 @@ import { FeatureDamage } from "../../../classes/Feature2/Damage";
 import { FeatureMultiplier } from "../../../classes/Feature2/Multiplier";
 import { StatTable } from "../../../classes/StatTable";
 import { weaponStatTables } from "../../generated/WeaponStatTables";
+import { weaponPassiveTables } from "../../generated/WeaponPassiveTables";
+import { percent } from "../../Params";
 
 export const ViridescentHunt = new DbObjectWeapon({
     name: 'the_viridescent_hunt',
@@ -18,9 +20,9 @@ export const ViridescentHunt = new DbObjectWeapon({
             title: 'talent_name.weapon_viridescent_hunt',
             description: 'talent_descr.weapon_viridescent_hunt',
             stats: [
-                new StatTable('text_percent_dmg', [40, 50, 60, 70, 80]),
-                new StatTable('text_percent_chance', [50]),
-                new StatTable('text_number_cd', [14, 13, 12, 11, 10]),
+                new StatTable('text_percent_dmg', percent(weaponPassiveTables.ViridescentHunt.p2)),
+                new StatTable('text_percent_chance', [percent(weaponPassiveTables.ViridescentHunt.p1[0])]),
+                new StatTable('text_number_cd', weaponPassiveTables.ViridescentHunt.p5),
             ],
         }),
     ],
@@ -30,7 +32,7 @@ export const ViridescentHunt = new DbObjectWeapon({
             multipliers: [
                 new FeatureMultiplier({
                     leveling: 'weapon_refine',
-                    values: new StatTable('viridescent_hunt_whirl', [40, 50, 60, 70, 80]),
+                    values: new StatTable('viridescent_hunt_whirl', percent(weaponPassiveTables.ViridescentHunt.p2)),
                 }),
             ],
         }),

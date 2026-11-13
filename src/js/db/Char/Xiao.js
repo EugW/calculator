@@ -18,6 +18,7 @@ import { FeatureMultiplier } from "../../classes/Feature2/Multiplier";
 import { StatTable } from "../../classes/StatTable";
 import { charTables } from "../generated/CharTables";
 import { charTalentTables } from "../generated/CharTalentTables";
+import { percent } from "../Params";
 
 const Talents = new DbObjectTalents({
     attack: {
@@ -106,6 +107,13 @@ const Talents = new DbObjectTalents({
         ],
     },
 });
+
+const A1Dmg = percent(charTalentTables.Xiao.a1.p1);
+const A4SkillDmg = percent(charTalentTables.Xiao.a4.p2);
+const A4MaxStacks = charTalentTables.Xiao.a4.p3;
+const C2Recharge = percent(charTalentTables.Xiao.c2.p1);
+const C4HpThreshold = percent(charTalentTables.Xiao.c4.p1);
+const C4DefBonus = percent(charTalentTables.Xiao.c4.p2);
 
 export const Xiao = new DbObjectChar({
     name: 'xiao',
@@ -289,7 +297,7 @@ export const Xiao = new DbObjectChar({
             description: 'talent_descr.xiao_tamer_of_demons',
             maxStacks: 5,
             stats: [
-                new StatTable('dmg_all', [5]),
+                new StatTable('dmg_all', [A1Dmg]),
             ],
             info: {ascension: 1},
             subConditions: [
@@ -301,9 +309,9 @@ export const Xiao = new DbObjectChar({
             serializeId: 3,
             title: 'talent_name.xiao_heaven_fall',
             description: 'talent_descr.xiao_heaven_fall',
-            maxStacks: 3,
+            maxStacks: A4MaxStacks,
             stats: [
-                new StatTable('dmg_skill_xiao', [15]),
+                new StatTable('dmg_skill_xiao', [A4SkillDmg]),
             ],
             info: {ascension: 4},
             subConditions: [
@@ -328,7 +336,7 @@ export const Xiao = new DbObjectChar({
                     title: 'talent_name.xiao_blossom_of_kaleidos',
                     description: 'talent_descr.xiao_blossom_of_kaleidos',
                     stats: {
-                        recharge: 25,
+                        recharge: C2Recharge,
                     }
                 }),
             ],
@@ -342,8 +350,8 @@ export const Xiao = new DbObjectChar({
                     title: 'talent_name.xiao_extinction_of_suffering',
                     description: 'talent_descr.xiao_extinction_of_suffering',
                     stats: {
-                        def_percent: 100,
-                        text_percent_hp: 50,
+                        def_percent: C4DefBonus,
+                        text_percent_hp: C4HpThreshold,
                     },
                 }),
             ],

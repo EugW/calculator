@@ -1,4 +1,5 @@
 import { Condition } from "../Condition";
+import { teamElements } from "../Team/Party";
 
 export class ConditionElementsCount extends Condition {
     getType() {
@@ -17,10 +18,7 @@ export class ConditionElementsCount extends Condition {
         let target = this.params.element || '';
         let count  = this.params.count || 1;
 
-        for (const name of ['char_element', 'resonance_element_1', 'resonance_element_2', 'resonance_element_3']) {
-            const element = settings[name] || '';
-            if (!element) continue;
-
+        for (const element of teamElements(settings)) {
             if (target == element) {
                 ++elementsCount;
             }

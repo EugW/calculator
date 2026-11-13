@@ -1,6 +1,8 @@
 import { Condition } from "../../classes/Condition";
 import { ConditionAscensionChar } from "../../classes/Condition/Ascension/Char";
+import { ConditionOnField } from "../../classes/Condition/Field";
 import { ConditionConstellation } from "../../classes/Condition/Constellation";
+import { ConditionReceiver } from "../../classes/Condition/Receiver";
 import { ConditionStacks } from "../../classes/Condition/Stacks";
 import { ConditionStatic } from "../../classes/Condition/Static";
 import { ConditionStaticLevel } from "../../classes/Condition/Static/Level";
@@ -9,8 +11,10 @@ import { DbObjectChar } from "../../classes/DbObject/Char";
 import { DbObjectConstellation } from "../../classes/DbObject/Constellation";
 import { DbObjectTalents } from "../../classes/DbObject/Talents";
 import { StatTable } from "../../classes/StatTable";
+import { RECEIVERS } from "../../classes/Team/Receivers";
 import { charTables } from "../generated/CharTables";
 import { charTalentTables } from "../generated/CharTalentTables";
+import { percent, plus, times } from "../Params";
 import { Stats } from "../../classes/Stats";
 import { ConditionLevels } from "../../classes/Condition/Levels";
 import { ConditionBooleanValue } from "../../classes/Condition/Boolean/Value";
@@ -113,7 +117,13 @@ const Talents = new DbObjectTalents({
     },
 });
 
-export const buffValues = [1, 4.5, 8, 11.5, 15, 18.5, 22, 25.5, 29, 32.5, 36, 39.5, 43, 46.5, 50];
+export const buffValues = percent(plus(charTalentTables.Yelan.a4.p1, times(charTalentTables.Yelan.a4.p2, [0, 1, 2, 3, 4, 5, 6, 7, 8, 9, 10, 11, 12, 13, 14])));
+
+const A1HpPercent = [percent(charTalentTables.Yelan.a1.p1), percent(charTalentTables.Yelan.a1.p2), percent(charTalentTables.Yelan.a1.p3), percent(charTalentTables.Yelan.a1.p4)];
+const C2Dmg = percent(charTalentTables.Yelan.c2.p1);
+const C4HpPercent = percent(charTalentTables.Yelan.c4.p1);
+const C4HpPercentMax = percent(times(charTalentTables.Yelan.c4.p1, charTalentTables.Yelan.c4.p3));
+const C6BarbDmg = percent(charTalentTables.Yelan.c6.p3);
 
 export const Yelan = new DbObjectChar({
     name: 'yelan',
@@ -193,7 +203,7 @@ export const Yelan = new DbObjectChar({
                 new FeatureMultiplier({
                     scaling: 'hp*',
                     scalingSource: 'constellation6',
-                    scalingMultiplier: 1.56,
+                    scalingMultiplier: C6BarbDmg / 100,
                     leveling: 'char_skill_attack',
                     values: Talents.get('attack.yelan_breakthrough_barb_dmg'),
                 }),
@@ -260,7 +270,7 @@ export const Yelan = new DbObjectChar({
                 new FeatureMultiplier({
                     scaling: 'hp*',
                     source: 'constellation2',
-                    values: new StatTable('yelan_taking_all_comers_dmg', [14]),
+                    values: new StatTable('yelan_taking_all_comers_dmg', [C2Dmg]),
                 }),
             ],
             condition: new ConditionConstellation({constellation: 2}),
@@ -278,7 +288,7 @@ export const Yelan = new DbObjectChar({
             levelSetting: 'party_elements_count_level',
             stats: [
                 new StatTable('text_number', [1, 2, 3, 4]),
-                new StatTable('hp_percent', [6, 12, 18, 30]),
+                new StatTable('hp_percent', A1HpPercent),
             ],
             info: {ascension: 1},
             subConditions: [
@@ -312,6 +322,7 @@ export const Yelan = new DbObjectChar({
         }),
         new ConditionLevels({
             levelSetting: 'yelan_adapt_with_ease',
+            receivers: RECEIVERS.TEAM,
             stats: [
                 new StatTable('dmg_all', buffValues),
             ],
@@ -320,6 +331,11 @@ export const Yelan = new DbObjectChar({
                     setting: 'yelan_adapt_with_ease',
                     cond: 'ge',
                     value: 1,
+                }),
+                new ConditionAscensionChar({ascension: 4}),
+                // Exquisite Throw buffs your own active character.
+                new ConditionReceiver({
+                    condition: new ConditionOnField(),
                 }),
             ],
         }),
@@ -339,7 +355,7 @@ export const Yelan = new DbObjectChar({
                     title: 'talent_name.yelan_taking_all_comers',
                     description: 'talent_descr.yelan_taking_all_comers',
                     stats: {
-                        text_percent: 14,
+                        text_percent: C2Dmg,
                     },
                 }),
             ],
@@ -358,12 +374,13 @@ export const Yelan = new DbObjectChar({
                 new ConditionStacks({
                     name: 'yelan_bait_and_switch',
                     serializeId: 2,
+                    receivers: RECEIVERS.TEAM,
                     title: 'talent_name.yelan_bait_and_switch',
                     description: 'talent_descr.yelan_bait_and_switch',
                     maxStacks: 4,
                     stats: [
-                        new StatTable('hp_percent', [10]),
-                        new StatTable('text_percent_max', [40]),
+                        new StatTable('hp_percent', [C4HpPercent]),
+                        new StatTable('text_percent_max', [C4HpPercentMax]),
                     ],
                 }),
             ],
@@ -384,63 +401,11 @@ export const Yelan = new DbObjectChar({
                     title: 'talent_name.yelan_winner_takes_all',
                     description: 'talent_descr.yelan_winner_takes_all',
                     stats: {
-                        text_percent: 156,
+                        text_percent: C6BarbDmg,
                     },
                 }),
             ],
         },
     ]),
-    partyData: {
-        conditions: [
-            new ConditionStacks({
-                name: 'party.yelan_adapt_with_ease',
-                serializeId: 1,
-                title: 'talent_name.yelan_adapt_with_ease',
-                description: 'talent_descr.yelan_adapt_with_ease',
-                maxStacks: 15,
-                rotation: 'party',
-                dropdownClass: 'stack-percent',
-                titleFunc: function(value) {
-                    if (value) {
-                        return {
-                            values: new Stats({text_percent: buffValues[value-1]}),
-                            str: 'talent_tooltip.yelan_dmg_bonus',
-                        };
-                    } else {
-                        return {
-                            str: 'talent_tooltip.sayu_egress_prep_none',
-                        };
-                    }
-                },
-                info: {ascension: 4},
-                stats: [],
-            }),
-            new ConditionLevels({
-                levelSetting: 'party.yelan_adapt_with_ease',
-                stats: [
-                    new StatTable('dmg_all', buffValues),
-                ],
-                subConditions: [
-                    new ConditionBooleanValue({
-                        setting: 'party.yelan_adapt_with_ease',
-                        cond: 'ge',
-                        value: 1,
-                    }),
-                ],
-            }),
-            new ConditionStacks({
-                name: 'party.yelan_bait_and_switch',
-                serializeId: 2,
-                title: 'talent_name.yelan_bait_and_switch',
-                description: 'talent_descr.yelan_bait_and_switch',
-                maxStacks: 4,
-                rotation: 'party',
-                info: {constellation: 4},
-                stats: [
-                    new StatTable('hp_percent', [10]),
-                    new StatTable('text_percent_max', [40]),
-                ],
-            }),
-        ],
-    },
+    retiredParty: [[1, 'stacks'], [2, 'stacks']],
 });

@@ -1,11 +1,14 @@
 import { AngelosHeptades } from "../src/js/db/Weapon/Catalyst/AngelosHeptades";
-import { Weapons as WeaponBuffs } from "../src/js/db/Buffs/Weapons";
+import { CalcObjectWeapon } from "../src/js/classes/CalcObject/Weapon";
+import { DB } from "../src/js/db/DB";
+
+global.DB = DB;
 
 function getCondition(conditions, name) {
     return conditions.find((condition) => condition.getName() === name);
 }
 
-test("Angelos Heptades disabled mode keeps refine-scaled text without enabling personal DMG bonus", () => {
+test("Angelos Heptades disabled toggle keeps refine-scaled text without enabling DMG bonus", () => {
     const mode = getCondition(AngelosHeptades.getConditions(), "weapon_angelos_heptades");
     const settings = {
         weapon_refine: 5,
@@ -15,25 +18,17 @@ test("Angelos Heptades disabled mode keeps refine-scaled text without enabling p
     const activePostEffects = AngelosHeptades.getPostEffects()
         .filter((postEffect) => postEffect.isActive(settings));
 
-    expect(mode.getSelectedValue(settings)).toBe("-");
+    expect(mode.isActive(settings)).toBe(false);
     expect(stats.get("text_percent_max")).toBe(58);
     expect(stats.get("text_percent_max_hexerei")).toBe(29);
     expect(stats.get("dmg_all")).toBe(0);
     expect(activePostEffects).toHaveLength(0);
 });
 
-test("Angelos Heptades team mode defaults disabled without enabling team DMG bonus", () => {
-    const partyMode = getCondition(WeaponBuffs.getConditions(), "weapon_other.weapon_angelos_heptades");
-    const settings = {
-        "weapon_other.weapon_angelos_heptades": 5,
-        angelos_heptades_atk: 1000,
-    };
-
-    const stats = partyMode.getStats(settings);
-    const activePostEffects = WeaponBuffs.getPostEffects()
-        .filter((postEffect) => postEffect.isActive(settings));
-
-    expect(stats.get("text_percent_max")).toBe(58);
-    expect(stats.get("text_percent_max_hexerei")).toBe(29);
-    expect(activePostEffects).toHaveLength(0);
+test.each([1, 2, 3])("old Angelos mode %i decodes without reusing its serialize ID", (mode) => {
+    const input = [AngelosHeptades.getId(), 90, 6, 5, 1, 1, mode];
+    const weapon = CalcObjectWeapon.deserialize(input);
+    expect(weapon).not.toBeNull();
+    expect(input).toHaveLength(0);
+    expect(weapon.getSettings().weapon_angelos_heptades).toBeUndefined();
 });

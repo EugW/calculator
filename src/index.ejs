@@ -11,7 +11,7 @@
     <meta property="og:image" content="https://calc.eugw.ru/images/share.jpg" />
     <meta name="viewport" content="width=device-width">
     <link rel="icon" href="images/favicon.png">
-    <link href="css/ui.css?<%= version %>" rel="stylesheet">
+    <% for (const file of htmlWebpackPlugin.files.css) { %><link href="<%= file %>" rel="stylesheet"><% } %>
     <script>
         let lang = localStorage.lang;
         if (lang != 'eng' && lang != 'rus') {
@@ -35,26 +35,27 @@
     </script>
 </head>
 <body>
-    <div class="gi-main-container">
-        <div class="gi-layout-left-tabs"><div class="tabs-narrow"></div><div class="tabs-all"></div></div>
-        <div class="gi-layout-left-container">
-            <div class="gi-layout-left-content"></div>
+    <div class="gi-page">
+        <div class="gi-layout-side"><div class="gi-layout-side-content"></div></div>
+        <div class="gi-main-container">
+            <div class="gi-layout-left-container">
+                <div class="gi-layout-left-content"></div>
+            </div>
+            <div class="gi-layout-right-container">
+                <div class="gi-layout-right-content"></div>
+            </div>
+            <div class="gi-main-copyright">
+                <a class="gi-lang-switch lang-rus" href="#"><div class="flag flag-rus"></div><u>Русский</u></a>
+                <a class="gi-lang-switch lang-eng" href="#"><div class="flag flag-eng"></div><u>English</u></a>
+                <span class="gi-spacer"></span>
+                <span class="gi-copyright-text"></span>
+                <span class="gi-sync-status"></span>
+            </div>
         </div>
-        <div class="gi-layout-right-container">
-            <div class="gi-layout-right-content"></div>
-        </div>
-        <div class="gi-layout-right-tabs"></div>
-        <div class="gi-main-copyright">
-            <a class="gi-lang-switch lang-rus" href="#"><div class="flag flag-rus"></div><u>Русский</u></a>
-            <a class="gi-lang-switch lang-eng" href="#"><div class="flag flag-eng"></div><u>English</u></a>
-            <span class="gi-spacer"></span>
-            <span class="gi-copyright-text"></span>
-            <span class="gi-sync-status"></span>
-        </div>
+        <div class="gi-layout-nav"><div class="gi-layout-nav-tabs"></div></div>
     </div>
     <div class="tooltip-wrapper"></div>
-    <script src="js/app.js?<%= version %>"></script>
-    <script src="js/db.js?<%= version %>"></script>
-    <script src="js/ui.js?<%= version %>"></script>
+    <% for (const file of htmlWebpackPlugin.files.js) { %><script src="<%= file %>"></script>
+    <% } %>
 </body>
 </html>

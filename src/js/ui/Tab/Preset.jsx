@@ -16,7 +16,6 @@ import { PresetApi } from '../../classes/API/Preset';
 let lang = new Lang();
 let presetApi = new PresetApi();
 
-const MAX_PARTY_FILTERS = 3;
 const PAGE_SIZE = 10;
 
 // ─── Tab shell ────────────────────────────────────────────────────────────────
@@ -26,7 +25,7 @@ export class PresetTab extends Tab {
         super(params);
         this.id = 'preset';
         this.rightRab = false;
-        this.title = lang.get('preset.tab_title');
+        this.title = 'preset.tab_title';
     }
 
     refresh() {
@@ -60,15 +59,11 @@ export class PresetView extends React.Component {
                 search: '',
                 char_id: null,
                 weapon_id: null,
-                // Multi-party: array of up to MAX_PARTY_FILTERS serializeIds
-                party_ids: [],
                 liked: false,
             },
             // Resolved objects for display labels
             filterChar: null,
             filterWeapon: null,
-            // Array of char objects matching party_ids filter
-            filterPartyChars: [],
             searchTimer: null,
         };
         this.hasLoaded = false;
@@ -144,19 +139,18 @@ export class PresetView extends React.Component {
     // ── Data ──────────────────────────────────────────────────────
 
     _activeFilters() {
-        let { search, char_id, weapon_id, party_ids, liked } = this.state.filters;
+        let { search, char_id, weapon_id, liked } = this.state.filters;
         let f = {};
         if (search)             f.search    = search;
         if (char_id)            f.char_id   = char_id;
         if (weapon_id)          f.weapon_id = weapon_id;
-        if (party_ids.length)   f.party_ids = party_ids;
         if (liked)              f.liked     = true;
         return f;
     }
 
     _activeFilterCount() {
-        let { search, char_id, weapon_id, party_ids, liked } = this.state.filters;
-        return (search ? 1 : 0) + (char_id ? 1 : 0) + (weapon_id ? 1 : 0) + party_ids.length + (liked ? 1 : 0);
+        let { search, char_id, weapon_id, liked } = this.state.filters;
+        return (search ? 1 : 0) + (char_id ? 1 : 0) + (weapon_id ? 1 : 0) + (liked ? 1 : 0);
     }
 
     async reload() {
@@ -222,33 +216,10 @@ export class PresetView extends React.Component {
         });
     }
 
-    handleAddPartyFilter() {
-        let existing = this.state.filters.party_ids;
-        if (existing.length >= MAX_PARTY_FILTERS) return;
-
-        UI.CharSelectReact.show({
-            showEmpty: false,
-            callback: (char) => {
-                if (!char) return;
-                let id = char.getId();
-                if (existing.includes(id)) return; // already selected
-                let newIds   = [...existing, id];
-                let newChars = [...this.state.filterPartyChars, char];
-                this._setFilter({ party_ids: newIds }, { filterPartyChars: newChars });
-            },
-        });
-    }
-
-    handleRemovePartyFilter(id) {
-        let newIds   = this.state.filters.party_ids.filter(pid => pid !== id);
-        let newChars = this.state.filterPartyChars.filter(c => c.getId() !== id);
-        this._setFilter({ party_ids: newIds }, { filterPartyChars: newChars });
-    }
-
     handleClearFilters() {
         this.setState({
-            filters: { search: '', char_id: null, weapon_id: null, party_ids: [], liked: false },
-            filterChar: null, filterWeapon: null, filterPartyChars: [],
+            filters: { search: '', char_id: null, weapon_id: null, liked: false },
+            filterChar: null, filterWeapon: null,
         }, () => this.reload());
     }
 
@@ -269,19 +240,18 @@ export class PresetView extends React.Component {
     }
 
     async handleSaveConfirm(data) {
-        let currentBuild = this.props.app.currentSet().clone();
+        let currentBuild = this.props.app.currentSet().characterBuild();
         currentBuild.clearArtifacts();
 
         let charId   = currentBuild.getChar()?.object?.getId() ?? null;
         let weaponId = currentBuild.getWeapon()?.object?.getId() ?? null;
-        let partyIds = currentBuild.getPartyChars?.() ?? [];
 
         let result = await presetApi.save({
             title:       data.name,
             description: data.description,
             char_id:     String(charId),
             weapon_id:   weaponId ? String(weaponId) : undefined,
-            party_ids:   partyIds,
+            party_ids:   [],
             data_blob:   Serializer.pack(currentBuild),
         });
 
@@ -324,12 +294,12 @@ export class PresetView extends React.Component {
     // ── Render ────────────────────────────────────────────────────
 
     render() {
-        let { presets, loading, hasMore, offset, currentUser, filters, filterChar, filterWeapon, filterPartyChars } = this.state;
+        let { presets, loading, hasMore, offset, currentUser, filters, filterChar, filterWeapon } = this.state;
         let isLoggedIn  = !!currentUser;
         let activeCount = this._activeFilterCount();
 
         return (
-            <ReactTab title={this.props.title}>
+            <ReactTab title={lang.get(this.props.title)}>
                 <FullHeight addClass="preset-view">
                     <FullHeightStatic>
                         {/* Top action bar */}
@@ -356,7 +326,7 @@ export class PresetView extends React.Component {
                                 buttonVisible={false}
                             />
 
-                            {/* Row 2: selector buttons + party chips */}
+                            {/* Row 2: character, weapon and liked filters */}
                             <div style={{ display: 'flex', gap: '5px', flexWrap: 'wrap', alignItems: 'center' }}>
                                 <FilterButton
                                     label={lang.get('preset.filter_char')}
@@ -372,23 +342,6 @@ export class PresetView extends React.Component {
                                     onClick={() => this.handleWeaponFilter()}
                                     onRemove={filters.weapon_id ? () => this._setFilter({ weapon_id: null }, { filterWeapon: null }) : null}
                                 />
-
-                                {/* Party member tags — one per selected, plus add button */}
-                                {filterPartyChars.map(pc => (
-                                    <FilterButton
-                                        key={pc.getId()}
-                                        label={UI.Lang.get(pc.getName())}
-                                        active={true}
-                                        onRemove={() => this.handleRemovePartyFilter(pc.getId())}
-                                    />
-                                ))}
-                                {filters.party_ids.length < MAX_PARTY_FILTERS && (
-                                    <FilterButton
-                                        label={filters.party_ids.length === 0 ? lang.get('preset.filter_party') : lang.get('preset.filter_party_add')}
-                                        active={false}
-                                        onClick={() => this.handleAddPartyFilter()}
-                                    />
-                                )}
 
                                 {isLoggedIn && (
                                     <FilterButton
@@ -495,8 +448,6 @@ class PresetCard extends React.Component {
 
         let char       = buildObj.getChar()?.object;
         let weapon     = buildObj.getWeapon()?.object;
-        let partyIds   = buildObj.getPartyChars?.()?.slice(0, 3) ?? [];
-        let partyChars = partyIds.map(id => DB.Chars.getById(id)).filter(Boolean);
 
         let isOwn      = this.props.currentUser && preset.submitter === this.props.currentUser;
         let liked      = !!preset.liked_by_user;
@@ -518,14 +469,9 @@ class PresetCard extends React.Component {
                             </div>
                         </div>
 
-                        {/* Weapon + party + action buttons */}
+                        {/* Weapon + action buttons */}
                         <div className="items" style={{ alignItems: 'center' }}>
                             {weapon && <WeaponIcon key='weapon' weapon={weapon} size="40" addClass="char-info-item-icon" />}
-                            {partyChars.length > 0 && (
-                                <div style={{ display: 'flex', gap: '4px', marginLeft: '8px' }}>
-                                    {partyChars.map(pc => <CharIcon key={pc.getId()} char={pc} size={40} />)}
-                                </div>
-                            )}
                             <div className="flex-spacer" />
 
                             {/* ── Action buttons ── all uniform 32px round, stop click propagation */}

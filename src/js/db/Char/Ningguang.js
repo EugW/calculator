@@ -15,8 +15,10 @@ import { FeatureMultiplier } from "../../classes/Feature2/Multiplier";
 import { FeaturePostEffectValue } from "../../classes/Feature2/PostEffectValue";
 import { PostEffectStatsHP } from "../../classes/PostEffect/Stats/HP";
 import { StatTable } from "../../classes/StatTable";
+import { RECEIVERS } from "../../classes/Team/Receivers";
 import { charTables } from "../generated/CharTables";
 import { charTalentTables } from "../generated/CharTalentTables";
+import { percent } from "../Params";
 
 const Talents = new DbObjectTalents({
     attack: {
@@ -86,7 +88,7 @@ const Talents = new DbObjectTalents({
     },
 });
 
-const A4GeoDmgBonus = 12;
+const A4GeoDmgBonus = percent(charTalentTables.Ningguang.a4.p1);
 const C4SkillRes = 10;
 
 export const Ningguang = new DbObjectChar({
@@ -100,6 +102,14 @@ export const Ningguang = new DbObjectChar({
     origin: 'liyue',
     talents: Talents,
     statTable: charTables.Ningguang,
+    // Talent hits (normal/charged/star jade/plunge/skill/burst) read the
+    // total ATK by construction: the game uses plain damagePercentage
+    // specials (Elemental_Art_Damage, ExtraAttack_Damage, NormalAttack_Damage)
+    // with no FIGHT_PROP read (checked: no FIGHT_PROP_* in
+    // ConfigAbility_Avatar_Ningguang.json); GO uses dmgNode('atk', ...) for
+    // all of them. KQM Ningguang has no buff-chain test (only snapshot and ICD
+    // mechanics). A scaling-less FeatureMultiplier reads total ATK and needs
+    // nothing. The Jade Screen HP display below is the only HP reader.
     features: [
         new FeatureDamageNormal({
             name: 'normal_hit',
@@ -171,6 +181,15 @@ export const Ningguang = new DbObjectChar({
                 }),
             ],
         }),
+        // Jade Screen HP display. Game data: Avatar_Ningguang_ServantStone_Material
+        // applies Ningguang_SkillUpgrade_2_HpUp, whose properties set
+        // Actor_MaxHPRatio = SkillUpgrade_2_HpUpPercentageRatio (the ProudSkill
+        // Inherited-HP param: 0.501 at skill 1, 0.816 at skill 10, matching
+        // s2.p3); no FIGHT_PROP_* marker anywhere in
+        // ConfigAbility_Avatar_Ningguang.json, so no read channel is evidenced
+        // (engine-internal gadget HP, like Lyney's hat HP): the default premod
+        // read stays. No ability writes extra HP, so it agrees with the total
+        // GO reads (input.total.hp). KQM has no chain test.
         new FeaturePostEffectValue({
             category: 'skill',
             name: 'ningguang_jade_screen_hp',
@@ -194,6 +213,13 @@ export const Ningguang = new DbObjectChar({
             ],
         }),
     ],
+    // A1 Backup Plan (Stamina with Star Jades) reads no stat. A4 Strategic
+    // Reserve (12% team Geo DMG): the game (Avatar_Ningguang_PermanentSkill_2,
+    // UNIQUE_Ningguang_PermanentSkill_2_AttackUp) writes Actor_RockAddHurtDelta
+    // from the flat PermanentSkill_RockAddHurtDelta special (0.12, ProudSkill
+    // 272201 param0), premod (no "Extra"), with no stat read. A flat
+    // ConditionBoolean writes premod by construction: default confirmed, no
+    // params. GO puts it under teamBuff.premod. KQM has no chain test.
     conditions: [
         new ConditionStatic({
             title: 'talent_name.ningguang_backup_plan',
@@ -206,6 +232,7 @@ export const Ningguang = new DbObjectChar({
         new ConditionBoolean({
             name: 'ningguang_strategic_reserve',
             serializeId: 1,
+            receivers: RECEIVERS.TEAM,
             title: 'talent_name.ningguang_strategic_reserve',
             description: 'talent_descr.ningguang_strategic_reserve',
             stats: {
@@ -217,6 +244,9 @@ export const Ningguang = new DbObjectChar({
             ],
         }),
     ],
+    // C1 (AoE), C2 (skill CD reset), C3/C5 (+3 talent levels) and C6 (+7 Star
+    // Jades) read no stat and write no attribute. C4 below is the only
+    // constellation with an attribute write.
     constellation: new DbObjectConstellation([
         {
             conditions: [
@@ -244,10 +274,18 @@ export const Ningguang = new DbObjectChar({
             ],
         },
         {
+            // C4 Exquisite be the Jade (10% team Elemental RES): the game
+            // (Avatar_Ningguang_Constellation_4,
+            // UNIQUE_ServantStone_Shield_ElementDefenceUp) writes
+            // Actor_*SubHurtDelta 0.1 for every element (premod, no "Extra")
+            // with no stat read. A flat condition writes premod by
+            // construction: default confirmed, no params. GO puts it under
+            // teamBuff.premod. KQM has no chain test.
             conditions: [
                 new ConditionBoolean({
                     name: 'ningguang_exquisite_be_the_jade_outshining_all_beneath',
                     serializeId: 2,
+                    receivers: RECEIVERS.TEAM,
                     title: 'talent_name.ningguang_exquisite_be_the_jade_outshining_all_beneath',
                     description: 'talent_descr.ningguang_exquisite_be_the_jade_outshining_all_beneath',
                     stats: {
@@ -280,35 +318,5 @@ export const Ningguang = new DbObjectChar({
             ],
         },
     ]),
-    partyData: {
-        conditions: [
-            new ConditionBoolean({
-                name: 'party.ningguang_strategic_reserve',
-                serializeId: 1,
-                rotation: 'party',
-                title: 'talent_name.ningguang_strategic_reserve',
-                description: 'talent_descr.ningguang_strategic_reserve',
-                info: {ascension: 4},
-                stats: {
-                    dmg_geo: A4GeoDmgBonus,
-                },
-            }),
-            new ConditionBoolean({
-                name: 'party.ningguang_exquisite_be_the_jade_outshining_all_beneath',
-                serializeId: 2,
-                title: 'talent_name.ningguang_exquisite_be_the_jade_outshining_all_beneath',
-                description: 'talent_descr.ningguang_exquisite_be_the_jade_outshining_all_beneath',
-                info: {constellation: 4},
-                stats: {
-                    res_anemo: C4SkillRes,
-                    res_pyro: C4SkillRes,
-                    res_hydro: C4SkillRes,
-                    res_cryo: C4SkillRes,
-                    res_electro: C4SkillRes,
-                    res_dendro: C4SkillRes,
-                    res_geo: C4SkillRes,
-                },
-            }),
-        ],
-    },
+    retiredParty: [[1, 'checkbox'], [2, 'checkbox']],
 });

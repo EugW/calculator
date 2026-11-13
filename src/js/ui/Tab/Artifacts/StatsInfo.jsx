@@ -25,7 +25,7 @@ export class StatsInfo extends React.Component {
     render() {
         let build = this.props.build;
 
-        let data = build.getBuildData();
+        let data = this.props.view.getBuildData();
         let stats = build.artifacts.getStats(data.settings).stats;
         let artCond = build.artifacts.getConditions();
         data.postEffects = build.artifacts.getPostEffects();

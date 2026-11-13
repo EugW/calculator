@@ -1,5 +1,40 @@
 import {CalcObject} from '../CalcObject';
+import {Condition} from '../Condition';
 import {Stats} from '../Stats';
+
+/**
+ * The enemy of a new team: the first enemy of the database.
+ *
+ * @returns {CalcObjectEnemy}
+ */
+export function defaultEnemy() {
+    let enemy = new CalcObjectEnemy();
+    enemy.set(DB.Enemies.getFirst().getFirst());
+    return enemy;
+}
+
+const enemySettingRegistries = new WeakMap();
+
+/**
+ * @param {string} name
+ * @returns {boolean} whether a setting belongs to an enemy: its level, its
+ *     type or a condition of any enemy
+ */
+export function isEnemySetting(name) {
+    let enemySettingNames = enemySettingRegistries.get(DB);
+    if (!enemySettingNames) {
+        let conditions = [...DB.Conditions.Enemy];
+        for (let enemy of DB.Enemies.getList(true)) {
+            conditions.push(...enemy.getConditions());
+        }
+        enemySettingNames = new Set(['enemy_level', 'enemy_type']);
+        for (let cond of Condition.unwrap(conditions)) {
+            if (cond.getName()) enemySettingNames.add(cond.getName());
+        }
+    }
+    enemySettingRegistries.set(DB, enemySettingNames);
+    return enemySettingNames.has(name);
+}
 
 const RAW_RESISTANCES = ['anemo', 'cryo', 'dendro', 'electro', 'geo', 'hydro', 'phys', 'pyro'];
 const RAW_RESISTANCES_TYPE_LEGACY = 1;
@@ -43,29 +78,29 @@ export class CalcObjectEnemy extends CalcObject {
         return this.resistances;
     }
 
+    /**
+     * The enemy's base RES, as its stats: what changes its RES (a shred, a
+     * shield state) adds to them, and the enemy's stats are its total RES
+     * (see TeamEvaluation.enemyStats).
+     *
+     * @returns {{stats: Stats, settings: Object}}
+     */
     getStats() {
+        let stats = new Stats();
+        let resistances = this.getResistances();
+        for (const res of RAW_RESISTANCES) {
+            stats.add('enemy_res_' + res, resistances[res] || 0);
+        }
+
         return {
-            stats: new Stats(),
+            stats: stats,
             settings: {},
         };
     }
 
     getSettings() {
         let result = super.getSettings();
-
-        let resistances = this.getResistances();
-
-        result = Object.assign(result, {
-            enemy_level: this.levels.level,
-            enemy_res_phys: resistances.phys || 0,
-            enemy_res_anemo: resistances.anemo || 0,
-            enemy_res_cryo: resistances.cryo || 0,
-            enemy_res_geo: resistances.geo || 0,
-            enemy_res_hydro: resistances.hydro || 0,
-            enemy_res_pyro: resistances.pyro || 0,
-            enemy_res_electro: resistances.electro || 0,
-            enemy_res_dendro: resistances.dendro || 0,
-        });
+        result.enemy_level = this.levels.level;
 
         if (this.object) {
             result.enemy_type = this.object.type;

@@ -20,8 +20,8 @@ export class RollsInfo extends React.Component {
             }
         }
 
-        let buildData = this.props.build.getBuildData();
-        let feature = this.props.build.getFeatureByName(this.props.feature);
+        let buildData = this.props.view.getBuildData();
+        let feature = this.props.view.getFeatureByName(this.props.feature, buildData);
         let usefulSubstats = feature.getUsedStats(buildData);
 
         if (!usefulSubstats.includes('recharge')) {
@@ -84,7 +84,7 @@ export class RollsInfo extends React.Component {
     render() {
         let items = [];
         let total = 0;
-        let featureResult = this.props.build.getFeatureResultByName(this.props.feature);
+        let featureResult = this.props.view.getFeatureResultByName(this.props.feature);
 
         for (let item of this.getSubstatRolls()) {
             total += item.count;

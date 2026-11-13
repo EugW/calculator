@@ -1,10 +1,11 @@
 import { Condition } from "../../classes/Condition";
+import { ConditionAnd } from "../../classes/Condition/And";
 import { ConditionAscensionChar } from "../../classes/Condition/Ascension/Char";
 import { ConditionBoolean } from "../../classes/Condition/Boolean";
 import { ConditionBooleanCharElement } from "../../classes/Condition/Boolean/CharElement";
 import { ConditionBooleanChevreuseParty } from "../../classes/Condition/Boolean/ChevreuseParty";
 import { ConditionConstellation } from "../../classes/Condition/Constellation";
-import { ConditionNumber } from "../../classes/Condition/Number";
+import { ConditionReceiver } from "../../classes/Condition/Receiver";
 import { ConditionStacks } from "../../classes/Condition/Stacks";
 import { ConditionStatic } from "../../classes/Condition/Static";
 import { DbObjectChar } from "../../classes/DbObject/Char";
@@ -21,13 +22,14 @@ import { FeatureHeal } from "../../classes/Feature2/Heal";
 import { FeatureMultiplier } from "../../classes/Feature2/Multiplier";
 import { FeatureMultiplierList } from "../../classes/Feature2/Multiplier/List";
 import { FeaturePostEffectValue } from "../../classes/Feature2/PostEffectValue";
-import { PostEffectStats } from "../../classes/PostEffect/Stats";
 import { PostEffectStatsHP } from "../../classes/PostEffect/Stats/HP";
+import { RECEIVERS } from "../../classes/Team/Receivers";
 import { StatTable } from "../../classes/StatTable";
 import { ValueTable } from "../../classes/ValueTable";
-import { CHARACTER_MAX_POSSIBLE_HP } from "../Constants";
 import { charTables } from "../generated/CharTables";
 import { charTalentTables } from "../generated/CharTalentTables";
+import { percent } from "../Params";
+import { CHANNELS } from "../../classes/PostEffect/Channels";
 
 const Talents = new DbObjectTalents({
     attack: {
@@ -134,20 +136,33 @@ const Talents = new DbObjectTalents({
 });
 
 const TalentValues = {
-    ResShred: -40,
-    AtkBuffValue: 1,
-    AtkBuffCap: 40,
-    C2ChainDmg: 120,
-    C6PartyHeal: 10,
-    C6DmgBonus: 20,
+    ResShred: -percent(charTalentTables.Chevreuse.a1.p1),
+    AtkBuffValue: percent(charTalentTables.Chevreuse.a4.p1),
+    AtkBuffCap: percent(charTalentTables.Chevreuse.a4.p3),
+    C2ChainDmg: percent(charTalentTables.Chevreuse.c2.p1),
+    C6PartyHeal: percent(charTalentTables.Chevreuse.c6.p2),
+    C6DmgBonus: percent(charTalentTables.Chevreuse.c6.p3),
+    C6MaxStacks: charTalentTables.Chevreuse.c6.p5,
 };
 
+const pyroElectroReceiver = new ConditionReceiver({
+    condition: new ConditionBooleanCharElement({element: ['pyro', 'electro']}),
+});
+
+// A4 Vertical Force Coordination: game reads total HP (FIGHT_PROP_MAX_HP through
+// CalcDamageUp in Avatar_Chevreuse_ElementalArt_Shoot) and writes non-extra ATK%
+// (Actor_AttackRatio in UNIQUE_Avatar_Chevreuse_Damage_Up). GO writes it under
+// premod atk_; Iansan's burst (non-extra ATK read) counts it.
 const atkBuffPost = new PostEffectStatsHP({
+    receivers: RECEIVERS.TEAM,
+    reads: CHANNELS.TOTAL,
+    writes: CHANNELS.PREMOD,
     percent: new StatTable('atk_percent', [TalentValues.AtkBuffValue / 1000]),
     statCap: new StatTable('', [TalentValues.AtkBuffCap]),
     conditions: [
         new ConditionAscensionChar({ascension: 4}),
         new ConditionBoolean({name: 'chevreuse_force_coordination'}),
+        pyroElectroReceiver,
     ],
 });
 
@@ -300,6 +315,7 @@ export const Chevreuse = new DbObjectChar({
                 }),
             ],
         }),
+        // C2 chain explosion: damage hit reads total ATK (default atk* scaling), needs nothing.
         new FeatureDamageSkill({
             name: 'chevreuse_chain_explosion_dmg',
             element: 'pyro',
@@ -311,6 +327,8 @@ export const Chevreuse = new DbObjectChar({
             ],
             condition: new ConditionConstellation({constellation: 2}),
         }),
+        // Skill hold heal: game reads caster Max HP total (HealHP amountByCasterMaxHPRatio
+        // in Avatar_Chevreuse_ElementalArt); scaling hp* (total) confirmed, no params.
         new FeatureHeal({
             category: 'skill',
             name: 'heal_dot',
@@ -322,6 +340,7 @@ export const Chevreuse = new DbObjectChar({
                 }),
             ],
         }),
+        // C6 10% Max HP party heal: total HP read (game text); scaling hp* confirmed.
         new FeatureHeal({
             category: 'skill',
             name: 'chevreuse_heal_dot',
@@ -365,6 +384,7 @@ export const Chevreuse = new DbObjectChar({
                 }),
             ],
         }),
+        // Display of atkBuffPost; follows its channels, needs nothing.
         new FeaturePostEffectValue({
             category: 'other',
             name: 'atk_bonus',
@@ -373,20 +393,36 @@ export const Chevreuse = new DbObjectChar({
         }),
     ],
     conditions: [
+        // A1 RES shred is a flat condition (no stat read; conditions are premod,
+        // right for flat buffs). Saved toggle only; the shred reaches the team
+        // when the Pyro/Electro-only composition holds. The gate lives on the
+        // hidden delivery so the saved control survives off-field save/load.
         new ConditionBoolean({
             name: 'chevreuse_tactics',
             serializeId: 1,
             title: 'talent_name.chevreuse_vanguards_coordinated_tactics',
             description: 'talent_descr.chevreuse_vanguards_coordinated_tactics',
             info: {ascension: 1},
-            stats: {
+            displayStats: {
                 enemy_res_pyro: TalentValues.ResShred,
                 enemy_res_electro: TalentValues.ResShred,
             },
             subConditions: [
                 new ConditionAscensionChar({ascension: 1}),
-                new ConditionBooleanChevreuseParty(),
             ],
+        }),
+        new Condition({
+            isHidden: true,
+            receivers: RECEIVERS.TEAM,
+            stats: {
+                enemy_res_pyro: TalentValues.ResShred,
+                enemy_res_electro: TalentValues.ResShred,
+            },
+            condition: new ConditionAnd([
+                new ConditionBoolean({name: 'chevreuse_tactics'}),
+                new ConditionAscensionChar({ascension: 1}),
+                new ConditionBooleanChevreuseParty(),
+            ]),
         }),
         new ConditionBoolean({
             name: 'chevreuse_force_coordination',
@@ -453,12 +489,16 @@ export const Chevreuse = new DbObjectChar({
         },
         {
             conditions: [
+                // C6 In Pursuit of Ending Evil: flat Pyro/Electro DMG% per stack
+                // (Actor_Elec/FireAddHurtDelta in UNIQUE_Avatar_Chevreuse_Talent6_Up,
+                // no stat read). Flat condition, premod is right; Chevreuse included (TEAM).
                 new ConditionStacks({
                     name: 'chevreuse_in_pursuit',
                     serializeId: 3,
+                    receivers: RECEIVERS.TEAM,
                     title: 'talent_name.chevreuse_in_pursuit_of_ending_evil',
                     description: 'talent_descr.chevreuse_in_pursuit_of_ending_evil',
-                    maxStacks: 3,
+                    maxStacks: TalentValues.C6MaxStacks,
                     stats: [
                         new StatTable('text_percent_heal', [TalentValues.C6PartyHeal]),
                         new StatTable('dmg_pyro', [TalentValues.C6DmgBonus]),
@@ -468,75 +508,5 @@ export const Chevreuse = new DbObjectChar({
             ],
         },
     ]),
-    partyData: {
-        loadStats: {
-            stats: ['hp_total'],
-        },
-        conditions: [
-            new ConditionNumber({
-                name: 'chevreuse_hp_total',
-                title: 'talent_name.stats_total_hp',
-                partyStat: 'hp_total',
-                serializeId: 1,
-                class: "gi-inputs-5digit",
-                max: CHARACTER_MAX_POSSIBLE_HP,
-            }),
-            new ConditionBoolean({
-                name: 'party.chevreuse_tactics',
-                serializeId: 2,
-                title: 'talent_name.chevreuse_vanguards_coordinated_tactics',
-                description: 'talent_descr.chevreuse_vanguards_coordinated_tactics',
-                rotation: 'party',
-                info: {ascension: 1},
-                stats: {
-                    enemy_res_pyro: TalentValues.ResShred,
-                    enemy_res_electro: TalentValues.ResShred,
-                },
-                subConditions: [
-                    new ConditionBooleanChevreuseParty(),
-                ],
-            }),
-            new ConditionBoolean({
-                name: 'party.chevreuse_force_coordination',
-                serializeId: 3,
-                title: 'talent_name.chevreuse_vertical_force_coordination',
-                description: 'talent_descr.chevreuse_vertical_force_coordination',
-                rotation: 'party',
-                info: {ascension: 4},
-                stats: {
-                    text_percent: TalentValues.AtkBuffValue,
-                    text_value: 1000,
-                    text_percent_max: TalentValues.AtkBuffCap,
-                },
-                subConditions: [
-                    new ConditionBooleanCharElement({element: ['pyro', 'electro']}),
-                ],
-            }),
-            new ConditionStacks({
-                name: 'party.chevreuse_in_pursuit',
-                serializeId: 4,
-                title: 'talent_name.chevreuse_in_pursuit_of_ending_evil',
-                description: 'talent_descr.chevreuse_in_pursuit_of_ending_evil',
-                rotation: 'party',
-                maxStacks: 3,
-                info: {constellation: 6},
-                stats: [
-                    new StatTable('text_percent_heal', [TalentValues.C6PartyHeal]),
-                    new StatTable('dmg_pyro', [TalentValues.C6DmgBonus]),
-                    new StatTable('dmg_electro', [TalentValues.C6DmgBonus]),
-                ],
-            }),
-        ],
-        postEffects: [
-            new PostEffectStats({
-                from: 'chevreuse_hp_total',
-                percent: new StatTable('atk_percent', [TalentValues.AtkBuffValue / 1000]),
-                statCap: new StatTable('', [TalentValues.AtkBuffCap]),
-                conditions: [
-                    new ConditionBoolean({name: 'party.chevreuse_force_coordination'}),
-                    new ConditionBooleanCharElement({element: ['pyro', 'electro']}),
-                ],
-            }),
-        ]
-    },
+    retiredParty: [[1, 'number'], [2, 'checkbox'], [3, 'checkbox'], [4, 'stacks']],
 });

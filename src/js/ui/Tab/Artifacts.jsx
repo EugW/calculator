@@ -16,6 +16,7 @@ import { ArtifactCraftModal } from '../Modal/ArtifactCraft';
 import { ArtifactReshapeModal } from '../Modal/ArtifactReshape';
 import { ArtifactUpgradeModal } from '../Modal/ArtifactUpgrade';
 import { ArtifactActionHistoryModal } from '../Modal/ArtifactActionHistory';
+import { ArtifactSetProfileModal } from '../Modal/ArtifactSetProfile';
 
 let lang = new Lang();
 
@@ -36,8 +37,7 @@ export class ArtifactsTab extends Tab {
         this.component.setState({
             feature: this.app.getFeature(),
         });
-        this.component.craftModal?.invalidate();
-        this.component.upgradeModal?.invalidate();
+        this.component.invalidateModals();
     }
 
     createContent() {
@@ -65,10 +65,32 @@ export class ArtifactsView extends React.Component {
         };
     }
 
+    invalidateModals() {
+        this.craftModal?.invalidate();
+        this.upgradeModal?.invalidate();
+        this.reshapeModal?.invalidate();
+    }
+
     render() {
+        // Embedded in the Build tab: content only, the Build tab owns the header.
+        if (this.props.embedded) {
+            return (
+                <>
+                    {this.tabContent()}
+                    <ArtifactSetProfileModal ref={element => { this.profileModal = element; }} app={this.props.app} />
+                    <ArtifactCraftModal ref={element => { this.craftModal = element; }} app={this.props.app} />
+                    <ArtifactReshapeModal ref={element => { this.reshapeModal = element; }} app={this.props.app} />
+                    <ArtifactUpgradeModal ref={element => { this.upgradeModal = element; }} app={this.props.app} />
+                    <ArtifactActionHistoryModal ref={element => { this.historyModal = element; }} app={this.props.app}
+                        onOpen={(entry, result) => this.openHistoryEntry(entry, result)} />
+                </>
+            );
+        }
+
         return (
             <ReactTab title={this.strings.title}>
                 {this.tabContent()}
+                <ArtifactSetProfileModal ref={element => { this.profileModal = element; }} app={this.props.app} />
                 <ArtifactCraftModal ref={element => { this.craftModal = element; }} app={this.props.app} />
                 <ArtifactReshapeModal ref={element => { this.reshapeModal = element; }} app={this.props.app} />
                 <ArtifactUpgradeModal ref={element => { this.upgradeModal = element; }} app={this.props.app} />
@@ -86,9 +108,9 @@ export class ArtifactsView extends React.Component {
     }
 
     handleSettingChange(name, value) {
-        let oldSettings = this.props.app.currentSet().artifacts.getSettings();
-        oldSettings[name] = value;
-        this.props.app.setArtifactsSettings(oldSettings);
+        // Profile controls patch individually; setArtifactsSettings still
+        // replaces the member state that equipped sets declare.
+        this.props.app.setArtifactsSettings({...this.props.app.currentSet().artifacts.getStateSettings(), [name]: value});
     }
 
     handleScanClick() {
@@ -195,6 +217,9 @@ export class ArtifactsView extends React.Component {
             <FullHeight>
                 <FullHeightStatic>
                     <ControlsBar wrap>
+                        <TitledButton icon="icon-settings" title={lang.get('artifact_profile.title')}
+                            onClick={() => this.profileModal.show(this.props.app.currentSet())}/>
+                        <ControlsBarDivider />
                         <TitledButton
                             icon="icon-scan"
                             title={this.strings.scan}
@@ -231,15 +256,18 @@ export class ArtifactsView extends React.Component {
                         onStorageClick={(slot) => this.handleArtifactStorage(slot)}
                     />
                     <ConditionList
+                        app={this.props.app}
                         items={conditions}
                         settings={data.settings}
                         onChange={(name, value) => this.handleSettingChange(name, value)}
                     />
                     <StatsInfo
                         build={this.props.app.currentSet()}
+                        view={this.props.app.view()}
                     />
                     <RollsInfo
                         build={this.props.app.currentSet()}
+                        view={this.props.app.view()}
                         feature={this.props.app.getFeature()}
                     />
                 </FullHeightScrollable>

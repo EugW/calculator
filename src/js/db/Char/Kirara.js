@@ -3,6 +3,7 @@ import { ConditionAscensionChar } from '../../classes/Condition/Ascension/Char';
 import { ConditionBoolean } from '../../classes/Condition/Boolean'
 import { ConditionConstellation } from '../../classes/Condition/Constellation';
 import { ConditionStatic } from '../../classes/Condition/Static';
+import { CHANNELS } from "../../classes/PostEffect/Channels";
 import { DbObjectChar } from "../../classes/DbObject/Char";
 import { DbObjectConstellation } from "../../classes/DbObject/Constellation"
 import { DbObjectTalents } from '../../classes/DbObject/Talents';
@@ -19,9 +20,11 @@ import { FeatureMultiplierKiraraBurst } from '../../classes/Feature2/Multiplier/
 import { FeatureShield } from '../../classes/Feature2/Shield';
 import { PostEffectStatsHP } from '../../classes/PostEffect/Stats/HP';
 import { StatTable } from "../../classes/StatTable"
+import { RECEIVERS } from "../../classes/Team/Receivers";
 import { ValueTable } from '../../classes/ValueTable';
 import { charTables } from "../generated/CharTables";
 import { charTalentTables } from '../generated/CharTalentTables';
+import { percent } from "../Params";
 
 const Talents = new DbObjectTalents({
     attack: {
@@ -148,13 +151,13 @@ const Talents = new DbObjectTalents({
 });
 
 const TalentValues = {
-    A1ShieldBonus: 20,
-    A4SkillBonus: 0.4,
-    A4BurstBonus: 0.3,
+    A1ShieldBonus: percent(charTalentTables.Kirara.a1.p1),
+    A4SkillBonus: percent(charTalentTables.Kirara.a4.p1),
+    A4BurstBonus: percent(charTalentTables.Kirara.a4.p2),
     C1SeedHp: 8000,
-    C2PartyShield: 40,
-    C4Damage: 200,
-    C6ElementalBonus: 12,
+    C2PartyShield: percent(charTalentTables.Kirara.c2.p1),
+    C4Damage: percent(charTalentTables.Kirara.c4.p1),
+    C6ElementalBonus: percent(charTalentTables.Kirara.c6.p1),
 };
 
 export const Kirara = new DbObjectChar({
@@ -168,6 +171,14 @@ export const Kirara = new DbObjectChar({
     origin: 'inazuma',
     talents: Talents,
     statTable: charTables.Kirara,
+    // Every scaling below reads the total stat, so it needs no channels:
+    // skill/burst hits scale on ATK (FIGHT_PROP_CUR_ATTACK by convention;
+    // GO dmgNode('atk', ...)); shields scale on Max HP through the skill's
+    // ShieldHPRatio/ShieldHPConst talent params (Momoka_ElementalArt_Shield_Handler
+    // has no FIGHT_PROP_NONEXTRA read; GO shieldNodeTalent('hp', ...) reads
+    // input.total.hp), so scaling: 'hp*' is already total. C1's extra-mine
+    // count and C4's coordinated hit are plain ATK/HP-scaled hits (see their
+    // notes), and C6 is a flat DMG bonus (see constellation note).
     features: [
         new FeatureDamageNormal({
             name: 'normal_hit_1',
@@ -364,6 +375,11 @@ export const Kirara = new DbObjectChar({
                 }),
             ],
         }),
+        // C2 party shield: 40% of the skill's max shield (talent
+        // Momoka_Constellation_2 paramList[0] = 0.4; game multiplies
+        // ShieldHPRatio_Max/ShieldHPConst_Max into ShieldHPRatio_Constellation
+        // in Avatar_Momoka_Constellation_2_ExtraGrassShield). Same HP-scaled
+        // shield path as above: scaling 'hp*' is already total, no params.
         new FeatureShield({
             name: 'kirara_party_shield',
             category: 'skill',
@@ -424,6 +440,11 @@ export const Kirara = new DbObjectChar({
                 }),
             ],
         }),
+        // C1 extra Cat Grass Cardamom: game counts floor(Max HP / 8000), cap 4
+        // (Avatar_Momoka_Constellation_1 onAbilityStart reads FIGHT_PROP_MAX_HP
+        // (total) into Extra_MineCount_Cache; talent Momoka_Constellation_1
+        // paramList[0] = 0.000125 = 1/8000; GO thresholds on input.total.hp).
+        // makeStatTotalItem('hp', ...) already reads the total: no params.
         new FeatureDamageBurst({
             name: 'kirara_cat_grass_explosion_extra_dmg',
             element: 'dendro',
@@ -437,6 +458,11 @@ export const Kirara = new DbObjectChar({
             ],
             condition: new ConditionConstellation({constellation: 1}),
         }),
+        // C4 coordinated attack: 200% of ATK as Dendro DMG, counted as burst
+        // (Avatar_Momoka_Constellation_AddAttack attackProperty damagePercentage
+        // Constellation4_Mine_Damage; talent Momoka_Constellation_4 paramList[0]
+        // = 2; GO prods input.total.atk). A plain ATK-scaled hit reads the
+        // total by default: no params.
         new FeatureDamageBurst({
             name: 'kirara_coordinated_dmg',
             element: 'dendro',
@@ -450,6 +476,11 @@ export const Kirara = new DbObjectChar({
             condition: new ConditionConstellation({constellation: 4}),
         }),
     ],
+    // A1 stacked shields (20% of the skill shield per Reinforced Packaging
+    // stack; ProudSkill 6121 paramList[0] = 0.2 = Momoka_PermanentSkill_1_PerShield
+    // in Momoka_ElementalArt_Shield_Handler) and the A4 text rows below are
+    // display only (text_percent / text_percent_skill / text_percent_burst):
+    // no stat read, no channels. A4's mechanical bonuses are the post-effects.
     conditions: [
         new ConditionStatic({
             title: 'talent_name.kirara_bewitching_betwitching_tails',
@@ -476,13 +507,23 @@ export const Kirara = new DbObjectChar({
         }),
     ],
     postEffects: [
+        // Game data: Avatar_Momoka_PermanentSkill_2_Handler (ModifyDamageMixin,
+        // openConfig Momoka_PermanentSkill_2 = ProudSkill 612201 params
+        // [0.004, 0.003]) scales ElementalArtDMGRatio x FIGHT_PROP_MAX_HP
+        // (total) for Elemental_Art tags. KQM Kirara has no stat-interaction
+        // test; GO reads input.total.hp. Total read.
         new PostEffectStatsHP({
+            reads: CHANNELS.TOTAL,
             percent: new StatTable('dmg_skill_kirara', [TalentValues.A4SkillBonus / 1000]),
             conditions: [
                 new ConditionAscensionChar({ascension: 4}),
             ],
         }),
+        // Game data: same handler's second ModifyDamageMixin scales
+        // ElementalBurstDMGRatio x FIGHT_PROP_MAX_HP (total) for Elemental_Burst;
+        // same evidence as dmg_skill_kirara above. GO reads input.total.hp.
         new PostEffectStatsHP({
+            reads: CHANNELS.TOTAL,
             percent: new StatTable('dmg_burst_kirara', [TalentValues.A4BurstBonus / 1000]),
             conditions: [
                 new ConditionAscensionChar({ascension: 4}),
@@ -491,6 +532,8 @@ export const Kirara = new DbObjectChar({
     ],
     constellation: new DbObjectConstellation([
         {
+            // C1 display only (text_value_hp = 8000): the mechanical mine count
+            // is the burst feature above, which already reads total HP.
             conditions: [
                 new ConditionStatic({
                     title: 'talent_name.kirara_material_circulation',
@@ -502,6 +545,8 @@ export const Kirara = new DbObjectChar({
             ],
         },
         {
+            // C2 display only (text_percent_shield = 40): the mechanical party
+            // shield is the skill feature above, HP-scaled (total), no params.
             conditions: [
                 new ConditionStatic({
                     title: 'talent_name.kirara_perfectly_packaged',
@@ -522,6 +567,8 @@ export const Kirara = new DbObjectChar({
             ],
         },
         {
+            // C4 display only (text_percent_atk = 200): the mechanical hit is
+            // the burst feature above, ATK-scaled (total), no params.
             conditions: [
                 new ConditionStatic({
                     title: 'talent_name.kirara_steed_of_skanda',
@@ -542,10 +589,17 @@ export const Kirara = new DbObjectChar({
             ],
         },
         {
+            // C6 flat 12% all-elemental DMG to nearby party (talent
+            // Momoka_Constellation_6 paramList[0] = 0.12; game writes
+            // Actor_*AddHurtDelta without Extra in
+            // UNIQUE_Avatar_Momoka_Constellation_6_ElemDamageUp_Effect).
+            // Conditions write premod: default confirmed, no params. GO puts
+            // it under teamBuff.premod.
             conditions: [
                 new ConditionBoolean({
                     name: 'kirara_countless_sights_to_see',
                     serializeId: 1,
+                    receivers: RECEIVERS.TEAM,
                     title: 'talent_name.kirara_countless_sights_to_see',
                     description: 'talent_descr.kirara_countless_sights_to_see',
                     stats: {
@@ -561,25 +615,5 @@ export const Kirara = new DbObjectChar({
             ],
         },
     ]),
-    partyData: {
-        conditions: [
-            new ConditionBoolean({
-                name: 'party.kirara_countless_sights_to_see',
-                serializeId: 1,
-                title: 'talent_name.kirara_countless_sights_to_see',
-                description: 'talent_descr.kirara_countless_sights_to_see',
-                rotation: 'party',
-                info: {constellation: 6},
-                stats: {
-                    dmg_anemo: TalentValues.C6ElementalBonus,
-                    dmg_geo: TalentValues.C6ElementalBonus,
-                    dmg_pyro: TalentValues.C6ElementalBonus,
-                    dmg_electro: TalentValues.C6ElementalBonus,
-                    dmg_hydro: TalentValues.C6ElementalBonus,
-                    dmg_cryo: TalentValues.C6ElementalBonus,
-                    dmg_dendro: TalentValues.C6ElementalBonus,
-                },
-            }),
-        ],
-    },
+    retiredParty: [[1, 'checkbox']],
 });

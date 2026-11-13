@@ -22,6 +22,7 @@ import { StatTable } from "../../classes/StatTable";
 import { ValueTable } from "../../classes/ValueTable";
 import { charTables } from "../generated/CharTables";
 import { charTalentTables } from "../generated/CharTalentTables";
+import { percent } from "../Params";
 
 const Talents = new DbObjectTalents({
     attack: {
@@ -146,6 +147,16 @@ const Talents = new DbObjectTalents({
         ],
     },
 });
+
+const A1Heal = charTalentTables.Sayu.a1.p1;
+const A1MasteryRatio = charTalentTables.Sayu.a1.p2;
+const A1MasteryRatioPercent = percent(charTalentTables.Sayu.a1.p2);
+const A4RangeRatio = charTalentTables.Sayu.a4.p1;
+const A4RangeRatioPercent = percent(charTalentTables.Sayu.a4.p1);
+const C2DmgBonus = percent(charTalentTables.Sayu.c2.p1);
+const C2MaxStacks = charTalentTables.Sayu.c2.p2;
+const C6Heal = percent(charTalentTables.Sayu.c6.p3);
+const C6HealMax = charTalentTables.Sayu.c6.p4;
 
 export const Sayu = new DbObjectChar({
     name: 'sayu',
@@ -408,8 +419,8 @@ export const Sayu = new DbObjectChar({
                 new FeatureMultiplier({
                     scaling: 'mastery*',
                     source: 'constellation6',
-                    values: new ValueTable([300]),
-                    capValue: new ValueTable([6000]),
+                    values: new ValueTable([C6Heal]),
+                    capValue: new ValueTable([C6HealMax]),
                     condition: new ConditionConstellation({constellation: 6}),
                 }),
             ],
@@ -422,8 +433,8 @@ export const Sayu = new DbObjectChar({
                     scaling: 'mastery*',
                     source: 'ascension1',
                     values: [
-                        new ValueTable([120]),
-                        new ValueTable([300]),
+                        new ValueTable([A1MasteryRatioPercent]),
+                        new ValueTable([A1Heal]),
                     ]
                 }),
             ],
@@ -435,15 +446,15 @@ export const Sayu = new DbObjectChar({
             multipliers: [
                 new FeatureMultiplierList({
                     leveling: 'char_skill_burst',
-                    scalingMultiplier: 0.2,
+                    scalingMultiplier: A4RangeRatio,
                     scalingSource: 'ascension4',
                     values: Talents.getList('burst.sayu_mujimuji_heal'),
                 }),
                 new FeatureMultiplier({
                     scaling: 'mastery*',
                     source: 'constellation6',
-                    values: new ValueTable([300]),
-                    capValue: new ValueTable([6000]),
+                    values: new ValueTable([C6Heal]),
+                    capValue: new ValueTable([C6HealMax]),
                     condition: new ConditionConstellation({constellation: 6}),
                 }),
             ],
@@ -455,8 +466,8 @@ export const Sayu = new DbObjectChar({
             title: 'talent_name.sayu_someone_more_capable',
             description: 'talent_descr.sayu_someone_more_capable',
             stats: {
-                text_value: 300,
-                text_value_hp: 1.2,
+                text_value: A1Heal,
+                text_value_hp: A1MasteryRatio,
             },
             info: {ascension: 1},
             subConditions: [
@@ -467,7 +478,7 @@ export const Sayu = new DbObjectChar({
             title: 'talent_name.sayu_no_work_today',
             description: 'talent_descr.sayu_no_work_today',
             stats: {
-                text_percent_hp: 20,
+                text_percent_hp: A4RangeRatioPercent,
             },
             info: {ascension: 4},
             subConditions: [
@@ -488,7 +499,7 @@ export const Sayu = new DbObjectChar({
             conditions: [
                 new Condition({
                     stats: {
-                        dmg_skill_sayu_press: 3.3,
+                        dmg_skill_sayu_press: C2DmgBonus,
                     },
                 }),
                 new ConditionStacks({
@@ -496,7 +507,7 @@ export const Sayu = new DbObjectChar({
                     serializeId: 1,
                     title: 'talent_name.sayu_egress_prep',
                     description: 'talent_descr.sayu_egress_prep',
-                    maxStacks: 20,
+                    maxStacks: C2MaxStacks,
                     dropdownClass: 'stack-percent',
                     titleFunc: function(value) {
                         if (value) {
@@ -511,7 +522,7 @@ export const Sayu = new DbObjectChar({
                         }
                     },
                     stats: [
-                        new StatTable('dmg_skill_sayu_hold', [3.3]),
+                        new StatTable('dmg_skill_sayu_hold', [C2DmgBonus]),
                     ],
                 }),
             ],

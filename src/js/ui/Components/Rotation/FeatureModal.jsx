@@ -11,6 +11,14 @@ import { Feature2 } from "../../../classes/Feature2";
 
 let lang = new Lang();
 
+/**
+ * The first hit of a member's dropdown items.
+ */
+function firstFeature(items) {
+    let item = items.find((item) => !item.isCaption);
+    return item ? item.value : '';
+}
+
 const reactionRadios = [
     {value: 0, title: lang.get('feature_reaction.none')},
     {value: 1, title: lang.get('feature_reaction.melt')},
@@ -22,10 +30,11 @@ export class RotationFeatureModal extends React.PureComponent {
     constructor(props) {
         super(props);
 
-        this.featureItems = [];
+        this.members = [];
 
         this.state = {
             isVisible: false,
+            charId: 0,
             feature: '',
             reaction: 0,
             count: 1,
@@ -33,36 +42,80 @@ export class RotationFeatureModal extends React.PureComponent {
     }
 
     show(data, saveCallback) {
-        this.featureItems = Feature2.buildDropdown(this.props.build, {checkCallback: (feat) => {
-            if (!feat.usedInRotation()) return false;
-            if (!DB.Features.Rotation.getByName(feat.getName())) return false;
-            return true;
-        }});
-
+        this.members = this.buildMembers(data);
         this.saveCallback = saveCallback;
 
-        let selectedFeature = data.feature || '';
-        if (!selectedFeature) {
-            for (let item of this.featureItems) {
-                if (item.isCaption) continue;
-                selectedFeature = item.value;
-                break;
-            }
+        // The edited hit's member, otherwise the viewed member.
+        let member = this.memberOf(data.feature ? data.charId : this.props.build.char.getId()) || this.members[0];
+        let feature = '';
+        if (member) {
+            feature = data.feature && member.value == data.charId ? data.feature : firstFeature(member.items);
         }
 
         this.setState({
             isVisible: true,
             data: data,
-            feature: selectedFeature,
+            charId: member ? member.value : 0,
+            feature: feature,
             reaction: data.reaction || 0,
             count: data.count || 1,
         });
     }
 
+    /**
+     * @param {number} charId
+     * @returns {Object|undefined} the member's dropdown item, with its hits
+     */
+    memberOf(charId) {
+        return this.members.find((item) => item.value == charId);
+    }
+
+    /**
+     * The members of the team that have hits, the viewed member first, each
+     * with its hits: the dropdown of hits lists the selected member's.
+     *
+     * @param {Object} edited the edited hit: its feature is listed even when
+     *     new hits are not offered it (Feature2.isRotationChoice)
+     */
+    buildMembers(edited) {
+        let build = this.props.build;
+        let members = [build].concat(build.team.getMembers().filter((member) => member !== build));
+        let result = [];
+
+        for (let member of members) {
+            let view = this.props.app.teamView().member(member);
+            let data = view.getBuildData();
+            let features = {};
+            for (let feat of member.getFeaturesList({ignoreRotation: true})) {
+                if (!feat.checkConditions(data) || !feat.usedInRotation()) continue;
+                if (!DB.Features.Rotation.getByName(feat.getName())) continue;
+                let isEdited = edited.feature == feat.getName() && edited.charId == member.char.getId();
+                if (!feat.isRotationChoice() && !isEdited) continue;
+                features[feat.getName()] = feat;
+            }
+
+            let items = Feature2.buildDropdown(view, {features});
+            if (!firstFeature(items)) continue;
+
+            let char = member.char.get();
+            result.push({
+                value: char.getId(),
+                text: lang.get(char.getName()),
+                textIcons: [' sprite sprite-24 ' + char.getIcon()],
+                items: items,
+            });
+        }
+
+        return result;
+    }
+
     handleSave() {
-        if (this.saveCallback) {
+        let member = this.memberOf(this.state.charId);
+        let selected = member && member.items.find((item) => !item.isCaption && item.value == this.state.feature);
+        if (this.saveCallback && selected) {
             this.saveCallback({
-                feature: this.state.feature,
+                charId: member.value,
+                feature: selected.value,
                 reaction: this.state.reaction,
                 count: this.state.count,
             });
@@ -73,6 +126,10 @@ export class RotationFeatureModal extends React.PureComponent {
 
     handleClose() {
         this.setState({isVisible: false});
+    }
+
+    handleMember(member) {
+        this.setState({charId: member.value, feature: firstFeature(member.items)});
     }
 
     handleFeature(value) {
@@ -88,6 +145,8 @@ export class RotationFeatureModal extends React.PureComponent {
     }
 
     render() {
+        let member = this.memberOf(this.state.charId);
+
         return (
             <DialogContainer
                 addClass="rotation-feature-modal"
@@ -96,14 +155,20 @@ export class RotationFeatureModal extends React.PureComponent {
                 title={lang.get('modal_window.rotation_feature')}
                 closeCallback={() => this.handleClose()}
             >
-                <ControlsBar>
+                {member ? <ControlsBar>
+                    <Dropdown
+                        barClass="rotation-member"
+                        items={this.members}
+                        selected={member.value}
+                        onChange={(item) => this.handleMember(item)}
+                    />
                     <Dropdown
                         barClass="resizable"
-                        items={this.featureItems}
+                        items={member.items}
                         selected={this.state.feature}
                         onChange={(item) => this.handleFeature(item.value)}
                     />
-                </ControlsBar>
+                </ControlsBar> : null}
                 <div className="line">
                     <RadioList
                         items={reactionRadios}

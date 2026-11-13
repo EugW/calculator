@@ -1,11 +1,11 @@
-import { CalcSet } from "../classes/CalcSet";
+// The database joins this worker's module graph; see webpack.config.js.
+import "../db";
+import { deserializeWorkerMember } from "../classes/Team";
 import { ArtifactGenerator } from "../classes/Generator/Artifacts";
 import { ArtifactGeneratorKQM } from "../classes/Generator/ArtifactsKQM";
 
-importScripts('db.js?'+ __VERSION__);
-
 self.onmessage = function(input) {
-    input.data.build = CalcSet.deserialize(input.data.build);
+    input.data.build = deserializeWorkerMember(input.data.build);
     input.data.progressCallback = (progress) => {
         self.postMessage({progress: progress});
     };

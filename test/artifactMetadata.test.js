@@ -150,7 +150,6 @@ test('v3 framing round-trips embedded artifacts and rejects truncated/invalid su
     const build = new CalcSet();
     build.setChar(DB.Chars.getFirst());
     build.setWeapon(DB.Weapons.get(DB.Chars.getFirst().weapon).getFirst());
-    build.setEnemy(DB.Enemies.getFirst().getFirst());
     build.setArtifact(art);
     const packed = Serializer.pack(build);
     expect(CalcSet.deserialize(Serializer.unpack(packed)).getArtifacts().goblet.getMetadata()).toEqual(art.getMetadata());

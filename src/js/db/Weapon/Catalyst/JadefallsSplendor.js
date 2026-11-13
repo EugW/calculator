@@ -2,14 +2,27 @@ import { ConditionBoolean } from "../../../classes/Condition/Boolean";
 import { ConditionBooleanRefine } from "../../../classes/Condition/Boolean/Refine";
 import { DbObjectWeapon } from "../../../classes/DbObject/Weapon";
 import { FeaturePostEffectValue } from "../../../classes/Feature2/PostEffectValue";
+import { CHANNELS } from "../../../classes/PostEffect/Channels";
 import { PostEffectStatsHPJadefall } from "../../../classes/PostEffect/Stats/HP/Jadefall";
 import { StatTable } from "../../../classes/StatTable";
 import { weaponStatTables } from "../../generated/WeaponStatTables";
+import { weaponPassiveTables } from "../../generated/WeaponPassiveTables";
+import { percent, times } from "../../Params";
 
 const weaponPost = new PostEffectStatsHPJadefall({
+    // Game data: Weapon_Catalyst_Morax computes CurBuff from FIGHT_PROP_MAX_HP
+    // (total) times HPConvertRatio (affix 114505), and
+    // UNIQUE_Weapon_Catalyst_Morax_Buff writes Actor_*AddHurtDelta (no
+    // "Extra"): premod. GO reads input.total.hp and writes the bonus under
+    // premod (its comment guesses a premod read, left as total for formatting).
+    // KQM has no chain test for this weapon. Declared reads: TOTAL, writes:
+    // PREMOD. No ability writes extra HP, so the total read changes no number
+    // today.
+    reads: CHANNELS.TOTAL,
+    writes: CHANNELS.PREMOD,
     levelSetting: 'weapon_refine',
-    percent: new StatTable('dmg_value', [0.0003, 0.0005, 0.0007, 0.0009, 0.0011]),
-    statCap: new StatTable('', [12, 20, 28, 36, 44]),
+    percent: new StatTable('dmg_value', percent(times(weaponPassiveTables.JadefallsSplendor.p1, 0.001))),
+    statCap: new StatTable('', percent(weaponPassiveTables.JadefallsSplendor.p2)),
     conditions: [
         new ConditionBoolean({name: 'weapon_jadefalls_splendor'}),
     ],
@@ -30,8 +43,8 @@ export const JadefallsSplendor = new DbObjectWeapon({
             title: 'talent_name.weapon_jadefalls_splendor',
             description: 'talent_descr.weapon_jadefalls_splendor',
             stats: [
-                new StatTable('text_percent', [0.3, 0.5, 0.7, 0.9, 1.1]),
-                new StatTable('text_percent_max', [12, 20, 28, 36, 44]),
+                new StatTable('text_percent', percent(weaponPassiveTables.JadefallsSplendor.p1)),
+                new StatTable('text_percent_max', percent(weaponPassiveTables.JadefallsSplendor.p2)),
             ],
         }),
     ],
@@ -39,6 +52,7 @@ export const JadefallsSplendor = new DbObjectWeapon({
         weaponPost,
     ],
     features: [
+        // Display of the classified post-effect above: no stat read of its own.
         new FeaturePostEffectValue({
             category: 'weapon',
             name: 'dmg_bonus',

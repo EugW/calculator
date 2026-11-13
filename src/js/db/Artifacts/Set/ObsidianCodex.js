@@ -1,7 +1,10 @@
 import { ArtifactSet } from "../../../classes/ArtifactSet";
 import { ConditionBoolean } from "../../../classes/Condition/Boolean";
 import { ConditionBooleanNightSoul } from "../../../classes/Condition/Boolean/NightSoul";
+import { ConditionRetired } from "../../../classes/Condition/Retired";
 import { ConditionStatic } from "../../../classes/Condition/Static";
+import { artifactSetTables } from "../../generated/ArtifactSetTables";
+import { percent } from "../../Params";
 
 export const ObsidianCodex = new ArtifactSet({
     serializeId: 53,
@@ -28,7 +31,7 @@ export const ObsidianCodex = new ArtifactSet({
                     title: 'set_bonus.obsidian_codex_2',
                     description: 'set_descr.obsidian_codex_2',
                     stats: {
-                        dmg_all: 15,
+                        dmg_all: percent(artifactSetTables.ObsidianCodex.pc2.p1),
                     },
                     subConditions: [
                         new ConditionBooleanNightSoul(),
@@ -40,16 +43,18 @@ export const ObsidianCodex = new ArtifactSet({
         {},
         {
             conditions: [
-                new ConditionBoolean({
-                    name: 'set.obsidian_codex_4',
-                    serializeId: 42,
+                // Its own toggle (42) until the set-bonus profile: the bonus
+                // follows the character's Nightsoul's Blessing, a member state.
+                new ConditionRetired({serializeId: 42, type: 'checkbox'}),
+                new ConditionStatic({
                     title: 'set_bonus.obsidian_codex_4',
                     description: 'set_descr.obsidian_codex_4',
                     stats: {
-                        crit_rate: 40,
+                        crit_rate: percent(artifactSetTables.ObsidianCodex.pc4.p2),
                     },
                     subConditions: [
                         new ConditionBooleanNightSoul(),
+                        new ConditionBoolean({name: 'common.nightsoul_blessing_state'}),
                     ],
                 }),
             ],

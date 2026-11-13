@@ -43,6 +43,27 @@ function TabContent(props) {
     );
 }
 
+/**
+ * Modes of a tab, shown as tabs under its header.
+ *
+ * @param {Object} props {items: [{value, title}], selected, onChange(value)}
+ */
+export function TabModes(props) {
+    return (
+        <div className="tab-modes">
+            {props.items.map((item) => (
+                <div
+                    key={item.value}
+                    className={'tab-mode' + (item.value === props.selected ? ' active' : '')}
+                    onClick={() => props.onChange(item.value)}
+                >
+                    {item.title}
+                </div>
+            ))}
+        </div>
+    );
+}
+
 export function TabDisclaimer(props) {
     return (
         <div className="tab-disclaimer">

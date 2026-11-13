@@ -1,9 +1,13 @@
 import { ArtifactSet } from "../../../classes/ArtifactSet";
+import { Condition } from "../../../classes/Condition";
 import { ConditionBoolean } from "../../../classes/Condition/Boolean";
 import { ConditionCalcMoonsign } from "../../../classes/Condition/CalcMoonsign";
 import { ConditionStatic } from "../../../classes/Condition/Static";
 import { ConditionStaticLevel } from "../../../classes/Condition/Static/Level";
 import { StatTable } from "../../../classes/StatTable";
+import { RECEIVERS } from "../../../classes/Team/Receivers";
+import { artifactSetTables } from "../../generated/ArtifactSetTables";
+import { percent } from "../../Params";
 
 export const NightOfTheSkysUnveiling = new ArtifactSet({
     serializeId: 56,
@@ -22,7 +26,7 @@ export const NightOfTheSkysUnveiling = new ArtifactSet({
                     title: 'set_bonus.night_of_the_skys_unveiling_2',
                     description: 'set_descr.night_of_the_skys_unveiling_2',
                     stats: {
-                        mastery: 80,
+                        mastery: artifactSetTables.NightOfTheSkysUnveiling.pc2.mastery,
                     },
                 })
             ],
@@ -39,9 +43,9 @@ export const NightOfTheSkysUnveiling = new ArtifactSet({
                     title: 'set_bonus.night_of_the_skys_unveiling_4',
                     description: 'set_descr.night_of_the_skys_unveiling_4_1',
                     stats: {
-                        text_crit_nascent: 15,
-                        text_crit_ascendant: 30,
-                        text_percent_lunar: 10,
+                        text_crit_nascent: percent(artifactSetTables.NightOfTheSkysUnveiling.pc4.p2),
+                        text_crit_ascendant: percent(artifactSetTables.NightOfTheSkysUnveiling.pc4.p3),
+                        text_percent_lunar: percent(artifactSetTables.NightOfTheSkysUnveiling.pc4.p4),
                     },
                 }),
                 // Crit Rate based on Moonsign level
@@ -51,11 +55,17 @@ export const NightOfTheSkysUnveiling = new ArtifactSet({
                     levelSetting: 'party_moonsign',
                     fromZero: true,
                     stats: [
-                        new StatTable('crit_rate', [0, 15, 30]),
+                        new StatTable('crit_rate', [0, percent(artifactSetTables.NightOfTheSkysUnveiling.pc4.p2), percent(artifactSetTables.NightOfTheSkysUnveiling.pc4.p3)]),
                     ],
                     subConditions: [
                         new ConditionBoolean({name: 'set.night_of_the_skys_unveiling_4'}),
                     ],
+                }),
+                new Condition({
+                    receivers: RECEIVERS.TEAM,
+                    stack: 'night_of_the_skys_unveiling_4',
+                    condition: new ConditionBoolean({name: 'set.night_of_the_skys_unveiling_4'}),
+                    stats: {dmg_reaction_lunar: percent(artifactSetTables.NightOfTheSkysUnveiling.pc4.p4)},
                 }),
             ],
         },

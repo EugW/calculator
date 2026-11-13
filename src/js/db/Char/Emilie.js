@@ -3,6 +3,7 @@ import { ConditionAnd } from "../../classes/Condition/And";
 import { ConditionAscensionChar } from "../../classes/Condition/Ascension/Char";
 import { ConditionBoolean } from "../../classes/Condition/Boolean";
 import { ConditionConstellation } from "../../classes/Condition/Constellation";
+import { ConditionEnemy } from "../../classes/Condition/Enemy";
 import { ConditionStatic } from "../../classes/Condition/Static";
 import { DbObjectChar } from "../../classes/DbObject/Char";
 import { DbObjectConstellation } from "../../classes/DbObject/Constellation";
@@ -19,9 +20,12 @@ import { FeatureMultiplierTarget } from "../../classes/Feature2/Multiplier/Targe
 import { FeaturePostEffectValue } from "../../classes/Feature2/PostEffectValue";
 import { PostEffectStatsAtk } from "../../classes/PostEffect/Stats/Atk";
 import { StatTable } from "../../classes/StatTable";
+import { RECEIVERS } from "../../classes/Team/Receivers";
 import { ValueTable } from "../../classes/ValueTable";
 import { charTables } from "../generated/CharTables";
 import { charTalentTables } from "../generated/CharTalentTables";
+import { percent } from "../Params";
+import { CHANNELS } from "../../classes/PostEffect/Channels";
 
 const Talents = new DbObjectTalents({
     attack: {
@@ -117,21 +121,31 @@ const Talents = new DbObjectTalents({
 });
 
 const TalentValues = {
-    A1Dmg: 600,
-    A4DamageBonus: 15,
-    A4DamageBonusMax: 36,
-    PassiveBurningRes: 85,
-    C1SkillBonus: 20,
-    C2DendroRes: -30,
-    C6DamageBonus: 300,
+    A1Dmg: percent(charTalentTables.Emilie.a1.p1),
+    A4DamageBonus: percent(charTalentTables.Emilie.a4.p1),
+    A4DamageBonusMax: percent(charTalentTables.Emilie.a4.p2),
+    PassiveBurningRes: percent(charTalentTables.Emilie.a0.p1),
+    C1SkillBonus: percent(charTalentTables.Emilie.c1.p2),
+    C2DendroRes: -percent(charTalentTables.Emilie.c2.p1),
+    C6DamageBonus: percent(charTalentTables.Emilie.c6.p3),
 };
 
+// A4 Rectification: +15% DMG per 1000 ATK vs Burning opponents, cap 36%.
+// Game data: Avatar_Emilie_PermanentSkill_2
+// (Avatar_Emilie_PermanentSkill_2_Attack_Handler onThinkInterval
+// SetOverrideMapValue [FIGHT_PROP_CUR_ATTACK x Ratio x 0.001, max MaxRatio]
+// into Emilie_PermanentSkill_2_Ratio; ProudSkill Emilie_PermanentSkill_2 =
+// [0.15, 0.36]) reads FIGHT_PROP_CUR_ATTACK (total). GO reads
+// input.total.atk into all_dmg_. Writes dmg_all, which has no extra lane,
+// so no writes param is needed. KQM Emilie page has no ATK-interaction test.
+// Game text ("increased DMG to Burning opponents") and GO's all_dmg_ agree
+// the generic dmg_all target is right.
 const atkBuffPost = new PostEffectStatsAtk({
-    global: 1,
+    reads: CHANNELS.TOTAL,
     percent: new StatTable('dmg_all', [TalentValues.A4DamageBonus / 1000]),
     statCap: new ValueTable([TalentValues.A4DamageBonusMax]),
     conditions: [
-        new ConditionBoolean({name: 'enemy_burning'}),
+        new ConditionEnemy({condition: new ConditionBoolean({name: 'enemy_burning'})}),
         new ConditionAscensionChar({ascension: 4}),
     ],
 });
@@ -265,6 +279,12 @@ export const Emilie = new DbObjectChar({
                 }),
             ],
         }),
+        // A1 Lingering Fragrance: Cleardew Cologne, 600% of ATK. Game data:
+        // Avatar_Emilie_Talent1 (ModifyDamageMixin damagePercentageRatio =
+        // Ratio; ProudSkill Emilie_PermanentSkill_1 = [6]) sets a 600%
+        // damage ratio with no stat read; the ATK scaling is the damage
+        // formula itself. GO reads input.total.atk. Damage hits read the
+        // total and need nothing.
         new FeatureDamage({
             name: 'emilie_cleardew_cologne_dmg',
             category: 'skill',
@@ -317,7 +337,7 @@ export const Emilie = new DbObjectChar({
                 text_percent_max: TalentValues.A4DamageBonusMax,
             },
             subConditions: [
-                new ConditionBoolean({name: 'enemy_burning'}),
+                new ConditionEnemy({condition: new ConditionBoolean({name: 'enemy_burning'})}),
                 new ConditionAscensionChar({ascension: 4}),
             ],
         }),
@@ -329,6 +349,13 @@ export const Emilie = new DbObjectChar({
             },
         }),
     ],
+    // C6 Marcotte Sillage: Normal/Charged hits deal +300% of ATK as Dendro.
+    // Game data: Avatar_Emilie_Talent6 (ModifyDamageMixin damageExtra
+    // [FIGHT_PROP_CUR_ATTACK x Talent6Ratio]; AvatarTalent Emilie_Constellation_6
+    // paramList [5, 4, 3, 12], dmg = 3) reads FIGHT_PROP_CUR_ATTACK (total).
+    // GO reads input.total.atk. Damage flat bonuses read the total by
+    // construction (FeatureMultiplier scaling atk*), so no params are needed.
+    // KQM Emilie page has no ATK-interaction test.
     multipliers: [
         new FeatureMultiplier({
             scaling: 'atk*',
@@ -347,6 +374,11 @@ export const Emilie = new DbObjectChar({
     constellation: new DbObjectConstellation([
         {
             conditions: [
+                // C1 Light Fragrance Leaching: +20% skill/Cologne DMG. Game
+                // data: Avatar_Emilie_Talent1 (AvatarTalent
+                // Emilie_Constellation_1 paramList [2.9, 0.2]) applies a flat
+                // damage ratio with no stat read. Flat conditions (premod)
+                // need nothing.
                 new ConditionStatic({
                     title: 'talent_name.emilie_light_fragrance_leaching',
                     description: 'talent_descr.emilie_light_fragrance_leaching',
@@ -358,9 +390,16 @@ export const Emilie = new DbObjectChar({
         },
         {
             conditions: [
+                // C2 Lakelight Top Note: -30% Dendro RES. Game data:
+                // Avatar_Emilie_Talent2
+                // (UNIQUE_Avatar_Emilie_Talent2_GrassDown properties
+                // Actor_GrassSubHurtDelta; AvatarTalent Emilie_Constellation_2
+                // paramList [0.3, 10]) writes enemy RES with no stat read.
+                // No channel applies.
                 new ConditionBoolean({
                     name: 'emilie_lakelight_top_note',
                     serializeId: 1,
+                    receivers: RECEIVERS.TEAM,
                     title: 'talent_name.emilie_lakelight_top_note',
                     description: 'talent_descr.emilie_lakelight_top_note',
                     stats: {
@@ -412,19 +451,5 @@ export const Emilie = new DbObjectChar({
             ],
         },
     ]),
-    partyData: {
-        conditions: [
-            new ConditionBoolean({
-                name: 'party.emilie_lakelight_top_note',
-                serializeId: 1,
-                rotation: 'party',
-                title: 'talent_name.emilie_lakelight_top_note',
-                description: 'talent_descr.emilie_lakelight_top_note',
-                info: {constellation: 2},
-                stats: {
-                    enemy_res_dendro: TalentValues.C2DendroRes,
-                },
-            }),
-        ],
-    },
+    retiredParty: [[1, 'checkbox']],
 });

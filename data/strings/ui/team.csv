@@ -1,0 +1,40 @@
+category;name;rus;eng
+buffs_name;selected_receiver;Получатель эффекта;Buff recipient
+buffs_descr;selected_receiver;Выберите персонажа отряда, которому передан эффект. Выбор не меняется при смене активного персонажа.;Choose the team member who received this effect. Changing the on-field character does not change this selection.
+tab_header;team;Отряд;Team
+team;saved_build;Сохранённый;Saved build
+team;enka;Enka;Enka
+team;remove;Убрать;Remove
+team;reset;Очистить отряд;Reset team
+team;reset_confirm;Вы действительно хотите сбросить весь отряд: персонажей, противника, ротацию и все настройки отряда?;Are you sure you want to reset the whole team: its members, the enemy, the rotation and all team settings?
+team;empty;Пустой слот;Empty slot
+team;slot;Слот;Slot
+team;slot_empty;пусто;empty
+team;slot_now;сейчас;now
+team;load_to_slot;Загрузить персонажа в слот;Load the character into slot
+team;load_full;Загрузить целиком: персонаж с его противником и дополнительными эффектами. Отряд будет заменён;Load in full: the character with its enemy and additional buffs. Replaces the team
+team;confirm_load_full;Отряд будет заменён этим персонажем с его противником и дополнительными эффектами. Продолжить?;The team will be replaced with this character, its enemy and its additional buffs. Do you want to continue?
+team;load_other_slot;Этот персонаж уже в другом слоте отряда;This character is in another slot of the team
+team;confirm_replace;Персонаж в этом слоте будет заменён. Продолжить?;The character in this slot will be replaced. Do you want to continue?
+team;level;Ур.;Lv.
+team;on_field;На поле;On-field
+team;link_placeholder;Ссылка на персонажа или отряд;Character or team link
+team;link_load;Загрузить;Load
+team;link_invalid;Не удалось прочитать ссылку;The link could not be read
+team;party;Настройки отряда;Party setup
+team;stack_title;Эффекты, которые не складываются;Effects that do not stack
+team;stack_descr;Каждый из этих эффектов даёт только один персонаж отряда. Выберите, кто именно.;Only one team member supplies each of these effects. Choose which one.
+team;stack_none;Никто;Nobody
+team;received;От отряда;From the team
+team;received_descr;Как каждый персонаж отряда меняет характеристики выбранного персонажа, включая резонанс и другие эффекты состава. Эффекты, которые меняют урон напрямую, здесь не видны.;How each teammate changes this character's stats, resonance and other team composition effects included. Effects that change damage directly do not show here.
+team;received_none;Не меняет характеристики;Changes no stats
+team;saved_teams;Сохранённые отряды;Saved teams
+team;save_placeholder;Название отряда;Team name
+team;saved_empty;Нет сохранённых отрядов;No saved teams
+team;edit_name;Название отряда;Team name
+team;confirm_load;Заменить текущий отряд сохранённым?;Replace the current team with this saved team?
+team;confirm_overwrite;Перезаписать сохранённый отряд текущим?;Overwrite this saved team with the current team?
+team;confirm_delete;Удалить сохранённый отряд?;Delete this saved team?
+team;condition_receivers;Значения для персонажей;Values by recipient
+team;condition_override;Свое значение;Override
+team;condition_inherit;Значение источника;Source value

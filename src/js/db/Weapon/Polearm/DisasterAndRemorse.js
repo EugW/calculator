@@ -5,9 +5,11 @@ import { ConditionStaticRefine } from "../../../classes/Condition/Static/Refine"
 import { DbObjectWeapon } from "../../../classes/DbObject/Weapon";
 import { StatTable } from "../../../classes/StatTable";
 import { weaponStatTables } from "../../generated/WeaponStatTables";
+import { weaponPassiveTables } from "../../generated/WeaponPassiveTables";
+import { percent, times } from "../../Params";
 
-const dmgBonus = [40, 50, 60, 70, 80];
-const hexereiBonus = [30, 37.5, 45, 52.5, 60];
+const dmgBonus = percent(weaponPassiveTables.DisasterAndRemorse.p3);
+const hexereiBonus = percent(times(weaponPassiveTables.DisasterAndRemorse.p3, weaponPassiveTables.DisasterAndRemorse.p6));
 
 export const DisasterAndRemorse = new DbObjectWeapon({
     name: 'disaster_and_remorse',

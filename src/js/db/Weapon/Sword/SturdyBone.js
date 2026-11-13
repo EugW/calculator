@@ -6,6 +6,8 @@ import { FeatureMultiplierTarget } from "../../../classes/Feature2/Multiplier/Ta
 import { StatTable } from "../../../classes/StatTable";
 import { ValueTable } from "../../../classes/ValueTable";
 import { weaponStatTables } from "../../generated/WeaponStatTables";
+import { weaponPassiveTables } from "../../generated/WeaponPassiveTables";
+import { percent } from "../../Params";
 
 export const SturdyBone = new DbObjectWeapon({
     name: 'sturdy_bone',
@@ -22,7 +24,7 @@ export const SturdyBone = new DbObjectWeapon({
             title: 'talent_name.weapon_sturdy_bone',
             description: 'talent_descr.weapon_sturdy_bone',
             stats: [
-                new StatTable('text_percent_dmg', [16, 20, 24, 28, 32]),
+                new StatTable('text_percent_dmg', percent(weaponPassiveTables.SturdyBone.p2)),
             ],
         }),
     ],
@@ -30,7 +32,7 @@ export const SturdyBone = new DbObjectWeapon({
         new FeatureMultiplier({
             leveling: 'weapon_refine',
             source: 'weapon',
-            values: new ValueTable([16, 20, 24, 28, 32]),
+            values: new ValueTable(percent(weaponPassiveTables.SturdyBone.p2)),
             condition: new ConditionBoolean({name: 'weapon_sturdy_bone'}),
             target: new FeatureMultiplierTarget({
                 damageTypes: ['normal'],

@@ -2,10 +2,12 @@ import { Condition } from "../../classes/Condition";
 import { ConditionAnd } from "../../classes/Condition/And";
 import { ConditionAscensionChar } from "../../classes/Condition/Ascension/Char";
 import { ConditionBoolean } from "../../classes/Condition/Boolean";
+import { ConditionOnField } from "../../classes/Condition/Field";
+import { ConditionTeam } from "../../classes/Condition/Team";
 import { ConditionBooleanValue } from "../../classes/Condition/Boolean/Value";
 import { ConditionConstellation } from "../../classes/Condition/Constellation";
-import { ConditionNumberTalent } from "../../classes/Condition/Number/Talent";
-import { ConditionStacksLevels } from "../../classes/Condition/Stacks/Levels";
+import { ConditionReceiver } from "../../classes/Condition/Receiver";
+import { ConditionStacks } from "../../classes/Condition/Stacks";
 import { ConditionStatic } from "../../classes/Condition/Static";
 import { ConditionStaticLevel } from "../../classes/Condition/Static/Level";
 import { DbObjectChar } from "../../classes/DbObject/Char";
@@ -24,10 +26,13 @@ import { FeatureMultiplierStatic } from "../../classes/Feature2/Multiplier/Stati
 import { FeaturePostEffectValue } from "../../classes/Feature2/PostEffectValue";
 import { FeatureStatic } from "../../classes/Feature2/Static";
 import { PostEffectStatsRecharge } from "../../classes/PostEffect/Stats/Recharge";
+import { CHANNELS } from "../../classes/PostEffect/Channels";
 import { StatTable } from "../../classes/StatTable";
 import { ValueTable } from "../../classes/ValueTable";
+import { RECEIVERS } from "../../classes/Team/Receivers";
 import { charTables } from "../generated/CharTables";
 import { charTalentTables } from "../generated/CharTalentTables";
+import { percent, times } from "../Params";
 
 const Talents = new DbObjectTalents({
     attack: {
@@ -125,17 +130,25 @@ const Talents = new DbObjectTalents({
     },
 });
 
-const A1ActiveHeal = 120;
-const A4SkillBurstPerEnergyRecharge = 35;
+const A1ActiveHeal = percent(charTalentTables.Alyosha.a1.p1);
+const A4SkillBurstPerEnergyRecharge = times(percent(charTalentTables.Alyosha.a4.p1), 100);
 const A4SkillBurstBonusCap = 70;
-const PassiveStellarConductBonus = 20;
-const C1Energy = 15;
-const C1Cooldown = 18;
-const C2BurstDurationExtension = 6;
-const C4LowestHpHeal = 60;
-const C6Mastery = 100;
+const A4SkillBurstPerEnergyRechargeText = percent(charTalentTables.Alyosha.a4.p1);
+const PassiveStellarConductBonus = percent(charTalentTables.Alyosha.a0.p1);
+const C1Energy = charTalentTables.Alyosha.c1.p1;
+const C1Cooldown = charTalentTables.Alyosha.c1.p2;
+const C2BurstDurationExtension = charTalentTables.Alyosha.c2.p1;
+const C4LowestHpHeal = percent(charTalentTables.Alyosha.c4.p1);
+const C6Mastery = charTalentTables.Alyosha.c6.p1;
 
 const a4SkillBurstPost = new PostEffectStatsRecharge({
+    // Game data: Avatar_Alyosha_PermanentSkill_2
+    // (UNIQUE_Alyosha_PermanentSkill_2_Buff, ModifyDamageMixin) reads
+    // FIGHT_PROP_CHARGE_EFFICIENCY (total), unlike Raiden's A4 which reads
+    // FIGHT_PROP_NONEXTRA_CHARGE_EFFICIENCY. GO reads input.total.enerRech_.
+    // KQM has no Alyosha interaction test. No writes param: dmg_skill and
+    // dmg_burst have no extra lane.
+    reads: CHANNELS.TOTAL,
     percent: [
         new StatTable('dmg_skill', [A4SkillBurstPerEnergyRecharge]),
         new StatTable('dmg_burst', [A4SkillBurstPerEnergyRecharge]),
@@ -147,8 +160,6 @@ const a4SkillBurstPost = new PostEffectStatsRecharge({
 const precisionStats = () => [
     Talents.getAlias('skill.alyosha_hunters_precision_atk_bonus', 'atk_percent'),
 ];
-
-const precisionMastery = () => new StatTable('mastery', [0, C6Mastery]);
 
 export const Alyosha = new DbObjectChar({
     name: 'alyosha',
@@ -364,20 +375,18 @@ export const Alyosha = new DbObjectChar({
             },
             condition: new ConditionConstellation({constellation: 3}),
         }),
-        new ConditionStacksLevels({
+        new ConditionStacks({
             name: 'alyosha_hunters_precision',
             serializeId: 1,
             title: 'talent_name.alyosha_hunters_precision',
             description: 'talent_descr.alyosha_hunters_precision',
             rotation: 'self',
-            levelSetting: 'char_skill_elemental',
             maxStacks: settings => settings.char_constellation >= 6 ? 2 : 1,
-            stats: precisionStats(),
-            realStats: precisionMastery(),
         }),
         new ConditionBoolean({
             name: 'alyosha_radiance_stellarconduct',
             serializeId: 2,
+            receivers: RECEIVERS.TEAM,
             title: 'talent_name.alyosha_into_the_fray',
             description: 'talent_descr.alyosha_into_the_fray',
             info: {special: true},
@@ -386,11 +395,55 @@ export const Alyosha = new DbObjectChar({
                 allowed_stellarconduct: 1,
             },
             subConditions: [
-                new ConditionBoolean({name: 'polestar_field'}),
+                new ConditionTeam({condition: new ConditionBoolean({name: 'polestar_field'})}),
             ],
+        }),
+        // Hunter's Mark grants Precision to every member, including Alyosha,
+        // but its bonuses apply only while that member is on the field.
+        // Keep the saved stack control independent of the receiving member.
+        new ConditionStaticLevel({
+            isHidden: true,
+            receivers: RECEIVERS.TEAM,
+            levelSetting: 'char_skill_elemental',
+            stats: precisionStats(),
+            condition: new ConditionAnd([
+                new ConditionBooleanValue({
+                    setting: 'alyosha_hunters_precision',
+                    cond: 'eq',
+                    value: 1,
+                }),
+                new ConditionReceiver({
+                    condition: new ConditionOnField(),
+                }),
+            ]),
         }),
         new ConditionStaticLevel({
             isHidden: true,
+            receivers: RECEIVERS.TEAM,
+            levelSetting: 'char_skill_elemental',
+            stats: [
+                Talents.getMulti({
+                    name: 'atk_percent',
+                    from: 'skill.alyosha_hunters_precision_atk_bonus',
+                    multi: 2,
+                }),
+                new StatTable('mastery', [C6Mastery]),
+            ],
+            condition: new ConditionAnd([
+                new ConditionConstellation({constellation: 6}),
+                new ConditionBooleanValue({
+                    setting: 'alyosha_hunters_precision',
+                    cond: 'eq',
+                    value: 2,
+                }),
+                new ConditionReceiver({
+                    condition: new ConditionOnField(),
+                }),
+            ]),
+        }),
+        new ConditionStaticLevel({
+            isHidden: true,
+            receivers: RECEIVERS.TEAM,
             levelSetting: 'alyosha_hunters_precision',
             stats: [
                 new StatTable('dmg_stellarconduct', [PassiveStellarConductBonus, PassiveStellarConductBonus * 2]),
@@ -402,7 +455,10 @@ export const Alyosha = new DbObjectChar({
                     value: 0,
                 }),
                 new ConditionBoolean({name: 'alyosha_radiance_stellarconduct'}),
-                new ConditionBoolean({name: 'polestar_field'}),
+                new ConditionTeam({condition: new ConditionBoolean({name: 'polestar_field'})}),
+                new ConditionReceiver({
+                    condition: new ConditionOnField(),
+                }),
             ]),
         }),
         new ConditionStatic({
@@ -419,7 +475,7 @@ export const Alyosha = new DbObjectChar({
             description: 'talent_descr.alyosha_suffer_the_winter_wheat_will',
             info: {ascension: 4},
             stats: {
-                text_percent: 0.35,
+                text_percent: A4SkillBurstPerEnergyRechargeText,
                 text_percent_max: A4SkillBurstBonusCap,
             },
             condition: new ConditionAscensionChar({ascension: 4}),
@@ -484,73 +540,5 @@ export const Alyosha = new DbObjectChar({
             ],
         },
     ]),
-    partyData: {
-        loadStats: {
-            settings: ['char_skill_elemental'],
-        },
-        conditions: [
-            new ConditionNumberTalent({
-                name: 'alyosha_char_skill_elemental',
-                title: 'talent_name.stats_level_skill',
-                partySetting: 'char_skill_elemental',
-                serializeId: 1,
-            }),
-            new ConditionBoolean({
-                name: 'party.alyosha_constellation_3',
-                serializeId: 5,
-                title: 'talent_name.alyosha_friendly_call',
-                description: 'talent_descr.char_constellation_skill',
-                info: {constellation: 3},
-                settings: {
-                    alyosha_char_skill_elemental_bonus: 3,
-                },
-            }),
-            new ConditionStacksLevels({
-                name: 'party.alyosha_hunters_precision',
-                serializeId: 2,
-                title: 'talent_name.alyosha_hunters_precision',
-                description: 'talent_descr.alyosha_hunters_precision',
-                rotation: 'party',
-                levelSetting: 'alyosha_char_skill_elemental',
-                maxStacks: settings => settings['party.alyosha_standard_reclaimed'] ? 2 : 1,
-                stats: precisionStats(),
-                realStats: precisionMastery(),
-            }),
-            new ConditionBoolean({
-                name: 'party.alyosha_radiance_stellarconduct',
-                serializeId: 3,
-                title: 'talent_name.alyosha_into_the_fray',
-                description: 'talent_descr.alyosha_into_the_fray',
-                info: {special: true},
-                rotation: 'party',
-                subConditions: [
-                    new ConditionBoolean({name: 'polestar_field'}),
-                ],
-            }),
-            new ConditionBoolean({
-                name: 'party.alyosha_standard_reclaimed',
-                serializeId: 4,
-                title: 'talent_name.alyosha_standard_reclaimed',
-                description: 'talent_descr.alyosha_standard_reclaimed',
-                info: {constellation: 6},
-                rotation: 'party',
-            }),
-            new ConditionStaticLevel({
-                isHidden: true,
-                levelSetting: 'party.alyosha_hunters_precision',
-                stats: [
-                    new StatTable('dmg_stellarconduct', [PassiveStellarConductBonus, PassiveStellarConductBonus * 2]),
-                ],
-                condition: new ConditionAnd([
-                    new ConditionBooleanValue({
-                        setting: 'party.alyosha_hunters_precision',
-                        cond: 'gt',
-                        value: 0,
-                    }),
-                    new ConditionBoolean({name: 'party.alyosha_radiance_stellarconduct'}),
-                    new ConditionBoolean({name: 'polestar_field'}),
-                ]),
-            }),
-        ],
-    },
+    retiredParty: [[1, 'number'], [2, 'stacks'], [3, 'checkbox'], [4, 'checkbox'], [5, 'checkbox']],
 });

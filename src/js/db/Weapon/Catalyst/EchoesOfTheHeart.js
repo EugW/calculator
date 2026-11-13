@@ -2,6 +2,8 @@ import { ConditionBooleanRefine } from "../../../classes/Condition/Boolean/Refin
 import { DbObjectWeapon } from "../../../classes/DbObject/Weapon";
 import { StatTable } from "../../../classes/StatTable";
 import { weaponStatTables } from "../../generated/WeaponStatTables";
+import { weaponPassiveTables } from "../../generated/WeaponPassiveTables";
+import { percent } from "../../Params";
 
 export const EchoesOfTheHeart = new DbObjectWeapon({
     name: 'echoes_of_the_heart',
@@ -18,7 +20,7 @@ export const EchoesOfTheHeart = new DbObjectWeapon({
             title: 'talent_name.weapon_echoes_of_the_heart',
             description: 'talent_descr.weapon_echoes_of_the_heart_1',
             stats: [
-                new StatTable('mastery', [60, 75, 90, 105, 120]),
+                new StatTable('mastery', weaponPassiveTables.EchoesOfTheHeart.p1),
             ],
         }),
         new ConditionBooleanRefine({
@@ -27,7 +29,7 @@ export const EchoesOfTheHeart = new DbObjectWeapon({
             title: 'talent_name.weapon_echoes_of_the_heart',
             description: 'talent_descr.weapon_echoes_of_the_heart_2',
             stats: [
-                new StatTable('dmg_stellarglimmer', [16, 20, 24, 28, 32]),
+                new StatTable('dmg_stellarglimmer', percent(weaponPassiveTables.EchoesOfTheHeart.p2)),
             ],
         }),
     ],

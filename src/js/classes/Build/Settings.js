@@ -36,6 +36,7 @@ export class BuildSettings {
         for (let item of arguments) {
             Object.assign(this, item);
         }
+        sumBySource(this, arguments);
         normalizeRadianceStellarGlimmer(this);
     }
 
@@ -46,6 +47,59 @@ export class BuildSettings {
      */
     getLevel(name) {
         return getSkillLevelByName(name, this);
+    }
+}
+
+/**
+ * Talent level bonuses members give (`char_skill_*_bonus_2`, see
+ * getSkillLevelByName) add up, one per source: two teammates that each give
+ * +1 give +2. Each source's bonus is kept under its source
+ * (`char_skill_elemental_bonus_2@<char ID>`, keyBySource) and the setting
+ * itself holds their sum. A source's bonus applied again replaces its own
+ * part, so evaluation rounds that apply it again never count it twice.
+ */
+const SUMMED = /^char_skill_\w+_bonus_2$/;
+const SUMMED_PART = /^(char_skill_\w+_bonus_2)@\d+$/;
+
+/**
+ * @param {Object} settings settings a condition gives
+ * @param {number} sourceId character ID of the member they come from
+ * @returns {Object} the settings, with the summed ones keyed by their source
+ */
+export function keyBySource(settings, sourceId) {
+    let result = null;
+    for (const name of Object.keys(settings || {})) {
+        if (!SUMMED.test(name)) continue;
+
+        result ||= Object.assign({}, settings);
+        result[name + '@' + sourceId] = settings[name];
+        delete result[name];
+    }
+    return result || settings;
+}
+
+/**
+ * Sum the sources' parts of every summed setting the items changed.
+ *
+ * @param {Object} settings
+ * @param {Array.<Object>} items settings just assigned
+ */
+function sumBySource(settings, items) {
+    let names = null;
+    for (const item of items) {
+        for (const name of Object.keys(item || {})) {
+            const match = SUMMED_PART.exec(name);
+            if (match) (names ||= new Set()).add(match[1]);
+        }
+    }
+    if (!names) return;
+
+    for (const name of names) {
+        let total = 0;
+        for (const key of Object.keys(settings)) {
+            if (key.startsWith(name + '@')) total += Number(settings[key]) || 0;
+        }
+        settings[name] = total;
     }
 }
 
@@ -65,33 +119,28 @@ export function normalizeRadianceStellarGlimmer(settings) {
         }
     }
 
-    // Mizuki and Vesna expose only the Swirl switch. Polestar Field is their
-    // competing Conduct state, so it receives the same persistent priority.
-    if (settings.polestar_field) {
-        if (settings.mizuki_radiance_stellarswirl) {
-            settings.mizuki_radiance_stellarswirl = false;
-        }
-        if (settings.vesna_radiance_stellarswirl) {
-            settings.vesna_radiance_stellarswirl = false;
-        }
-    }
-
     return settings;
 }
 
-export function migrateViridescentVenererSettings(settings) {
-    for (const prefix of ['set', 'set_other']) {
-        const name = prefix + '.viridescent_venerer_4';
-        const legacyName = name + '_stellarswirl';
-        if (settings[legacyName]) {
-            const elements = (settings[name] || '').split(';').filter(Boolean);
-            if (!elements.includes('cryo')) {
-                elements.push('cryo');
+/**
+ * Member settings a team toggle overrides while it is on, in an evaluation's
+ * copy: the member's own settings keep them. Mizuki and Vesna expose only
+ * the Swirl switch; Polestar Field is their competing Conduct state and wins
+ * as Conduct does.
+ *
+ * @param {Object} settings a member's settings in an evaluation, changed in place
+ * @param {Object} team the team's toggles
+ * @returns {Object} settings
+ */
+export function applyTeamOverrides(settings, team) {
+    if (team.polestar_field) {
+        for (const name of ['mizuki_radiance_stellarswirl', 'vesna_radiance_stellarswirl']) {
+            if (settings[name]) {
+                settings[name] = false;
             }
-            settings[name] = elements.join(';');
         }
-        delete settings[legacyName];
     }
+
     return settings;
 }
 

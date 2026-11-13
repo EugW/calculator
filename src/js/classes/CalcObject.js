@@ -1,6 +1,6 @@
 import { Stats } from "./Stats";
 import { Condition } from "./Condition";
-import { migrateViridescentVenererSettings, normalizeRadianceStellarGlimmer } from "./Build/Settings";
+import { normalizeRadianceStellarGlimmer } from "./Build/Settings";
 
 export class CalcObject {
     constructor() {
@@ -73,7 +73,6 @@ export class CalcObject {
 
     setSettings(data) {
         this.settings = normalizeRadianceStellarGlimmer(Object.assign({}, data));
-        migrateViridescentVenererSettings(this.settings);
     }
 
     modifySettings(data) {
@@ -110,21 +109,17 @@ export class CalcObject {
         let count = 0;
         let result = [];
 
-        let conditions = [];
-
-        if (items) {
-            for (const cond of Condition.unwrap(items, settings)) {
-                if (cond.isActive(settings)) {
-                    conditions.push(cond);
-                }
-            }
-        } else {
-            for (const cond of Condition.unwrap(this.getConditions({serialize: true}), settings)) {
-                if (cond.isActive(settings)) {
-                    conditions.push(cond);
-                }
-            }
-        }
+        // Save selected controls, independently of whether their effects are
+        // active in this team/environment. Otherwise exporting a character
+        // drops toggles when its enemy, field or teammates are absent.
+        const conditions = Condition.unwrap(items || this.getConditions({serialize: true})).filter((cond) => {
+            if (cond.isRetired?.()) return false;
+            const type = cond.getType();
+            if (type === 'custom_buffs') return true;
+            if (type === 'dropdown' || type === 'dropdown_multiple') return !!cond.getSelectedId(settings);
+            const value = settings[cond.getName()];
+            return !!value || (type === 'number' && value === 0 && cond.params.forceSettings);
+        });
 
         for (const cond of conditions) {
             if (!cond.params.serializeId) {
@@ -200,6 +195,7 @@ export class CalcObject {
     deserializeConditions(input, items) {
         let result = {};
         let count = input.shift();
+        if (!Number.isInteger(count) || count < 0 || count > input.length) return null;
         let match = {};
 
         if (items) {
@@ -247,10 +243,14 @@ export class CalcObject {
                 let value = cond.getValueById(input.shift());
                 result[cond.getName()] = value || '';
             } else if (type == 'char') {
-                result = Object.assign(result, this.deserializeChars(input));
+                const party = this.deserializeChars(input);
+                if (!party) return null;
             } else if (type == 'custom_buffs') {
-                result = Object.assign(result, this.deserializeCustomBuffs(input));
+                const custom = this.deserializeCustomBuffs(input);
+                if (!custom) return null;
+                Object.assign(result, custom);
             }
+            if (cond.isRetired?.()) delete result[cond.getName()];
         }
 
         return result;

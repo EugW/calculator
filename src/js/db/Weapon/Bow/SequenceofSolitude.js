@@ -4,6 +4,8 @@ import { FeatureDamage } from "../../../classes/Feature2/Damage";
 import { FeatureMultiplier } from "../../../classes/Feature2/Multiplier";
 import { StatTable } from "../../../classes/StatTable";
 import { weaponStatTables } from "../../generated/WeaponStatTables";
+import { weaponPassiveTables } from "../../generated/WeaponPassiveTables";
+import { percent } from "../../Params";
 
 export const SequenceofSolitude = new DbObjectWeapon({
     name: 'sequence_of_solitude',
@@ -20,7 +22,7 @@ export const SequenceofSolitude = new DbObjectWeapon({
             title: 'talent_name.weapon_sequence_of_solitude',
             description: 'talent_descr.weapon_sequence_of_solitude',
             stats: [
-                new StatTable('text_percent_dmg', [40, 50, 60, 70, 80]),
+                new StatTable('text_percent_dmg', percent(weaponPassiveTables.SequenceofSolitude.p1)),
             ],
         })
     ],
@@ -31,7 +33,7 @@ export const SequenceofSolitude = new DbObjectWeapon({
                 new FeatureMultiplier({
                     scaling: 'hp*',
                     leveling: 'weapon_refine',
-                    values: new StatTable('sequence_of_solitude_dmg', [40, 55, 70, 85, 100]),
+                    values: new StatTable('sequence_of_solitude_dmg', percent(weaponPassiveTables.SequenceofSolitude.p1)),
                 }),
             ],
         }),

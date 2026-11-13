@@ -9,6 +9,9 @@
 
 .calc-object-block .info {
     width: 100%;
+    /* Not wider than the room beside the icon, even for a long name: the
+       name is shrunk when its text overflows this width (see ObjectName). */
+    min-width: 0;
     display: flex;
     flex-direction: column;
 }

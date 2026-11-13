@@ -1,5 +1,5 @@
 import { Artifact } from "../src/js/classes/Artifact";
-import { CalcSet } from "../src/js/classes/CalcSet";
+import { BUILD_FORMAT, CalcSet } from "../src/js/classes/CalcSet";
 import { Serializer } from "../src/js/classes/Serializer";
 import { migrateArtifactPersistence } from "../src/js/classes/StorageMigration/Artifacts";
 import { StorageItemArtifacts } from "../src/js/classes/StorageItem/Artifacts";
@@ -18,6 +18,15 @@ const FEATHER_V2 = "cBxfucceeEhjDtkIrhva";
 // the corresponding v1 payload recreates a valid pre-v2 saved build.
 const CANONICAL_BUILD = "bChDmgbkkkebcefDqDmgbbbhfcBxfubbecojGdeBvkEfacBxfucceeEhjDtkIrhvacBufuddejGtkEudvhxacCbfuedebIbjFkcskHmacBufufkeeHfjDxhxiCnaaDwcbahrdEwgbELkdeefijEvebhccdeBxbcCsCtmhCvCpdCyhdahaabBcbaaabbjaaabcjaaabdiaaabeiaaabMkeaaabBCjeadaaa";
 const LEGACY_BUILD = CANONICAL_BUILD.replace(FLOWER_V2, FLOWER_V1);
+// Character format 3 drops the old enemy and party sections, preserving own
+// controls and canonical artifact identities; its rotation (format 5) names
+// its owner on every hit, and the set-bonus profile follows the artifacts.
+// The original input above stays unchanged so this still exercises the
+// affected user's historical payload.
+const CANONICAL_REENCODED = "dChDmgbkkkebcefDqDmgbbbhfcBxfubbecojGdeBvkEfacBxfucceeEhjDtkIrhvacBufuddejGtkEudvhxacCbfuedebIbjFkcskHmacBufufkeeHfjDxhxiCnaaaafahaabChBcbaaabChbjaaabChcjaaabChdiaaabCheiaaabChMkeaaabChBCjeadaaa";
+// The same build in the character format with the v1 flower: what the
+// migration rewrites. A build of the released format is left as stored.
+const LEGACY_REENCODED = CANONICAL_REENCODED.replace(FLOWER_V2, FLOWER_V1);
 
 const MALFORMED_ARTIFACT = {
     data: "!",
@@ -90,6 +99,18 @@ function buildArtifactHashes(hash) {
         .map((artifact) => artifact.getHash());
 }
 
+test("the character format preserves chosen controls when their old enemy or party is absent", () => {
+    const original = CalcSet.deserialize(Serializer.unpack(CANONICAL_BUILD));
+    expect(original.char.settings.cyno_together_we_rise).toBe(true);
+    const input = original.serialize();
+    expect(input[0]).toBe(BUILD_FORMAT);
+    const restored = CalcSet.deserialize(input);
+    expect(input).toEqual([]);
+    expect(restored.char.settings).toEqual(original.char.settings);
+    expect(Serializer.pack(restored)).toBe(CANONICAL_REENCODED);
+    expect(Serializer.pack(restored)).toBe(Serializer.pack(original));
+});
+
 test("canonicalizes the artifact pool while preserving lock, groups, metadata, and order", () => {
     expect(decodeArtifact(FLOWER_V1).getHash()).toBe(FLOWER_V2);
     expect(decodeArtifact(FEATHER_V2).getHash()).toBe(FEATHER_V2);
@@ -120,21 +141,58 @@ test("canonicalizes the artifact pool while preserving lock, groups, metadata, a
     ]);
 });
 
+test("a build of the released format stays as stored, with its enemy and its party", () => {
+    expect(LEGACY_BUILD).not.toBe(CANONICAL_BUILD);
+    const original = CalcSet.deserialize(Serializer.unpack(LEGACY_BUILD)).legacyTeam;
+    expect(original.party.length + Object.keys(original.buffs).length).toBeGreaterThan(0);
+
+    const pool = [
+        {data: FLOWER_V1, locked: false, group: [""]},
+        {data: FEATHER_V2, locked: true, group: [""]},
+    ];
+    const chars = [{title: "сайно кондакт", data: LEGACY_BUILD}];
+    const settings = {last_build: LEGACY_BUILD, unrelated_setting: "preserve me"};
+    const comparisons = [{title: "comparison", data: LEGACY_BUILD}];
+    const storage = makeStorage({
+        artifact_pool: pool,
+        char: chars,
+        settings: settings,
+        compare_items: comparisons,
+    });
+
+    const report = migrateArtifactPersistence(storage);
+
+    expect(report.writes).toEqual(["artifact_pool"]);
+    expect(readJSON(storage, "char")).toEqual(chars);
+    expect(readJSON(storage, "settings")).toEqual(settings);
+    expect(readJSON(storage, "compare_items")).toEqual(comparisons);
+
+    const kept = CalcSet.deserialize(Serializer.unpack(readJSON(storage, "char")[0].data)).legacyTeam;
+    expect(kept.party).toEqual(original.party);
+    expect(kept.buffs).toEqual(original.buffs);
+    expect(kept.enemy.getLevels()).toEqual(original.enemy.getLevels());
+
+    // Its artifacts are read into the identities the pool has after the migration.
+    const poolHashes = new Set(readJSON(storage, "artifact_pool").map((item) => item.data));
+    expect(buildArtifactHashes(readJSON(storage, "char")[0].data).filter((hash) => poolHashes.has(hash)))
+        .toEqual([FLOWER_V2, FEATHER_V2]);
+});
+
 test("rewrites saved, last, and comparison builds so stored artifacts share canonical hashes", () => {
     const pool = [
         {data: FLOWER_V1, locked: false, group: [""]},
         {data: FEATHER_V2, locked: true, group: [""]},
     ];
     const chars = [
-        {title: "сайно кондакт", data: LEGACY_BUILD},
+        {title: "сайно кондакт", data: LEGACY_REENCODED},
         MALFORMED_BUILD,
     ];
     const settings = {
-        last_build: LEGACY_BUILD,
+        last_build: LEGACY_REENCODED,
         unrelated_setting: "preserve me",
     };
     const comparisons = [
-        {title: "comparison", data: LEGACY_BUILD},
+        {title: "comparison", data: LEGACY_REENCODED},
         MALFORMED_BUILD,
     ];
     const storage = makeStorage({
@@ -157,15 +215,15 @@ test("rewrites saved, last, and comparison builds so stored artifacts share cano
     ]);
     expect(migratedChars[0]).toEqual({
         title: "сайно кондакт",
-        data: CANONICAL_BUILD,
+        data: CANONICAL_REENCODED,
     });
     expect(migratedSettings).toEqual({
-        last_build: CANONICAL_BUILD,
+        last_build: CANONICAL_REENCODED,
         unrelated_setting: "preserve me",
     });
     expect(migratedComparisons[0]).toEqual({
         title: "comparison",
-        data: CANONICAL_BUILD,
+        data: CANONICAL_REENCODED,
     });
 
     const poolHashes = new Set(migratedPool.map((item) => item.data));
@@ -183,7 +241,7 @@ test("canonicalizes a free-floating saved-build artifact without adding it to st
             {data: FEATHER_V2, locked: true, group: [""]},
         ],
         char: [
-            {title: "free-floating flower", data: LEGACY_BUILD},
+            {title: "free-floating flower", data: LEGACY_REENCODED},
         ],
     });
 
@@ -227,11 +285,12 @@ test("is idempotent after canonicalizing mixed artifact and build versions", () 
             {data: FEATHER_V2, locked: true, group: [""]},
         ],
         char: [
-            {title: "сайно кондакт", data: LEGACY_BUILD},
+            {title: "сайно кондакт", data: LEGACY_REENCODED},
+            {title: "released", data: LEGACY_BUILD},
         ],
-        settings: {last_build: LEGACY_BUILD},
+        settings: {last_build: LEGACY_REENCODED},
         compare_items: [
-            {title: "comparison", data: LEGACY_BUILD},
+            {title: "comparison", data: LEGACY_REENCODED},
         ],
     });
 
@@ -335,7 +394,7 @@ test("restores earlier keys when a later storage write fails", () => {
             {data: FLOWER_V1, locked: false, group: [""]},
         ],
         char: [
-            {title: "сайно кондакт", data: LEGACY_BUILD},
+            {title: "сайно кондакт", data: LEGACY_REENCODED},
         ],
     }).data;
     const storage = new FailingStorage(initial, "char");

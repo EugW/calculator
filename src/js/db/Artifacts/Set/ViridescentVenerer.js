@@ -1,8 +1,14 @@
 import { ArtifactSet } from "../../../classes/ArtifactSet";
-import { ConditionBoolean } from "../../../classes/Condition/Boolean";
+import { Condition } from "../../../classes/Condition";
+import { ConditionAnd } from "../../../classes/Condition/And";
 import { ConditionBooleanCharElement } from "../../../classes/Condition/Boolean/CharElement";
+import { ConditionBooleanDropdownValue } from "../../../classes/Condition/Boolean/DropdownValue";
 import { ConditionDropdownElement } from "../../../classes/Condition/Dropdown/Element";
+import { ConditionRetired } from "../../../classes/Condition/Retired";
 import { ConditionStatic } from "../../../classes/Condition/Static";
+import { RECEIVERS } from "../../../classes/Team/Receivers";
+import { artifactSetTables } from "../../generated/ArtifactSetTables";
+import { percent } from "../../Params";
 
 export const ViridescentVenerer = new ArtifactSet({
     serializeId: 26,
@@ -22,24 +28,21 @@ export const ViridescentVenerer = new ArtifactSet({
                     description: 'set_descr.viridescent_venerer_2',
                     settings: {},
                     stats: {
-                        dmg_anemo: 15,
+                        dmg_anemo: artifactSetTables.ViridescentVenerer.pc2.dmg_anemo,
                     },
                 })
             ],
         },
         {},
         {
-            suggesterSettings: {
-                "set.viridescent_venerer_4": 'cryo;electro;hydro;pyro',
-            },
             conditions: [
                 new ConditionStatic({
                     title: 'set_bonus.viridescent_venerer_4',
                     description: 'set_descr.viridescent_venerer_4_1',
                     settings: {},
                     stats: {
-                        dmg_reaction_swirl: 60,
-                        dmg_stellarswirl: 20,
+                        dmg_reaction_swirl: percent(artifactSetTables.ViridescentVenerer.pc4.p1),
+                        dmg_stellarswirl: percent(artifactSetTables.ViridescentVenerer.pc4.p4),
                     },
                 }),
                 new ConditionDropdownElement({
@@ -72,11 +75,44 @@ export const ViridescentVenerer = new ArtifactSet({
                         new ConditionBooleanCharElement({element: ['anemo']}),
                     ],
                 }),
-                new ConditionBoolean({
-                    // Read the old checkbox so saved builds can migrate it to Cryo.
-                    name: 'set.viridescent_venerer_4_stellarswirl',
-                    serializeId: 55,
-                    isHidden: true,
+                // The Stellar Swirl checkbox: its shred is the Cryo choice above, which
+                // the user makes. A saved value is read and dropped.
+                new ConditionRetired({serializeId: 55, type: 'checkbox'}),
+                new Condition({
+                    receivers: RECEIVERS.TEAM,
+                    stack: 'viridescent_venerer_4_cryo',
+                    condition: new ConditionAnd([
+                    new ConditionBooleanCharElement({element: ['anemo']}),
+                    new ConditionBooleanDropdownValue({name: 'set.viridescent_venerer_4', value: 'cryo'}),
+                ]),
+                    stats: {enemy_res_cryo: -percent(artifactSetTables.ViridescentVenerer.pc4.p2)},
+                }),
+                new Condition({
+                    receivers: RECEIVERS.TEAM,
+                    stack: 'viridescent_venerer_4_electro',
+                    condition: new ConditionAnd([
+                    new ConditionBooleanCharElement({element: ['anemo']}),
+                    new ConditionBooleanDropdownValue({name: 'set.viridescent_venerer_4', value: 'electro'}),
+                ]),
+                    stats: {enemy_res_electro: -percent(artifactSetTables.ViridescentVenerer.pc4.p2)},
+                }),
+                new Condition({
+                    receivers: RECEIVERS.TEAM,
+                    stack: 'viridescent_venerer_4_hydro',
+                    condition: new ConditionAnd([
+                    new ConditionBooleanCharElement({element: ['anemo']}),
+                    new ConditionBooleanDropdownValue({name: 'set.viridescent_venerer_4', value: 'hydro'}),
+                ]),
+                    stats: {enemy_res_hydro: -percent(artifactSetTables.ViridescentVenerer.pc4.p2)},
+                }),
+                new Condition({
+                    receivers: RECEIVERS.TEAM,
+                    stack: 'viridescent_venerer_4_pyro',
+                    condition: new ConditionAnd([
+                    new ConditionBooleanCharElement({element: ['anemo']}),
+                    new ConditionBooleanDropdownValue({name: 'set.viridescent_venerer_4', value: 'pyro'}),
+                ]),
+                    stats: {enemy_res_pyro: -percent(artifactSetTables.ViridescentVenerer.pc4.p2)},
                 }),
             ],
         },

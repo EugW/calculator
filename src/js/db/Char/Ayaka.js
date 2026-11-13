@@ -14,9 +14,11 @@ import { FeatureDamagePlungeCollision } from "../../classes/Feature2/Damage/Plun
 import { FeatureDamagePlungeShockWave } from "../../classes/Feature2/Damage/Plunge/ShockWave";
 import { FeatureDamageSkill } from "../../classes/Feature2/Damage/Skill";
 import { FeatureMultiplier } from "../../classes/Feature2/Multiplier";
+import { RECEIVERS } from "../../classes/Team/Receivers";
 import { StatTable } from "../../classes/StatTable";
 import { charTables } from "../generated/CharTables";
 import { charTalentTables } from "../generated/CharTalentTables";
+import { percent } from "../Params";
 
 const Talents = new DbObjectTalents({
     attack: {
@@ -122,12 +124,13 @@ const Talents = new DbObjectTalents({
 });
 
 const TalentValues = {
-    A1NormalBonus: 30,
-    A1ChargedBonus: 30,
-    A4CryoDamage: 18,
-    C2BurstDamage: 20,
-    C4DefReduce: 30,
-    C6ChargedDamage: 298,
+    A1NormalBonus: percent(charTalentTables.Ayaka.a1.p1),
+    A1ChargedBonus: percent(charTalentTables.Ayaka.a1.p1),
+    A4CryoDamage: percent(charTalentTables.Ayaka.a4.p2),
+    C1Chance: percent(charTalentTables.Ayaka.c1.p1),
+    C2BurstDamage: percent(charTalentTables.Ayaka.c2.p1),
+    C4DefReduce: percent(charTalentTables.Ayaka.c4.p1),
+    C6ChargedDamage: percent(charTalentTables.Ayaka.c6.p2),
 };
 
 export const Ayaka = new DbObjectChar({
@@ -368,7 +371,7 @@ export const Ayaka = new DbObjectChar({
                     title: 'talent_name.kamisato_ayaka_snowswept_sakura',
                     description: 'talent_descr.kamisato_ayaka_snowswept_sakura',
                     stats: {
-                        text_percent_chance: 50,
+                        text_percent_chance: TalentValues.C1Chance,
                     },
                 })
             ],
@@ -398,6 +401,7 @@ export const Ayaka = new DbObjectChar({
                 new ConditionBoolean({
                     name: 'ayaka_eikyo_ryuuhan',
                     serializeId: 4,
+                    receivers: RECEIVERS.TEAM,
                     title: 'talent_name.kamisato_ayaka_ebb_and_flow',
                     description: 'talent_descr.kamisato_ayaka_ebb_and_flow',
                     stats: {
@@ -429,21 +433,5 @@ export const Ayaka = new DbObjectChar({
             ],
         },
     ]),
-    partyData: {
-        conditions: [
-            new ConditionBoolean({
-                name: 'party.ayaka_eikyo_ryuuhan',
-                serializeId: 1,
-                rotation: 'party',
-                title: 'talent_name.kamisato_ayaka_ebb_and_flow',
-                description: 'talent_descr.kamisato_ayaka_ebb_and_flow',
-                stats: {
-                    enemy_def_reduce: TalentValues.C4DefReduce,
-                },
-                info: {
-                    constellation: 4,
-                },
-            }),
-        ],
-    },
+    retiredParty: [[1, 'checkbox']],
 });

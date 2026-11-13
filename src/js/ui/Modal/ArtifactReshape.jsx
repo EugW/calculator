@@ -9,7 +9,8 @@ import { Feature2 } from '../../classes/Feature2';
 import { Stats } from '../../classes/Stats';
 import { ACTION_SLOTS, getReshapeInputs, hallowedExegesisTransition, RESHAPE_COST } from '../../classes/ArtifactActionProbability';
 import { artifactReshapeSources } from '../../classes/ArtifactReshapeSources';
-import { WorkerFactoryArtifactActionPredictor } from '../../classes/WorkerFactory/ArtifactActionPredictor';
+import { availableTeamArtifacts, inventoryArtifactHash, teamArtifactOwnership } from '../../classes/ArtifactTeamInventory';
+import { ArtifactActionBaselineFlow } from './ArtifactActionBaselineFlow';
 import { Accordion, AccordionItem } from '../Components/Accordion';
 import { ArtifactActionAdvancedSettings, ArtifactActionProgress, ArtifactActionRVSummary, formatExpectedGain, formatExpectedGainPercent, mergeActionProgress } from '../Components/ArtifactActionControls';
 import { ControlsBar, ControlsBarDivider } from '../Components/ControlsBar';
@@ -49,7 +50,7 @@ export class ArtifactReshapeModal extends React.Component {
         this.state = {isVisible: false, stage: 'parameters', feature: props.app.getFeature(), featureType: 'average',
             points: 0, trigger: 0, pairs: {}, preserveTopology: true, rvFilters: normalizeArtifactRVFilters(),
             targets: [], pickerOpen: false, progress: {}, result: null, historyEntry: null, error: ''};
-        this.factory = new WorkerFactoryArtifactActionPredictor({
+        this.factory = new ArtifactActionBaselineFlow(this, {
             callback: result => {
                 this.factory.dispose();
                 this.saveHistory(result);
@@ -76,8 +77,8 @@ export class ArtifactReshapeModal extends React.Component {
         this.setState({isVisible: false, stage: 'parameters', pickerOpen: false, result: null, historyEntry: null, progress: {}});
     }
     invalidate() {
-        if (!this.state.isVisible || this.state.historyEntry) return;
-        const stale = this.state.stage === 'progress' || this.state.result;
+        if (this.factory.applying || !this.state.isVisible || this.state.historyEntry) return;
+        const stale = ['progress', 'baseline'].includes(this.state.stage) || this.state.result;
         this.factory.dispose();
         this.resultArtifacts = null;
         this.setState({stage: 'parameters', pickerOpen: false, result: null, progress: {}, error: stale ? t('stale') : '',
@@ -87,8 +88,8 @@ export class ArtifactReshapeModal extends React.Component {
     saveHistory(result) {
         const sources = this.resultArtifacts
             ? Array.from(this.resultArtifacts, ([id, artifact]) => [id, artifact.serialize()]) : [];
-        this.props.app.storage.actionHistory.saveRun({kind: 'reshape', feature: this.state.feature,
-            featureType: this.state.featureType, context: {sources}, result}).catch(() => {});
+        this.props.app.storage.actionHistory.saveRun({kind: 'reshape', feature: result.runSnapshot.feature,
+            featureType: result.runSnapshot.featureType, context: {sources}, result}).catch(() => {});
     }
     openHistoryEntry(entry, result) {
         this.showHistoryEntry(entry, result);
@@ -109,11 +110,14 @@ export class ArtifactReshapeModal extends React.Component {
     }
     sources(state = this.state) {
         const equipped = this.props.app.getArtifacts();
+        const storage = this.props.app.storage.artifacts;
+        const {teammates} = teamArtifactOwnership(this.props.app.currentSet(), storage);
         return artifactReshapeSources(state.targets.map(target => {
             const artifact = target.origin === 'equipped' ? equipped[target.slot]
-                : this.props.app.storage.artifacts.getByHash(target.hash);
+                : storage.getByHash(target.hash);
+            const usedByTeammate = artifact && teammates.has(inventoryArtifactHash(artifact, storage));
             return {...target, artifact: artifact || target.artifact,
-                error: !artifact && target.origin === 'storage' ? 'reshape_source_unavailable' : undefined};
+                error: usedByTeammate || (!artifact && target.origin === 'storage') ? 'reshape_source_unavailable' : undefined};
         }), state.pairs);
     }
     removeTarget(id) {
@@ -141,7 +145,7 @@ export class ArtifactReshapeModal extends React.Component {
             && Number.isInteger(trigger) && trigger >= 0 && trigger <= 2 && this.sources().some(source => !source.error);
     }
     start() {
-        if (!this.canStart() || this.state.stage === 'progress') return;
+        if (!this.canStart() || this.state.stage !== 'parameters') return;
         let rvFilters;
         try { rvFilters = normalizeArtifactRVFilters(this.state.rvFilters); }
         catch (error) { this.setState({error: errorText(error.message)}); return; }
@@ -167,7 +171,7 @@ export class ArtifactReshapeModal extends React.Component {
     renderParameters() {
         return <>
             <ControlsBar>
-                <Dropdown barClass="resizable" items={Feature2.buildDropdown(this.props.app.currentSet())}
+                <Dropdown barClass="resizable" items={Feature2.buildDropdown(this.props.app.view())}
                     selected={this.state.feature} onChange={item => this.change({feature: item.value})} />
                 <Dropdown barClass="feature-type" items={['normal', 'crit', 'average'].map(value => ({value, text: lang.get('pool_view.type_' + value)}))}
                     selected={this.state.featureType} onChange={item => this.change({featureType: item.value})} />
@@ -270,7 +274,7 @@ export class ArtifactReshapeModal extends React.Component {
         const {isVisible, stage} = this.state;
         const outcomeRow = this.state.result?.rows.find(row => (row.targetId || row.slot) === this.state.outcomeRow);
         return <><DialogContainer addClass="artifact-action-modal artifact-reshape-modal" width={stage === 'progress' ? 500 : 1000}
-            centered isVisible={isVisible} title={lang.get('tab_header.artifact_reshape')} closeCallback={() => this.close()}>
+            centered isVisible={isVisible && stage !== 'baseline'} title={lang.get('tab_header.artifact_reshape')} closeCallback={() => this.close()}>
             {isVisible && <FullHeight>
                 <FullHeightScrollable maxHeight="calc(100dvh - 210px)">
                     {this.state.error && <div role="alert" className="craft-error">{this.state.error}</div>}
@@ -291,11 +295,13 @@ export class ArtifactReshapeModal extends React.Component {
                 </ControlsBar></FullHeightStatic>
             </FullHeight>}
         </DialogContainer>
+            {this.factory.renderBaseline()}
             {isVisible && stage === 'results' && outcomeRow?.outcomeDetails &&
                 <ArtifactActionOutcomesModal key={outcomeRow.targetId || outcomeRow.slot} kind="reshape"
                     row={outcomeRow} result={this.state.result} onClose={() => this.setState({outcomeRow: null})} />}
             {isVisible && stage === 'parameters' && this.state.pickerOpen && <ArtifactReshapePicker
-                artifacts={this.props.app.storage.artifacts.listArtifacts()}
+                artifacts={availableTeamArtifacts(this.props.app.currentSet(),
+                    this.props.app.storage.artifacts.listArtifacts(), this.props.app.storage.artifacts)}
                 selectedHashes={new Set(this.sources().filter(source => !source.error).map(source => source.artifact.getHash()))}
                 onAdd={artifact => this.addTarget(artifact)} onClose={() => this.setState({pickerOpen: false})} />}
         </>;

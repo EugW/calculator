@@ -2,8 +2,6 @@ import { Condition } from "../../classes/Condition";
 import { ConditionAscensionChar } from "../../classes/Condition/Ascension/Char";
 import { ConditionBoolean } from "../../classes/Condition/Boolean";
 import { ConditionConstellation } from "../../classes/Condition/Constellation";
-import { ConditionNumber } from "../../classes/Condition/Number";
-import { ConditionNumberTalent } from "../../classes/Condition/Number/Talent";
 import { ConditionStatic } from "../../classes/Condition/Static";
 import { DbObjectChar } from "../../classes/DbObject/Char";
 import { DbObjectConstellation } from "../../classes/DbObject/Constellation";
@@ -19,8 +17,10 @@ import { FeaturePostEffectValue } from "../../classes/Feature2/PostEffectValue";
 import { PostEffectStats } from "../../classes/PostEffect/Stats";
 import { PostEffectStatsRecharge } from "../../classes/PostEffect/Stats/Recharge";
 import { StatTable } from "../../classes/StatTable";
+import { RECEIVERS } from "../../classes/Team/Receivers";
 import { charTables } from "../generated/CharTables";
 import { charTalentTables } from "../generated/CharTalentTables";
+import { percent } from "../Params";
 
 const Talents = new DbObjectTalents({
     attack: {
@@ -105,6 +105,15 @@ const Talents = new DbObjectTalents({
 });
 
 const atkBuffPost = new PostEffectStats({
+    // Tengu Juurai ATK buff: game data (Avatar_Sara_AttackUp /
+    // UNIQUE_Sara_AttackUp) writes Actor_AttackExtraDelta (extra) from
+    // FIGHT_PROP_BASE_ATTACK (Sara's base ATK, copied through
+    // _ABILITY_Sara_BaseAttack into Avatar_Sara_BaseAttack). A base read
+    // can never chain, and the extra write is invisible to premod readers
+    // (Flins/Ineffa A4) but counted by total readers and damage hits. GO
+    // reads input.base.atk into teamBuff.total.atk. Default confirmed,
+    // no params.
+    receivers: RECEIVERS.TEAM,
     levelSetting: 'char_skill_elemental',
     from: 'atk_base',
     percent: Talents.getMulti({
@@ -116,6 +125,11 @@ const atkBuffPost = new PostEffectStats({
         new ConditionBoolean({name: 'sara_tengu_juurai'}),
     ],
 });
+
+const A1ChargeTime = percent(charTalentTables.Sara.a1.p1);
+const A4Energy = charTalentTables.Sara.a4.p1;
+const C2DarkWingsDmg = percent(charTalentTables.Sara.c2.p1);
+const C6CritDmgElectro = percent(charTalentTables.Sara.c6.p1);
 
 export const Sara = new DbObjectChar({
     name: 'kujou_sara',
@@ -222,9 +236,11 @@ export const Sara = new DbObjectChar({
         new FeatureDamageSkill({
             name: 'sara_dark_wings_dmg',
             element: 'electro',
+            // C2 Dark Wings: 30% of the skill hit. A damage hit reads the
+            // total and needs nothing.
             multipliers: [
                 new FeatureMultiplier({
-                    scalingMultiplier: 0.3,
+                    scalingMultiplier: C2DarkWingsDmg / 100,
                     scalingSource: 'constellation2',
                     leveling: 'char_skill_elemental',
                     values: Talents.get('skill.sara_ambush_dmg'),
@@ -241,7 +257,14 @@ export const Sara = new DbObjectChar({
             category: 'skill',
             name: 'sara_decorum',
             postEffect: new PostEffectStatsRecharge({
-                percent: new StatTable('', [1.2]),
+                // A4 Decorum energy: game data (Avatar_Sara_PermanentSkill_2 /
+                // Sara_PermanentSkill_2_ReviveEnergy, ReviveElemEnergy) reads
+                // FIGHT_PROP_NONEXTRA_CHARGE_EFFICIENCY (premod ER), so extra
+                // ER (Xiphos, Electro Traveler amulet) restores nothing: KQM's
+                // pre-A4 EMC amulet test. GO reads input.total.enerRech_,
+                // contradicted by the game data. Default (premod) confirmed,
+                // no params.
+                percent: new StatTable('', [A4Energy]),
             }),
             format: 'decimal',
             digits: 2,
@@ -277,7 +300,7 @@ export const Sara = new DbObjectChar({
             title: 'talent_name.kujou_sara_immovable_will',
             description: 'talent_descr.kujou_sara_immovable_will',
             stats: {
-                text_percent: 60,
+                text_percent: A1ChargeTime,
             },
             info: {ascension: 1},
             subConditions: [
@@ -311,7 +334,7 @@ export const Sara = new DbObjectChar({
                     title: 'talent_name.kujou_sara_dark_wings',
                     description: 'talent_descr.kujou_sara_dark_wings',
                     stats: {
-                        text_percent_dmg: 30,
+                        text_percent_dmg: C2DarkWingsDmg,
                     },
                 }),
             ],
@@ -345,80 +368,21 @@ export const Sara = new DbObjectChar({
         {
             conditions: [
                 new ConditionStatic({
+                    receivers: RECEIVERS.TEAM,
+                    // C6 Sin of Pride: flat +60% Electro CRIT DMG on buffed
+                    // characters. Game data (Avatar_Sara_AttackUp /
+                    // UNIQUE_Sara_Constellation_6_CriticalHurt,
+                    // ModifyDamageMixin bonusCriticalHurt) reads no stat;
+                    // flat conditions are always premod. Needs nothing.
                     title: 'talent_name.kujou_sara_sin_of_pride',
                     description: 'talent_descr.kujou_sara_sin_of_pride',
                     stats: {
-                        crit_dmg_electro: 60,
+                        crit_dmg_electro: C6CritDmgElectro,
                     },
+                    condition: new ConditionBoolean({name: 'sara_tengu_juurai'}),
                 }),
             ],
         },
     ]),
-    partyData: {
-        loadStats: {
-            stats: ['atk_base'],
-            settings: ['char_skill_elemental'],
-        },
-        conditions: [
-            new ConditionNumber({
-                name: 'sara_atk_base',
-                title: 'talent_name.stats_base_atk',
-                partyStat: 'atk_base',
-                serializeId: 1,
-                max: 10000,
-            }),
-            new ConditionNumberTalent({
-                name: 'sara_char_skill_elemental',
-                title: 'talent_name.stats_level_skill',
-                partySetting: 'char_skill_elemental',
-                serializeId: 2,
-            }),
-            new ConditionBoolean({
-                name: 'party.sara_tengu_juurai',
-                serializeId: 3,
-                rotation: 'party',
-                title: 'talent_name.sara_tengu_juurai',
-                description: 'talent_descr.sara_tengu_juurai',
-            }),
-            new ConditionBoolean({
-                name: 'party.kujou_sara_spellsinger',
-                serializeId: 4,
-                title: 'talent_name.kujou_sara_spellsinger',
-                description: 'talent_descr.char_constellation_skill',
-                info: {constellation: 5},
-                settings: {
-                    sara_char_skill_elemental_bonus: 3,
-                },
-            }),
-            new ConditionBoolean({
-                name: 'party.kujou_sara_sin_of_pride',
-                serializeId: 5,
-                rotation: 'party',
-                title: 'talent_name.kujou_sara_sin_of_pride',
-                description: 'talent_descr.kujou_sara_sin_of_pride',
-                info: {constellation: 6},
-                stats: {
-                    crit_dmg_electro: 60,
-                },
-                subConditions: [
-                    new ConditionBoolean({name: 'party.kujou_sara_spellsinger'}),
-                ],
-            }),
-        ],
-        postEffects: [
-            new PostEffectStats({
-                levelSetting: 'sara_char_skill_elemental',
-                maxLevelSetting: 10,
-                from: 'sara_atk_base',
-                percent: Talents.getMulti({
-                    name: 'atk',
-                    from: 'skill.sara_atk_bonus',
-                    multi: 0.01,
-                }),
-                conditions: [
-                    new ConditionBoolean({name: 'party.sara_tengu_juurai'}),
-                ],
-            }),
-        ],
-    },
+    retiredParty: [[1, 'number'], [2, 'number'], [3, 'checkbox'], [4, 'checkbox'], [5, 'checkbox']],
 });

@@ -1,6 +1,8 @@
 import { ArtifactSet } from "../../../classes/ArtifactSet";
 import { ConditionBoolean } from "../../../classes/Condition/Boolean";
 import { ConditionStatic } from "../../../classes/Condition/Static";
+import { artifactSetTables } from "../../generated/ArtifactSetTables";
+import { percent } from "../../Params";
 
 export const ScarletProof = new ArtifactSet({
     serializeId: 62,
@@ -19,7 +21,7 @@ export const ScarletProof = new ArtifactSet({
                     title: 'set_bonus.scarlet_proof_2',
                     description: 'set_descr.scarlet_proof_2',
                     stats: {
-                        atk_percent: 18,
+                        atk_percent: artifactSetTables.ScarletProof.pc2.atk_percent,
                     },
                 }),
             ],
@@ -33,8 +35,8 @@ export const ScarletProof = new ArtifactSet({
                     title: 'set_bonus.scarlet_proof_4',
                     description: 'set_descr.scarlet_proof_4',
                     stats: {
-                        crit_rate: 16,
-                        dmg_stellarswirl: 40,
+                        crit_rate: percent(artifactSetTables.ScarletProof.pc4.p1),
+                        dmg_stellarswirl: percent(artifactSetTables.ScarletProof.pc4.p2),
                     },
                 }),
             ],

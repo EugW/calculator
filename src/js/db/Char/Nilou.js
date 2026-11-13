@@ -3,7 +3,6 @@ import { ConditionAscensionChar } from "../../classes/Condition/Ascension/Char";
 import { ConditionBoolean } from "../../classes/Condition/Boolean";
 import { ConditionBooleanNilouParty } from "../../classes/Condition/Boolean/NilouParty";
 import { ConditionConstellation } from "../../classes/Condition/Constellation";
-import { ConditionNumber } from "../../classes/Condition/Number";
 import { ConditionStatic } from "../../classes/Condition/Static";
 import { DbObjectChar } from "../../classes/DbObject/Char";
 import { DbObjectConstellation } from "../../classes/DbObject/Constellation";
@@ -17,12 +16,13 @@ import { FeatureDamagePlungeShockWave } from "../../classes/Feature2/Damage/Plun
 import { FeatureDamageSkill } from "../../classes/Feature2/Damage/Skill";
 import { FeatureMultiplier } from "../../classes/Feature2/Multiplier";
 import { FeaturePostEffectValue } from "../../classes/Feature2/PostEffectValue";
-import { PostEffectStats } from "../../classes/PostEffect/Stats";
 import { PostEffectStatsHP } from "../../classes/PostEffect/Stats/HP";
 import { StatTable } from "../../classes/StatTable";
-import { CHARACTER_MAX_POSSIBLE_HP } from "../Constants";
+import { RECEIVERS } from "../../classes/Team/Receivers";
 import { charTables } from "../generated/CharTables";
 import { charTalentTables } from "../generated/CharTalentTables";
+import { percent } from "../Params";
+import { CHANNELS } from "../../classes/PostEffect/Channels";
 
 const Talents = new DbObjectTalents({
     attack: {
@@ -138,21 +138,36 @@ const Talents = new DbObjectTalents({
     },
 });
 
-const A1Mastery = 100;
-const A4BloomBonus = 9;
-const A4BloomBonusMax = 400;
-const C1SkillDmg = 65;
-const C2EnemyResHydro = -35;
-const C2EnemyResDendro = -35;
-const C4BurstDmg = 50;
-const C6CritRate = 0.6;
-const C6CritRateMax = 30;
-const C6CritDmg = 1.2;
-const C6CritDmgMax = 60;
+const A1Mastery = charTalentTables.Nilou.a1.p2;
+const A4BloomBonus = percent(charTalentTables.Nilou.a4.p1);
+const A4BloomBonusMax = percent(charTalentTables.Nilou.a4.p3);
+const A4MinHP = charTalentTables.Nilou.a4.p2;
+const C1SkillDmg = percent(charTalentTables.Nilou.c1.p1);
+const C2EnemyResHydro = -percent(charTalentTables.Nilou.c2.p1);
+const C2EnemyResDendro = -percent(charTalentTables.Nilou.c2.p2);
+const C4BurstDmg = percent(charTalentTables.Nilou.c4.p2);
+const C6CritRate = percent(charTalentTables.Nilou.c6.p1);
+const C6CritRateMax = percent(charTalentTables.Nilou.c6.p3);
+const C6CritDmg = percent(charTalentTables.Nilou.c6.p2);
+const C6CritDmgMax = percent(charTalentTables.Nilou.c6.p4);
 
 const bloomDmgPost = new PostEffectStatsHP({
-    global: true,
-    exceed: 30000,
+    receivers: RECEIVERS.TEAM,
+    // Game data: Avatar_Nilou_ElementalArt_Buff_Controller computes
+    // OvergrowDamageUpCache as [FIGHT_PROP_MAX_HP, MaxHP_Trans_To_Overgrow_Ratio,
+    // MUL, 0.001, MUL, ...] (total HP above the 30000 lower limit; ProudSkill
+    // Nilou_PermanentSkill_2 params [0.09, 30000, 4]: 9% per 1000 HP, cap 400%)
+    // into UNIQUE_Avatar_Nilou_Overgrow_Damage_Up, which writes
+    // Actor_ElemReactOvergrowVariationExtraDelta (extra). FIGHT_PROP_MAX_HP is
+    // the total marker (md/buff_chains.md), as for Baizhu/Candace/Chevreuse/
+    // Columbina/Dahlia; the same number as premod while no ability writes extra
+    // HP. GO reads input.total.hp (its teamBuff.premod write is for a reaction
+    // bonus with no extra lane; supporting evidence only). KQM Nilou has no
+    // EM/ATK/HP/ER buff-chain test (only that the A4 is additive to the EM
+    // Bloom bonus). The extra_scan misses the A4 (it goes through the
+    // intermediate OvergrowDamageUpCache), like Dahlia's.
+    reads: CHANNELS.TOTAL,
+    exceed: A4MinHP,
     percent: new StatTable('dmg_reaction_rupture', [A4BloomBonus / 1000]),
     statCap: new StatTable('', [A4BloomBonusMax]),
     conditions: [
@@ -163,6 +178,18 @@ const bloomDmgPost = new PostEffectStatsHP({
 });
 
 const critRatePost = new PostEffectStatsHP({
+    // Game data: Avatar_Nilou_MaxHP_Trans_Crit
+    // (Avatar_Nilou_Talent_MaxHP_Trans_Crit_Handler) computes Critical_Rate_Cache
+    // as [FIGHT_PROP_MAX_HP, MaxHP_Trans_Critical_Rate, MUL, 0.001, MUL] (total;
+    // Talent Nilou_Constellation_6 params [0.006, 0.012, 0.30, 0.60]: 0.6% CRIT
+    // Rate per 1000 Max HP, cap 30%) into UNIQUE_Nilou_MaxHP_Trans_Crit, which
+    // writes Actor_CriticalExtraDelta (extra). FIGHT_PROP_MAX_HP is the total
+    // marker (md/buff_chains.md); the same number as premod while no ability
+    // writes extra HP. The extra_scan lists it (final HP read, extra crit
+    // writes). GO reads input.total.hp but writes it under premod (guesses, as
+    // with Columbina's C2 read; supporting evidence only). KQM Nilou has no
+    // EM/ATK/HP/ER buff-chain test.
+    reads: CHANNELS.TOTAL,
     percent: new StatTable('crit_rate', [C6CritRate / 1000]),
     statCap: new StatTable('', [C6CritRateMax]),
     conditions: [
@@ -171,6 +198,18 @@ const critRatePost = new PostEffectStatsHP({
 });
 
 const critDmgPost = new PostEffectStatsHP({
+    // Game data: Avatar_Nilou_MaxHP_Trans_Crit
+    // (Avatar_Nilou_Talent_MaxHP_Trans_Crit_Handler) computes Critical_Damage_Cache
+    // as [FIGHT_PROP_MAX_HP, MaxHP_Trans_Critical_Damage, MUL, 0.001, MUL] (total;
+    // Talent Nilou_Constellation_6 params [0.006, 0.012, 0.30, 0.60]: 1.2% CRIT
+    // DMG per 1000 Max HP, cap 60%) into UNIQUE_Nilou_MaxHP_Trans_Crit, which
+    // writes Actor_CriticalHurtExtraDelta (extra). FIGHT_PROP_MAX_HP is the total
+    // marker (md/buff_chains.md); the same number as premod while no ability
+    // writes extra HP. The extra_scan lists it (final HP read, extra crit
+    // writes). GO reads input.total.hp but writes it under premod (guesses, as
+    // with Columbina's C2 read; supporting evidence only). KQM Nilou has no
+    // EM/ATK/HP/ER buff-chain test.
+    reads: CHANNELS.TOTAL,
     percent: new StatTable('crit_dmg', [C6CritDmg / 1000]),
     statCap: new StatTable('', [C6CritDmgMax]),
     conditions: [
@@ -189,6 +228,11 @@ export const Nilou = new DbObjectChar({
     origin: 'sumeru',
     talents: Talents,
     statTable: charTables.Nilou,
+    // Talent hits read the total HP by construction (FeatureDamageSkill/Burst
+    // multipliers scaling 'hp*'; the game puts FIGHT_PROP_MAX_HP, the total
+    // marker, in each attackProperty's damageExtra) and need nothing. The
+    // FeaturePostEffectValue entries below only display bloomDmgPost,
+    // critRatePost and critDmgPost.
     features: [
         new FeatureDamageNormal({
             name: 'normal_hit_1',
@@ -421,9 +465,14 @@ export const Nilou = new DbObjectChar({
                 new ConditionBooleanNilouParty(),
             ],
         }),
+        // A1 EM +100 (ProudSkill Nilou_PermanentSkill_1 params [30, 100, 10]):
+        // the game (UNIQUE_Nilou_Hit_By_Grass_Mastery_Up) writes the flat
+        // MasteryUp into Actor_ElemMasteryDelta (premod, no "Extra"). Flat
+        // toggles are always premod and need nothing.
         new ConditionBoolean({
             name: 'nilou_stance_attacked',
             serializeId: 2,
+            receivers: RECEIVERS.TEAM,
             title: 'talent_name.nilou_court_of_dancing_petals',
             description: 'talent_descr.nilou_court_of_dancing_petals_2',
             stats: {
@@ -436,6 +485,8 @@ export const Nilou = new DbObjectChar({
                 new ConditionBoolean({name: 'nilou_stance_bonus'}),
             ],
         }),
+        // A4 talent text (text_* stats only fill description texts; the live
+        // bonus is bloomDmgPost above).
         new ConditionStatic({
             title: 'talent_name.nilou_dreamy_dance_of_aeons',
             description: 'talent_descr.nilou_dreamy_dance_of_aeons',
@@ -459,6 +510,8 @@ export const Nilou = new DbObjectChar({
     constellation: new DbObjectConstellation([
         {
             conditions: [
+                // C1 Luminous Illusion +65% (Talent Nilou_Constellation_1 params
+                // [0.65, 6]): a flat toggle, always premod, needs nothing.
                 new ConditionStatic({
                     title: 'talent_name.nilou_dance_of_the_waning_moon',
                     description: 'talent_descr.nilou_dance_of_the_waning_moon',
@@ -470,9 +523,15 @@ export const Nilou = new DbObjectChar({
         },
         {
             conditions: [
+                // C2 RES shreds (Talent Nilou_Constellation_2 params
+                // [0.35, 0.35, 10]): the game (UNIQUE_Nilou_Water/Grass_Resistance_Reduce,
+                // gated by Nilou_Talent_2) writes the flat DefenseDown specials
+                // into Actor_Water/GrassSubHurtDelta. Flat toggles read no stat
+                // and are always premod; need nothing.
                 new ConditionBoolean({
                     name: 'nilou_the_starry_skies_1',
                     serializeId: 3,
+                    receivers: RECEIVERS.TEAM,
                     title: 'talent_name.nilou_the_starry_skies_their_flowers_rain_1',
                     description: 'talent_descr.nilou_the_starry_skies_their_flowers_rain_1',
                     stats: {
@@ -487,6 +546,7 @@ export const Nilou = new DbObjectChar({
                 new ConditionBoolean({
                     name: 'nilou_the_starry_skies_2',
                     serializeId: 4,
+                    receivers: RECEIVERS.TEAM,
                     title: 'talent_name.nilou_the_starry_skies_their_flowers_rain_2',
                     description: 'talent_descr.nilou_the_starry_skies_their_flowers_rain_2',
                     stats: {
@@ -509,6 +569,9 @@ export const Nilou = new DbObjectChar({
         },
         {
             conditions: [
+                // C4 burst DMG +50% (Talent Nilou_Constellation_4 params
+                // [15, 0.5, 8]: 15 energy, 50% DMG, 8s): a flat toggle, always
+                // premod, needs nothing.
                 new ConditionBoolean({
                     name: 'nilou_fricative_pulse',
                     serializeId: 5,
@@ -531,6 +594,7 @@ export const Nilou = new DbObjectChar({
         },
         {
             conditions: [
+                // C6 talent text (text_* stats only fill description texts).
                 new ConditionStatic({
                     title: 'talent_name.nilou_frostbreakers_melody',
                     description: 'talent_descr.nilou_frostbreakers_melody',
@@ -544,92 +608,5 @@ export const Nilou = new DbObjectChar({
             ],
         },
     ]),
-    partyData: {
-        loadStats: {
-            stats: ['hp_total'],
-        },
-        conditions: [
-            new ConditionNumber({
-                name: 'nilou_max_hp',
-                title: 'talent_name.stats_total_hp',
-                partyStat: 'hp_total',
-                serializeId: 1,
-                max: CHARACTER_MAX_POSSIBLE_HP,
-                class: "gi-inputs-5digit",
-            }),
-            new ConditionBoolean({
-                name: 'party.nilou_stance_bonus',
-                serializeId: 2,
-                title: 'talent_name.nilou_court_of_dancing_petals',
-                description: 'talent_descr.nilou_court_of_dancing_petals_1',
-                info: {ascension: 1},
-                subConditions: [
-                    new ConditionBooleanNilouParty(),
-                ],
-            }),
-            new ConditionBoolean({
-                name: 'party.nilou_stance_attacked',
-                serializeId: 3,
-                rotation: 'party',
-                title: 'talent_name.nilou_court_of_dancing_petals',
-                description: 'talent_descr.nilou_court_of_dancing_petals_2',
-                stats: {
-                    mastery: A1Mastery,
-                },
-                info: {ascension: 1},
-                subConditions: [
-                    new ConditionBooleanNilouParty(),
-                    new ConditionBoolean({name: 'party.nilou_stance_bonus'}),
-                ],
-            }),
-            new ConditionStatic({
-                title: 'talent_name.nilou_dreamy_dance_of_aeons',
-                description: 'talent_descr.nilou_dreamy_dance_of_aeons',
-                info: {ascension: 4},
-                subConditions: [
-                    new ConditionBooleanNilouParty(),
-                    new ConditionBoolean({name: 'party.nilou_stance_bonus'}),
-                ],
-            }),
-            new ConditionBoolean({
-                name: 'party.nilou_the_starry_skies_1',
-                serializeId: 5,
-                rotation: 'party',
-                title: 'talent_name.nilou_the_starry_skies_their_flowers_rain_1',
-                description: 'talent_descr.nilou_the_starry_skies_their_flowers_rain_1',
-                stats: {
-                    enemy_res_hydro: C2EnemyResHydro,
-                },
-                info: {constellation: 2},
-                subConditions: [
-                    new ConditionBooleanNilouParty(),
-                    new ConditionBoolean({name: 'party.nilou_stance_bonus'}),
-                ],
-            }),
-            new ConditionBoolean({
-                name: 'party.nilou_the_starry_skies_2',
-                serializeId: 6,
-                rotation: 'party',
-                title: 'talent_name.nilou_the_starry_skies_their_flowers_rain_2',
-                description: 'talent_descr.nilou_the_starry_skies_their_flowers_rain_2',
-                stats: {
-                    enemy_res_dendro: C2EnemyResDendro,
-                },
-                info: {constellation: 2},
-            }),
-        ],
-        postEffects: [
-            new PostEffectStats({
-                from: 'nilou_max_hp',
-                global: 1,
-                exceed: 30000,
-                percent: new StatTable('dmg_reaction_rupture', [A4BloomBonus / 1000]),
-                statCap: new StatTable('', [A4BloomBonusMax]),
-                conditions: [
-                    new ConditionBooleanNilouParty(),
-                    new ConditionBoolean({name: 'party.nilou_stance_bonus'}),
-                ],
-            }),
-        ],
-    },
+    retiredParty: [[1, 'number'], [2, 'checkbox'], [3, 'checkbox'], [5, 'checkbox'], [6, 'checkbox']],
 });

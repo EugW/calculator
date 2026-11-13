@@ -6,10 +6,13 @@ import { ConditionBooleanDropdownValue } from "../../classes/Condition/Boolean/D
 import { ConditionBooleanValue } from "../../classes/Condition/Boolean/Value";
 import { ConditionConstellation } from "../../classes/Condition/Constellation";
 import { ConditionDropdown } from "../../classes/Condition/Dropdown";
+import { ConditionOnField } from "../../classes/Condition/Field";
 import { ConditionNumber } from "../../classes/Condition/Number";
+import { ConditionReceiver } from "../../classes/Condition/Receiver";
 import { ConditionStacks } from "../../classes/Condition/Stacks";
 import { ConditionStatic } from "../../classes/Condition/Static";
 import { ConditionStaticLevel } from "../../classes/Condition/Static/Level";
+import { ConditionTeam } from "../../classes/Condition/Team";
 import { DbObjectChar } from "../../classes/DbObject/Char";
 import { DbObjectConstellation } from "../../classes/DbObject/Constellation";
 import { DbObjectTalents } from "../../classes/DbObject/Talents";
@@ -22,12 +25,15 @@ import { FeatureDamageSkill } from "../../classes/Feature2/Damage/Skill";
 import { FeatureDamageStellarConduct } from "../../classes/Feature2/Damage/StellarConduct";
 import { FeatureMultiplier } from "../../classes/Feature2/Multiplier";
 import { FeaturePostEffectValue } from "../../classes/Feature2/PostEffectValue";
-import { PostEffectStats } from "../../classes/PostEffect/Stats";
+import { CHANNELS } from "../../classes/PostEffect/Channels";
 import { PostEffectStatsMastery } from "../../classes/PostEffect/Stats/Mastery";
+import { PostEffectStatsStatic } from "../../classes/PostEffect/Stats/Static";
 import { StatTable } from "../../classes/StatTable";
+import { RECEIVERS } from "../../classes/Team/Receivers";
 import { ValueTable } from "../../classes/ValueTable";
 import { charTables } from "../generated/CharTables";
 import { charTalentTables } from "../generated/CharTalentTables";
+import { percent, plus } from "../Params";
 
 const Talents = new DbObjectTalents({
     attack: {
@@ -110,61 +116,37 @@ const Talents = new DbObjectTalents({
     links: [11360001, 11360002, 11330003, 11190007],
 });
 
+// Passive and constellation values. Typed where the game data has no
+// position: the Gradient Beacon limits (4, 5 at C1) and A4's 4 stacks are
+// fixed inside the abilities.
 const BeaconMax = 4;
 const C1BeaconMax = 5;
-const A1SteadyMasteryPerBeacon = 30;
-const A4CritRatePerStack = 5;
+const A1SteadyMasteryPerBeacon = charTalentTables.Mitya.a1.p1;
+const A4CritRatePerStack = percent(charTalentTables.Mitya.a4.p1);
 const A4MaxStacks = 4;
-const JubileeBasePerMastery = 0.028;
-const JubileeBaseCap = 14;
-const C1CritDmg = 40;
-const C2ResistanceReduction = -20;
-const C2SteadyMastery = 123;
-const C2OverloadedMastery = 234;
-const C4MasteryDmg = 300;
-const C6SteadyCoreDmgMultiplier = 1.15;
-const C6StellarConductElevation = 20;
+const JubileeBasePerMastery = percent(charTalentTables.Mitya.a0.p1);
+const JubileeBaseCap = percent(charTalentTables.Mitya.a0.p2);
+const C1CritDmg = percent(charTalentTables.Mitya.c1.p1);
+const C2ResistanceReduction = -percent(charTalentTables.Mitya.c2.p1);
+const C2SteadyMastery = charTalentTables.Mitya.c2.p2;
+const C2OverloadedMastery = charTalentTables.Mitya.c2.p3;
+const C4MasteryDmg = percent(charTalentTables.Mitya.c4.p1);
+const C6StellarConductElevation = percent(charTalentTables.Mitya.c6.p2);
+const C6SteadyCoreDmgMultiplier = plus(1, charTalentTables.Mitya.c6.p3);
 
 const coreName = 'mitya_detection_core';
 const beaconsName = 'mitya_gradient_beacons';
-const partyCoreName = 'party.mitya_detection_core';
-const partyBeaconsName = 'party.mitya_gradient_beacons';
+const a4StacksName = 'mitya_safe_limits_exceeded';
 
 const maxBeacons = (settings) => (settings.char_constellation || 0) >= 1 ? C1BeaconMax : BeaconMax;
-
-function coreDropdown(name, serializeId, rotation) {
-    return new ConditionDropdown({
-        name: name,
-        serializeId: serializeId,
-        title: 'talent_name.n11360002',
-        description: 'talent_descr.n11360002',
-        rotation: rotation,
-        dropdownClass: 'medium-text',
-        separateControlLine: true,
-        values: [
-            {
-                title_str: 'talent_name.mitya_detection_core_steady',
-                value: 'steady',
-                serializeId: 1,
-                conditions: [],
-            },
-            {
-                title_str: 'talent_name.mitya_detection_core_overloaded',
-                value: 'overloaded',
-                serializeId: 2,
-                conditions: [],
-            },
-        ],
-    });
-}
 
 const corePresent = () => new ConditionBoolean({name: coreName});
 const steadyCore = () => new ConditionBooleanDropdownValue({name: coreName, value: 'steady'});
 const overloadedCore = () => new ConditionBooleanDropdownValue({name: coreName, value: 'overloaded'});
-const partyCorePresent = () => new ConditionBoolean({name: partyCoreName});
-const partySteadyCore = () => new ConditionBooleanDropdownValue({name: partyCoreName, value: 'steady'});
-const partyOverloadedCore = () => new ConditionBooleanDropdownValue({name: partyCoreName, value: 'overloaded'});
 const hasBeacon = () => new ConditionBooleanValue({setting: beaconsName, cond: 'ge', value: 1});
+// "Your own active character": the team's on-field member, Mitya included.
+const activeRecipient = () => new ConditionReceiver({condition: new ConditionOnField()});
+const inPolestarField = () => new ConditionTeam({condition: new ConditionBoolean({name: 'polestar_field'})});
 
 // Detection Core: Steady State damage is 115% of its original DMG at C6.
 const c6SteadyCore = () => new ConditionAnd([
@@ -177,7 +159,31 @@ const a1MasteryTable = () => new StatTable(
     [0, 1, 2, 3, 4, 5].map((beacons) => beacons * A1SteadyMasteryPerBeacon),
 );
 
+// A4 Explosive Reagent: Safe Limits Exceeded: "Mitya's CRIT Rate increases
+// by 5% ... This effect can stack up to 4 times." Game data:
+// Avatar_Mitya_PermanentSkill_2, Mitya_T2_CritBuff writes
+// Actor_CriticalExtraDelta: a flat bonus in the extra part, so it is a
+// post-effect (a condition's stats are always premod; md/buff_chains.md).
+const a4CritPost = new PostEffectStatsStatic({
+    percent: new StatTable('crit_rate', [A4CritRatePerStack]),
+    stacksSetting: a4StacksName,
+    conditions: [
+        new ConditionAscensionChar({ascension: 4}),
+        new ConditionBooleanValue({setting: a4StacksName, cond: 'ge', value: 1}),
+    ],
+});
+
+// Stellar Jubilee: Top-Secret Protocol: "the Base Stellar-Conduct DMG dealt
+// by all nearby party members will be increased based on Mitya's Elemental
+// Mastery: Every point ... by 0.028%. The maximum ... is 14%." Game data:
+// Avatar_Mitya_PermanentSkill_3 sets it with
+// SetNewElementReactionBaseDamageRatioParam (propType Mastery;
+// AS_AttackTransferRatio, AS_MaxTransRatio), which names no premod or total
+// read. The same call reads the total stat in game (Ineffa's Benediction,
+// in-game test: md/buff_chains.md): extra Elemental Mastery counts.
 const jubileeBasePost = new PostEffectStatsMastery({
+    receivers: RECEIVERS.TEAM,
+    reads: CHANNELS.TOTAL,
     percent: new StatTable('stellarconduct_multi', [JubileeBasePerMastery]),
     statCap: new ValueTable([JubileeBaseCap]),
 });
@@ -326,7 +332,13 @@ export const Mitya = new DbObjectChar({
             postEffect: jubileeBasePost,
             format: 'percent',
         }),
-        // One instance for every five Beacons consumed while a core is on the field.
+        // One instance for every five Beacons consumed while a core is on
+        // the field. The core deals it, so C6's Steady State bonus ("Detection
+        // Core deals 115% of its original DMG") applies. Game data:
+        // Avatar_Mitya_Constellation_4, Mitya_C4_ExtraAttack multiplies the
+        // hit by AS_Constellation_6_StableDamageUp in the core's Steady
+        // State (ability_channels.txt: c4.p1, c6.p3). The released
+        // calculator leaves the 115% out.
         new FeatureDamageStellarConduct({
             category: 'other',
             name: 'mitya_the_isotopes_born_of_decay_stellarconduct',
@@ -336,6 +348,9 @@ export const Mitya = new DbObjectChar({
                     scaling: 'mastery*',
                     source: 'constellation4',
                     values: new ValueTable([C4MasteryDmg]),
+                    scalingMultiplier: C6SteadyCoreDmgMultiplier,
+                    scalingSource: 'constellation6',
+                    scalingMultiplierCondition: c6SteadyCore(),
                 }),
             ],
             condition: new ConditionAnd([
@@ -345,12 +360,37 @@ export const Mitya = new DbObjectChar({
         }),
     ],
     conditions: [
+        // "When party members trigger Superconduct, it will be changed to
+        // Stellar-Conduct."
         new Condition({
+            receivers: RECEIVERS.TEAM,
             settings: {
                 allowed_stellarconduct: 1,
             },
         }),
-        coreDropdown(coreName, 1, 'self'),
+        new ConditionDropdown({
+            name: coreName,
+            serializeId: 1,
+            title: 'talent_name.n11360002',
+            description: 'talent_descr.n11360002',
+            rotation: 'self',
+            dropdownClass: 'medium-text',
+            separateControlLine: true,
+            values: [
+                {
+                    title_str: 'talent_name.mitya_detection_core_steady',
+                    value: 'steady',
+                    serializeId: 1,
+                    conditions: [],
+                },
+                {
+                    title_str: 'talent_name.mitya_detection_core_overloaded',
+                    value: 'overloaded',
+                    serializeId: 2,
+                    conditions: [],
+                },
+            ],
+        }),
         new ConditionNumber({
             name: beaconsName,
             serializeId: 2,
@@ -369,8 +409,14 @@ export const Mitya = new DbObjectChar({
             info: {ascension: 1},
             condition: new ConditionAscensionChar({ascension: 1}),
         }),
+        // A1 Baseline Stress Test: "Steady State: All nearby party members
+        // gain 30 Elemental Mastery for each Gradient Beacon Mitya has."
+        // Game data: Avatar_Mitya_PermanentSkill_1,
+        // UNIQUE_Mitya_PS1_TeamMasteryBuff writes Actor_ElemMasteryDelta
+        // (premod), no stat read: a flat condition needs nothing.
         new ConditionStaticLevel({
             isHidden: true,
+            receivers: RECEIVERS.TEAM,
             levelSetting: beaconsName,
             fromZero: true,
             stats: [a1MasteryTable()],
@@ -379,15 +425,16 @@ export const Mitya = new DbObjectChar({
                 steadyCore(),
             ]),
         }),
+        // Its CRIT Rate is a4CritPost.
         new ConditionStacks({
-            name: 'mitya_safe_limits_exceeded',
+            name: a4StacksName,
             serializeId: 3,
             title: 'talent_name.mitya_safe_limits_exceeded',
             description: 'talent_descr.mitya_safe_limits_exceeded',
             info: {ascension: 4},
             rotation: 'self',
             maxStacks: A4MaxStacks,
-            stats: [
+            displayStats: [
                 new StatTable('crit_rate', [A4CritRatePerStack]),
             ],
             condition: new ConditionAscensionChar({ascension: 4}),
@@ -398,21 +445,39 @@ export const Mitya = new DbObjectChar({
         }),
     ],
     postEffects: [
+        a4CritPost,
         jubileeBasePost,
     ],
     constellation: new DbObjectConstellation([
         {
             conditions: [
+                // C1: "While the Detection Core is present, your own active
+                // character's CRIT DMG is increased by 40%." Game data:
+                // Avatar_Mitya_Constellation_1,
+                // UNIQUE_Mitya_C1_FrontCritHurt_Effect writes
+                // Actor_CriticalHurtDelta (premod), no stat read.
                 new ConditionBoolean({
                     name: 'mitya_the_observer_seeking_what_is_missing',
                     serializeId: 4,
                     title: 'talent_name.mitya_the_observer_seeking_what_is_missing',
                     description: 'talent_descr.mitya_the_observer_seeking_what_is_missing',
                     rotation: 'self',
-                    stats: {
+                    displayStats: {
                         crit_dmg: C1CritDmg,
                     },
                     condition: corePresent(),
+                }),
+                new Condition({
+                    isHidden: true,
+                    receivers: RECEIVERS.TEAM,
+                    stats: {
+                        crit_dmg: C1CritDmg,
+                    },
+                    condition: new ConditionAnd([
+                        new ConditionBoolean({name: 'mitya_the_observer_seeking_what_is_missing'}),
+                        corePresent(),
+                        activeRecipient(),
+                    ]),
                 }),
             ],
         },
@@ -422,6 +487,9 @@ export const Mitya = new DbObjectChar({
                     title: 'talent_name.mitya_the_matter_that_slumbers_beyond_inertness',
                     description: 'talent_descr.mitya_the_matter_that_slumbers_beyond_inertness',
                 }),
+                // "While the Detection Core is present, all opponents within
+                // the Polestar Field have their Cryo RES and Electro RES
+                // decreased by 20%": the enemy's, for the whole team.
                 new Condition({
                     isHidden: true,
                     stats: {
@@ -430,26 +498,45 @@ export const Mitya = new DbObjectChar({
                     },
                     condition: new ConditionAnd([
                         corePresent(),
-                        new ConditionBoolean({name: 'polestar_field'}),
+                        inPolestarField(),
                     ]),
                 }),
+                // "Steady State: All nearby party members gain 123 Elemental
+                // Mastery." Game data: Avatar_Mitya_Constellation_2,
+                // UNIQUE_Mitya_C2_TeamMasteryBuff and
+                // UNIQUE_Mitya_C2_FrontMastery_Effect write
+                // Actor_ElemMasteryDelta (premod), no stat read.
                 new Condition({
                     isHidden: true,
+                    receivers: RECEIVERS.TEAM,
                     stats: {
                         mastery: C2SteadyMastery,
                     },
                     condition: steadyCore(),
                 }),
-                // Overloaded only buffs your own active character.
+                // "Overloaded: Your own active character gains 234 Elemental
+                // Mastery."
                 new ConditionBoolean({
                     name: 'mitya_the_matter_that_slumbers_beyond_inertness',
                     serializeId: 5,
                     title: 'talent_name.mitya_the_matter_that_slumbers_beyond_inertness',
                     rotation: 'self',
-                    stats: {
+                    displayStats: {
                         mastery: C2OverloadedMastery,
                     },
                     condition: overloadedCore(),
+                }),
+                new Condition({
+                    isHidden: true,
+                    receivers: RECEIVERS.TEAM,
+                    stats: {
+                        mastery: C2OverloadedMastery,
+                    },
+                    condition: new ConditionAnd([
+                        new ConditionBoolean({name: 'mitya_the_matter_that_slumbers_beyond_inertness'}),
+                        overloadedCore(),
+                        activeRecipient(),
+                    ]),
                 }),
             ],
         },
@@ -481,7 +568,10 @@ export const Mitya = new DbObjectChar({
         },
         {
             conditions: [
+                // "Stellar-Conduct reaction DMG dealt by all nearby party
+                // members is Elevated by 20%."
                 new ConditionStatic({
+                    receivers: RECEIVERS.TEAM,
                     title: 'talent_name.mitya_elemental_transition_at_the_gate_of_reason',
                     description: 'talent_descr.mitya_elemental_transition_at_the_gate_of_reason',
                     stats: {
@@ -491,120 +581,5 @@ export const Mitya = new DbObjectChar({
             ],
         },
     ]),
-    partyData: {
-        loadStats: {
-            stats: ['mastery_total'],
-        },
-        conditions: [
-            new Condition({
-                settings: {
-                    allowed_stellarconduct: 1,
-                },
-            }),
-            new ConditionNumber({
-                name: 'mitya_mastery_total',
-                serializeId: 1,
-                title: 'talent_name.stats_total_mastery',
-                partyStat: 'mastery_total',
-                max: 10000,
-            }),
-            new ConditionStatic({
-                title: 'talent_name.mitya_top_secret_protocol',
-                description: 'talent_descr.mitya_top_secret_protocol',
-            }),
-            coreDropdown(partyCoreName, 2, 'party'),
-            new ConditionNumber({
-                name: partyBeaconsName,
-                serializeId: 3,
-                title: 'talent_name.mitya_baseline_stress_test',
-                description: 'talent_descr.mitya_baseline_stress_test',
-                info: {ascension: 1},
-                rotation: 'party',
-                min: 0,
-                max: C1BeaconMax,
-                allowMinZero: true,
-                forceSettings: true,
-                noStat: true,
-                condition: partySteadyCore(),
-            }),
-            new ConditionStaticLevel({
-                isHidden: true,
-                levelSetting: partyBeaconsName,
-                fromZero: true,
-                stats: [a1MasteryTable()],
-                condition: partySteadyCore(),
-            }),
-            new ConditionBoolean({
-                name: 'party.mitya_the_observer_seeking_what_is_missing',
-                serializeId: 4,
-                title: 'talent_name.mitya_the_observer_seeking_what_is_missing',
-                description: 'talent_descr.mitya_the_observer_seeking_what_is_missing',
-                info: {constellation: 1},
-                rotation: 'party',
-                stats: {
-                    crit_dmg: C1CritDmg,
-                },
-                condition: partyCorePresent(),
-            }),
-            new ConditionBoolean({
-                name: 'party.mitya_the_matter_that_slumbers_beyond_inertness',
-                serializeId: 5,
-                title: 'talent_name.mitya_the_matter_that_slumbers_beyond_inertness',
-                description: 'talent_descr.mitya_the_matter_that_slumbers_beyond_inertness',
-                info: {constellation: 2},
-                rotation: 'party',
-                condition: partyCorePresent(),
-            }),
-            new Condition({
-                isHidden: true,
-                stats: {
-                    enemy_res_cryo: C2ResistanceReduction,
-                    enemy_res_electro: C2ResistanceReduction,
-                },
-                condition: new ConditionAnd([
-                    new ConditionBoolean({name: 'party.mitya_the_matter_that_slumbers_beyond_inertness'}),
-                    partyCorePresent(),
-                    new ConditionBoolean({name: 'polestar_field'}),
-                ]),
-            }),
-            new Condition({
-                isHidden: true,
-                stats: {
-                    mastery: C2SteadyMastery,
-                },
-                condition: new ConditionAnd([
-                    new ConditionBoolean({name: 'party.mitya_the_matter_that_slumbers_beyond_inertness'}),
-                    partySteadyCore(),
-                ]),
-            }),
-            new Condition({
-                isHidden: true,
-                stats: {
-                    mastery: C2OverloadedMastery,
-                },
-                condition: new ConditionAnd([
-                    new ConditionBoolean({name: 'party.mitya_the_matter_that_slumbers_beyond_inertness'}),
-                    partyOverloadedCore(),
-                ]),
-            }),
-            new ConditionBoolean({
-                name: 'party.mitya_elemental_transition_at_the_gate_of_reason',
-                serializeId: 6,
-                title: 'talent_name.mitya_elemental_transition_at_the_gate_of_reason',
-                description: 'talent_descr.mitya_elemental_transition_at_the_gate_of_reason',
-                info: {constellation: 6},
-                rotation: 'party',
-                stats: {
-                    dmg_stellarconduct_special: C6StellarConductElevation,
-                },
-            }),
-        ],
-        postEffects: [
-            new PostEffectStats({
-                from: 'mitya_mastery_total',
-                percent: new StatTable('stellarconduct_multi', [JubileeBasePerMastery]),
-                statCap: new ValueTable([JubileeBaseCap]),
-            }),
-        ],
-    },
+    retiredParty: [[1, 'number'], [2, 'dropdown'], [3, 'number'], [4, 'checkbox'], [5, 'checkbox'], [6, 'checkbox']],
 });

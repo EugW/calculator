@@ -106,6 +106,7 @@ export class StatsTab extends Tab {
 
         this.id = 'stats';
         this.rightRab = false;
+        this.title = 'tab_header.stat_view';
     }
 
     refresh() {
@@ -558,8 +559,7 @@ class StatsView extends React.Component {
     }
 
     render() {
-        let build = this.props.app.currentSet();
-        let buildData = build.getBuildData();
+        let buildData = this.props.app.getBuildData();
         let stats = buildData.stats;
         buildData.applyPostEffects();
 

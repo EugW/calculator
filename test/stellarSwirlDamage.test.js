@@ -20,9 +20,9 @@ function makeFormulaData(element) {
     const data = new BuildData({
         char_level: 90,
         enemy_level: 100,
-        ['enemy_res_' + element]: 10,
         reaction: 'melt',
     }, {
+        ['enemy__res_' + element]: 0.1,
         atk_base: 1000,
         mastery: 500,
         stellarglimmer_multi: 0.1,
@@ -36,8 +36,8 @@ function makeFormulaData(element) {
         dmg_stellarconduct_special: 9,
         dmg_all: 10,
         ['dmg_' + element]: 10,
-        enemy_def_reduce: 0.9,
-        enemy_def_ignore: 0.9,
+        enemy__def_reduce: 0.9,
+        def_ignore: 0.9,
         crit_rate_base: 1,
         crit_dmg_base: 0.5,
         crit_dmg: 0.1,
@@ -64,10 +64,11 @@ test('Stellar Swirl contribution follows base/additive/Quill/RES/CRIT/elevation 
     ];
 
     const result = feature.getResult(data)['reaction.test_stellarswirl_anemo'];
-    const base = reactionDamageValues.getValue(90) * 0.75 * 0.6;
+    const base = reactionDamageValues.getValue(90) * 0.75;
     const baseBonus = 1 + 0.1 + 0.2;
     const masteryAndAdditive = 1 + 6 * 500 / 2500 + 0.05 + 0.15;
-    const expected = (base * baseBonus * masteryAndAdditive + 100) * 0.9 * 1.3;
+    // The rank weight is of the whole contribution, Quills included.
+    const expected = (base * baseBonus * masteryAndAdditive + 100) * 0.6 * 0.9 * 1.3;
 
     expect(result.normal).toBeCloseTo(expected, 5);
     expect(result.crit).toBeCloseTo(expected * 2.1, 5);
@@ -114,10 +115,11 @@ test('configured Stellar Swirl rows expose coefficients, contribution ranks, tri
 
     const data = new BuildData({
         char_level: 90,
-        enemy_res_cryo: 40,
         allowed_stellarswirl: true,
         char_element: 'cryo',
-    }, {});
+    }, {
+        enemy__res_cryo: 0.4,
+    });
     const result = byName.stellarswirl_vortex_1_contribution.getResult(data)
         ['reaction.stellarswirl_vortex_1_contribution'];
     const expected = reactionDamageValues.getValue(90) * 2 * 0.6 * 0.6;

@@ -2,6 +2,8 @@ import { ConditionStacks } from "../../../classes/Condition/Stacks";
 import { DbObjectWeapon } from "../../../classes/DbObject/Weapon";
 import { StatTable } from "../../../classes/StatTable";
 import { weaponStatTables } from "../../generated/WeaponStatTables";
+import { weaponPassiveTables } from "../../generated/WeaponPassiveTables";
+import { percent } from "../../Params";
 
 export const SkyriderGreatsword = new DbObjectWeapon({
     name: 'skyrider_greatsword',
@@ -20,7 +22,7 @@ export const SkyriderGreatsword = new DbObjectWeapon({
             maxStacks: 4,
             levelSetting: 'weapon_refine',
             stats: [
-                new StatTable('atk_percent', [6, 7, 8, 9, 10]),
+                new StatTable('atk_percent', percent(weaponPassiveTables.SkyriderGreatsword.p1)),
             ],
         })
     ],

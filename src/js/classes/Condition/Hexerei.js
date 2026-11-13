@@ -1,3 +1,5 @@
+import { teamState } from "../Team/Scope";
+
 /**
  * Shared utilities for Hexerei-related conditions.
  * Hexerei characters are those with the "Witch's Homework" passive.
@@ -24,34 +26,15 @@ export function isMainCharHexerei(settings) {
 
 /**
  * Counts how many characters in the party have Witch's Homework enabled.
- * Includes both main character and party members.
+ * Every member's own toggle counts (see TeamState).
  * @param {Object} settings - Build settings
  * @returns {number}
  */
 export function countHexereiInParty(settings) {
-    let count = 0;
-
-    // Check main character
-    if (isMainCharHexerei(settings)) {
-        ++count;
+    const team = teamState(settings);
+    if (team) {
+        return team.countHexerei();
     }
 
-    // Check party characters
-    for (let i = 1; i <= 3; ++i) {
-        const charId = settings['party_char_' + i];
-        if (!charId) continue;
-
-        const char = DB.Chars.getById(charId);
-        if (!char) continue;
-
-        const partyCharName = char.name;
-        if (HEXEREI_CAPABLE_CHARS.includes(partyCharName)) {
-            const partyWitchHomeworkSetting = 'party.' + partyCharName + '_witch_homework';
-            if (settings[partyWitchHomeworkSetting]) {
-                ++count;
-            }
-        }
-    }
-
-    return count;
+    return isMainCharHexerei(settings) ? 1 : 0;
 }

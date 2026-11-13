@@ -7,8 +7,7 @@ import { ConditionBooleanXilonen } from "../../classes/Condition/Boolean/Xilonen
 import { ConditionConstellation } from "../../classes/Condition/Constellation";
 import { ConditionLevels } from "../../classes/Condition/Levels";
 import { ConditionNot } from "../../classes/Condition/Not";
-import { ConditionNumber } from "../../classes/Condition/Number";
-import { ConditionNumberTalent } from "../../classes/Condition/Number/Talent";
+import { ConditionReceiver } from "../../classes/Condition/Receiver";
 import { ConditionStatic } from "../../classes/Condition/Static";
 import { DbObjectChar } from "../../classes/DbObject/Char";
 import { DbObjectConstellation } from "../../classes/DbObject/Constellation";
@@ -25,9 +24,11 @@ import { FeatureMultiplier } from "../../classes/Feature2/Multiplier";
 import { FeatureMultiplierList } from "../../classes/Feature2/Multiplier/List";
 import { FeatureMultiplierTarget } from "../../classes/Feature2/Multiplier/Target";
 import { StatTable } from "../../classes/StatTable";
+import { RECEIVERS } from "../../classes/Team/Receivers";
 import { ValueTable } from "../../classes/ValueTable";
 import { charTables } from "../generated/CharTables";
 import { charTalentTables } from "../generated/CharTalentTables";
+import { percent } from "../Params";
 
 const Talents = new DbObjectTalents({
     attack: {
@@ -153,15 +154,15 @@ const Talents = new DbObjectTalents({
     },
 });
 
-const A1AttackBonus = 30;
-const A4DefBonus = 20;
-const C2GeoBonus = 50;
-const C2PyroAtkPercent = 45;
-const C2HydroHpPercent = 45;
-const C2CryoCritDmg = 60;
-const C4DefDmgBonus = 65;
-const C6DefHeal = 120;
-const C6DefDmgBonus = 300;
+const A1AttackBonus = percent(charTalentTables.Xilonen.a1.p2);
+const A4DefBonus = percent(charTalentTables.Xilonen.a4.p2);
+const C2GeoBonus = percent(charTalentTables.Xilonen.c2.p4);
+const C2PyroAtkPercent = percent(charTalentTables.Xilonen.c2.p1);
+const C2HydroHpPercent = percent(charTalentTables.Xilonen.c2.p2);
+const C2CryoCritDmg = percent(charTalentTables.Xilonen.c2.p3);
+const C4DefDmgBonus = percent(charTalentTables.Xilonen.c4.p1);
+const C6DefHeal = percent(charTalentTables.Xilonen.c6.p4);
+const C6DefDmgBonus = percent(charTalentTables.Xilonen.c6.p2);
 
 export const Xilonen = new DbObjectChar({
     name: 'xilonen',
@@ -381,6 +382,9 @@ export const Xilonen = new DbObjectChar({
     ],
     multipliers: [
         new FeatureMultiplier({
+            // Blooming Blessing raises all nearby party members' Normal,
+            // Charged and Plunging Attack DMG from Xilonen's live DEF.
+            receivers: RECEIVERS.TEAM,
             scaling: 'def*',
             source: 'constellation4',
             values: new ValueTable([C4DefDmgBonus]),
@@ -477,6 +481,8 @@ export const Xilonen = new DbObjectChar({
         }),
         new ConditionLevels({
             levelSetting: 'char_skill_elemental',
+            // Source Samples lower nearby opponents' corresponding RES.
+            receivers: RECEIVERS.TEAM,
             stats: [
                 Talents.getMulti({
                     name: 'enemy_res_geo',
@@ -491,6 +497,8 @@ export const Xilonen = new DbObjectChar({
         }),
         new ConditionLevels({
             levelSetting: 'char_skill_elemental',
+            // Source Samples lower nearby opponents' corresponding RES.
+            receivers: RECEIVERS.TEAM,
             stats: [
                 Talents.getMulti({
                     name: 'enemy_res_pyro',
@@ -505,6 +513,8 @@ export const Xilonen = new DbObjectChar({
         }),
         new ConditionLevels({
             levelSetting: 'char_skill_elemental',
+            // Source Samples lower nearby opponents' corresponding RES.
+            receivers: RECEIVERS.TEAM,
             stats: [
                 Talents.getMulti({
                     name: 'enemy_res_hydro',
@@ -519,6 +529,8 @@ export const Xilonen = new DbObjectChar({
         }),
         new ConditionLevels({
             levelSetting: 'char_skill_elemental',
+            // Source Samples lower nearby opponents' corresponding RES.
+            receivers: RECEIVERS.TEAM,
             stats: [
                 Talents.getMulti({
                     name: 'enemy_res_cryo',
@@ -533,6 +545,8 @@ export const Xilonen = new DbObjectChar({
         }),
         new ConditionLevels({
             levelSetting: 'char_skill_elemental',
+            // Source Samples lower nearby opponents' corresponding RES.
+            receivers: RECEIVERS.TEAM,
             stats: [
                 Talents.getMulti({
                     name: 'enemy_res_electro',
@@ -575,6 +589,64 @@ export const Xilonen = new DbObjectChar({
                     condition: new ConditionAnd([
                         new ConditionBoolean({name: 'xilonen_sampler_geo'}),
                         new ConditionBoolean({name: 'xilonen_active_sampler_geo'}),
+                    ]),
+                }),
+                // Chiucue Mix reaches matching teammates; Xilonen keeps her
+                // own copy above.
+                new Condition({
+                    isHidden: true,
+                    receivers: RECEIVERS.OTHERS,
+                    stats: {
+                        dmg_all: C2GeoBonus,
+                    },
+                    condition: new ConditionAnd([
+                        new ConditionBoolean({name: 'xilonen_sampler_geo'}),
+                        new ConditionBoolean({name: 'xilonen_active_sampler_geo'}),
+                        new ConditionReceiver({
+                            condition: new ConditionBooleanCharElement({element: ['geo']}),
+                        }),
+                    ]),
+                }),
+                new Condition({
+                    isHidden: true,
+                    receivers: RECEIVERS.OTHERS,
+                    stats: {
+                        atk_percent: C2PyroAtkPercent,
+                    },
+                    condition: new ConditionAnd([
+                        new ConditionBoolean({name: 'xilonen_sampler_pyro'}),
+                        new ConditionBoolean({name: 'xilonen_active_sampler_pyro'}),
+                        new ConditionReceiver({
+                            condition: new ConditionBooleanCharElement({element: ['pyro']}),
+                        }),
+                    ]),
+                }),
+                new Condition({
+                    isHidden: true,
+                    receivers: RECEIVERS.OTHERS,
+                    stats: {
+                        hp_percent: C2HydroHpPercent,
+                    },
+                    condition: new ConditionAnd([
+                        new ConditionBoolean({name: 'xilonen_sampler_hydro'}),
+                        new ConditionBoolean({name: 'xilonen_active_sampler_hydro'}),
+                        new ConditionReceiver({
+                            condition: new ConditionBooleanCharElement({element: ['hydro']}),
+                        }),
+                    ]),
+                }),
+                new Condition({
+                    isHidden: true,
+                    receivers: RECEIVERS.OTHERS,
+                    stats: {
+                        crit_dmg: C2CryoCritDmg,
+                    },
+                    condition: new ConditionAnd([
+                        new ConditionBoolean({name: 'xilonen_sampler_cryo'}),
+                        new ConditionBoolean({name: 'xilonen_active_sampler_cryo'}),
+                        new ConditionReceiver({
+                            condition: new ConditionBooleanCharElement({element: ['cryo']}),
+                        }),
                     ]),
                 }),
             ],
@@ -621,205 +693,5 @@ export const Xilonen = new DbObjectChar({
             ],
         },
     ]),
-    partyData: {
-        loadStats: {
-            stats: ['def_total'],
-            settings: ['char_skill_elemental'],
-        },
-        conditions: [
-            new ConditionNumber({
-                name: 'xilonen_def_total',
-                title: 'talent_name.stats_total_def',
-                partyStat: 'def_total',
-                serializeId: 7,
-                rotation: 'party',
-                max: 10000,
-            }),
-            new ConditionNumberTalent({
-                name: 'xilonen_char_skill_elemental',
-                title: 'talent_name.stats_level_skill',
-                partySetting: 'char_skill_elemental',
-                serializeId: 1,
-            }),
-            new ConditionBoolean({
-                name: 'party.xilonen_constellation_3',
-                serializeId: 2,
-                title: 'talent_name.xilonen_tonalpohuallis_loop',
-                description: 'talent_descr.char_constellation_skill',
-                info: {constellation: 3},
-                settings: {
-                    xilonen_char_skill_elemental_bonus: 3,
-                },
-            }),
-            new ConditionBoolean({
-                name: 'party.xilonen_blessing_state',
-                serializeId: 3,
-                title: 'talent_name.nightsoul_blessing_state',
-                rotation: 'party',
-                settings: {
-                    xilonen_active_sampler_geo: 1,
-                },
-            }),
-            new ConditionBooleanXilonen({
-                name: 'party.xilonen_samplers',
-                serializeId: 4,
-                title: 'talent_name.xilonen_samplers',
-                description: 'talent_descr.xilonen_samplers',
-                rotation: 'party',
-            }),
-            new ConditionBoolean({
-                name: 'xilonen_chiucue_mix',
-                serializeId: 5,
-                title: 'talent_name.xilonen_chiucue_mix',
-                description: 'talent_descr.xilonen_chiucue_mix',
-                rotation: 'party',
-                info: {constellation: 2},
-                stats: {
-                    text_percent_geo: C2GeoBonus,
-                    text_percent_pyro: C2PyroAtkPercent,
-                    text_percent_hydro: C2HydroHpPercent,
-                    text_percent_cryo: C2CryoCritDmg,
-                },
-                settings: {
-                    xilonen_active_sampler_geo: 1,
-                },
-            }),
-            new ConditionBoolean({
-                name: 'party.xilonen_suchitls_trance',
-                serializeId: 6,
-                title: 'talent_name.xilonen_suchitls_trance',
-                description: 'talent_descr.xilonen_suchitls_trance',
-                rotation: 'party',
-                info: {constellation: 4},
-                stats: {
-                    text_percent_dmg: C4DefDmgBonus,
-                },
-            }),
-            new ConditionLevels({
-                levelSetting: 'xilonen_char_skill_elemental',
-                stats: [
-                    Talents.getMulti({
-                        name: 'enemy_res_geo',
-                        from: 'skill.xilonen_res_decrease',
-                        multi: -1,
-                    }),
-                ],
-                subConditions: [
-                    new ConditionBoolean({name: 'xilonen_sampler_geo'}),
-                    new ConditionBoolean({name: 'xilonen_active_sampler_geo'}),
-                ]
-            }),
-            new ConditionLevels({
-                levelSetting: 'xilonen_char_skill_elemental',
-                stats: [
-                    Talents.getMulti({
-                        name: 'enemy_res_pyro',
-                        from: 'skill.xilonen_res_decrease',
-                        multi: -1,
-                    }),
-                ],
-                subConditions: [
-                    new ConditionBoolean({name: 'xilonen_sampler_pyro'}),
-                    new ConditionBoolean({name: 'xilonen_active_sampler_pyro'}),
-                ]
-            }),
-            new ConditionLevels({
-                levelSetting: 'xilonen_char_skill_elemental',
-                stats: [
-                    Talents.getMulti({
-                        name: 'enemy_res_hydro',
-                        from: 'skill.xilonen_res_decrease',
-                        multi: -1,
-                    }),
-                ],
-                subConditions: [
-                    new ConditionBoolean({name: 'xilonen_sampler_hydro'}),
-                    new ConditionBoolean({name: 'xilonen_active_sampler_hydro'}),
-                ]
-            }),
-            new ConditionLevels({
-                levelSetting: 'xilonen_char_skill_elemental',
-                stats: [
-                    Talents.getMulti({
-                        name: 'enemy_res_cryo',
-                        from: 'skill.xilonen_res_decrease',
-                        multi: -1,
-                    }),
-                ],
-                subConditions: [
-                    new ConditionBoolean({name: 'xilonen_sampler_cryo'}),
-                    new ConditionBoolean({name: 'xilonen_active_sampler_cryo'}),
-                ]
-            }),
-            new ConditionLevels({
-                levelSetting: 'xilonen_char_skill_elemental',
-                stats: [
-                    Talents.getMulti({
-                        name: 'enemy_res_electro',
-                        from: 'skill.xilonen_res_decrease',
-                        multi: -1,
-                    }),
-                ],
-                subConditions: [
-                    new ConditionBoolean({name: 'xilonen_sampler_electro'}),
-                    new ConditionBoolean({name: 'xilonen_active_sampler_electro'}),
-                ]
-            }),
-            new Condition({
-                stats: {
-                    dmg_all: C2GeoBonus,
-                },
-                subConditions: [
-                    new ConditionBoolean({name: 'xilonen_chiucue_mix'}),
-                    new ConditionBoolean({name: 'xilonen_sampler_geo'}),
-                    new ConditionBoolean({name: 'xilonen_active_sampler_geo'}),
-                    new ConditionBooleanCharElement({element: ['geo']}),
-                ],
-            }),
-            new Condition({
-                stats: {
-                    atk_percent: C2PyroAtkPercent,
-                },
-                subConditions: [
-                    new ConditionBoolean({name: 'xilonen_chiucue_mix'}),
-                    new ConditionBoolean({name: 'xilonen_sampler_pyro'}),
-                    new ConditionBoolean({name: 'xilonen_active_sampler_pyro'}),
-                    new ConditionBooleanCharElement({element: ['pyro']}),
-                ],
-            }),
-            new Condition({
-                stats: {
-                    hp_percent: C2HydroHpPercent,
-                },
-                subConditions: [
-                    new ConditionBoolean({name: 'xilonen_chiucue_mix'}),
-                    new ConditionBoolean({name: 'xilonen_sampler_hydro'}),
-                    new ConditionBoolean({name: 'xilonen_active_sampler_hydro'}),
-                    new ConditionBooleanCharElement({element: ['hydro']}),
-                ],
-            }),
-            new Condition({
-                stats: {
-                    crit_dmg: C2CryoCritDmg,
-                },
-                subConditions: [
-                    new ConditionBoolean({name: 'xilonen_chiucue_mix'}),
-                    new ConditionBoolean({name: 'xilonen_sampler_cryo'}),
-                    new ConditionBoolean({name: 'xilonen_active_sampler_cryo'}),
-                    new ConditionBooleanCharElement({element: ['cryo']}),
-                ],
-            }),
-        ],
-        multipliers: [
-            new FeatureMultiplier({
-                scaling: 'xilonen_def_total',
-                source: 'xilonen',
-                values: new ValueTable([C4DefDmgBonus]),
-                condition: new ConditionBoolean({name: 'party.xilonen_suchitls_trance'}),
-                target: new FeatureMultiplierTarget({
-                    damageTypes: ['normal', 'charged', 'plunge'],
-                }),
-            }),
-        ],
-    },
+    retiredParty: [[1, 'number'], [2, 'checkbox'], [3, 'checkbox'], [4, 'checkbox'], [5, 'checkbox'], [6, 'checkbox'], [7, 'number']],
 });

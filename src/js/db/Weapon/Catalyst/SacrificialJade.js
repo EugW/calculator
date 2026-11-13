@@ -2,6 +2,8 @@ import { ConditionBooleanRefine } from "../../../classes/Condition/Boolean/Refin
 import { DbObjectWeapon } from "../../../classes/DbObject/Weapon";
 import { StatTable } from "../../../classes/StatTable";
 import { weaponStatTables } from "../../generated/WeaponStatTables";
+import { weaponPassiveTables } from "../../generated/WeaponPassiveTables";
+import { percent } from "../../Params";
 
 export const SacrificialJade = new DbObjectWeapon({
     name: 'sacrificial_jade',
@@ -18,8 +20,8 @@ export const SacrificialJade = new DbObjectWeapon({
             title: 'talent_name.weapon_sacrificial_jade',
             description: 'talent_descr.weapon_sacrificial_jade',
             stats: [
-                new StatTable('hp_percent', [32, 40, 48, 56, 64]),
-                new StatTable('mastery', [40, 50, 60, 70, 80]),
+                new StatTable('hp_percent', percent(weaponPassiveTables.SacrificialJade.p3)),
+                new StatTable('mastery', weaponPassiveTables.SacrificialJade.p4),
             ],
         }),
     ],

@@ -4,7 +4,6 @@ import { ConditionAscensionChar } from "../../classes/Condition/Ascension/Char";
 import { ConditionBoolean } from "../../classes/Condition/Boolean";
 import { ConditionNot } from "../../classes/Condition/Not";
 import { ConditionNumber } from "../../classes/Condition/Number";
-import { ConditionNumberTalent } from "../../classes/Condition/Number/Talent";
 import { ConditionStatic } from "../../classes/Condition/Static";
 import { DbObjectChar } from "../../classes/DbObject/Char";
 import { DbObjectConstellation } from "../../classes/DbObject/Constellation";
@@ -25,8 +24,10 @@ import { PostEffectStats } from "../../classes/PostEffect/Stats";
 import { PostEffectStatsExceedRecharge } from "../../classes/PostEffect/Stats/ExceedRecharge";
 import { StatTable } from "../../classes/StatTable";
 import { ValueTable } from "../../classes/ValueTable";
+import { RECEIVERS } from "../../classes/Team/Receivers";
 import { charTables } from "../generated/CharTables";
 import { charTalentTables } from "../generated/CharTalentTables";
+import { percent, times } from "../Params";
 
 const Talents = new DbObjectTalents({
     attack: {
@@ -183,20 +184,39 @@ const Talents = new DbObjectTalents({
 });
 
 const burstDmgPost = new PostEffectStats({
+    receivers: RECEIVERS.TEAM,
     levelSetting: 'char_skill_elemental',
+    // Game data: Avatar_Shougun_Elf/UNIQUE_Shougun_Elf_LocalHandler copies
+    // each holder's FIGHT_PROP_MAX_FIRE_ENERGY into
+    // _ABILITY_Shougun_LocalAvatarEnergy, and
+    // UNIQUE_Shougun_Elf_BurstDamageHandler scales burst hits on it. Energy
+    // cost is a static property nothing writes, so the default channels hold.
     from: 'burst_energy_cost',
+    fromScope: 'receiver',
     percent: Talents.getAlias('skill.baal_burst_bonus', 'dmg_burst'),
     conditions: [
         new ConditionBoolean({name: 'baal_eye_of_stormy_judgment'}),
     ],
 });
 
+// A4: per 1% of Energy Recharge above 100%; both uses take the value per 100%.
+const A4ElectroDmgPerRecharge = times(percent(charTalentTables.RaidenShogun.a4.p3), 100);
+const A4EnergyRestorePerRecharge = times(percent(charTalentTables.RaidenShogun.a4.p2), 100);
+
+// Game data: Avatar_Shougun_Talent_ChargeEfficiencyToElecAddHurt reads
+// FIGHT_PROP_NONEXTRA_CHARGE_EFFICIENCY (premod) and writes
+// Actor_ElecAddHurtExtraDelta (extra): the defaults. KQM (weapons, Xiphos and
+// Raiden A4 Interactions; Electro Traveler): Xiphos and amulet ER affect
+// neither part of her A4.
 const electroDmgPost = new PostEffectStatsExceedRecharge({
-    percent: new StatTable('dmg_electro', [40]),
+    percent: new StatTable('dmg_electro', [A4ElectroDmgPerRecharge]),
     conditions: [
         new ConditionAscensionChar({ascension: 4}),
     ],
 });
+
+const C2DefIgnore = percent(charTalentTables.RaidenShogun.c2.p1);
+const C4Atk = percent(charTalentTables.RaidenShogun.c4.p1);
 
 export const RaidenShogun = new DbObjectChar({
     name: 'raiden_shogun',
@@ -604,11 +624,17 @@ export const RaidenShogun = new DbObjectChar({
                     values: new ValueTable([1]),
                 }),
                 new FeatureMultiplier({
-                    scaling: 'recharge*',
+                    // Game data: Avatar_Shougun_ElementalBurst /
+                    // UNIQUE_Shougun_Tachi_ReviveEnergy_Handler computes
+                    // ExtraReviveEnergy_ValidProp from
+                    // FIGHT_PROP_NONEXTRA_CHARGE_EFFICIENCY (premod), so extra
+                    // ER (Xiphos, Electro Traveler amulet) restores nothing
+                    // (KQM weapons evidence; Astra's +20%-extra-ER probe).
+                    scaling: 'recharge~',
                     leveling: 'char_skill_elemental',
                     values: Talents.getMulti({
                         from: 'burst.baal_energy_recharge',
-                        multi: 60,
+                        multi: A4EnergyRestorePerRecharge,
                     }),
                 }),
             ],
@@ -699,7 +725,7 @@ export const RaidenShogun = new DbObjectChar({
                     title: 'talent_name.raiden_shogun_steelbreaker',
                     description: 'talent_descr.raiden_shogun_steelbreaker',
                     stats: {
-                        enemy_def_ignore_burst: 60,
+                        def_ignore_burst: C2DefIgnore,
                     },
                 }),
             ],
@@ -715,13 +741,21 @@ export const RaidenShogun = new DbObjectChar({
         },
         {
             conditions: [
-                new ConditionStatic({
+                // Game data: Avatar_Shougun_Talent_BuffAfterKatana writes
+                // Actor_AttackRatio (no "Extra" = premod), matching toggle
+                // stats, which are always premod.
+                new ConditionBoolean({
+                    name: 'raiden_shogun_pledge_of_propriety',
+                    serializeId: 4,
+                    receivers: RECEIVERS.OTHERS,
                     title: 'talent_name.raiden_shogun_pledge_of_propriety',
                     description: 'talent_descr.raiden_shogun_pledge_of_propriety',
                     stats: {
-                        text_percent: 30,
+                        atk_percent: C4Atk,
                     },
+                    displayStats: {text_percent: C4Atk},
                 }),
+                new Condition({stats: {text_percent: C4Atk}}),
             ],
         },
         {
@@ -742,57 +776,5 @@ export const RaidenShogun = new DbObjectChar({
             ],
         },
     ]),
-    partyData: {
-        loadStats: {
-            settings: ['char_skill_elemental'],
-        },
-        conditions: [
-            new ConditionNumberTalent({
-                name: 'baal_char_skill_elemental',
-                title: 'talent_name.stats_level_skill',
-                partySetting: 'char_skill_elemental',
-                serializeId: 1,
-            }),
-            new ConditionBoolean({
-                name: 'party.baal_eye_of_stormy_judgment',
-                serializeId: 2,
-                rotation: 'party',
-                title: 'talent_name.baal_eye_of_stormy_judgment',
-                description: 'talent_descr.baal_eye_of_stormy_judgment',
-            }),
-            new ConditionBoolean({
-                name: 'party.raiden_shogun_pledge_of_propriety',
-                serializeId: 5,
-                rotation: 'party',
-                title: 'talent_name.raiden_shogun_pledge_of_propriety',
-                description: 'talent_descr.raiden_shogun_pledge_of_propriety',
-                info: {constellation: 4},
-                stats: {
-                    atk_percent: 30,
-                    text_percent: 30,
-                },
-            }),
-            new ConditionBoolean({
-                name: 'party.baal_constellation_5',
-                serializeId: 3,
-                title: 'talent_name.raiden_shogun_shoguns_descent',
-                description: 'talent_descr.char_constellation_skill',
-                info: {constellation: 5},
-                settings: {
-                    baal_char_skill_elemental_bonus: 3,
-                },
-            }),
-        ],
-        postEffects: [
-            new PostEffectStats({
-                levelSetting: 'baal_char_skill_elemental',
-                maxLevelSetting: 10,
-                from: 'burst_energy_cost',
-                percent: Talents.getAlias('skill.baal_burst_bonus', 'dmg_burst'),
-                conditions: [
-                    new ConditionBoolean({name: 'party.baal_eye_of_stormy_judgment'}),
-                ],
-            })
-        ],
-    },
+    retiredParty: [[1, 'number'], [2, 'checkbox'], [5, 'checkbox'], [3, 'checkbox']],
 });

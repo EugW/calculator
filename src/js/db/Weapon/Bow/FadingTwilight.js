@@ -4,6 +4,8 @@ import { ConditionStaticRefine } from "../../../classes/Condition/Static/Refine"
 import { DbObjectWeapon } from "../../../classes/DbObject/Weapon";
 import { StatTable } from "../../../classes/StatTable";
 import { weaponStatTables } from "../../generated/WeaponStatTables";
+import { weaponPassiveTables } from "../../generated/WeaponPassiveTables";
+import { percent } from "../../Params";
 
 export const FadingTwilight = new DbObjectWeapon({
     name: 'fading_twilight',
@@ -34,7 +36,7 @@ export const FadingTwilight = new DbObjectWeapon({
             title: 'talent_name.weapon_fading_twilight_1',
             description: 'talent_descr.weapon_fading_twilight_dmg',
             stats: [
-                new StatTable('dmg_all', [6, 7.5, 9, 10.5, 12]),
+                new StatTable('dmg_all', percent(weaponPassiveTables.FadingTwilight.p2)),
             ],
             subConditions: [
                 new ConditionBooleanRefine({
@@ -53,7 +55,7 @@ export const FadingTwilight = new DbObjectWeapon({
             title: 'talent_name.weapon_fading_twilight_2',
             description: 'talent_descr.weapon_fading_twilight_dmg',
             stats: [
-                new StatTable('dmg_all', [10, 12.5, 17, 17.5, 20]),
+                new StatTable('dmg_all', percent(weaponPassiveTables.FadingTwilight.p3)),
             ],
             subConditions: [
                 new ConditionBooleanRefine({
@@ -72,7 +74,7 @@ export const FadingTwilight = new DbObjectWeapon({
             title: 'talent_name.weapon_fading_twilight_3',
             description: 'talent_descr.weapon_fading_twilight_dmg',
             stats: [
-                new StatTable('dmg_all', [14, 17.5, 21, 24.5, 28]),
+                new StatTable('dmg_all', percent(weaponPassiveTables.FadingTwilight.p4)),
             ],
             subConditions: [
                 new ConditionBooleanRefine({

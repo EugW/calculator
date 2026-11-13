@@ -74,10 +74,6 @@ export class ArtifactGeneratorSettings extends React.Component {
         this.changeSettings({kqms: value});
     }
 
-    handleSetSettings(settings) {
-        this.changeSettings({required_sets_settings: settings});
-    }
-
     render() {
         let settings = this.props.settings || {};
 
@@ -87,11 +83,9 @@ export class ArtifactGeneratorSettings extends React.Component {
                     title={lang.get('art_gen.set_bonus')}
                     set1={settings.required_sets ? settings.required_sets.set1 : ''}
                     set2={settings.required_sets ? settings.required_sets.set2 : ''}
-                    settings={settings.required_sets_settings || {}}
                     onChange={(slot, name) => this.handleRequiredSets(slot, name)}
                     onReset={() => this.handleRequiredSetsReset()}
                     minRarity={5}
-                    showSettingsCallback={(settings) => this.handleSetSettings(settings)}
                 />
                 <GroupBox title={lang.get('art_gen.conditions')}>
                 <div className="line">
@@ -186,7 +180,6 @@ export function generatorSettings(settings) {
         mode: settings.rollMode,
         minRecharge: settings.minRecharge,
         kqms: settings.kqms,
-        required_sets_settings: settings.required_sets_settings,
     };
 }
 
@@ -201,7 +194,6 @@ export function getDefaultSettings() {
             set1: '',
             set2: '',
         },
-        required_sets_settings: {},
     };
 }
 
@@ -216,6 +208,5 @@ export function cloneSettings(settings) {
             set1: settings.required_sets.set1 || '',
             set2: settings.required_sets.set2 || '',
         },
-        required_sets_settings: Object.assign({}, settings.required_sets_settings),
     };
 }

@@ -1,6 +1,7 @@
 import { Artifact } from '../src/js/classes/Artifact';
 import { ArtifactsSuggest, buildFusedOutcomeRegions } from '../src/js/classes/ArtifactsSuggest';
 import { CalcSet } from '../src/js/classes/CalcSet';
+import { Team } from '../src/js/classes/Team';
 import { DB } from '../src/js/db/DB';
 import { evaluateArtifactActionPredictions } from '../src/js/classes/ArtifactActionPredictor';
 import { artifactMatchesRV, normalizeArtifactRVRange } from '../src/js/classes/ArtifactUsefulRV';
@@ -22,7 +23,7 @@ const mains = {flower: 'hp', plume: 'atk', sands: 'atk_percent', goblet: 'dmg_ph
 function setup() {
     const baseBuild = new CalcSet();
     baseBuild.setChar(DB.Chars.get('Jean'));
-    baseBuild.setEnemy(DB.Enemies.getFirst().getFirst());
+    Team.fromMember(baseBuild);
     const inventory = Object.entries(mains).map(([slot, main]) => new Artifact(5, 20, slot, 'GladiatorFinale', main, []));
     inventory.forEach(artifact => baseBuild.setArtifact(artifact));
     return {baseBuild, inventory, feature: 'stats.crit_dmg', retainOutcomes: true, useGPU: false};

@@ -2,6 +2,8 @@ import { ConditionBooleanRefine } from "../../../classes/Condition/Boolean/Refin
 import { DbObjectWeapon } from "../../../classes/DbObject/Weapon";
 import { StatTable } from "../../../classes/StatTable";
 import { weaponStatTables } from "../../generated/WeaponStatTables";
+import { weaponPassiveTables } from "../../generated/WeaponPassiveTables";
+import { percent } from "../../Params";
 
 export const BriefPavilionChatter = new DbObjectWeapon({
     name: 'brief_pavilion_chatter',
@@ -18,8 +20,8 @@ export const BriefPavilionChatter = new DbObjectWeapon({
             title: 'talent_name.weapon_brief_pavilion_chatter',
             description: 'talent_descr.weapon_brief_pavilion_chatter',
             stats: [
-                new StatTable('atk_percent', [20, 25, 30, 35, 40]),
-                new StatTable('move_speed', [10]),
+                new StatTable('atk_percent', percent(weaponPassiveTables.BriefPavilionChatter.p1)),
+                new StatTable('move_speed', [percent(weaponPassiveTables.BriefPavilionChatter.p2[0])]),
             ],
         }),
     ],

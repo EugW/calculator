@@ -2,6 +2,7 @@ import { ConditionBoolean } from "../../classes/Condition/Boolean";
 import { ConditionDropdownElement } from "../../classes/Condition/Dropdown/Element";
 import { ConditionEnemyStatus } from "../../classes/Condition/Boolean/EnemyStatus";
 import { ConditionBooleanWeaponType } from "../../classes/Condition/Boolean/WeaponType";
+import { ConditionNumber } from "../../classes/Condition/Number";
 
 export const Enemy = [
     new ConditionDropdownElement({
@@ -70,6 +71,17 @@ export const Enemy = [
         stats: {
             'enemy_res_phys': -40,
         },
+    }),
+    // DEF reductions the calculator does not model, in addition to the
+    // members' (a custom buff before the enemy belonged to the team).
+    new ConditionNumber({
+        name: 'enemy.def_reduce',
+        serializeId: 21,
+        title: 'talent_name.enemy_def_reduce',
+        description: 'talent_descr.enemy_def_reduce',
+        stat: 'enemy_def_reduce',
+        format: 'decimal',
+        max: 100,
     }),
     new ConditionBoolean({
         name: 'enemy_weak_shot',

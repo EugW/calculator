@@ -5,6 +5,8 @@ import { ConditionStaticRefineWaveridingWhirl } from "../../../classes/Condition
 import { DbObjectWeapon } from "../../../classes/DbObject/Weapon";
 import { StatTable } from "../../../classes/StatTable";
 import { weaponStatTables } from "../../generated/WeaponStatTables";
+import { weaponPassiveTables } from "../../generated/WeaponPassiveTables";
+import { percent } from "../../Params";
 import { atkTables } from "../AtkTables";
 
 export const WaveridingWhirl = new DbObjectWeapon({
@@ -20,7 +22,7 @@ export const WaveridingWhirl = new DbObjectWeapon({
             title: 'talent_name.waveriding_whirl',
             description: 'talent_descr.waveriding_whirl_1',
             stats: [
-                new StatTable('text_percent', [15]),
+                new StatTable('text_percent', [percent(weaponPassiveTables.WaveridingWhirl.p1[0])]),
             ],
         }),
         new ConditionBooleanRefine({
@@ -29,7 +31,7 @@ export const WaveridingWhirl = new DbObjectWeapon({
             title: 'talent_name.waveriding_whirl',
             description: 'talent_descr.waveriding_whirl_2',
             stats: [
-                new StatTable('hp_percent', [20, 25, 30, 35, 40]),
+                new StatTable('hp_percent', percent(weaponPassiveTables.WaveridingWhirl.p2)),
             ],
         }),
         new ConditionStaticRefineWaveridingWhirl({
@@ -38,12 +40,12 @@ export const WaveridingWhirl = new DbObjectWeapon({
             levelSetting: 'weapon_refine',
             effectLevelSetting: 'party_elements_different',
             stats: [
-                new StatTable('text_percent', [12, 15, 18, 21, 24]),
+                new StatTable('text_percent', percent(weaponPassiveTables.WaveridingWhirl.p5)),
                 new StatTable('text_percent_max', [24, 30, 36, 42, 48]),
             ],
             realStats: [
                 new StatTable('', [
-                    new StatTable('hp_percent', [12, 15, 18, 21, 24]),
+                    new StatTable('hp_percent', percent(weaponPassiveTables.WaveridingWhirl.p5)),
                     new StatTable('hp_percent', [24, 30, 36, 42, 48]),
                 ]),
             ],

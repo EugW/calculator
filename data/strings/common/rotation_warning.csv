@@ -1,0 +1,4 @@
+category;name;rus;eng
+rotation_warning;same_state;состояние не изменилось;same state as before
+rotation_warning;branch_on;при активном эффекте uptime;with the uptime buff active
+rotation_warning;branch_off;при неактивном эффекте uptime;with the uptime buff inactive

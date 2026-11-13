@@ -3,7 +3,6 @@ import { ConditionAscensionChar } from "../../classes/Condition/Ascension/Char";
 import { ConditionBoolean } from "../../classes/Condition/Boolean";
 import { ConditionConstellation } from "../../classes/Condition/Constellation";
 import { ConditionDropdownElement } from "../../classes/Condition/Dropdown/Element";
-import { ConditionNumber } from "../../classes/Condition/Number";
 import { ConditionStatic } from "../../classes/Condition/Static";
 import { DbObjectChar } from "../../classes/DbObject/Char";
 import { DbObjectConstellation } from "../../classes/DbObject/Constellation";
@@ -12,18 +11,19 @@ import { FeatureDamageBurst } from "../../classes/Feature2/Damage/Burst";
 import { FeatureDamageCharged } from "../../classes/Feature2/Damage/Charged";
 import { FeatureDamageMultihit } from "../../classes/Feature2/Damage/Multihit";
 import { FeatureDamageNormal } from "../../classes/Feature2/Damage/Normal";
-import { FeatureDamagePlunge } from "../../classes/Feature2/Damage/Plunge";
 import { FeatureDamagePlungeCollision } from "../../classes/Feature2/Damage/Plunge/Collision";
 import { FeatureDamagePlungeShockWave } from "../../classes/Feature2/Damage/Plunge/ShockWave";
 import { FeatureDamageSkill } from "../../classes/Feature2/Damage/Skill";
 import { FeatureMultiplier } from "../../classes/Feature2/Multiplier";
 import { FeaturePostEffectValue } from "../../classes/Feature2/PostEffectValue";
-import { PostEffectStats } from "../../classes/PostEffect/Stats";
+import { CHANNELS } from "../../classes/PostEffect/Channels";
 import { PostEffectStatsMastery } from "../../classes/PostEffect/Stats/Mastery";
 import { StatTable } from "../../classes/StatTable";
+import { RECEIVERS } from "../../classes/Team/Receivers";
 import { ValueTable } from "../../classes/ValueTable";
 import { charTables } from "../generated/CharTables";
 import { charTalentTables } from "../generated/CharTalentTables";
+import { percent } from "../Params";
 
 const Talents = new DbObjectTalents({
     attack: {
@@ -128,14 +128,22 @@ const Talents = new DbObjectTalents({
 });
 
 const TalentValues = {
-    A1PlungeDmg: 200,
-    A4ElementalBonus: 0.04,
+    A1PlungeDmg: percent(charTalentTables.Kazuha.a1.p1),
+    A4ElementalBonus: percent(charTalentTables.Kazuha.a4.p1),
     C1SkillCd: 10,
-    C2Mastery: 200,
-    C6DmgBonus: 0.2,
+    C2Mastery: charTalentTables.Kazuha.c2.p1,
+    C6DmgBonus: percent(charTalentTables.Kazuha.c6.p1),
 };
 
+// C6 Crimson Momiji: Normal/Charged/Plunging DMG from EM. Game data:
+// Avatar_Kazuha_Constellation_6 (Avatar_Kazuha_Constellation_6_DamageUp,
+// ModifyDamageMixin) scales damagePercentageRatio on
+// FIGHT_PROP_ELEMENT_MASTERY (total EM). KQM has no EM-interaction test
+// for it; GO guesses premod ("I am guessing premod"), contradicted by the
+// game data. Writes dmg_normal/charged/plunge, which have no extra lane,
+// so no writes param is needed.
 const damageBonusPost = new PostEffectStatsMastery({
+    reads: CHANNELS.TOTAL,
     percent: [
         new StatTable('dmg_normal', [TalentValues.C6DmgBonus]),
         new StatTable('dmg_charged', [TalentValues.C6DmgBonus]),
@@ -501,28 +509,47 @@ export const Kazuha = new DbObjectChar({
         }),
     ],
     postEffects: [
+        // A4 Poetics of Fuubutsu: game data (Avatar_Kazuha_PermanentSkill_2,
+        // UNIQUE_Avatar_Kazuha_PermanentSkill_2_{Fire,Water,Electric,Ice})
+        // writes Actor_*AddHurtExtraDelta (extra) from
+        // FIGHT_PROP_NONEXTRA_ELEMENT_MASTERY (premod EM). KQM: Key of
+        // Khaj-Nisut's EM does not affect it. GO reads input.premod.eleMas.
+        // Default confirmed, no params.
         new PostEffectStatsMastery({
+            receivers: RECEIVERS.TEAM,
             percent: new StatTable('dmg_cryo', [TalentValues.A4ElementalBonus]),
             conditions: [
                 new ConditionBoolean({name: 'kazuha_windsong_poetics_cryo'}),
                 new ConditionAscensionChar({ascension: 4}),
             ],
         }),
+        // A4, electro: same game data (UNIQUE_..._Electric writes
+        // Actor_ElecAddHurtExtraDelta from FIGHT_PROP_NONEXTRA_ELEMENT_MASTERY).
+        // Default confirmed, no params.
         new PostEffectStatsMastery({
+            receivers: RECEIVERS.TEAM,
             percent: new StatTable('dmg_electro', [TalentValues.A4ElementalBonus]),
             conditions: [
                 new ConditionBoolean({name: 'kazuha_windsong_poetics_electro'}),
                 new ConditionAscensionChar({ascension: 4}),
             ],
         }),
+        // A4, hydro: same game data (UNIQUE_..._Water writes
+        // Actor_WaterAddHurtExtraDelta from FIGHT_PROP_NONEXTRA_ELEMENT_MASTERY).
+        // Default confirmed, no params.
         new PostEffectStatsMastery({
+            receivers: RECEIVERS.TEAM,
             percent: new StatTable('dmg_hydro', [TalentValues.A4ElementalBonus]),
             conditions: [
                 new ConditionBoolean({name: 'kazuha_windsong_poetics_hydro'}),
                 new ConditionAscensionChar({ascension: 4}),
             ],
         }),
+        // A4, pyro: same game data (UNIQUE_..._Fire writes
+        // Actor_FireAddHurtExtraDelta from FIGHT_PROP_NONEXTRA_ELEMENT_MASTERY).
+        // Default confirmed, no params.
         new PostEffectStatsMastery({
+            receivers: RECEIVERS.TEAM,
             percent: new StatTable('dmg_pyro', [TalentValues.A4ElementalBonus]),
             conditions: [
                 new ConditionBoolean({name: 'kazuha_windsong_poetics_pyro'}),
@@ -623,9 +650,15 @@ export const Kazuha = new DbObjectChar({
         },
         {
             conditions: [
+                // C2 Yamaarashi Tailwind: game data (Avatar_Kazuha_ElementalBurst_Mist,
+                // UNIQUE_Kazuha_Constellation_2_MasteryUp) writes the flat +200 EM as
+                // Actor_ElemMasteryDelta (premod, no Extra). Conditions write premod:
+                // default confirmed, no params. KQM: Sucrose A4 shares Kazuha's C2 EM.
+                // GO writes it under premod.
                 new ConditionBoolean({
                     name: 'kaedehara_kazuha_yamaarashi_tailwind',
                     serializeId: 1,
+                    receivers: RECEIVERS.TEAM,
                     title: 'talent_name.kaedehara_kazuha_yamaarashi_tailwind',
                     description: 'talent_descr.kaedehara_kazuha_yamaarashi_tailwind',
                     stats: {
@@ -682,134 +715,6 @@ export const Kazuha = new DbObjectChar({
             ],
         }
     ]),
-    partyData: {
-        loadStats: {
-            stats: ['mastery_total'],
-        },
-        conditions: [
-            new ConditionNumber({
-                name: 'kazuha_mastery',
-                title: 'stat.mastery',
-                partyStat: 'mastery_total',
-                serializeId: 1,
-                rotation: 'party',
-                max: 10000,
-            }),
-            new ConditionDropdownElement({
-                name: 'party.kaedehara_kazuha_poetics_of_fuubutsu',
-                serializeId: 2,
-                rotation: 'party',
-                multiple: true,
-                hideEmpty: true,
-                dropdownClass: 'select-element-multiple',
-                title: 'talent_name.kaedehara_kazuha_poetics_of_fuubutsu',
-                description: 'talent_descr.kaedehara_kazuha_poetics_of_fuubutsu',
-                info: {
-                    ascension: 4,
-                },
-                settings: {
-                    party_kazuha_windsong_poetics_cryo: 0,
-                    party_kazuha_windsong_poetics_electro: 0,
-                    party_kazuha_windsong_poetics_hydro: 0,
-                    party_kazuha_windsong_poetics_pyro: 0,
-                },
-                values: [
-                    {
-                        value: 'cryo',
-                        serializeId: 1,
-                        conditions: [
-                            new Condition({
-                                settings: {
-                                    party_kazuha_windsong_poetics_cryo: 1,
-                                },
-                            }),
-                        ],
-                    },
-                    {
-                        value: 'electro',
-                        serializeId: 2,
-                        conditions: [
-                            new Condition({
-                                settings: {
-                                    party_kazuha_windsong_poetics_electro: 1,
-                                },
-                            }),
-                        ],
-                    },
-                    {
-                        value: 'hydro',
-                        serializeId: 3,
-                        conditions: [
-                            new Condition({
-                                settings: {
-                                    party_kazuha_windsong_poetics_hydro: 1,
-                                },
-                            }),
-                        ],
-                    },
-                    {
-                        value: 'pyro',
-                        serializeId: 4,
-                        conditions: [
-                            new Condition({
-                                settings: {
-                                    party_kazuha_windsong_poetics_pyro: 1,
-                                },
-                            }),
-                        ],
-                    },
-                ],
-            }),
-            new ConditionBoolean({
-                name: 'kaedehara_kazuha_yamaarashi_tailwind',
-                serializeId: 3,
-                rotation: 'party',
-                title: 'talent_name.kaedehara_kazuha_yamaarashi_tailwind',
-                description: 'talent_descr.kaedehara_kazuha_yamaarashi_tailwind',
-                info: {constellation: 2},
-                stats: {
-                    mastery: TalentValues.C2Mastery,
-                },
-            }),
-        ],
-        postEffects: [
-            new PostEffectStats({
-                from: 'kazuha_mastery',
-                percent: new StatTable('dmg_cryo', [TalentValues.A4ElementalBonus]),
-                conditions: [
-                    new ConditionBoolean({
-                        name: 'party_kazuha_windsong_poetics_cryo',
-                    }),
-                ],
-            }),
-            new PostEffectStats({
-                from: 'kazuha_mastery',
-                percent: new StatTable('dmg_electro', [TalentValues.A4ElementalBonus]),
-                conditions: [
-                    new ConditionBoolean({
-                        name: 'party_kazuha_windsong_poetics_electro',
-                    }),
-                ],
-            }),
-            new PostEffectStats({
-                from: 'kazuha_mastery',
-                percent: new StatTable('dmg_hydro', [TalentValues.A4ElementalBonus]),
-                conditions: [
-                    new ConditionBoolean({
-                        name: 'party_kazuha_windsong_poetics_hydro',
-                    }),
-                ],
-            }),
-            new PostEffectStats({
-                from: 'kazuha_mastery',
-                percent: new StatTable('dmg_pyro', [TalentValues.A4ElementalBonus]),
-                conditions: [
-                    new ConditionBoolean({
-                        name: 'party_kazuha_windsong_poetics_pyro',
-                    }),
-                ],
-            }),
-        ],
-    },
+    retiredParty: [[1, 'number'], [2, 'dropdown'], [3, 'checkbox']],
 });
 

@@ -2,6 +2,8 @@ import { ConditionBooleanRefine } from "../../../classes/Condition/Boolean/Refin
 import { DbObjectWeapon } from "../../../classes/DbObject/Weapon";
 import { StatTable } from "../../../classes/StatTable";
 import { weaponStatTables } from "../../generated/WeaponStatTables";
+import { weaponPassiveTables } from "../../generated/WeaponPassiveTables";
+import { percent } from "../../Params";
 
 export const HarbingerofDawn = new DbObjectWeapon({
     name: 'harbinger_of_dawn',
@@ -18,7 +20,7 @@ export const HarbingerofDawn = new DbObjectWeapon({
             title: 'talent_name.weapon_harbinger_of_dawn',
             description: 'talent_descr.weapon_harbinger_of_dawn',
             stats: [
-                new StatTable('crit_rate', [14, 17.5, 21, 24.5, 28]),
+                new StatTable('crit_rate', percent(weaponPassiveTables.HarbingerofDawn.p1)),
             ],
         })
     ],

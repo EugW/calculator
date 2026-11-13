@@ -2,6 +2,7 @@ import { CalcSet } from "./CalcSet";
 import { Rotation } from "./Rotation";
 import { Serializer } from "./Serializer";
 import { StorageItemArtifacts } from "./StorageItem/Artifacts";
+import { Team } from "./Team";
 
 export class Backup {
     constructor(data) {
@@ -17,15 +18,20 @@ export class Backup {
     }
 
     getChars() {
-        return this.data.chars || [];
+        return this.data.chars;
+    }
+
+    getTeams() {
+        // An omitted category in a partial backup must leave saved teams alone.
+        return this.data.teams;
     }
 
     getArtifacts() {
-        return this.data.artifacts || [];
+        return this.data.artifacts;
     }
 
     getRotations() {
-        return this.data.rotations || [];
+        return this.data.rotations;
     }
 
     stringify() {
@@ -40,6 +46,7 @@ export class Backup {
         if (!opts) {
             opts = {
                 saveChars: 1,
+                saveTeams: 1,
                 saveArts: 1,
                 saveRotations: 1,
             };
@@ -61,6 +68,11 @@ export class Backup {
                     data.chars.push(item);
                 }
             }
+        }
+
+        if (opts.saveTeams) {
+            data.teams = storage.team.list().filter((item) => item
+                && storage.team.decodeItem(item.data));
         }
 
         if (opts.saveArts) {
@@ -98,7 +110,7 @@ export class Backup {
             return null;
         }
 
-        if (typeof data !== 'object') {
+        if (!data || typeof data !== 'object') {
             return null;
         }
 
@@ -125,8 +137,22 @@ export class Backup {
                     }
                 }
 
-                if (chars.length) {
-                    result.chars = chars;
+                result.chars = chars;
+            }
+
+            if (Array.isArray(data.teams)) {
+                result.teams = [];
+                for (const item of data.teams) {
+                    if (!item || typeof item !== 'object') continue;
+                    let team;
+                    try {
+                        team = Team.deserialize(Serializer.unpack(item.data));
+                    } catch {
+                        continue;
+                    }
+                    if (team?.getMembers().length) {
+                        result.teams.push({title: '' + (item.title || ''), data: item.data});
+                    }
                 }
             }
 
@@ -144,9 +170,7 @@ export class Backup {
                     }
                 }
 
-                if (artifacts.length) {
-                    result.artifacts = artifacts;
-                }
+                result.artifacts = artifacts;
             }
 
             if (data.rotations && Array.isArray(data.rotations)) {
@@ -167,9 +191,7 @@ export class Backup {
                     }
                 }
 
-                if (rotations.length) {
-                    result.rotations = rotations;
-                }
+                result.rotations = rotations;
             }
         } else {
             return null;

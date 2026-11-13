@@ -3,6 +3,8 @@ import { ConditionStaticRefine } from "../../../classes/Condition/Static/Refine"
 import { DbObjectWeapon } from "../../../classes/DbObject/Weapon";
 import { StatTable } from "../../../classes/StatTable";
 import { weaponStatTables } from "../../generated/WeaponStatTables";
+import { weaponPassiveTables } from "../../generated/WeaponPassiveTables";
+import { percent } from "../../Params";
 
 export const FlowerWreathedFeathers = new DbObjectWeapon({
     name: 'flower_wreathed_feathers',
@@ -17,7 +19,7 @@ export const FlowerWreathedFeathers = new DbObjectWeapon({
             title: 'talent_name.flower_wreathed_feathers',
             description: 'talent_descr.flower_wreathed_feathers_1',
             stats: [
-                new StatTable('text_percent', [15]),
+                new StatTable('text_percent', [percent(weaponPassiveTables.FlowerWreathedFeathers.p1[0])]),
             ],
         }),
         new ConditionStacks({
@@ -25,10 +27,10 @@ export const FlowerWreathedFeathers = new DbObjectWeapon({
             serializeId: 1,
             title: 'talent_name.flower_wreathed_feathers',
             description: 'talent_descr.flower_wreathed_feathers_2',
-            maxStacks: 6,
+            maxStacks: weaponPassiveTables.FlowerWreathedFeathers.p4[0],
             levelSetting: 'weapon_refine',
             stats: [
-                new StatTable('dmg_charged', [6, 7.5, 9, 10.5, 12]),
+                new StatTable('dmg_charged', percent(weaponPassiveTables.FlowerWreathedFeathers.p3)),
             ],
         }),
     ],

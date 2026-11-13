@@ -5,13 +5,16 @@ import { ConditionStaticRefine } from "../../../classes/Condition/Static/Refine"
 import { DbObjectWeapon } from "../../../classes/DbObject/Weapon";
 import { StatTable } from "../../../classes/StatTable";
 import { weaponStatTables } from "../../generated/WeaponStatTables";
+import { weaponPassiveTables } from "../../generated/WeaponPassiveTables";
+import { percent } from "../../Params";
 
 const crystalCompoundingName = 'weapon_starsealed_edict';
 const lawOfCombustionName = 'weapon_starsealed_edict_law_of_combustion';
 const radianceName = 'weapon_starsealed_edict_radiance';
+// "Max 3 stacks": fixed inside the ability.
 const LawOfCombustionMaxStacks = 3;
 
-const stellarConductCritDmgPerStack = [12, 15, 18, 21, 24];
+const stellarConductCritDmgPerStack = percent(weaponPassiveTables.StarsealedEdict.p3);
 const stellarConductCritDmg = new StatTable('crit_dmg_stellarconduct', stellarConductCritDmgPerStack);
 
 /**
@@ -30,6 +33,9 @@ class ConditionStarsealedEdictRadiance extends ConditionBooleanRefine {
     }
 }
 
+// Every effect is the equipping character's own: nothing reaches the team.
+// Game data: Weapon_Catalyst_Chernaya writes flat values and reads no stat
+// (ability_channels.txt lists no effect for it).
 export const StarsealedEdict = new DbObjectWeapon({
     name: 'starsealed_edict',
     serializeId: 269,
@@ -43,7 +49,7 @@ export const StarsealedEdict = new DbObjectWeapon({
             title: 'talent_name.weapon_starsealed_edict',
             description: 'talent_descr.weapon_starsealed_edict_1',
             stats: [
-                new StatTable('crit_dmg', [24, 30, 36, 42, 48]),
+                new StatTable('crit_dmg', weaponPassiveTables.StarsealedEdict.crit_dmg),
             ],
         }),
         new ConditionBooleanRefine({
@@ -52,7 +58,7 @@ export const StarsealedEdict = new DbObjectWeapon({
             title: 'talent_name.weapon_starsealed_edict',
             description: 'talent_descr.weapon_starsealed_edict_2',
             stats: [
-                new StatTable('mastery', [48, 60, 72, 84, 96]),
+                new StatTable('mastery', weaponPassiveTables.StarsealedEdict.p1),
             ],
         }),
         new ConditionStacks({
@@ -63,7 +69,7 @@ export const StarsealedEdict = new DbObjectWeapon({
             maxStacks: LawOfCombustionMaxStacks,
             levelSetting: 'weapon_refine',
             stats: [
-                new StatTable('mastery', [24, 30, 36, 42, 48]),
+                new StatTable('mastery', weaponPassiveTables.StarsealedEdict.p2),
             ],
             condition: new ConditionBoolean({name: crystalCompoundingName}),
         }),

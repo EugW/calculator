@@ -5,6 +5,8 @@ import { ConditionStaticClam } from "../../../classes/Condition/Static/Clam";
 import { FeatureDamageClam } from "../../../classes/Feature2/Damage/Clam";
 import { FeatureMultiplier } from "../../../classes/Feature2/Multiplier";
 import { ValueTable } from "../../../classes/ValueTable";
+import { artifactSetTables } from "../../generated/ArtifactSetTables";
+import { percent } from "../../Params";
 
 export const OceanHuedClam = new ArtifactSet({
     serializeId: 37,
@@ -24,7 +26,7 @@ export const OceanHuedClam = new ArtifactSet({
                     description: 'set_descr.ocean_hued_clam_2',
                     settings: {},
                     stats: {
-                        healing: 15,
+                        healing: artifactSetTables.OceanHuedClam.pc2.healing,
                     },
                 })
             ],
@@ -37,13 +39,13 @@ export const OceanHuedClam = new ArtifactSet({
                     serializeId: 20,
                     title: 'set_bonus.ocean_hued_clam_4_stack',
                     class: "gi-inputs-5digit",
-                    max: 30000,
+                    max: artifactSetTables.OceanHuedClam.pc4.p5,
                 }),
                 new ConditionStaticClam({
                     title: 'set_bonus.ocean_hued_clam_4',
                     description: 'set_descr.ocean_hued_clam_4',
                     stats: {
-                        text_percent_hp: 90,
+                        text_percent_hp: percent(artifactSetTables.OceanHuedClam.pc4.p2),
                     },
                     settings: {
                         'set_bonus.ocean_hued_clam_4': 1,
@@ -60,8 +62,8 @@ export const OceanHuedClam = new ArtifactSet({
                         new FeatureMultiplier({
                             scaling: 'accumulated_healing',
                             source: 'ocean_hued_clam',
-                            values: new ValueTable([90]),
-                            capValue: new ValueTable([30_000]),
+                            values: new ValueTable([percent(artifactSetTables.OceanHuedClam.pc4.p2)]),
+                            capValue: new ValueTable([artifactSetTables.OceanHuedClam.pc4.p5]),
                         }),
                     ],
                 }),

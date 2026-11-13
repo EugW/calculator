@@ -3,11 +3,11 @@ import "../../../../css/Components/Accordion/SetBonuses.css";
 
 import { ArtifactSetIcon } from '../Icons';
 import { Checkbox } from '../Inputs/Input';
-import { ConditionList } from '../ConditionList';
 import { ControlsBar } from '../ControlsBar';
 import { GroupBox } from '../Inputs/GroupBox';
 import { Lang } from '../../Lang';
 import { TitledButton } from '../Inputs/Buttons';
+import { setProfileControls } from '../../../classes/ArtifactSetProfile';
 
 export class AccordionSetBonuses extends React.Component {
     constructor(props) {
@@ -16,13 +16,13 @@ export class AccordionSetBonuses extends React.Component {
         this.lang = new Lang();
 
         this.strings = {
-            enable_all: this.lang.get('pool_view.enable_sets'),
-            disable_all: this.lang.get('pool_view.disable_sets'),
-            pieces_1: this.lang.get('artifact_set.pieces_1'),
-            pieces_2: this.lang.get('artifact_set.pieces_2'),
-            pieces_3: this.lang.get('artifact_set.pieces_3'),
-            pieces_4: this.lang.get('artifact_set.pieces_4'),
-            pieces_5: this.lang.get('artifact_set.pieces_5'),
+            enable_all: this.lang.get('artifact_profile.allow_all'),
+            disable_all: this.lang.get('artifact_profile.disallow_all'),
+            pieces_1: this.lang.get('artifact_profile.allow_1'),
+            pieces_2: this.lang.get('artifact_profile.allow_2'),
+            pieces_3: this.lang.get('artifact_profile.allow_3'),
+            pieces_4: this.lang.get('artifact_profile.allow_4'),
+            pieces_5: this.lang.get('artifact_profile.allow_5'),
         };
     }
 
@@ -44,8 +44,6 @@ export class AccordionSetBonuses extends React.Component {
             );
         }
 
-        let appSettings = Object.assign({char_element: 'anemo'}, this.props.setsSettings);
-
         return (
             <GroupBox key={setName}>
                 <div className="accordion-set-bonuses">
@@ -59,16 +57,11 @@ export class AccordionSetBonuses extends React.Component {
                         </div>
                     </div>
                 </div>
-                {itemData.conditions.length ?
-                    <ConditionList
-                        items={itemData.conditions}
-                        settings={appSettings}
-                        onlySelectable={true}
-                        ignoreSubconditions={true}
-                        onChange={this.props.onSettingChange}
-                        noWrap={true}
-                    />
-                : ''}
+                {setProfileControls(setName).length ? (
+                    <button type="button" className="set-profile-link" onClick={() => this.props.onOpenProfile(setName)}>
+                        {this.lang.get('artifact_profile.edit')}
+                    </button>
+                ) : null}
             </GroupBox>
         );
     }
@@ -86,6 +79,7 @@ export class AccordionSetBonuses extends React.Component {
 
         return (
             <Fragment>
+                <p>{this.lang.get('artifact_profile.allow_help')}</p>
                 <ControlsBar>
                     <div><TitledButton title={this.strings.enable_all} onClick={this.props.enableAction} icon="button-icon-unlock"/></div>
                     <div><TitledButton title={this.strings.disable_all} onClick={this.props.disableAction} icon="button-icon-lock"/></div>

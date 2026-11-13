@@ -3,6 +3,8 @@ import { ConditionStaticRefine } from "../../../classes/Condition/Static/Refine"
 import { DbObjectWeapon } from "../../../classes/DbObject/Weapon";
 import { StatTable } from "../../../classes/StatTable";
 import { weaponStatTables } from "../../generated/WeaponStatTables";
+import { weaponPassiveTables } from "../../generated/WeaponPassiveTables";
+import { percent } from "../../Params";
 
 export const LightbearingMoonshard = new DbObjectWeapon({
     name: 'lightbearing_moonshard',
@@ -17,7 +19,7 @@ export const LightbearingMoonshard = new DbObjectWeapon({
             title: 'talent_name.weapon_lightbearing_moonshard',
             description: 'talent_descr.weapon_lightbearing_moonshard_1',
             stats: [
-                new StatTable('def_percent', [20, 25, 30, 35, 40]),
+                new StatTable('def_percent', weaponPassiveTables.LightbearingMoonshard.def_percent),
             ],
         }),
         new ConditionBooleanRefine({
@@ -26,7 +28,7 @@ export const LightbearingMoonshard = new DbObjectWeapon({
             title: 'talent_name.weapon_lightbearing_moonshard',
             description: 'talent_descr.weapon_lightbearing_moonshard_2',
             stats: [
-                new StatTable('dmg_reaction_lunarcrystallize', [64, 80, 96, 112, 128]),
+                new StatTable('dmg_reaction_lunarcrystallize', percent(weaponPassiveTables.LightbearingMoonshard.p1)),
             ],
         }),
     ],

@@ -6,6 +6,8 @@ import { FeatureDamage } from "../../../classes/Feature2/Damage";
 import { FeatureMultiplier } from "../../../classes/Feature2/Multiplier";
 import { StatTable } from "../../../classes/StatTable";
 import { weaponStatTables } from "../../generated/WeaponStatTables";
+import { weaponPassiveTables } from "../../generated/WeaponPassiveTables";
+import { percent } from "../../Params";
 
 export const SwordofDescension = new DbObjectWeapon({
     name: 'sword_of_descension',
@@ -26,7 +28,7 @@ export const SwordofDescension = new DbObjectWeapon({
             title: 'talent_name.sword_of_descension',
             description: 'talent_descr.sword_of_descension_1',
             stats: {
-                atk: 66,
+                atk: weaponPassiveTables.SwordofDescension.p4[0],
             },
             subConditions: [
                 new ConditionBooleanChar({
@@ -39,8 +41,8 @@ export const SwordofDescension = new DbObjectWeapon({
             title: 'talent_name.sword_of_descension',
             description: 'talent_descr.sword_of_descension_2',
             stats: {
-                text_percent_chance: 50,
-                text_percent_dmg: 200,
+                text_percent_chance: percent(weaponPassiveTables.SwordofDescension.p1[0]),
+                text_percent_dmg: percent(weaponPassiveTables.SwordofDescension.p2[0]),
             },
             subConditions: [
                 new ConditionBoolean({name: 'common.ps_network'}),
@@ -53,7 +55,7 @@ export const SwordofDescension = new DbObjectWeapon({
             multipliers: [
                 new FeatureMultiplier({
                     leveling: 'weapon_refine',
-                    values: new StatTable('sword_of_descension_dmg', [200]),
+                    values: new StatTable('sword_of_descension_dmg', [percent(weaponPassiveTables.SwordofDescension.p2[0])]),
                 }),
             ],
             condition: new ConditionBoolean({name: 'common.ps_network'}),

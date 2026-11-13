@@ -1,6 +1,8 @@
 import { ArtifactSet } from "../../../classes/ArtifactSet";
 import { ConditionStatic } from "../../../classes/Condition/Static";
 import { ConditionBoolean } from "../../../classes/Condition/Boolean";
+import { artifactSetTables } from "../../generated/ArtifactSetTables";
+import { percent } from "../../Params";
 
 export const DesertPavilionChronicle = new ArtifactSet({
     serializeId: 42,
@@ -19,7 +21,7 @@ export const DesertPavilionChronicle = new ArtifactSet({
                     title: 'set_bonus.desert_pavilion_chronicle_2',
                     description: 'set_descr.desert_pavilion_chronicle_2',
                     stats: {
-                        dmg_anemo: 15,
+                        dmg_anemo: artifactSetTables.DesertPavilionChronicle.pc2.dmg_anemo,
                     },
                 })
             ],
@@ -33,10 +35,10 @@ export const DesertPavilionChronicle = new ArtifactSet({
                     title: 'set_bonus.desert_pavilion_chronicle_4',
                     description: 'set_descr.desert_pavilion_chronicle_4',
                     stats: {
-                        atk_speed_normal: 10,
-                        dmg_normal: 40,
-                        dmg_charged: 40,
-                        dmg_plunge: 40,
+                        atk_speed_normal: percent(artifactSetTables.DesertPavilionChronicle.pc4.p1),
+                        dmg_normal: percent(artifactSetTables.DesertPavilionChronicle.pc4.p2),
+                        dmg_charged: percent(artifactSetTables.DesertPavilionChronicle.pc4.p2),
+                        dmg_plunge: percent(artifactSetTables.DesertPavilionChronicle.pc4.p2),
                     },
                 }),
             ],

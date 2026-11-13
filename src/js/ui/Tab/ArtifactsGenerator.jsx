@@ -3,7 +3,6 @@ import "../../../css/Components/Tab/ArtifactsGenerator.css"
 
 import { ArtifactGeneratorModal } from '../Components/Dialog/ArtifactGenerator';
 import { ArtifactsGeneratorResults } from './ArtifactsGenerator/Results';
-import { Condition } from '../../classes/Condition';
 import { ControlsBar } from '../Components/ControlsBar';
 import { Dropdown } from '../Components/Inputs/Dropdown';
 import { Feature2 } from '../../classes/Feature2';
@@ -24,6 +23,7 @@ export class ArtifactsGeneratorTab extends Tab {
 
         this.id = 'artifacts_gen';
         this.rightRab = false;
+        this.title = 'art_gen.title';
     }
 
     refresh() {
@@ -74,7 +74,7 @@ export class ArtifactsGeneratorView extends React.Component {
     }
 
     dataFeaturesItems() {
-        return Feature2.buildDropdown(this.props.app.currentSet());
+        return Feature2.buildDropdown(this.props.app.view());
     }
 
     handleSettingsOpen() {
@@ -102,16 +102,10 @@ export class ArtifactsGeneratorView extends React.Component {
 
     makeBuildWithResults(data) {
         let build = this.props.app.currentSet().clone();
+        // Set effects read the member's set-bonus profile.
         for (let art of data) {
             build.setArtifact(art);
         }
-
-        let artConditions = build.getConditions({objects: 'artifacts'});
-        let allSettings = Condition.allConditionsOn(artConditions);
-        if (this.settings.required_sets_settings) {
-            allSettings = Object.assign(allSettings, this.settings.required_sets_settings);
-        }
-        build.setArtifactsSettings(allSettings);
 
         return build;
     }
@@ -160,20 +154,13 @@ export class ArtifactsGeneratorView extends React.Component {
     }
 
     generateCompleteCallback(result) {
-        let baseFeature = this.props.app.currentSet().getFeatureResultByName(this.state.feature);
+        let baseFeature = this.props.app.view().getFeatureResultByName(this.state.feature);
         let build = this.props.app.currentSet().clone();
 
         for (let item of result) {
             for (let art of item.artifacts) {
                 build.setArtifact(art);
             }
-
-            let artConditions = build.getConditions({objects: 'artifacts'});
-            let allSettings = Condition.allConditionsOn(artConditions);
-            if (this.settings.required_sets_settings) {
-                allSettings = Object.assign(allSettings, this.settings.required_sets_settings);
-            }
-            build.setArtifactsSettings(allSettings);
 
             item.feature = build.getFeatureResultByName(this.state.feature);
         }

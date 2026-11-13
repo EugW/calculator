@@ -3,6 +3,8 @@ import { ConditionStaticRefine } from "../../../classes/Condition/Static/Refine"
 import { DbObjectWeapon } from "../../../classes/DbObject/Weapon";
 import { StatTable } from "../../../classes/StatTable";
 import { weaponStatTables } from "../../generated/WeaponStatTables";
+import { weaponPassiveTables } from "../../generated/WeaponPassiveTables";
+import { percent } from "../../Params";
 
 export const Absolution = new DbObjectWeapon({
     name: 'absolution',
@@ -17,7 +19,7 @@ export const Absolution = new DbObjectWeapon({
             title: 'talent_name.weapon_absolution',
             description: 'talent_descr.weapon_absolution_1',
             stats: [
-                new StatTable('crit_dmg', [20, 25, 30, 35, 40]),
+                new StatTable('crit_dmg', weaponPassiveTables.Absolution.crit_dmg),
             ],
         }),
         new ConditionStacks({
@@ -28,7 +30,7 @@ export const Absolution = new DbObjectWeapon({
             maxStacks: 3,
             levelSetting: 'weapon_refine',
             stats: [
-                new StatTable('dmg_all', [16, 20, 24, 28, 32]),
+                new StatTable('dmg_all', percent(weaponPassiveTables.Absolution.p2)),
             ],
         }),
     ],

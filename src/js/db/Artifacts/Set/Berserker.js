@@ -1,6 +1,8 @@
 import { ArtifactSet } from "../../../classes/ArtifactSet";
 import { ConditionBoolean } from "../../../classes/Condition/Boolean";
 import { ConditionStatic } from "../../../classes/Condition/Static";
+import { artifactSetTables } from "../../generated/ArtifactSetTables";
+import { percent } from "../../Params";
 
 export const Berserker = new ArtifactSet({
     serializeId: 3,
@@ -19,7 +21,7 @@ export const Berserker = new ArtifactSet({
                     title: 'set_bonus.berserker_2',
                     description: 'set_descr.berserker_2',
                     stats: {
-                        crit_rate: 12,
+                        crit_rate: artifactSetTables.Berserker.pc2.crit_rate,
                     },
                 })
             ],
@@ -33,7 +35,7 @@ export const Berserker = new ArtifactSet({
                     title: 'set_bonus.berserker_4',
                     description: 'set_descr.berserker_4',
                     stats: {
-                        crit_rate: 24,
+                        crit_rate: percent(artifactSetTables.Berserker.pc4.p1),
                     },
                 })
             ],

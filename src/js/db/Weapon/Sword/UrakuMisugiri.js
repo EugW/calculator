@@ -3,6 +3,8 @@ import { ConditionStaticRefine } from "../../../classes/Condition/Static/Refine"
 import { DbObjectWeapon } from "../../../classes/DbObject/Weapon";
 import { StatTable } from "../../../classes/StatTable";
 import { weaponStatTables } from "../../generated/WeaponStatTables";
+import { weaponPassiveTables } from "../../generated/WeaponPassiveTables";
+import { percent } from "../../Params";
 
 export const UrakuMisugiri = new DbObjectWeapon({
     name: 'uraku_misugiri',
@@ -17,8 +19,8 @@ export const UrakuMisugiri = new DbObjectWeapon({
             title: 'talent_name.weapon_uraku_misugiri',
             description: 'talent_descr.weapon_uraku_misugiri_1',
             stats: [
-                new StatTable('dmg_normal', [16, 20, 24, 28, 32]),
-                new StatTable('dmg_skill', [24, 30, 36, 42, 48]),
+                new StatTable('dmg_normal', percent(weaponPassiveTables.UrakuMisugiri.p2)),
+                new StatTable('dmg_skill', percent(weaponPassiveTables.UrakuMisugiri.p3)),
             ],
         }),
         new ConditionBooleanRefine({
@@ -27,15 +29,15 @@ export const UrakuMisugiri = new DbObjectWeapon({
             title: 'talent_name.weapon_uraku_misugiri',
             description: 'talent_descr.weapon_uraku_misugiri_2',
             stats: [
-                new StatTable('dmg_normal', [16, 20, 24, 28, 32]),
-                new StatTable('dmg_skill', [24, 30, 36, 42, 48]),
+                new StatTable('dmg_normal', percent(weaponPassiveTables.UrakuMisugiri.p2)),
+                new StatTable('dmg_skill', percent(weaponPassiveTables.UrakuMisugiri.p3)),
             ],
         }),
         new ConditionStaticRefine({
             title: 'talent_name.weapon_uraku_misugiri',
             description: 'talent_descr.weapon_uraku_misugiri_3',
             stats: [
-                new StatTable('def_percent', [20, 25, 30, 35, 40]),
+                new StatTable('def_percent', weaponPassiveTables.UrakuMisugiri.def_percent),
             ],
         }),
     ],

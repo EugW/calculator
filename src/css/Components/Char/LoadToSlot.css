@@ -1,0 +1,63 @@
+/*
+ * The slots of the team a build can be loaded into, beside the build: two by
+ * two, so the build's name and items keep their width.
+ */
+.load-to-slot {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    align-self: center;
+    gap: 3px;
+    flex-shrink: 0;
+    margin-left: 8px;
+}
+
+.load-to-slot-caption {
+    font-size: 12px;
+    line-height: 14px;
+    color: #BEAEA9;
+}
+
+.load-to-slot-buttons {
+    display: grid;
+    grid-template-columns: repeat(2, 26px);
+    gap: 3px;
+}
+
+/* A slot with a member. */
+.load-to-slot-button {
+    width: 26px;
+    height: 26px;
+    line-height: 24px;
+    box-sizing: border-box;
+    border: 1px solid #ECE5D8;
+    border-radius: 50%;
+    background-color: #ECE5D8;
+    color: #3B4255;
+    font-size: 14px;
+    text-align: center;
+    cursor: pointer;
+    user-select: none;
+}
+
+/* As the empty slot of the Team tab. */
+.load-to-slot-button.empty {
+    border: 1px dashed #BEAEA9;
+    background-color: transparent;
+    color: #ECE5D8;
+}
+
+/* The slot of this character. */
+.load-to-slot-button.own {
+    border-color: #D3BC8E;
+    background-color: #D3BC8E;
+}
+
+.load-to-slot-button:not(.disabled):hover {
+    border-color: #FFFFFF;
+}
+
+.load-to-slot-button.disabled {
+    opacity: 0.35;
+    cursor: default;
+}

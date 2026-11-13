@@ -1,6 +1,7 @@
 import { ArtifactSet } from "../../../classes/ArtifactSet";
 import { ConditionStatic } from "../../../classes/Condition/Static";
 import { ConditionDefendersWill } from "../../../classes/Condition/Static/DefendersWill";
+import { artifactSetTables } from "../../generated/ArtifactSetTables";
 
 export const DefendersWill = new ArtifactSet({
     serializeId: 8,
@@ -19,7 +20,7 @@ export const DefendersWill = new ArtifactSet({
                     title: 'set_bonus.defenders_will_2',
                     description: 'set_descr.defenders_will_2',
                     stats: {
-                        def_percent: 30,
+                        def_percent: artifactSetTables.DefendersWill.pc2.def_percent,
                     },
                 })
             ],

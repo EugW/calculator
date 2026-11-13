@@ -13,9 +13,11 @@ import { FeatureDamagePlungeShockWave } from "../../classes/Feature2/Damage/Plun
 import { FeatureDamageSkill } from "../../classes/Feature2/Damage/Skill";
 import { FeatureMultiplier } from "../../classes/Feature2/Multiplier";
 import { StatTable } from "../../classes/StatTable";
+import { RECEIVERS } from "../../classes/Team/Receivers";
 import { ValueTable } from "../../classes/ValueTable";
 import { charTables } from "../generated/CharTables";
 import { charTalentTables } from "../generated/CharTalentTables";
+import { percent } from "../Params";
 
 const Talents = new DbObjectTalents({
     attack: {
@@ -109,7 +111,7 @@ const Talents = new DbObjectTalents({
 });
 
 const BurstInitialDmg = 10;
-const A4DefReduce = 15;
+const A4DefReduce = percent(charTalentTables.Lisa.a4.p1);
 const C2DefPercent = 25;
 
 export const Lisa = new DbObjectChar({
@@ -288,6 +290,7 @@ export const Lisa = new DbObjectChar({
         new ConditionBoolean({
             name: 'lisa_static_electricity_field',
             serializeId: 1,
+            receivers: RECEIVERS.TEAM,
             title: 'talent_name.lisa_static_electricity_field',
             description: 'talent_descr.lisa_static_electricity_field',
             stats: {
@@ -356,19 +359,5 @@ export const Lisa = new DbObjectChar({
             ],
         },
     ]),
-    partyData: {
-        conditions: [
-            new ConditionBoolean({
-                name: 'party.lisa_static_electricity_field',
-                serializeId: 1,
-                rotation: 'party',
-                title: 'talent_name.lisa_static_electricity_field',
-                description: 'talent_descr.lisa_static_electricity_field',
-                info: {ascension: 4},
-                stats: {
-                    enemy_def_reduce: A4DefReduce,
-                },
-            }),
-        ],
-    },
+    retiredParty: [[1, 'checkbox']],
 });

@@ -1,5 +1,7 @@
 import { ArtifactSet } from "../../../classes/ArtifactSet";
 import { ConditionStatic } from "../../../classes/Condition/Static";
+import { artifactSetTables } from "../../generated/ArtifactSetTables";
+import { percent } from "../../Params";
 
 export const TinyMiracle = new ArtifactSet({
     serializeId: 24,
@@ -18,13 +20,13 @@ export const TinyMiracle = new ArtifactSet({
                     title: 'set_bonus.tiny_miracle_2',
                     description: 'set_descr.tiny_miracle_2',
                     stats: {
-                        res_pyro: 20,
-                        res_cryo: 20,
-                        res_hydro: 20,
-                        res_electro: 20,
-                        res_enemo: 20,
-                        res_geo: 20,
-                        res_dendro: 20,
+                        res_pyro: percent(artifactSetTables.TinyMiracle.pc2.p1),
+                        res_cryo: percent(artifactSetTables.TinyMiracle.pc2.p1),
+                        res_hydro: percent(artifactSetTables.TinyMiracle.pc2.p1),
+                        res_electro: percent(artifactSetTables.TinyMiracle.pc2.p1),
+                        res_enemo: percent(artifactSetTables.TinyMiracle.pc2.p1),
+                        res_geo: percent(artifactSetTables.TinyMiracle.pc2.p1),
+                        res_dendro: percent(artifactSetTables.TinyMiracle.pc2.p1),
                     },
                 })
             ],

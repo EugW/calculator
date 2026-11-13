@@ -45,6 +45,7 @@ export function ArtifactPoolList(props) {
                     art={item.art}
                     locked={item.art.isLocked()}
                     equipped={props.equippedHashes.includes(item.hash)}
+                    teammates={props.teammateArtifacts?.[item.hash]}
                     charIcons={props.savedHashes[item.hash]}
                     onClick={props.onClick}
                     onEdit={props.onEdit}
@@ -69,6 +70,7 @@ export class ArtifactListItem extends React.Component {
         return this.props.hash != nextProps.hash
             || this.props.locked != nextProps.locked
             || this.props.equipped != nextProps.equipped
+            || this.props.teammates != nextProps.teammates
             || this.props.charIcons != nextProps.charIcons
             || this.props.highlightStat != nextProps.highlightStat
             || !!this.props.onEdit != !!nextProps.onEdit
@@ -84,6 +86,10 @@ export class ArtifactListItem extends React.Component {
             classes.push('equipped');
         } else if (this.props.locked) {
             classes.push('locked');
+        }
+
+        if (this.props.teammates?.length) {
+            classes.push('equipped-teammate');
         }
 
         if (this.props.hidden) {
@@ -145,7 +151,7 @@ export class ArtifactListItem extends React.Component {
                             (+{art.getLevel()})
                         </div>
                     </div>
-                    <ArtifactCharIcons items={this.props.charIcons} />
+                    <ArtifactCharIcons items={this.props.charIcons} teammates={this.props.teammates} />
                 </div>
                 {substats}
             </div>
@@ -154,7 +160,9 @@ export class ArtifactListItem extends React.Component {
 }
 
 function ArtifactCharIcons(props) {
-    let icons = props.items || [];
+    const teammates = props.teammates || [];
+    let icons = teammates.map(char => char.getIcon());
+    icons = [...new Set(icons.concat(props.items || []))];
     if (!icons.length) {
         return '';
     }
@@ -163,12 +171,16 @@ function ArtifactCharIcons(props) {
 
     for (let i = 0; i < icons.length; ++i) {
         let icon = icons[i];
+        const teammate = teammates.find(char => char.getIcon() === icon);
         if (i == 3) {
             break;
         }
 
         items.push(
-            <div key={'icon'+ i} className={'equipped item-icon icon-24 char-'+ (i+1)}>
+            <div key={'icon'+ i} className={'equipped item-icon icon-24 char-'+ (i+1) + (teammate ? ' teammate' : '')}
+                title={teammate ? lang.get('team_artifacts.equipped_by') + ': ' + lang.get(teammate.getName())
+                    + '. ' + lang.get('team_artifacts.transfer_hint') : undefined}
+            >
                 <div className={'sprite sprite-char sprite-24 ' + icon} />
             </div>
         );

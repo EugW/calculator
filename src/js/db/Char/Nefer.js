@@ -3,7 +3,6 @@ import { ConditionAscensionChar } from "../../classes/Condition/Ascension/Char";
 import { ConditionBoolean } from "../../classes/Condition/Boolean";
 import { ConditionCalcMoonsign } from "../../classes/Condition/CalcMoonsign";
 import { ConditionConstellation } from "../../classes/Condition/Constellation";
-import { ConditionNumber } from "../../classes/Condition/Number";
 import { ConditionNumberNefer } from "../../classes/Condition/Number/Nefer";
 import { ConditionStatic } from "../../classes/Condition/Static";
 import { DbObjectChar } from "../../classes/DbObject/Char";
@@ -18,13 +17,15 @@ import { FeatureDamageSkill } from "../../classes/Feature2/Damage/Skill";
 import { FeatureMultiplier } from "../../classes/Feature2/Multiplier";
 import { FeaturePostEffectValue } from "../../classes/Feature2/PostEffectValue";
 import { FeatureReactionLunarBloomLike } from "../../classes/Feature2/Reaction/Transformative/Lunar/BloomLike";
-import { PostEffectStats } from "../../classes/PostEffect/Stats";
+import { CHANNELS } from "../../classes/PostEffect/Channels";
 import { PostEffectStatsMastery } from "../../classes/PostEffect/Stats/Mastery";
 import { StatTable } from "../../classes/StatTable";
+import { RECEIVERS } from "../../classes/Team/Receivers";
 import { StatTableAscensionScale } from "../../classes/StatTable/Ascension/Scale";
 import { ValueTable } from "../../classes/ValueTable";
 import { charTables } from "../generated/CharTables";
 import { charTalentTables } from "../generated/CharTalentTables";
+import { percent } from "../Params";
 
 const Talents = new DbObjectTalents({
     attack: {
@@ -142,26 +143,36 @@ const Talents = new DbObjectTalents({
 });
 
 // Passive scaling constants
-const PassiveLunarScale = 0.0175;
-const PassiveLunarScaleCap = 14;
-const A1EmBonus = 100;
-const A1VeilMaxStacks = 3;
-const C2VeilStackBonus = 2;
-const C2EmBonus = 200;
+const PassiveLunarScale = percent(charTalentTables.Nefer.a0.p1);
+const PassiveLunarScaleCap = percent(charTalentTables.Nefer.a0.p2);
+const A1EmBonus = charTalentTables.Nefer.a1.p3;
+const A1VeilMaxStacks = charTalentTables.Nefer.a1.p1;
+const A1VeilDmgBonus = percent(charTalentTables.Nefer.a1.p6);
+const C2VeilStackBonus = charTalentTables.Nefer.c2.p1;
+const C2EmBonus = charTalentTables.Nefer.c2.p3;
 const A4VerdantDewScale = 10;
-const A4VerdantDewCap = 50;
-const C1LunarBloomEmScale = 60;
-const C2VeilDuration = 5;
-const C2VeilStackLimit = 5;
+const A4VerdantDewCap = percent(charTalentTables.Nefer.a4.p5);
+const C1LunarBloomEmScale = percent(charTalentTables.Nefer.c1.p2);
+const C2VeilDuration = charTalentTables.Nefer.c2.p2;
+const C2VeilStackLimit = charTalentTables.Nefer.a1.p1 + charTalentTables.Nefer.c2.p1;
 const C2PhantasmDmgMax = 140;
-const C4VerdantDewBonus = 25;
-const C4ResShred = 20;
-const C6PhantasmStage2EmScale = 85;
-const C6PhantasmEndEmScale = 120;
-const C6LunarBloomElevate = 15;
+const C4VerdantDewBonus = percent(charTalentTables.Nefer.c4.p1);
+const C4ResShred = percent(charTalentTables.Nefer.c4.p3);
+const C6PhantasmStage2EmScale = percent(charTalentTables.Nefer.c6.p1);
+const C6PhantasmEndEmScale = percent(charTalentTables.Nefer.c6.p2);
+const C6LunarBloomElevate = percent(charTalentTables.Nefer.c6.p3);
 
-// Lunar-Bloom base bonus post effect (scales from EM)
+// Moonsign benediction: EM feeds the Lunar-Bloom base damage ratio.
+// Game data: Avatar_Nefer_PermanentSkill_3 uses
+// SetNewElementReactionBaseDamageRatioParam (propType Mastery), which names
+// no premod/total read. The same call reads the total stat in game
+// (Ineffa's Benediction, in-game test: md/buff_chains.md), as GO does
+// (input.total.eleMas): extra EM (Key, Nahida, Sucrose) counts.
+// Delivered to the whole team from the source's live Mastery.
+// Moonsign Benedictions of different members stack, so no stack key.
 const lunarBloomPost = new PostEffectStatsMastery({
+    receivers: RECEIVERS.TEAM,
+    reads: CHANNELS.TOTAL,
     percent: new StatTable('lunarbloom_multi', [PassiveLunarScale]),
     statCap: new ValueTable([PassiveLunarScaleCap]),
 });
@@ -183,6 +194,15 @@ export const Nefer = new DbObjectChar({
             base: 100,
         }),
     ],
+    // Every scaling: 'mastery*' damage multiplier below reads the total EM:
+    // the game computes these hits from FIGHT_PROP_ELEMENT_MASTERY
+    // (Avatar_Nefer_Damage_Handler ModifyDamageMixin damageExtra,
+    // Avatar_Nefer_ElementalArt / SkillObj_Nefer_ElementalBurst_Attacker
+    // attackProperty damageExtra DPM x MASTERY; GO: input.total.eleMas via
+    // splitScaleDmgNode / lunarDmgNode). mastery* is already total, so no
+    // params. C1 (60% EM) and C6 (85%/120% EM) are the same kind of EM hit
+    // scaling (Proud params 0.6 / 0.85 / 1.2; GO: lunarDmgNode on total
+    // eleMas; KQM Nefer has no interaction test).
     features: [
         // Normal attacks
         new FeatureDamageNormal({
@@ -450,16 +470,25 @@ export const Nefer = new DbObjectChar({
         }),
     ],
     conditions: [
+        // Nefer unlocks Lunar-Bloom for the whole team (merged with the old
+        // partyData copy).
         new Condition({
+            receivers: RECEIVERS.TEAM,
             settings: {
                 allowed_lunarbloom: 1,
             },
         }),
-        new ConditionCalcMoonsign(),
+        // Moonsign level comes from the real team; every Moonsign member
+        // delivers the same values, so this needs no stack key.
+        new ConditionCalcMoonsign({receivers: RECEIVERS.TEAM}),
         // Veil of Falsehood stacks (max 3 base, max 5 at C2+)
         // Each stack gives 8% Phantasm Performance DMG
         // Also includes A1 Ascendant Gleam EM bonus via party_moonsign level check.
         // Uses both dmg_skill (for regular hits) and dmg_nefer_phantasm (for Lunar-Bloom hits)
+        // Game data: Avatar_Nefer_PermanentSkill_1 Nefer_PermanentSkill_1_MaxStackBuff
+        // (and the C2 variant) writes the flat Actor_ElemMasteryDelta (non-extra,
+        // no stat read). Conditions write premod: default confirmed, no params.
+        // GO writes it under premod eleMas.
         new ConditionNumberNefer({
             name: 'nefer_veil_stacks',
             serializeId: 2,
@@ -471,8 +500,8 @@ export const Nefer = new DbObjectChar({
             c2bonus: C2VeilStackBonus,
             default: 0,
             stats: [
-                new StatTable('dmg_skill', [8]),
-                new StatTable('dmg_nefer_phantasm', [8]),
+                new StatTable('dmg_skill', [A1VeilDmgBonus]),
+                new StatTable('dmg_nefer_phantasm', [A1VeilDmgBonus]),
             ],
             ascendantMinStacks: A1VeilMaxStacks,
             ascendantMaxConstellation: 1,
@@ -492,6 +521,11 @@ export const Nefer = new DbObjectChar({
             serializeId: 1,
             isHidden: true,
         }),
+        // A4 Daughter of the Dust and Sand: Verdant Dew provision speed.
+        // Game data: Avatar_Nefer_PermanentSkill_2 Nefer_PermanentSkill_2_Buff_Handler
+        // computes SpeedUp from FIGHT_PROP_ELEMENT_MASTERY (total). Not modeled:
+        // Verdant Dew provision has no attribute stat, so no reads/writes to
+        // declare here (STOP; see md/task_progress.md).
         new ConditionStatic({
             title: 'talent_name.nefer_daughter_of_the_dust_and_sand',
             description: 'talent_descr.nefer_daughter_of_the_dust_and_sand',
@@ -589,46 +623,5 @@ export const Nefer = new DbObjectChar({
             ],
         },
     ]),
-    partyData: {
-        loadStats: {
-            stats: ['mastery_total'],
-        },
-        conditions: [
-            new Condition({settings: {allowed_lunarbloom: 1}}),
-            new ConditionNumber({
-                name: 'nefer_mastery_total',
-                title: 'talent_name.stats_total_mastery',
-                partyStat: 'mastery_total',
-                serializeId: 1,
-                rotation: 'party',
-                max: 2000,
-            }),
-            new ConditionStatic({
-                title: 'talent_name.nefer_dusklit_eaves',
-                description: 'talent_descr.nefer_dusklit_eaves',
-                stats: {
-                    text_percent: PassiveLunarScale * 100,
-                    text_percent_max: PassiveLunarScaleCap,
-                },
-            }),
-            new ConditionBoolean({
-                name: 'party.nefer_victory_flows_from_the_turning_of_tides',
-                serializeId: 2,
-                title: 'talent_name.nefer_victory_flows_from_the_turning_of_tides',
-                description: 'talent_descr.nefer_victory_flows_from_the_turning_of_tides',
-                info: {constellation: 6},
-                rotation: 'party',
-                stats: {
-                    'dmg_lunarbloom_special': C6LunarBloomElevate,
-                },
-            }),
-        ],
-        postEffects: [
-            new PostEffectStats({
-                from: 'nefer_mastery_total',
-                percent: new StatTable('lunarbloom_multi', [PassiveLunarScale]),
-                statCap: new ValueTable([PassiveLunarScaleCap]),
-            }),
-        ],
-    },
+    retiredParty: [[1, 'number'], [2, 'checkbox']],
 });

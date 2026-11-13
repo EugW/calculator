@@ -1,10 +1,12 @@
+import { ConditionReceiver } from "../../classes/Condition/Receiver";
 import { Condition } from "../../classes/Condition";
 import { ConditionAnd } from "../../classes/Condition/And";
 import { ConditionAscensionChar } from "../../classes/Condition/Ascension/Char";
 import { ConditionBoolean } from "../../classes/Condition/Boolean";
+import { ConditionOnField } from "../../classes/Condition/Field";
+import { ConditionTeam } from "../../classes/Condition/Team";
 import { ConditionEnemyStatus } from "../../classes/Condition/Boolean/EnemyStatus";
 import { ConditionConstellation } from "../../classes/Condition/Constellation";
-import { ConditionNumber } from "../../classes/Condition/Number";
 import { ConditionNot } from "../../classes/Condition/Not";
 import { ConditionOr } from "../../classes/Condition/Or";
 import { ConditionRadianceStellarGlimmer, RADIANCE_STELLARCONDUCT, RADIANCE_STELLARSWIRL } from "../../classes/Condition/RadianceStellarGlimmer";
@@ -25,10 +27,12 @@ import { FeatureHeal } from "../../classes/Feature2/Heal";
 import { FeatureMultiplier } from "../../classes/Feature2/Multiplier";
 import { FeatureMultiplierList } from "../../classes/Feature2/Multiplier/List";
 import { FeatureMultiplierTarget } from "../../classes/Feature2/Multiplier/Target";
+import { RECEIVERS } from "../../classes/Team/Receivers";
 import { StatTable } from "../../classes/StatTable";
 import { ValueTable } from "../../classes/ValueTable";
 import { charTables } from "../generated/CharTables";
 import { charTalentTables } from "../generated/CharTalentTables";
+import { percent } from "../Params";
 
 const Talents = new DbObjectTalents({
     attack: {
@@ -163,15 +167,14 @@ const Talents = new DbObjectTalents({
 
 const A1HealingRecv = 20;
 const C2NormalDmg = 15;
-const RadianceReactionDmg = 50;
-const C2RadianceAtk = 50;
-const C4ExtraHeal = 180;
-const C6StellarGlimmerFlat = 600;
+const RadianceReactionDmg = percent(charTalentTables.Qiqi.sp.p2);
+const C2RadianceAtk = percent(charTalentTables.Qiqi.c2.p1);
+const C4ExtraHeal = percent(charTalentTables.Qiqi.c4.p1);
+const C6StellarGlimmerFlat = percent(charTalentTables.Qiqi.c6.p2);
+const C6MaxStacks = charTalentTables.Qiqi.c6.p3;
 
 const radianceConductName = 'qiqi_radiance_stellarconduct';
 const radianceSwirlName = 'qiqi_radiance_stellarswirl';
-const partyRadianceConductName = 'party.qiqi_herald_of_frost_radiance_stellarconduct';
-const partyRadianceSwirlName = 'party.qiqi_herald_of_frost_radiance_stellarswirl';
 
 function radianceCondition(mode) {
     return new ConditionRadianceStellarGlimmer({
@@ -439,6 +442,7 @@ export const Qiqi = new DbObjectChar({
         new ConditionBoolean({
             name: 'qiqi_life_prolonging_methods',
             serializeId: 1,
+            receivers: RECEIVERS.TEAM,
             title: 'talent_name.qiqi_life_prolonging_methods',
             description: 'talent_descr.qiqi_life_prolonging_methods',
             stats: {
@@ -462,7 +466,7 @@ export const Qiqi = new DbObjectChar({
             serializeId: 3,
             title: 'talent_name.qiqi_seven_sacred_treasures',
             description: 'talent_descr.qiqi_seven_sacred_treasures',
-            condition: new ConditionBoolean({name: 'polestar_field'}),
+            condition: new ConditionTeam({condition: new ConditionBoolean({name: 'polestar_field'})}),
         }),
         new ConditionBoolean({
             name: 'qiqi_herald_of_frost_radiance',
@@ -474,6 +478,7 @@ export const Qiqi = new DbObjectChar({
             ],
         }),
         new Condition({
+            receivers: RECEIVERS.TEAM,
             stats: {
                 dmg_reaction_superconduct: RadianceReactionDmg,
                 dmg_stellarconduct: RadianceReactionDmg,
@@ -484,6 +489,7 @@ export const Qiqi = new DbObjectChar({
             ]),
         }),
         new Condition({
+            receivers: RECEIVERS.TEAM,
             stats: {
                 dmg_reaction_swirl_cryo: RadianceReactionDmg,
                 dmg_stellarswirl: RadianceReactionDmg,
@@ -501,6 +507,31 @@ export const Qiqi = new DbObjectChar({
             condition: new ConditionNot([
                 new ConditionBoolean({name: radianceConductName}),
             ]),
+        }),
+    ],
+    multipliers: [
+        // Rite of Resurrection: after Preserver of Fortune, the active party
+        // member (except Qiqi) dealing Stellar-Conduct or Stellar-Swirl
+        // damage consumes a Glimpse of Mystery level for flat ATK-scaled DMG.
+        new FeatureMultiplier({
+            receivers: RECEIVERS.OTHERS,
+            scaling: 'atk*',
+            source: 'constellation6',
+            values: new ValueTable([C6StellarGlimmerFlat]),
+            condition: new ConditionAnd([
+                new ConditionConstellation({constellation: 6}),
+                new ConditionReceiver({
+                    condition: new ConditionOnField(),
+                }),
+                new ConditionStacks({
+                    name: 'qiqi_glimpse_of_mystery',
+                    maxStacks: C6MaxStacks,
+                }),
+            ]),
+            target: new FeatureMultiplierTarget({
+                tags: ['stellarglimmer_direct'],
+                options: ['stellarglimmer_flat'],
+            }),
         }),
     ],
     constellation: new DbObjectConstellation([
@@ -566,88 +597,15 @@ export const Qiqi = new DbObjectChar({
         },
         {
             conditions: [
-                new ConditionStatic({
+                new ConditionStacks({
+                    name: 'qiqi_glimpse_of_mystery',
+                    serializeId: 6,
                     title: 'talent_name.qiqi_rite_of_resurrection',
                     description: 'talent_descr.qiqi_rite_of_resurrection_buffed',
+                    maxStacks: C6MaxStacks,
                 }),
             ],
         },
     ]),
-    partyData: {
-        loadStats: {
-            stats: ['atk_total'],
-        },
-        conditions: [
-            new ConditionNumber({
-                name: 'qiqi_atk_total',
-                title: 'talent_name.stats_total_atk',
-                partyStat: 'atk_total',
-                serializeId: 2,
-                rotation: 'party',
-                max: 10000,
-            }),
-            new ConditionBoolean({
-                name: 'party.qiqi_life_prolonging_methods',
-                serializeId: 1,
-                rotation: 'party',
-                title: 'talent_name.qiqi_life_prolonging_methods',
-                description: 'talent_descr.qiqi_life_prolonging_methods',
-                info: {ascension: 4},
-                stats: {
-                    healing_recv: 20,
-                },
-            }),
-            new ConditionBoolean({
-                name: partyRadianceConductName,
-                serializeId: 3,
-                rotation: 'party',
-                title: 'talent_name.qiqi_seven_sacred_treasures',
-                description: 'talent_descr.qiqi_seven_sacred_treasures',
-                info: {special: true},
-                stats: {
-                    dmg_reaction_superconduct: RadianceReactionDmg,
-                    dmg_stellarconduct: RadianceReactionDmg,
-                },
-            }),
-            new ConditionStacks({
-                name: 'party.qiqi_glimpse_of_mystery',
-                serializeId: 4,
-                rotation: 'party',
-                title: 'talent_name.qiqi_rite_of_resurrection',
-                description: 'talent_descr.qiqi_rite_of_resurrection_buffed',
-                info: {constellation: 6},
-                maxStacks: 4,
-            }),
-            new ConditionBoolean({
-                name: partyRadianceSwirlName,
-                serializeId: 5,
-                rotation: 'party',
-                title: 'talent_name.qiqi_seven_sacred_treasures',
-                description: 'talent_descr.qiqi_seven_sacred_treasures',
-                info: {special: true},
-                stats: {
-                    dmg_reaction_swirl_cryo: RadianceReactionDmg,
-                    dmg_stellarswirl: RadianceReactionDmg,
-                },
-                condition: new ConditionNot([
-                    new ConditionBoolean({name: partyRadianceConductName}),
-                ]),
-            }),
-        ],
-        multipliers: [
-            new FeatureMultiplier({
-                scaling: 'qiqi_atk_total',
-                source: 'constellation6',
-                values: new ValueTable([C6StellarGlimmerFlat]),
-                condition: new ConditionStacks({
-                    name: 'party.qiqi_glimpse_of_mystery',
-                    maxStacks: 4,
-                }),
-                target: new FeatureMultiplierTarget({
-                    tags: ['stellarglimmer_direct'],
-                    options: ['stellarglimmer_flat'],
-                }),
-            }),
-        ],
-    },
+    retiredParty: [[1, 'checkbox'], [2, 'number'], [3, 'checkbox'], [4, 'stacks'], [5, 'checkbox']],
 });

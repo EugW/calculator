@@ -1,6 +1,10 @@
 import { ArtifactSet } from "../../../classes/ArtifactSet";
+import { Condition } from "../../../classes/Condition";
 import { ConditionBoolean } from "../../../classes/Condition/Boolean";
 import { ConditionStatic } from "../../../classes/Condition/Static";
+import { RECEIVERS } from "../../../classes/Team/Receivers";
+import { artifactSetTables } from "../../generated/ArtifactSetTables";
+import { percent } from "../../Params";
 
 export const DeepwoodMemories = new ArtifactSet({
     serializeId: 41,
@@ -19,7 +23,7 @@ export const DeepwoodMemories = new ArtifactSet({
                     title: 'set_bonus.deepwood_memories_2',
                     description: 'set_descr.deepwood_memories_2',
                     stats: {
-                        dmg_dendro: 15,
+                        dmg_dendro: artifactSetTables.DeepwoodMemories.pc2.dmg_dendro,
                     },
                 }),
             ],
@@ -33,8 +37,14 @@ export const DeepwoodMemories = new ArtifactSet({
                     title: 'set_bonus.deepwood_memories_4',
                     description: 'set_descr.deepwood_memories_4',
                     stats: {
-                        text_percent: 30,
+                        text_percent: percent(artifactSetTables.DeepwoodMemories.pc4.p1),
                     },
+                }),
+                new Condition({
+                    receivers: RECEIVERS.TEAM,
+                    stack: 'deepwood_memories_4',
+                    condition: new ConditionBoolean({name: 'set.deepwood_memories_4'}),
+                    stats: {enemy_res_dendro: -percent(artifactSetTables.DeepwoodMemories.pc4.p1)},
                 }),
             ],
         },

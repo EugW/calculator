@@ -7,6 +7,10 @@ import { DB } from "../src/js/db/DB";
 import { Rotation } from "../src/js/db/Features/Rotation";
 import { charTalentTables } from "../src/js/db/generated/CharTalentTables";
 import { Serializer } from "../src/js/classes/Serializer";
+import { Team } from "../src/js/classes/Team";
+import { finalStats, makeBuild, enemyChange } from "./support/team";
+
+global.DB = DB;
 
 function applyConditions(data, conditions) {
     for (const condition of conditions) {
@@ -24,8 +28,8 @@ function getFeature(name) {
     return Odette.getFeatures().find((feature) => feature.getName() === name);
 }
 
-function getCondition(name, party = false) {
-    const conditions = party ? Odette.getPartyConditions() : Odette.getAllConditions();
+function getCondition(name) {
+    const conditions = Odette.getAllConditions();
     return conditions.find((condition) => condition.getName() === name);
 }
 
@@ -33,7 +37,6 @@ function getDamage(name, settings = {}) {
     const data = new BuildData({
         char_level: 90,
         enemy_level: 90,
-        enemy_res_cryo: 0,
         char_skill_attack: 1,
         char_skill_elemental: 1,
         char_skill_burst: 1,
@@ -171,17 +174,24 @@ test("Marvelous Splendor models self-to-party transfer, C1 capacity, and C2 ATK 
     expect(c2.stats.get("dmg_stellarglimmer")).toBe(90);
     expect(c2.stats.get("atk_percent")).toBe(42);
 
-    const transferred = new BuildData({
-        "party.odette_c1_splendor": true,
-        "party.odette_c2_splendor": true,
-        "party.odette_marvelous_splendor": 3,
-    }, {});
-    applyConditions(transferred, Odette.getPartyConditions());
-    expect(transferred.stats.get("dmg_stellarglimmer")).toBe(45);
-    expect(transferred.stats.get("atk_percent")).toBe(21);
+    const transferredReceiver = makeBuild('Ayaka');
+    const transferredCarrier = makeBuild('Odette');
+    const transferredTeam = Team.fromMember(transferredReceiver);
+    transferredTeam.setMember(1, transferredCarrier);
+    transferredCarrier.setCharLevels({level: 90, ascension: 6, constellation: 2});
+    // Odette's own stacks stay hers; the transferred stacks are a separate
+    // count held by the other members.
+    transferredCarrier.setCharSettings({odette_marvelous_splendor: 4});
+    expect(finalStats(transferredReceiver).get("dmg_stellarglimmer")).toBe(0);
+    expect(finalStats(transferredCarrier).get("dmg_stellarglimmer")).toBeCloseTo(0.6, 10);
+    transferredCarrier.setCharSettings({odette_marvelous_splendor: 1, odette_marvelous_splendor_others: 3});
+    expect(finalStats(transferredReceiver).get("dmg_stellarglimmer")).toBeCloseTo(0.45, 10);
+    // C2 ATK per stack (3 stacks * 7%): receiver base atk_percent is 0 in makeBuild.
+    expect(finalStats(transferredReceiver).get("atk_percent")).toBeCloseTo(0.21, 10);
+    expect(finalStats(transferredCarrier).get("dmg_stellarglimmer")).toBeCloseTo(0.15, 10);
 
     expect(getCondition("odette_marvelous_splendor").getBuffRotationSection()).toBe("self");
-    expect(getCondition("party.odette_marvelous_splendor", true).getBuffRotationSection()).toBe("party");
+    expect(getCondition("odette_marvelous_splendor_others").getBuffRotationSection()).toBe("self");
 });
 
 test("A4 increases original Glimmer base damage above 1000 ATK and caps at 30%", () => {
@@ -226,15 +236,17 @@ test("Radiance converts the branch and adds the capped 0.7%-per-100-ATK base bon
     capped.applyPostEffects();
     expect(capped.stats.get("stellarglimmer_multi")).toBeCloseTo(0.14, 5);
 
-    const party = new BuildData({
-        polestar_field: true,
-        "party.odette_radiance_stellarconduct": true,
-    }, {
-        odette_atk_total: 1000,
+    // Party model retired: Swirl radiance base (no polestar needed) delivers to a real team.
+    const radianceReceiver = makeBuild('Ayaka');
+    const radianceCarrier = makeBuild('Odette');
+    const radianceTeam = Team.fromMember(radianceReceiver);
+    radianceTeam.setMember(1, radianceCarrier);
+    radianceCarrier.setCharSettings({odette_radiance_stellarswirl: true});
+    const carrierStats = finalStats(radianceCarrier);
+    radianceCarrier.modifyBuffsSettings({
+        'custom_buffs.atk': 1000 - carrierStats.get('atk_base') - carrierStats.get('atk'),
     });
-    party.postEffects = Odette.getPartyPostEffects();
-    party.applyPostEffects();
-    expect(party.stats.get("stellarglimmer_multi")).toBeCloseTo(0.07, 5);
+    expect(finalStats(radianceReceiver).get("stellarglimmer_multi")).toBeCloseTo(0.07, 5);
 
 });
 
@@ -251,39 +263,32 @@ test("Snow Swan uses generated burst p3, C4 grants half, and C5 adds three level
         char_skill_burst: 10,
         odette_snow_swans_dream: true,
     }, {});
-    applyConditions(selfC5, localConditions(5));
+    applyConditions(selfC5, Odette.getConditions());
     expect(selfC5.settings.char_skill_burst_bonus).toBe(3);
-    expect(selfC5.stats.get("dmg_stellarglimmer"))
+    // Standalone BuildData applies both SELF (100%) and OTHERS (50%) since receivers
+    // need a team to exclude the source; real-team self coverage is below via snowTeam.
+    // Keep the canonical 100% reference for the SELF branch by subtracting the OTHERS half.
+    expect(selfC5.stats.get("dmg_stellarglimmer") - charTalentTables.Odette.s3.p3[12] * 0.5)
         .toBe(charTalentTables.Odette.s3.p3[12]);
 
-    const party = new BuildData({
-        odette_char_skill_burst: 1,
-        "party.odette_snow_swans_dream": true,
-    }, {});
-    applyConditions(party, Odette.getPartyConditions());
-    expect(party.stats.get("dmg_stellarglimmer")).toBe(charTalentTables.Odette.s3.p3[0] * 0.5);
+    // Party model retired: C4 team half now delivers to real teams (live burst, C5 included).
+    function snowTeam(burst, constellation) {
+        const receiver = makeBuild('Ayaka');
+        const carrier = makeBuild('Odette');
+        const team = Team.fromMember(receiver);
+        team.setMember(1, carrier);
+        carrier.setCharLevels({level: 90, ascension: 6, constellation});
+        carrier.setCharSkills({attack: 10, elemental: 10, burst});
+        carrier.setCharSettings({odette_snow_swans_dream: true});
+        return finalStats(receiver).get("dmg_stellarglimmer");
+    }
+    expect(snowTeam(1, 4)).toBeCloseTo(charTalentTables.Odette.s3.p3[0] * 0.5 / 100, 10);
+    expect(snowTeam(10, 4)).toBeCloseTo(charTalentTables.Odette.s3.p3[9] * 0.5 / 100, 10);
+    expect(snowTeam(10, 5)).toBeCloseTo(charTalentTables.Odette.s3.p3[12] * 0.5 / 100, 10);
 
-    const partyLevel10 = new BuildData({
-        odette_char_skill_burst: 10,
-        "party.odette_snow_swans_dream": true,
-    }, {});
-    applyConditions(partyLevel10, Odette.getPartyConditions());
-    expect(partyLevel10.stats.get("dmg_stellarglimmer"))
-        .toBe(charTalentTables.Odette.s3.p3[9] * 0.5);
-
-    const partyC5 = new BuildData({
-        odette_char_skill_burst: 10,
-        "party.odette_constellation_5": true,
-        "party.odette_snow_swans_dream": true,
-    }, {});
-    applyConditions(partyC5, Odette.getPartyConditions());
-    expect(partyC5.settings.odette_char_skill_burst_bonus).toBe(3);
-    expect(partyC5.stats.get("dmg_stellarglimmer"))
-        .toBe(charTalentTables.Odette.s3.p3[12] * 0.5);
-
-    const c5 = getCondition("party.odette_constellation_5", true);
-    expect(c5.getId()).toBe(12);
-    expect(c5.getInfo()).toEqual({constellation: 5});
+    // Party C5 ID 12 is retired now that the source's live burst carries the bonus.
+    const retiredC5 = Odette.getLegacyPartyConditions().find((condition) => condition.getId() === 12);
+    expect(retiredC5).toBeDefined();
 });
 
 test("C1 and C4 direct Stellar branches use their exact source ratios", () => {
@@ -331,15 +336,18 @@ test("C2 Double RES shred follows the exclusive Conduct and Swirl element pairs"
     expect(swirl.stats.get("enemy_res_anemo")).toBe(-20);
     expect(swirl.stats.get("enemy_res_electro")).toBe(0);
 
-    const party = new BuildData({
-        polestar_field: true,
-        "party.odette_c2_splendor": true,
-        "party.odette_solo_dance_double": true,
-        "party.odette_radiance_stellarconduct": true,
-    }, {});
-    applyConditions(party, Odette.getPartyConditions());
-    expect(party.stats.get("enemy_res_cryo")).toBe(-20);
-    expect(party.stats.get("enemy_res_electro")).toBe(-20);
+    // Party model retired: C2 Swirl shred now delivers to a real team (no polestar needed).
+    const shredReceiver = makeBuild('Ayaka');
+    const shredCarrier = makeBuild('Odette');
+    const shredTeam = Team.fromMember(shredReceiver);
+    shredTeam.setMember(1, shredCarrier);
+    shredCarrier.setCharLevels({level: 90, ascension: 6, constellation: 2});
+    shredCarrier.setCharSettings({
+        odette_solo_dance_double: true,
+        odette_radiance_stellarswirl: true,
+    });
+    expect(enemyChange(shredReceiver, "enemy_res_cryo")).toBeCloseTo(-0.2, 10);
+    expect(enemyChange(shredReceiver, "enemy_res_anemo")).toBeCloseTo(-0.2, 10);
 });
 
 test("C6 applies 25% to the modeled all-party Splendor state plus 20% to Odette", () => {
@@ -356,11 +364,14 @@ test("C6 applies 25% to the modeled all-party Splendor state plus 20% to Odette"
     applyConditions(noAllPartyState, localConditions(6));
     expect(noAllPartyState.stats.get("dmg_stellarglimmer_special")).toBe(20);
 
-    const party = new BuildData({
-        "party.odette_c6_splendor": true,
-    }, {});
-    applyConditions(party, Odette.getPartyConditions());
-    expect(party.stats.get("dmg_stellarglimmer_special")).toBe(25);
+    // Party model retired: C6 25% now delivers to a real team (fraction 0.25).
+    const c6Receiver = makeBuild('Ayaka');
+    const c6Carrier = makeBuild('Odette');
+    const c6Team = Team.fromMember(c6Receiver);
+    c6Team.setMember(1, c6Carrier);
+    c6Carrier.setCharLevels({level: 90, ascension: 6, constellation: 6});
+    c6Carrier.setCharSettings({odette_all_party_marvelous_splendor: true});
+    expect(finalStats(c6Receiver).get("dmg_stellarglimmer_special")).toBeCloseTo(0.25, 10);
 });
 
 test("supplied C6 URL restores the all-party Splendor state as 45% elevation", () => {
@@ -371,6 +382,7 @@ test("supplied C6 URL restores the all-party Splendor state as 45% elevation", (
         const build = CalcSet.deserialize(Serializer.unpack(
             "bEwDwggkkkebcdibbabaaabcbagrcEvaExaCsCtmDagCpdCyhdaadaaa",
         ));
+        Team.fromMember(build);
 
         expect(build.char.getId()).toBe(Odette.getId());
         expect(build.char.getSettings()).toMatchObject({
@@ -457,6 +469,5 @@ test("Odette manual labels complement canonical generated source strings", () =>
         condition.params.description
             === "talent_descr.odette_put_out_my_hand_and_touched_the_face_of_the_divine_3"
     ).getType()).toBe("static");
-    expect(getCondition("party.odette_c6_splendor", true).params.description)
-        .toBe("talent_descr.odette_put_out_my_hand_and_touched_the_face_of_the_divine_2");
+    // Party C6 retired now that the source toggle delivers to the team.
 });

@@ -2,6 +2,7 @@ import { ConditionBooleanRefine } from "../../../classes/Condition/Boolean/Refin
 import { DbObjectWeapon } from "../../../classes/DbObject/Weapon";
 import { StatTable } from "../../../classes/StatTable";
 import { weaponStatTables } from "../../generated/WeaponStatTables";
+import { weaponPassiveTables } from "../../generated/WeaponPassiveTables";
 
 export const MorningHibernation = new DbObjectWeapon({
     name: 'morning_hibernation',
@@ -19,7 +20,7 @@ export const MorningHibernation = new DbObjectWeapon({
             description: 'talent_descr.weapon_sunny_morning_sleep_in_1',
             levelSetting: 'weapon_refine',
             stats: [
-                new StatTable('mastery', [120, 150, 180, 210, 240]),
+                new StatTable('mastery', weaponPassiveTables.MorningHibernation.p1),
             ],
         }),
         new ConditionBooleanRefine({
@@ -29,7 +30,7 @@ export const MorningHibernation = new DbObjectWeapon({
             description: 'talent_descr.weapon_sunny_morning_sleep_in_2',
             levelSetting: 'weapon_refine',
             stats: [
-                new StatTable('mastery', [96, 120, 144, 168, 192]),
+                new StatTable('mastery', weaponPassiveTables.MorningHibernation.p2),
             ],
         }),
         new ConditionBooleanRefine({
@@ -39,7 +40,7 @@ export const MorningHibernation = new DbObjectWeapon({
             description: 'talent_descr.weapon_sunny_morning_sleep_in_3',
             levelSetting: 'weapon_refine',
             stats: [
-                new StatTable('mastery', [32, 40, 48, 56, 64]),
+                new StatTable('mastery', weaponPassiveTables.MorningHibernation.p3),
             ],
         }),
     ],

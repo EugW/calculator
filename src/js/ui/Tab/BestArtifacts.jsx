@@ -10,7 +10,6 @@ import { AccordionRequredSets } from '../Components/Accordion/RequredSets';
 import { AccordionSetBonuses } from '../Components/Accordion/SetBonuses';
 import { AccordionStatFilter } from '../Components/Accordion/StatFilter';
 import { AccordionSuggesterStats } from '../Components/Accordion/SuggesterStats';
-import { Condition } from '../../classes/Condition';
 import { ControlsBar } from '../Components/ControlsBar';
 import { Dropdown } from '../Components/Inputs/Dropdown';
 import { Feature2 } from '../../classes/Feature2';
@@ -26,6 +25,11 @@ import { Tab } from "../Tab";
 import { TitledButton } from '../Components/Inputs/Buttons';
 import { WorkerFactorySuggestArtifacts } from '../../classes/WorkerFactory/SuggestArtifacts';
 import { loadArtifactSuggestPreferences, restoreArtifactSuggestPreferences, saveArtifactSuggestPreferences } from '../../classes/ArtifactSuggestPreferences';
+import { inventoryArtifactHash, teamArtifactOwnership } from '../../classes/ArtifactTeamInventory';
+import { captureArtifactSuggestRun, artifactSuggestRunKey, artifactSuggestResultBuild, equipArtifactPieces } from '../../classes/ArtifactSuggestRun';
+import { deserializeWorkerMember } from '../../classes/Team';
+import { Artifact } from '../../classes/Artifact';
+import { ArtifactSetProfileModal } from '../Modal/ArtifactSetProfile';
 
 const MIN_THREADS = 1;
 const MAX_THREADS = 16;
@@ -35,6 +39,7 @@ export class BestArtifactTab extends Tab {
         super(params);
         this.id = 'bestart';
         this.rightRab = true;
+        this.title = 'tab_header.artifact_pool_suggest';
     }
 
     refresh() {
@@ -93,7 +98,7 @@ function cloneSuggestSettings(settings) {
     return JSON.parse(JSON.stringify(settings || {}));
 }
 
-class BestArtifact extends React.Component {
+export class BestArtifact extends React.Component {
     constructor(props) {
         super(props);
         this.lang = new Lang();
@@ -122,7 +127,6 @@ class BestArtifact extends React.Component {
                 groups: {},
                 slots: {},
                 sets: {},
-                sets_settings: {},
                 filter: {
                     min_level: 0,
                     max_level: 20,
@@ -207,16 +211,11 @@ class BestArtifact extends React.Component {
         }
 
         let setData = this.listSets();
-        let setSettings = {};
         for (let setName of Object.keys(setData)) {
             for (let piece of setData[setName].pieces) {
                 this.state.settings.sets[setName + '-' + piece] = true;
             }
-
-            let localSettings = Condition.allConditionsOn(setData[setName].conditions);
-            Object.assign(setSettings, localSettings);
         }
-        this.state.settings.sets_settings = setSettings;
 
         for (let slot of DB.Artifacts.Slots.getKeys()) {
             let data = DB.Artifacts.Slots.get(slot);
@@ -240,6 +239,7 @@ class BestArtifact extends React.Component {
             total: this.artifacts.length,
             filtered: 0,
             locked: 0,
+            teammates: 0,
             used: 0,
         };
 
@@ -255,8 +255,15 @@ class BestArtifact extends React.Component {
         let minLevel = this.state.settings.filter.min_level;
         let maxLevel = this.state.settings.filter.max_level;
         let hasSlots = {};
+        const build = this.props.app.currentSet();
+        const teammateArtifacts = teamArtifactOwnership(build, this.storage).teammates;
 
         for (let art of this.artifacts) {
+            if (teammateArtifacts.has(art.getHash())) {
+                this.counts.teammates++;
+                continue;
+            }
+
             if (art.isLocked()) {
                 this.counts.locked++;
                 continue;
@@ -290,12 +297,12 @@ class BestArtifact extends React.Component {
             this.filteredArtifacts.push(art);
         }
 
-        let artifacts = this.props.app.currentSet().getArtifacts();
+        let artifacts = build.getArtifacts();
         for (let slot of DB.Artifacts.Slots.getKeys()) {
             if (hasSlots[slot]) continue;
 
             let art = artifacts[slot];
-            if (art) {
+            if (art && !teammateArtifacts.has(inventoryArtifactHash(art, this.storage))) {
                 this.filteredArtifacts.push(art);
             }
         }
@@ -311,7 +318,7 @@ class BestArtifact extends React.Component {
     }
 
     dataFeaturesItems() {
-        return Feature2.buildDropdown(this.props.app.currentSet());
+        return Feature2.buildDropdown(this.props.app.view());
     }
 
     dataArtifactGroups() {
@@ -388,12 +395,6 @@ class BestArtifact extends React.Component {
         this.modifySettings('sets', setsSettings);
     }
 
-    handleSetBonusesSettings(name, value) {
-        let setsSettings = this.state.settings.sets_settings;
-        setsSettings[name] = value;
-        this.modifySettings('sets_settings', setsSettings);
-    }
-
     handleSetBonusesEnable() {
         let setsSettings = this.state.settings.sets;
         for (let key of Object.keys(setsSettings)) {
@@ -433,7 +434,13 @@ class BestArtifact extends React.Component {
     }
 
     handleApplyResult(set) {
-        this.props.app.replaceSet(set);
+        if (this.resultsAreStale()) {
+            this.setState({view: 'result'});
+            return;
+        }
+        const member = this.props.app.currentSet();
+        equipArtifactPieces(member, Object.values(set.getArtifacts()));
+        this.props.app.refresh();
     }
 
     handleCompareResult(set) {
@@ -443,7 +450,7 @@ class BestArtifact extends React.Component {
     handleFeaturesSelect() {
         UI.WindowSelectFeatureList.show((items) => {
             this.setState({ otherFeatures: items });
-        }, this.state.otherFeatures);
+        }, this.state.otherFeatures, this.state.result.items[0]?.view());
     }
 
     handleDisplayMode(mode) {
@@ -518,7 +525,6 @@ class BestArtifact extends React.Component {
             let conds = DB.Artifacts.Sets.get(setName).getConditionsByPieces(pieces);
 
             let valueble = [];
-            let updateCond = false;
 
             for (let i in conds) {
                 if (i <= pieces && conds[i].length) {
@@ -527,30 +533,13 @@ class BestArtifact extends React.Component {
                     let settingName = setName + '-' + i;
                     if (this.state.settings.sets[settingName] === undefined) {
                         this.state.settings.sets[settingName] = true;
-                        updateCond = true;
-
                     }
                 }
-            }
-
-            let activeConds = [];
-            for (let i in conds) {
-                for (let cond of conds[i]) {
-                    if (cond && cond.isSerializable()) {
-                        activeConds.push(cond);
-                    }
-                }
-            }
-
-            if (updateCond) {
-                let localSettings = Condition.allConditionsOn(activeConds);
-                this.state.settings.sets_settings = Object.assign({}, localSettings, this.state.settings.sets_settings);
             }
 
             if (valueble.length) {
                 result[setName] = {
                     pieces: valueble,
-                    conditions: activeConds,
                 };
             }
         }
@@ -559,28 +548,17 @@ class BestArtifact extends React.Component {
     }
 
     suggestCompleteCallback(data) {
-        let results = [];
-
         UI.Layout.unlockClosing();
         this.progressModal.hide();
-
-        for (let item of data) {
-            let build = this.props.app.currentSet().clone();
-            for (let art of item.artifacts) {
-                build.setArtifact(art);
-            }
-            build.setArtifactsSettings(Object.assign({}, this.state.settings.sets_settings));
-            build.artifacts.removeInvalidSettings();
-            build.suggesterWorkerValue = item.value;
-            build.suggesterWorkerFeature = this.state.feature;
-            build.suggesterWorkerFeatureType = this.state.featureType;
-            results.push(build);
-        }
+        const snapshot = this.pendingRun;
+        if (!snapshot) return;
+        const results = data.map(item => artifactSuggestResultBuild(snapshot, item));
 
         this.setState({
             view: 'result',
             result: {
-                feature: this.state.feature,
+                feature: snapshot.feature,
+                runKey: artifactSuggestRunKey(snapshot),
                 items: results,
             },
         });
@@ -591,6 +569,7 @@ class BestArtifact extends React.Component {
     }
 
     suggestTerminateCallback() {
+        this.pendingRun = null;
         UI.Layout.unlockClosing();
     }
 
@@ -629,19 +608,33 @@ class BestArtifact extends React.Component {
         return this.state.settings;
     }
 
+    captureRun() {
+        this.filterArtifacts();
+        return captureArtifactSuggestRun({member: this.props.app.currentSet(), artifacts: this.filteredArtifacts,
+            settings: this.state.settings, feature: this.state.feature, featureType: this.state.featureType,
+            showBeta: this.props.app.showBetaContent(), fastFilter: this.state.artifactFilter});
+    }
+
+    resultsAreStale() {
+        const runKey = this.state.result.runKey;
+        return !runKey || runKey !== artifactSuggestRunKey(this.captureRun());
+    }
+
     startSuggest() {
         const useGPU = this.state.gpuAvailable && this.state.useGPU;
+        const snapshot = this.captureRun();
+        this.pendingRun = snapshot;
         this.factory.run({
-            artifacts: this.filteredArtifacts,
-            settings: this.state.settings,
-            feature: this.state.feature,
-            featureType: this.state.featureType,
-            calcset: this.props.app.currentSet(),
+            artifacts: snapshot.inventory.map(data => Artifact.deserialize(data.slice())),
+            settings: cloneSuggestSettings(snapshot.settings),
+            feature: snapshot.feature,
+            featureType: snapshot.featureType,
+            calcset: deserializeWorkerMember(snapshot.build),
             maxThreads: useGPU ? 1 : this.state.maxThreads,
-            fastFilter: this.state.artifactFilter,
+            fastFilter: snapshot.fastFilter,
             useGPU: useGPU,
             gpuBatchSize: this.props.app.getSetting('artifact_suggest_gpu_batch_size') || 'auto',
-            showBeta: this.props.app.showBetaContent(),
+            showBeta: snapshot.showBeta,
         });
     }
 
@@ -661,6 +654,7 @@ class BestArtifact extends React.Component {
                 backButtonCallback={() => this.showDefault()}
             >
                 {this.tabContent()}
+                <ArtifactSetProfileModal ref={obj => { this.profileModal = obj; }} app={this.props.app}/>
                 <SuggestProgressModal
                     ref={obj => this.progressModal = obj}
                 />
@@ -673,6 +667,7 @@ class BestArtifact extends React.Component {
             return (
                 <SuggestResult
                     result={this.state.result}
+                    stale={this.resultsAreStale()}
                     savedHashes={this.savedHashes()}
                     onApply={(set) => this.handleApplyResult(set)}
                     onCompare={(set) => this.handleCompareResult(set)}
@@ -719,6 +714,10 @@ class BestArtifact extends React.Component {
                         <div className="line">
                             <div className="value">{this.counts.locked}</div>
                             <div className="title">{this.strings.total_locked}</div>
+                        </div>
+                        <div className="line" title={this.lang.get('team_artifacts.optimizer_hint')}>
+                            <div className="value">{this.counts.teammates}</div>
+                            <div className="title">{this.lang.get('team_artifacts.equipped_teammates')}</div>
                         </div>
                         <div className="line">
                             <div className="value">{this.counts.filtered}</div>
@@ -820,10 +819,9 @@ class BestArtifact extends React.Component {
                             <AccordionSetBonuses
                                 sets={this.listSets()}
                                 settings={this.state.settings.sets}
-                                setsSettings={this.state.settings.sets_settings}
                                 showBeta={this.props.app.showBetaContent()}
                                 onChange={(param, value) => this.handleSetBonuses(param, value)}
-                                onSettingChange={(param, value) => this.handleSetBonusesSettings(param, value)}
+                                onOpenProfile={setId => this.profileModal.show(this.props.app.currentSet(), setId)}
                                 enableAction={() => this.handleSetBonusesEnable()}
                                 disableAction={() => this.handleSetBonusesDisable()}
                             />

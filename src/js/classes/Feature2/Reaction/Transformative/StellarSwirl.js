@@ -1,8 +1,9 @@
 import { BuildData } from "../../../Build/Data";
 import { reactionDamageValues } from "../../../../db/generated/ElementScale";
 import { makeStatItem } from "../../Compile/Helpers";
-import { CBaseDamage, CFlatDamage, CMulti, CMultiplierResistance, CSum } from "../../Compile/Types/Block";
+import { CBaseDamage, CFlatDamage, CMulti, CMultiplierCustom, CMultiplierResistance, CSum } from "../../Compile/Types/Block";
 import { CDamage } from "../../Compile/Types/Damage";
+import { CConst } from "../../Compile/Types/Item";
 import { FeatureMultiplierReaction } from "../../Multiplier/Reaction";
 import { FeatureMultiplierStellarSwirl } from "../../Multiplier/StellarSwirl";
 import { FeatureReaction } from "../../Reaction";
@@ -32,11 +33,19 @@ export class FeatureReactionStellarSwirl extends FeatureReaction {
         return this.penalty;
     }
 
+    /**
+     * A row with a rank weight of its own is a member's contribution at that
+     * rank. New hits are offered the team's row instead, which ranks the
+     * contributions itself (Feature2/Reaction/Team).
+     */
+    isRotationChoice() {
+        return this.getContributionWeight() == 1;
+    }
+
     getBaseMultiplier(data) {
         return new FeatureMultiplierReaction({
             reactionRate: this.getReactionRate(),
             reactionValue: reactionDamageValues.getValue(data.settings.char_level),
-            reactionContribution: this.getContributionWeight(),
         });
     }
 
@@ -90,8 +99,10 @@ export class FeatureReactionStellarSwirl extends FeatureReaction {
     }
 
     /**
-     * (level base * coefficient * contribution * base bonus * (EM + additive)
-     * + flat Quills) * RES * elevation, with CRIT applied by CDamage. No DEF.
+     * (level base * coefficient * base bonus * (EM + additive) + flat Quills)
+     * * contribution * RES * elevation, with CRIT applied by CDamage. No DEF.
+     * A rank row's weight is of everything the member deals, Quills included,
+     * as the team's row weighs it (Feature2/Reaction/Team) and the Lunar rows do.
      *
      * @param {BuildData} data
      * @returns {CItem}
@@ -113,8 +124,12 @@ export class FeatureReactionStellarSwirl extends FeatureReaction {
             ], {group: true});
         }
 
+        let weight = this.getContributionWeight();
         base = new CMulti([
             base,
+            ...(weight == 1 ? [] : [new CMultiplierCustom([
+                new CConst({value: weight, percent: true, comment: 'reaction_contribution'}),
+            ], {comment: 'reaction_contribution'})]),
             new CMultiplierResistance([this.getResistanceMultiplier(data)]),
             FeatureMultiplierStellarSwirl.elevationMultiplier(data),
         ], {group: true});

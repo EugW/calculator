@@ -2,6 +2,7 @@ import { Condition } from "../../classes/Condition";
 import { ConditionAnd } from "../../classes/Condition/And";
 import { ConditionAscensionChar } from "../../classes/Condition/Ascension/Char";
 import { ConditionBoolean } from "../../classes/Condition/Boolean";
+import { ConditionTeam } from "../../classes/Condition/Team";
 import { ConditionBooleanValue } from "../../classes/Condition/Boolean/Value";
 import { ConditionConstellation } from "../../classes/Condition/Constellation";
 import { ConditionNot } from "../../classes/Condition/Not";
@@ -23,13 +24,16 @@ import { FeatureDamagePlungeShockWave } from "../../classes/Feature2/Damage/Plun
 import { FeatureDamageSkill } from "../../classes/Feature2/Damage/Skill";
 import { FeatureDamageStellarSwirl } from "../../classes/Feature2/Damage/StellarSwirl";
 import { FeatureMultiplier } from "../../classes/Feature2/Multiplier";
-import { PostEffectStats } from "../../classes/PostEffect/Stats";
+import { CHANNELS } from "../../classes/PostEffect/Channels";
 import { PostEffectStatsAtk } from "../../classes/PostEffect/Stats/Atk";
+import { RECEIVERS } from "../../classes/Team/Receivers";
 import { StatTable } from "../../classes/StatTable";
 import { Stats } from "../../classes/Stats";
+import { teammateElements } from "../../classes/Team/Party";
 import { ValueTable } from "../../classes/ValueTable";
 import { charTables } from "../generated/CharTables";
 import { charTalentTables } from "../generated/CharTalentTables";
+import { percent, plus } from "../Params";
 
 const Talents = new DbObjectTalents({
     attack: {
@@ -111,19 +115,19 @@ const ArmedForActionDuration = 15;
 const SwordEnergyInitial = 2;
 const WindborneSwordMaxUses = 3;
 const C1WindborneSwordMaxUses = 4;
-const DisciplinaryActionMaxStacks = 6;
-const DisciplinaryActionDmgPerStack = 10;
-const A4AtkPerCryoAnemo = 6;
-const A4MasteryPerOther = 25;
-const C1StellarSwirlDmg = 20;
-const C2Atk = 40;
-const C4A4TotalMultiplier = 3;
-const C6TransposeDuration = 5;
-const C6TransposeAnemoDmg = 150;
-const C6TransposeSpiritBladeDmg = 200;
-const C6StellarSwirlElevation = 20;
-const JubileeBaseScalePer100Atk = 0.7;
-const JubileeBaseScaleCap = 14;
+const DisciplinaryActionMaxStacks = charTalentTables.Vesna.a1.p2;
+const DisciplinaryActionDmgPerStack = percent(charTalentTables.Vesna.a1.p3);
+const A4AtkPerCryoAnemo = percent(charTalentTables.Vesna.a4.p1);
+const A4MasteryPerOther = charTalentTables.Vesna.a4.p2;
+const C1StellarSwirlDmg = percent(charTalentTables.Vesna.c1.p2);
+const C2Atk = percent(charTalentTables.Vesna.c2.p1);
+const C4A4TotalMultiplier = plus(1, charTalentTables.Vesna.c4.p1);
+const C6TransposeDuration = charTalentTables.Vesna.c6.p1;
+const C6TransposeAnemoDmg = percent(charTalentTables.Vesna.c6.p2);
+const C6TransposeSpiritBladeDmg = percent(charTalentTables.Vesna.c6.p3);
+const C6StellarSwirlElevation = percent(charTalentTables.Vesna.c6.p4);
+const JubileeBaseScalePer100Atk = percent(charTalentTables.Vesna.a0.p1);
+const JubileeBaseScaleCap = percent(charTalentTables.Vesna.a0.p2);
 const RadianceDuration = 8;
 
 const armedForActionName = 'vesna_armed_for_action';
@@ -148,7 +152,16 @@ const armedForActionRadianceCondition = new ConditionAnd([
     radianceCondition,
 ]);
 
-/** Count Vesna plus the three selected party slots for A4 and its C4 tripling. */
+/** Truth Prevails (A4; C4 triples it): no stat read, it counts Cryo/Anemo vs
+ * other party members. Game data: Avatar_Vesna_PermanentSkill_2
+ * (Vesna_PermanentSkill_2_AttackUp_Buff /
+ * Vesna_PermanentSkill_2_ElementalMasteryUp_Buff; ProudSkill
+ * Vesna_PermanentSkill_2 = [0.06, 25]) writes Actor_AttackRatio and
+ * Actor_ElemMasteryDelta, both without "Extra": premod ATK% and premod EM.
+ * Conditions write premod, so the default is confirmed (no params); the
+ * premod EM counts for premod EM readers (Nahida A1). KQM has no Vesna
+ * stat-interaction test; GO has no Vesna sheet. Count Vesna plus the three
+ * selected party slots for A4 and its C4 tripling. */
 class ConditionVesnaTruthPrevails extends Condition {
     getData(settings) {
         const result = {
@@ -159,16 +172,7 @@ class ConditionVesnaTruthPrevails extends Condition {
             return result;
         }
 
-        const elements = ['anemo'];
-        for (const name of [
-            'resonance_element_1',
-            'resonance_element_2',
-            'resonance_element_3',
-        ]) {
-            if (settings[name]) {
-                elements.push(settings[name]);
-            }
-        }
+        const elements = ['anemo'].concat(teammateElements(settings));
 
         const cryoAnemo = elements.filter((element) => [
             'cryo',
@@ -189,18 +193,21 @@ class ConditionVesnaTruthPrevails extends Condition {
     }
 }
 
+// Stellar Jubilee: Splendid Prelude, TEAM base Stellar Swirl bonus from ATK
+// (0.7% per 100 ATK, cap 14%). Game data:
+// Avatar_Vesna_PermanentSkill_3 sets it with
+// SetNewElementReactionBaseDamageRatioParam (AttackTransferRatio x 0.01 for
+// StarSwirlIce/StarSwirlWind, caps Min/MaxTransRatio; ProudSkill
+// Vesna_PermanentSkill_3 = [0.007, 0.14]), which names no premod/total read:
+// the engine resolves the ATK stat itself. The same call reads the total
+// ATK in game (Ineffa's Benediction, in-game test: md/buff_chains.md):
+// extra ATK (Bennett's burst) counts. GO has no Vesna sheet.
+// stellarswirl_multi has no extra lane, so only the read matters.
 const jubileeBasePost = new PostEffectStatsAtk({
+    receivers: RECEIVERS.TEAM,
+    reads: CHANNELS.TOTAL,
     percent: new StatTable('stellarswirl_multi', [JubileeBaseScalePer100Atk / 100]),
     statCap: new ValueTable([JubileeBaseScaleCap]),
-});
-const partyJubileeCondition = new ConditionBoolean({
-    name: 'party.vesna_stellar_jubilee',
-});
-const partyJubileeBasePost = new PostEffectStats({
-    from: 'vesna_atk_total',
-    percent: new StatTable('stellarswirl_multi', [JubileeBaseScalePer100Atk / 100]),
-    statCap: new ValueTable([JubileeBaseScaleCap]),
-    condition: partyJubileeCondition,
 });
 
 function attackMultiplier(name) {
@@ -422,6 +429,7 @@ export const Vesna = new DbObjectChar({
     ],
     conditions: [
         new Condition({
+            receivers: RECEIVERS.TEAM,
             settings: {
                 allowed_stellarswirl: 1,
             },
@@ -466,6 +474,13 @@ export const Vesna = new DbObjectChar({
             condition: armedForActionCondition,
         }),
         new ConditionStacks({
+            // Rite of Spring's Procession (A1): a stack counter, no stat
+            // read or attribute write. Game data:
+            // Avatar_Vesna_PermanentSkill_1 (Vesna_PermanentSkill_1_Buff;
+            // ProudSkill Vesna_PermanentSkill_1 = [20, 6, 0.1]) only counts
+            // stacks; the Spirit Blade formula multiplies
+            // FIGHT_PROP_CUR_ATTACK (total) by Sword_Buff_Up_Factor x count:
+            // damage hits read the total and need nothing.
             name: disciplinaryActionName,
             serializeId: 4,
             title: 'talent_name.vesna_rite_of_springs_procession',
@@ -497,7 +512,7 @@ export const Vesna = new DbObjectChar({
                 text_duration: RadianceDuration,
             },
             condition: new ConditionNot([
-                new ConditionBoolean({name: 'polestar_field'}),
+                new ConditionTeam({condition: new ConditionBoolean({name: 'polestar_field'})}),
             ]),
         }),
         new ConditionStatic({
@@ -542,6 +557,11 @@ export const Vesna = new DbObjectChar({
                     },
                 }),
                 new Condition({
+                    // C1 Winter's Farewell Feast: flat +20% Stellar Swirl DMG
+                    // (game: Vesna_Constellation_1_Buff writes
+                    // Actor_ElemReactStarSwirlIceDelta/WindDelta =
+                    // C1_StarDamage_Ratio, no stat read). Flat conditions
+                    // (premod) need nothing.
                     isHidden: true,
                     stats: {
                         dmg_stellarswirl: C1StellarSwirlDmg,
@@ -560,6 +580,11 @@ export const Vesna = new DbObjectChar({
                     },
                 }),
                 new Condition({
+                    // C2 Kolo of Spring's Arrival: flat +40% ATK at maximum
+                    // Disciplinary Action (game:
+                    // Vesna_Constellation_2_ATK_Buff writes Actor_AttackRatio
+                    // = C2_ATK_Ratio, no stat read; needs A1). Flat
+                    // conditions (premod) need nothing.
                     isHidden: true,
                     stats: {
                         atk_percent: C2Atk,
@@ -619,6 +644,11 @@ export const Vesna = new DbObjectChar({
                     },
                 }),
                 new ConditionStatic({
+                    // C6 Unwavering Ardor elevation: flat +20% Stellar Swirl
+                    // DMG (game:
+                    // UNIQUE_Avatar_Vesna_Constellation_6_StarSwirlBuff writes
+                    // Actor_ElemReactStarSwirlIce/WindEffectFactor, no stat
+                    // read). Flat conditions (premod) need nothing.
                     title: 'talent_name.vesna_unwavering_ardor',
                     description: 'talent_descr.vesna_unwavering_ardor_2',
                     stats: {
@@ -629,31 +659,5 @@ export const Vesna = new DbObjectChar({
             ],
         },
     ]),
-    partyData: {
-        loadStats: {
-            stats: ['atk_total'],
-        },
-        conditions: [
-            new ConditionNumber({
-                name: 'vesna_atk_total',
-                serializeId: 1,
-                title: 'talent_name.stats_total_atk',
-                partyStat: 'atk_total',
-                max: 10000,
-            }),
-            new ConditionBoolean({
-                name: 'party.vesna_stellar_jubilee',
-                serializeId: 2,
-                title: 'talent_name.vesna_splendid_prelude',
-                description: 'talent_descr.vesna_splendid_prelude',
-                rotation: 'party',
-                settings: {
-                    allowed_stellarswirl: 1,
-                },
-            }),
-        ],
-        postEffects: [
-            partyJubileeBasePost,
-        ],
-    },
+    retiredParty: [[1, 'number'], [2, 'checkbox']],
 });

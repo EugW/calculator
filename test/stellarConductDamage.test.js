@@ -21,10 +21,10 @@ test("Stellar-Conduct direct damage follows its direct formula and ignores ordin
     const data = new BuildData({
         char_level: 90,
         enemy_level: 90,
-        enemy_res_cryo: 10,
         stellarconduct_hit_count: 3,
         reaction: "melt",
     }, {
+        enemy__res_cryo: 0.1,
         atk_base: 1000,
         mastery: 500,
         stellarglimmer_multi: 0.1,
@@ -36,7 +36,7 @@ test("Stellar-Conduct direct damage follows its direct formula and ignores ordin
         dmg_all: 10,
         dmg_skill: 10,
         dmg_cryo: 10,
-        enemy_def_reduce: 0.9,
+        enemy__def_reduce: 0.9,
         crit_rate_base: 1,
         crit_dmg_base: 1,
         crit_dmg_stellarglimmer: 0.2,
@@ -66,7 +66,6 @@ test("Stellar-Conduct flat direct bonuses are added before elevation", () => {
     const data = new BuildData({
         char_level: 90,
         enemy_level: 90,
-        enemy_res_cryo: 0,
         stellarconduct_hit_count: 0,
     }, {
         atk_base: 1000,

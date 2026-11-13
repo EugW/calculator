@@ -80,7 +80,7 @@ features_view;stat_mastery_multi;Мн. МС;EMM
 features_view;stat_char_level;Ур. персонажа;Char lvl
 features_view;stat_enemy_level;Ур. врага;Enemy lvl
 features_view;stat_enemy_def_reduce;Сниж. защ.;DEF reduce
-features_view;stat_enemy_def_ignore;Игнор. защ.;DEF ignore
+features_view;stat_def_ignore;Игнор. защ.;DEF ignore
 features_view;stat_def_reduce_cap;Лимит сниж. защ.;DEF reduce cap
 features_view;stat_def_ignore_cap;Лимит игнор. защ.;DEF ignore cap
 features_view;stat_stacks;Уровни;Stacks
@@ -94,3 +94,80 @@ features_view;stat_stellarconduct_base;Базовый множитель Звё�
 features_view;stat_stellarconduct_mastery;М. стихий Звёздного проводника;Stellar-Conduct EM Bonus
 features_view;stat_stellarglimmer_mastery;М. стихий Звёздного блеска;Stellar Glimmer EM Bonus
 features_view;block_crit_dmg;Крит урон;Crit Damage
+features_view;graph;Граф;Graph
+features_view;graph_title;Граф урона;Damage graph
+features_view;graph_open;Показать, откуда берётся каждое значение, по всему отряду;Show where every value comes from, across the team
+features_view;graph_result_normal;Обычный;Normal
+features_view;graph_result_average;Средний;Average
+features_view;graph_result_crit;Крит;Crit
+features_view;graph_result_value;Значение;Value
+features_view;graph_no_crit;Без крита;No crit
+features_view;graph_impact_on;Вклад в;Impact on
+features_view;graph_reset;Включить все эффекты;Turn all effects back on
+features_view;graph_on;Вкл;On
+features_view;graph_off;Выкл;Off
+features_view;graph_if_on;если включить;if on
+features_view;graph_without;Без этого эффекта;Without this effect
+features_view;graph_if_turned_on;Если включить;If turned back on
+features_view;graph_turn_off;Выключить;Turn off
+features_view;graph_turn_on;Включить;Turn on
+features_view;graph_settings_kept;Остальные настройки не меняются.;Other settings stay as they are.
+features_view;graph_build;Сборка;Build
+features_view;graph_show_parts;Показать части сборки;Show build parts
+features_view;graph_collapse_build;Свернуть сборку;Collapse build
+features_view;graph_base;база;base
+features_view;graph_multiplier;Множитель;Multiplier
+features_view;graph_conversion;Преобразование характеристик;Stat conversion
+features_view;graph_enemy_base;Сопротивление врага;Enemy base RES
+features_view;graph_team;Отряд;Team
+features_view;graph_team_sub;Эффекты отряда;Party effects
+features_view;graph_enemy;Противник;Enemy
+features_view;graph_formula;Формула;Formula
+features_view;graph_result;Результат;Result
+features_view;graph_lanes_head;Отряд: эффекты и характеристики, влияющие на удар;Team: effects and stats that reach this hit
+features_view;graph_kind_source;Эффект;Effect
+features_view;graph_kind_build;Сборка;Build
+features_view;graph_kind_total;Характеристика;Stat total
+features_view;graph_kind_term;Слагаемое;Term
+features_view;graph_kind_factor;Множитель формулы;Formula factor
+features_view;graph_kind_result;Результат;Result
+features_view;graph_comes_from;Входы;Comes from
+features_view;graph_feeds;Влияет на;Feeds
+features_view;graph_path;Путь к результату;Path to the result
+features_view;graph_engine;В движке;In the engine
+features_view;graph_adds;Добавляет;Adds
+features_view;graph_parts;Части;Parts
+features_view;graph_how;Как считается;How it's computed
+features_view;graph_select_hint;Выберите узел, чтобы увидеть, от чего он зависит и на что влияет. Выключите эффект, чтобы увидеть результат без него.;Select a node to trace what it depends on and what it feeds. Turn an effect off to see the result without it.
+features_view;graph_viewing;Просмотр;Viewing
+features_view;graph_on_field;На поле;On field
+features_view;graph_slot;Слот;Slot
+features_view;graph_custom;Свои бонусы;Custom buffs
+features_view;graph_food;Еда;Food
+features_view;graph_other;Прочее;Other
+features_view;graph_unattributed;Без источника;Unattributed
+features_view;graph_legend_value;даёт значение;adds a value
+features_view;graph_legend_teammate;от союзника;from a teammate
+features_view;graph_error;Не удалось построить граф для этого значения.;The graph for this value could not be built.
+features_view;graph_zoom_in;Приблизить;Zoom in
+features_view;graph_zoom_out;Отдалить;Zoom out
+features_view;graph_fit;Показать весь граф;Fit the graph
+features_view;graph_render;Сохранить граф как изображение (PNG);Render the graph as an image (PNG)
+features_view;graph_render_failed;Не удалось сохранить изображение графа;The graph image could not be made
+features_view;graph_rotation_title;Граф урона ротации;Rotation damage graph
+features_view;graph_rotation_open;Показать граф каждого удара ротации, с отрядом на момент этого удара;Show the graph of every hit of the rotation, with the team as it is at that hit
+features_view;graph_rotation_empty;В ротации нет ударов, наносящих урон.;The rotation has no hits that deal damage.
+features_view;graph_step_prev;Предыдущий удар;Previous hit
+features_view;graph_step_next;Следующий удар;Next hit
+features_view;graph_step_of;Удар {x} из {y};Hit {x} of {y}
+features_view;graph_uptime_on;С бафами: {x}%;With buffs: {x}%
+features_view;graph_uptime_off;Без бафов: {x}%;Without buffs: {x}%
+features_view;block_crit_rate;Шанс крит. попадания;CRIT Rate
+features_view;stat_crit_rate_base;Базовый шанс крит.;Base CRIT Rate
+features_view;stat_crit_dmg_base;Базовый крит. урон;Base CRIT DMG
+features_view;block_damage_contribution_result;Вклады отряда;Team contributions
+features_view;contribution_ranking;Каждый участник отдельно проверяет крит. попадание, затем значения ранжируются: 60% наибольшего, 30% второго и по 5% остальных. Здесь показано ранжирование без крит. попаданий.;Every contributor rolls its own CRIT, then the values are ranked: 60% of the highest, 30% of the second, 5% of each of the rest. Shown here: the ranking without CRIT Hits.
+features_view;graph_contribution;Вклад;Contribution
+features_view;graph_kind_contribution;Вклад участника;Contributor
+features_view;graph_ranking_note;Каждый участник отдельно проверяет крит. попадание, затем значения ранжируются: 60% наибольшего, 30% второго и по 5% остальных. Среднее учитывает все сочетания крит. попаданий: вес участника в нём — средний из его весов.;Every contributor rolls its own CRIT, then the values are ranked: 60% of the highest, 30% of the second, 5% of each of the rest. The average is over every combination of CRIT Hits: a contributor's weight there is the mean of its weights.
+features_view;block_reaction_contribution;Вклад;Contribution

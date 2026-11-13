@@ -2,6 +2,8 @@ import { ConditionStaticRefine } from "../../../classes/Condition/Static/Refine"
 import { DbObjectWeapon } from "../../../classes/DbObject/Weapon";
 import { StatTable } from "../../../classes/StatTable";
 import { weaponStatTables } from "../../generated/WeaponStatTables";
+import { weaponPassiveTables } from "../../generated/WeaponPassiveTables";
+import { percent } from "../../Params";
 
 export const SharpshooterOath = new DbObjectWeapon({
     name: 'sharpshooters_oath',
@@ -16,7 +18,7 @@ export const SharpshooterOath = new DbObjectWeapon({
             title: 'talent_name.weapon_sharpshooter_oath',
             description: 'talent_descr.weapon_sharpshooter_oath',
             stats: [
-                new StatTable('dmg_weak', [24, 30, 36, 42, 48]),
+                new StatTable('dmg_weak', percent(weaponPassiveTables.SharpshootersOath.p1)),
             ],
         }),
     ],

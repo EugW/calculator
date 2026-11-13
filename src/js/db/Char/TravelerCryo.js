@@ -2,12 +2,14 @@ import { Condition } from "../../classes/Condition";
 import { ConditionAnd } from "../../classes/Condition/And";
 import { ConditionAscensionChar } from "../../classes/Condition/Ascension/Char";
 import { ConditionBoolean } from "../../classes/Condition/Boolean";
+import { ConditionOnField } from "../../classes/Condition/Field";
+import { ConditionTeam } from "../../classes/Condition/Team";
 import { ConditionBooleanValue } from "../../classes/Condition/Boolean/Value";
 import { ConditionConstellation } from "../../classes/Condition/Constellation";
 import { ConditionDropdownTravelerResonated } from "../../classes/Condition/Dropdown/TravelerResonated";
 import { ConditionLevelSelect } from "../../classes/Condition/LevelSelect";
 import { ConditionNot } from "../../classes/Condition/Not";
-import { ConditionNumber } from "../../classes/Condition/Number";
+import { ConditionReceiver } from "../../classes/Condition/Receiver";
 import { ConditionOr } from "../../classes/Condition/Or";
 import {
     ConditionRadianceStellarGlimmer,
@@ -16,6 +18,7 @@ import {
 } from "../../classes/Condition/RadianceStellarGlimmer";
 import { ConditionStacks } from "../../classes/Condition/Stacks";
 import { ConditionStatic } from "../../classes/Condition/Static";
+import { ConditionStaticLevel } from "../../classes/Condition/Static/Level";
 import { DbObjectChar } from "../../classes/DbObject/Char";
 import { DbObjectConstellation } from "../../classes/DbObject/Constellation";
 import { DbObjectTalents } from "../../classes/DbObject/Talents";
@@ -37,13 +40,15 @@ import { FeatureMultiplierStatic } from "../../classes/Feature2/Multiplier/Stati
 import { FeatureMultiplierTarget } from "../../classes/Feature2/Multiplier/Target";
 import { FeaturePostEffectValue } from "../../classes/Feature2/PostEffectValue";
 import { FeatureStatic } from "../../classes/Feature2/Static";
-import { PostEffectStats } from "../../classes/PostEffect/Stats";
+import { CHANNELS } from "../../classes/PostEffect/Channels";
 import { PostEffectStatsAtk } from "../../classes/PostEffect/Stats/Atk";
+import { RECEIVERS } from "../../classes/Team/Receivers";
 import { StatTable } from "../../classes/StatTable";
 import { StatTableAscensionScale } from "../../classes/StatTable/Ascension/Scale";
 import { ValueTable } from "../../classes/ValueTable";
 import { charTables } from "../generated/CharTables";
 import { charTalentTables } from "../generated/CharTalentTables";
+import { percent, times } from "../Params";
 
 const Talents = new DbObjectTalents({
     attack: {
@@ -130,20 +135,20 @@ const Talents = new DbObjectTalents({
     links: [10050001, 10050002, 11500004],
 });
 
-const A1AttackBonus = 80;
-const A4EmScale = 8;
-const A4EmCap = 160;
-const GlimmerBaseScale = 0.35;
+const A1AttackBonus = percent(charTalentTables.TravelerCryo.a1.p1);
+const A4EmScale = percent(charTalentTables.TravelerCryo.a4.p1);
+const A4EmCap = charTalentTables.TravelerCryo.a4.p2;
+const GlimmerBaseScale = percent(times(charTalentTables.TravelerCryo.a0.p1, 100));
 const GlimmerBaseCap = 7;
 const RadianceSwirlDuration = 8;
-const ForeignPermafrostBonus = 140;
+const ForeignPermafrostBonus = percent(charTalentTables.TravelerCryo.sp.p8);
 const ForeignPermafrostFrostglow = 2;
-const ForeignPermafrostCooldown = 15;
-const C1Energy = 5;
-const C2Mastery = 60;
-const C2MasteryEnhanced = 120;
-const C4DurationBonus = 3;
-const C6GlimmerPerFrostglow = 5;
+const ForeignPermafrostCooldown = charTalentTables.TravelerCryo.sp.p9;
+const C1Energy = charTalentTables.TravelerCryo.c1.p1;
+const C2Mastery = charTalentTables.TravelerCryo.c2.p1;
+const C2MasteryEnhanced = times(charTalentTables.TravelerCryo.c2.p1, charTalentTables.TravelerCryo.c2.p3);
+const C4DurationBonus = times(charTalentTables.TravelerCryo.s2.p4[0], charTalentTables.TravelerCryo.c4.p1);
+const C6GlimmerPerFrostglow = percent(charTalentTables.TravelerCryo.c6.p1);
 
 const radianceConductName = 'traveler_cryo_radiance_stellarconduct';
 const radianceSwirlName = 'traveler_cryo_radiance_stellarswirl';
@@ -182,12 +187,26 @@ const a1Condition = new ConditionAnd([
 ]);
 
 const a4EmPost = new PostEffectStatsAtk({
+    // A4 Lucent Ice: game Avatar_Player_Ice_PermanentSkill_2 computes
+    // Calc_Mastery from FIGHT_PROP_NONEXTRA_ATTACK (premod; 8%, cap 160,
+    // ProudSkill 82201; GO: prod(percent, input.premod.atk)) into
+    // Actor_ElemMasteryExtraDelta (extra), so the default premod read and
+    // extra write are confirmed.
     percent: new StatTable('mastery', [A4EmScale / 100]),
     statCap: new ValueTable([A4EmCap]),
     condition: new ConditionAscensionChar({ascension: 4}),
 });
 
 const glimmerBasePost = new PostEffectStatsAtk({
+    // Illusory Frostmirror Stellar base bonus: game
+    // Avatar_Player_Ice_StarReaction_Damage_Up_By_Attack sets the base-damage
+    // ratio with SetNewElementReactionBaseDamageRatioParam
+    // (StarSuperconduct_Atk_Ratio, cap StarSuperconduct_Max_Ratio), which
+    // names no premod/total read. The same call reads the total ATK in game
+    // (Ineffa's Benediction, in-game test: md/buff_chains.md): extra ATK
+    // (Bennett's burst) counts, as in GO (input.total.atk).
+    receivers: RECEIVERS.TEAM,
+    reads: CHANNELS.TOTAL,
     percent: new StatTable('stellarglimmer_multi', [GlimmerBaseScale / 100]),
     statCap: new ValueTable([GlimmerBaseCap]),
 });
@@ -558,7 +577,9 @@ export const TravelerCryo = new DbObjectChar({
         }),
     ],
     conditions: [
-        new Condition({settings: {
+        new Condition({
+            receivers: RECEIVERS.TEAM,
+            settings: {
             allowed_stellarconduct: 1,
             allowed_stellarswirl: 1,
         }}),
@@ -569,7 +590,7 @@ export const TravelerCryo = new DbObjectChar({
             description: 'talent_descr.traveler_illusory_frostmirror_1',
             info: {special: true},
             rotation: 'self',
-            condition: new ConditionBoolean({name: 'polestar_field'}),
+            condition: new ConditionTeam({condition: new ConditionBoolean({name: 'polestar_field'})}),
         }),
         new ConditionBoolean({
             name: radianceSwirlName,
@@ -674,6 +695,12 @@ export const TravelerCryo = new DbObjectChar({
         }),
     ],
     multipliers: [
+        // A1 Ever Keen Frost: game
+        // Player_Ice_ElementalArt_StarSuperconducted_Talent1 is a
+        // ModifyDamageMixin damageExtra of FIGHT_PROP_CUR_ATTACK (total; +80%,
+        // ProudSkill 82101; GO: prod(percent, input.total.atk)). Damage
+        // multipliers of hits read the total by construction, so nothing is
+        // declared.
         new FeatureMultiplier({
             source: 'ascension1',
             values: new ValueTable([A1AttackBonus]),
@@ -690,6 +717,8 @@ export const TravelerCryo = new DbObjectChar({
     ],
     constellation: new DbObjectConstellation([
         {
+            // C1 Somber Freeze: flat 5 energy (AvatarTalent 81
+            // Player_Ice_Constellation_1 paramList [5, 0.5]); no stat is read.
             conditions: [
                 new ConditionStatic({
                     title: 'talent_name.traveler_somber_freeze',
@@ -700,6 +729,16 @@ export const TravelerCryo = new DbObjectChar({
         },
         {
             conditions: [
+                // C2: "The active character's Elemental Mastery is increased by
+                // 60 for 5s when an opponent is hit by an ice crystal ...
+                // increased to 120" after a Stellar Glimmer reaction. The
+                // saved level has no receiver check; the delivery goes to the
+                // on-field member, the Traveler included. Game data:
+                // UNIQUE_Player_Ice_Icicle_Hit_Mastery_Buff(_Enhanced) writes
+                // Actor_ElemMasteryDelta (no "Extra": premod; AvatarTalent 82
+                // Player_Ice_Constellation_2 paramList [60, 5, 2]; GO writes it
+                // under premod). Condition stats are always premod, so nothing
+                // is declared.
                 new ConditionLevelSelect({
                     name: 'traveler_cryo_frostfall_reverberation',
                     serializeId: 8,
@@ -707,6 +746,18 @@ export const TravelerCryo = new DbObjectChar({
                     description: 'talent_descr.traveler_frostfall_reverberation',
                     maxStacks: 2,
                     rotation: 'self',
+                    stats: [],
+                }),
+                new ConditionStaticLevel({
+                    isHidden: true,
+                    receivers: RECEIVERS.TEAM,
+                    levelSetting: 'traveler_cryo_frostfall_reverberation',
+                    condition: new ConditionAnd([
+                        new ConditionBooleanValue({setting: 'traveler_cryo_frostfall_reverberation', cond: 'ge', value: 1}),
+                        new ConditionReceiver({
+                            condition: new ConditionOnField(),
+                        }),
+                    ]),
                     stats: [new StatTable('mastery', [C2Mastery, C2MasteryEnhanced])],
                 }),
             ],
@@ -724,58 +775,39 @@ export const TravelerCryo = new DbObjectChar({
         {conditions: [new Condition({settings: {char_skill_elemental_bonus: 3}})]},
         {
             conditions: [
+                // The description row's text value; hidden because the stacks
+                // control below shows the same text.
                 new ConditionStatic({
+                    isHidden: true,
                     title: 'talent_name.traveler_brumal_grimfrost',
                     description: 'talent_descr.traveler_brumal_grimfrost',
                     stats: {text_percent: C6GlimmerPerFrostglow},
                 }),
+                // C6: "Every stack of Frostglow consumed ... increases Stellar
+                // Glimmer reaction DMG dealt by other party members by 5%".
+                // Game data: UNIQUE_Player_Ice_Constellation_6_TeamDamageUp
+                // writes Actor_ElemReactStarSConductElectricDelta /
+                // Actor_ElemReactStarSConductIceDelta /
+                // Actor_ElemReactStarSwirlIceDelta /
+                // Actor_ElemReactStarSwirlWindDelta from
+                // Elemental_Damage_Up_CurrentRatio (flat 5% per Frostglow,
+                // AvatarTalent 86 Player_Ice_Constellation_6 paramList
+                // [0.05, 15]); no stat is read and reaction bonuses have no
+                // extra lane, so nothing is declared.
+                new ConditionStacks({
+                    name: 'traveler_cryo_brumal_grimfrost',
+                    serializeId: 7,
+                    receivers: RECEIVERS.OTHERS,
+                    title: 'talent_name.traveler_brumal_grimfrost',
+                    description: 'talent_descr.traveler_brumal_grimfrost',
+                    maxStacks: 8,
+                    rotation: 'self',
+                    stats: [
+                        new StatTable('dmg_stellarglimmer', [C6GlimmerPerFrostglow]),
+                    ],
+                }),
             ],
         },
     ]),
-    partyData: {
-        loadStats: {
-            stats: ['atk_total'],
-        },
-        conditions: [
-            new ConditionNumber({
-                name: 'traveler_cryo_atk_total',
-                title: 'talent_name.stats_total_atk',
-                partyStat: 'atk_total',
-                serializeId: 1,
-                rotation: 'party',
-                max: 10000,
-            }),
-            new Condition({settings: {
-                allowed_stellarconduct: 1,
-                allowed_stellarswirl: 1,
-            }}),
-            new ConditionLevelSelect({
-                name: 'party.traveler_cryo_frostfall_reverberation',
-                serializeId: 2,
-                title: 'talent_name.traveler_frostfall_reverberation',
-                description: 'talent_descr.traveler_frostfall_reverberation',
-                info: {constellation: 2},
-                maxStacks: 2,
-                rotation: 'party',
-                stats: [new StatTable('mastery', [C2Mastery, C2MasteryEnhanced])],
-            }),
-            new ConditionStacks({
-                name: 'party.traveler_cryo_brumal_grimfrost',
-                serializeId: 3,
-                title: 'talent_name.traveler_brumal_grimfrost',
-                description: 'talent_descr.traveler_brumal_grimfrost',
-                info: {constellation: 6},
-                maxStacks: 8,
-                rotation: 'party',
-                stats: [new StatTable('dmg_stellarglimmer', [C6GlimmerPerFrostglow])],
-            }),
-        ],
-        postEffects: [
-            new PostEffectStats({
-                from: 'traveler_cryo_atk_total',
-                percent: new StatTable('stellarglimmer_multi', [GlimmerBaseScale / 100]),
-                statCap: new ValueTable([GlimmerBaseCap]),
-            }),
-        ],
-    },
+    retiredParty: [[1, 'number'], [2, 'stacks'], [3, 'stacks']],
 });

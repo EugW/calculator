@@ -6,6 +6,8 @@ import { ConditionStaticRefineDreamsSame } from "../../../classes/Condition/Stat
 import { DbObjectWeapon } from "../../../classes/DbObject/Weapon";
 import { StatTable } from "../../../classes/StatTable";
 import { weaponStatTables } from "../../generated/WeaponStatTables";
+import { weaponPassiveTables } from "../../generated/WeaponPassiveTables";
+import { percent } from "../../Params";
 
 class ConditionJadeVistaSame extends ConditionStaticRefineDreamsSame {
     getStacks(settings) {
@@ -38,7 +40,7 @@ export const JadeVista = new DbObjectWeapon({
             title: 'talent_name.weapon_jade_vista',
             description: 'talent_descr.weapon_jade_vista_same',
             stats: [
-                new StatTable('mastery', [64, 80, 96, 112, 128]),
+                new StatTable('mastery', weaponPassiveTables.JadeVista.p2),
             ],
             subConditions: [
                 new ConditionBoolean({name: 'party_elements_same'}),
@@ -48,7 +50,7 @@ export const JadeVista = new DbObjectWeapon({
             title: 'talent_name.weapon_jade_vista',
             description: 'talent_descr.weapon_jade_vista_other',
             stats: [
-                new StatTable('atk_percent', [12, 15, 18, 21, 24]),
+                new StatTable('atk_percent', percent(weaponPassiveTables.JadeVista.p1)),
             ],
             subConditions: [
                 new ConditionBoolean({name: 'party_elements_different'}),

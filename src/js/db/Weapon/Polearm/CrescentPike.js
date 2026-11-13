@@ -4,6 +4,8 @@ import { FeatureDamage } from "../../../classes/Feature2/Damage";
 import { FeatureMultiplier } from "../../../classes/Feature2/Multiplier";
 import { StatTable } from "../../../classes/StatTable";
 import { weaponStatTables } from "../../generated/WeaponStatTables";
+import { weaponPassiveTables } from "../../generated/WeaponPassiveTables";
+import { percent } from "../../Params";
 
 export const CrescentPike = new DbObjectWeapon({
     name: 'crescent_pike',
@@ -20,7 +22,7 @@ export const CrescentPike = new DbObjectWeapon({
             title: 'talent_name.weapon_crescent_pike',
             description: 'talent_descr.weapon_crescent_pike',
             stats: [
-                new StatTable('text_percent', [20, 25, 30, 35, 40]),
+                new StatTable('text_percent', percent(weaponPassiveTables.CrescentPike.p1)),
             ]
         }),
     ],
@@ -30,7 +32,7 @@ export const CrescentPike = new DbObjectWeapon({
             multipliers: [
                 new FeatureMultiplier({
                     leveling: 'weapon_refine',
-                    values: new StatTable('weapon_additional_dmg', [20, 25, 30, 35, 40]),
+                    values: new StatTable('weapon_additional_dmg', percent(weaponPassiveTables.CrescentPike.p1)),
                 }),
             ],
         }),

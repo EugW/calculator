@@ -1,0 +1,116 @@
+.buff-legacy-descr {
+    font-size: 13px;
+    color: #9B9FA8;
+    margin-bottom: 8px;
+}
+
+.buff-legacy-add {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-bottom: 10px;
+}
+
+.buff-legacy-entry {
+    margin-bottom: 6px;
+    border: 1px solid #3A3F4A;
+    border-radius: 6px;
+}
+
+/* A virtual character whose character is a member: kept, without effect. */
+.buff-legacy-entry.inactive .buff-legacy-header {
+    opacity: 0.55;
+}
+
+/* The collapsed form: the entry is expanded by a click and moved by a drag. */
+.buff-legacy-header {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    padding: 6px 8px;
+    cursor: pointer;
+    user-select: none;
+}
+
+.buff-legacy-header:hover {
+    background-color: rgba(255, 255, 255, 0.04);
+}
+
+.buff-legacy-entry.expanded .buff-legacy-header {
+    border-bottom: 1px solid #3A3F4A;
+}
+
+/* While dragged: where the entry will land. */
+.buff-legacy-list .sortable-ghost {
+    opacity: 0.4;
+}
+
+.buff-legacy-title {
+    flex-grow: 1;
+    min-width: 0;
+}
+
+.buff-legacy-name {
+    font-weight: bold;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+.buff-legacy-state {
+    font-size: 12px;
+    color: #9B9FA8;
+}
+
+.buff-legacy-body {
+    padding: 8px;
+}
+
+.buff-legacy-fields {
+    display: flex;
+    flex-wrap: wrap;
+    align-items: center;
+    gap: 6px 14px;
+    margin-bottom: 8px;
+}
+
+.buff-legacy-field {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+}
+
+/* C0-C6, R1-R5: room for the arrow, and for the check mark of the chosen
+   option in the open list. */
+.buff-legacy-field .dropdown-wrapper.level-select {
+    width: 70px;
+    min-width: 70px;
+}
+
+.buff-legacy-field .stat-input {
+    width: 90px;
+}
+
+.buff-legacy-field .talent-input {
+    width: 60px;
+}
+
+.buff-legacy-stated-title {
+    margin-bottom: 4px;
+    font-size: 13px;
+    color: #9B9FA8;
+}
+
+.buff-legacy-body .condition-list {
+    margin-bottom: 8px;
+}
+
+.buff-legacy-none {
+    margin-bottom: 8px;
+    font-size: 13px;
+    color: #9B9FA8;
+}
+
+.buff-legacy-actions {
+    display: flex;
+    justify-content: flex-end;
+}

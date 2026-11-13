@@ -1,13 +1,20 @@
 import fs from "fs";
 import path from "path";
 import { BuildData } from "../src/js/classes/Build/Data";
+import { Team } from "../src/js/classes/Team";
+import { reachesSource } from "../src/js/classes/Team/Receivers";
 import { Alyosha } from "../src/js/db/Char/Alyosha";
 import { DB } from "../src/js/db/DB";
 import { Rotation } from "../src/js/db/Features/Rotation";
 import { charTalentTables } from "../src/js/db/generated/CharTalentTables";
+import { finalStats, makeBuild, makeSolo } from "./support/team";
+
+global.DB = DB;
 
 function applyConditions(data, conditions) {
-    for (const condition of conditions) {
+    // Own-behavior checks apply what reaches the source; shares directed at
+    // other members are covered by team tests, not by direct application.
+    for (const condition of conditions.filter((item) => reachesSource(item))) {
         const conditionData = condition.getData(data.settings);
         data.addSettings(conditionData.settings);
         data.addStats(conditionData.stats);
@@ -18,8 +25,8 @@ function getFeature(name) {
     return Alyosha.getFeatures().find((feature) => feature.getName() === name);
 }
 
-function getCondition(name, party = false) {
-    const conditions = party ? Alyosha.getPartyConditions() : Alyosha.getAllConditions();
+function getCondition(name) {
+    const conditions = Alyosha.getAllConditions();
     return conditions.find((condition) => condition.getName() === name);
 }
 
@@ -27,7 +34,6 @@ function damageResult(name, talentLevel = 1) {
     const data = new BuildData({
         char_level: 90,
         enemy_level: 90,
-        enemy_res_electro: 0,
         char_skill_elemental: talentLevel,
         char_skill_burst: talentLevel,
     }, {
@@ -90,21 +96,23 @@ test("Hunter's Precision uses skill p5, is party-wide, and only reaches two stac
     expect(c6.stats.get("atk_percent")).toBeCloseTo(charTalentTables.Alyosha.s2.p5[3] * 2, 5);
     expect(c6.stats.get("mastery")).toBe(100);
 
-    const party = new BuildData({
-        alyosha_char_skill_elemental: 10,
-        "party.alyosha_constellation_3": true,
-        "party.alyosha_hunters_precision": 2,
-        "party.alyosha_standard_reclaimed": true,
-    }, {});
-    applyConditions(party, Alyosha.getPartyConditions());
+    // The retired party row is now a real team: Alyosha's own stacks (with
+    // the C3 skill bonus and the C6 second stack) reach the on-field member.
+    const receiver = makeBuild('Tartaglia');
+    const carrier = makeBuild('Alyosha');
+    carrier.setCharLevels({level: 90, ascension: 6, constellation: 6});
+    carrier.setCharSkills({attack: 10, elemental: 10, burst: 10});
+    const team = Team.fromMember(receiver);
+    team.setMember(1, carrier);
+    const receiverBase = finalStats(makeSolo('Tartaglia'));
+    carrier.setCharSettings({alyosha_hunters_precision: 2});
+    expect(finalStats(receiver).get('atk_percent') - receiverBase.get('atk_percent'))
+        .toBeCloseTo(charTalentTables.Alyosha.s2.p5[12] * 2 / 100, 5);
+    expect(finalStats(receiver).get('mastery') - receiverBase.get('mastery')).toBe(100);
 
-    expect(party.settings.alyosha_char_skill_elemental_bonus).toBe(3);
-    expect(party.stats.get("atk_percent")).toBeCloseTo(charTalentTables.Alyosha.s2.p5[12] * 2, 5);
-    expect(party.stats.get("mastery")).toBe(100);
-
-    const c3Toggle = getCondition("party.alyosha_constellation_3", true);
-    expect(c3Toggle.getId()).toBe(5);
-    expect(c3Toggle.getInfo()).toEqual({constellation: 3});
+    // Old party links keep decoding: the retired IDs are still reserved.
+    const retired = Alyosha.getLegacyPartyConditions().find((condition) => condition.getId() === 5);
+    expect(retired).toBeDefined();
 });
 
 test("Polestar Precision grants 20% Stellar-Conduct DMG for each Precision stack", () => {
@@ -146,24 +154,29 @@ test("Polestar Precision grants 20% Stellar-Conduct DMG for each Precision stack
     expect(noField.settings.allowed_stellarconduct).toBeUndefined();
     expect(noField.stats.get("dmg_stellarconduct")).toBe(0);
 
-    const partyOneStack = new BuildData({
-        polestar_field: true,
-        alyosha_char_skill_elemental: 1,
-        "party.alyosha_hunters_precision": 1,
-        "party.alyosha_radiance_stellarconduct": true,
-    }, {});
-    applyConditions(partyOneStack, Alyosha.getPartyConditions());
-    expect(partyOneStack.stats.get("dmg_stellarconduct")).toBe(20);
+    const partyReceiver = makeBuild('Tartaglia');
+    const partyCarrier = makeBuild('Alyosha');
+    partyCarrier.setCharLevels({level: 90, ascension: 6, constellation: 6});
+    const partyTeam = Team.fromMember(partyReceiver);
+    partyTeam.setMember(1, partyCarrier);
+    partyCarrier.setCharSettings({
+        alyosha_hunters_precision: 1,
+        alyosha_radiance_stellarconduct: true,
+    });
+    partyTeam.modifySettings({polestar_field: true});
+    expect(finalStats(partyReceiver).get('dmg_stellarconduct')).toBeCloseTo(0.2, 5);
 
-    const partyTwoStacks = new BuildData({
-        polestar_field: true,
-        alyosha_char_skill_elemental: 1,
-        "party.alyosha_hunters_precision": 2,
-        "party.alyosha_radiance_stellarconduct": true,
-        "party.alyosha_standard_reclaimed": true,
-    }, {});
-    applyConditions(partyTwoStacks, Alyosha.getPartyConditions());
-    expect(partyTwoStacks.stats.get("dmg_stellarconduct")).toBe(40);
+    const partyTwoStacksCarrier = makeBuild('Alyosha');
+    partyTwoStacksCarrier.setCharLevels({level: 90, ascension: 6, constellation: 6});
+    const partyTwoStacksTeam = Team.fromMember(makeBuild('Tartaglia'));
+    partyTwoStacksTeam.setMember(1, partyTwoStacksCarrier);
+    const partyTwoStacksReceiver = partyTwoStacksTeam.getMember(0);
+    partyTwoStacksCarrier.setCharSettings({
+        alyosha_hunters_precision: 2,
+        alyosha_radiance_stellarconduct: true,
+    });
+    partyTwoStacksTeam.modifySettings({polestar_field: true});
+    expect(finalStats(partyTwoStacksReceiver).get('dmg_stellarconduct')).toBeCloseTo(0.4, 5);
 });
 
 test("Suffer the Winter Wheat Will scales Skill and Burst from ER and caps both at 70%", () => {
@@ -261,5 +274,7 @@ test("Alyosha imports Hunter's Mark while keeping calculator-only states manual"
         (condition) => condition.params.description === "talent_descr.n11480001",
     )).toBe(true);
     expect(getCondition("alyosha_hunters_precision")).toBeDefined();
-    expect(getCondition("party.alyosha_hunters_precision", true)).toBeDefined();
+    expect(Alyosha.partyData).toBeUndefined();
+    expect(Alyosha.getLegacyPartyConditions().map((condition) => condition.getId()).sort((a, b) => a - b))
+        .toEqual([1, 2, 3, 4, 5]);
 });

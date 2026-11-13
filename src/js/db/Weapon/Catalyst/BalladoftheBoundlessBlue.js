@@ -2,6 +2,8 @@ import { ConditionStacks } from "../../../classes/Condition/Stacks";
 import { DbObjectWeapon } from "../../../classes/DbObject/Weapon";
 import { StatTable } from "../../../classes/StatTable";
 import { weaponStatTables } from "../../generated/WeaponStatTables";
+import { weaponPassiveTables } from "../../generated/WeaponPassiveTables";
+import { percent } from "../../Params";
 
 export const BalladoftheBoundlessBlue = new DbObjectWeapon({
     name: 'ballad_of_the_boundless_blue',
@@ -20,8 +22,8 @@ export const BalladoftheBoundlessBlue = new DbObjectWeapon({
             maxStacks: 3,
             levelSetting: 'weapon_refine',
             stats: [
-                new StatTable('dmg_normal', [8, 10, 12, 14, 16]),
-                new StatTable('dmg_charged', [6, 7.5, 9, 10.5, 12]),
+                new StatTable('dmg_normal', percent(weaponPassiveTables.BalladoftheBoundlessBlue.p3)),
+                new StatTable('dmg_charged', percent(weaponPassiveTables.BalladoftheBoundlessBlue.p4)),
             ],
         }),
     ],

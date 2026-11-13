@@ -36,8 +36,9 @@ class FeatureListComponent extends React.Component {
         };
     }
 
-    show(callback, selectedNames) {
+    show(callback, selectedNames, view) {
         this.callback = callback;
+        this.view = view;
 
         this.setState({
             selectedNames: selectedNames,
@@ -91,6 +92,7 @@ class FeatureListComponent extends React.Component {
                     <FullHeightScrollable>
                         <FeatureList
                             app={this.props.app}
+                            view={this.view}
                             selectedNames={this.state.selectedNames}
                             onChange={(name) => this.handleSelectName(name)}
                         />
@@ -123,8 +125,9 @@ class FeatureListComponent extends React.Component {
 }
 
 function FeatureList(props) {
-    let stats    = props.app.getStats();
-    let features = props.app.getFeatures(stats, 1);
+    const source = props.view || props.app;
+    let stats    = source.getStats();
+    let features = source.getFeatures(stats, 1);
     let tree     = Feature2.getTree(features);
 
     let selected = {};

@@ -21,11 +21,11 @@ import { FeaturePostEffectValue } from "./classes/Feature2/PostEffectValue";
 import { FeatureShield } from "./classes/Feature2/Shield";
 import { ArtifactGenerator, getMainStatCombinations, StatDistributor, StatsObject } from "./classes/Generator/Artifacts";
 import { ArtifactGeneratorKQM } from "./classes/Generator/ArtifactsKQM";
-import { PostEffectSetBonusViridiscent } from "./classes/PostEffect/SetBonus/Viridescent";
 import { PostEffectStats } from "./classes/PostEffect/Stats";
 import { PostEffectStatsAtk } from "./classes/PostEffect/Stats/Atk";
 import { PostEffectStatsHP } from "./classes/PostEffect/Stats/HP";
 import { Serializer } from "./classes/Serializer";
+import { Team } from "./classes/Team";
 import { StatTable } from "./classes/StatTable";
 import { ValueTable } from "./classes/ValueTable";
 import { DB } from "./db/DB";
@@ -170,7 +170,7 @@ let settings = {
     },
 };
 
-let build = CalcSet.deserialize(Serializer.unpack(build_hash));
+let build = Team.solo(CalcSet.deserialize(Serializer.unpack(build_hash)));
 let buildData = build.getBuildData();
 
 let artifactsList = [];

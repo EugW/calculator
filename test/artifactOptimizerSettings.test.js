@@ -3,14 +3,13 @@ import { createOptimizationPlanConstraints } from "../src/js/classes/Optimizatio
 
 test('empty artifact optimizer settings produce the ordinary unconstrained defaults', () => {
     expect(normalizeArtifactOptimizerSettings()).toEqual({
-        sets_settings: {},
         stats: {},
         setMinValues: {},
         setMaxValues: {},
     });
 });
 
-test('Best Artifact required sets and disabled bonuses normalize without mutating the UI model', () => {
+test('Best Artifact required sets and disabled bonuses normalize without mutating the UI model; set effects are not settings of a search', () => {
     let rawSettings = {
         stats: {
             crit_rate_min: '70',
@@ -38,9 +37,6 @@ test('Best Artifact required sets and disabled bonuses normalize without mutatin
     let normalized = normalizeArtifactOptimizerSettings(rawSettings);
 
     expect(normalized).toEqual({
-        sets_settings: {
-            emblem_energy: false,
-        },
         stats: {
             crit_rate_min: '70',
         },
@@ -54,7 +50,6 @@ test('Best Artifact required sets and disabled bonuses normalize without mutatin
     });
     expect(rawSettings).toEqual(snapshot);
     expect(normalized.stats).not.toBe(rawSettings.stats);
-    expect(normalized.sets_settings).not.toBe(rawSettings.sets_settings);
 });
 
 test('already canonical optimizer constraints remain supported for core callers', () => {

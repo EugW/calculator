@@ -18,6 +18,7 @@ export function CharacterList(props) {
                     set={item.set}
                     callbackData={item.callbackData}
                     buttons={props.buttons}
+                    sideControls={props.sideControls}
                     moreButtons={props.moreButtons}
                     statDetails={props.statDetails}
                     artifactDetails={props.artifactDetails}

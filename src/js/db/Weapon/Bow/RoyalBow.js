@@ -4,6 +4,8 @@ import { ConditionStacks } from "../../../classes/Condition/Stacks";
 import { DbObjectWeapon } from "../../../classes/DbObject/Weapon";
 import { StatTable } from "../../../classes/StatTable";
 import { weaponStatTables } from "../../generated/WeaponStatTables";
+import { weaponPassiveTables } from "../../generated/WeaponPassiveTables";
+import { percent } from "../../Params";
 
 export const RoyalBow = new DbObjectWeapon({
     name: 'royal_bow',
@@ -31,7 +33,7 @@ export const RoyalBow = new DbObjectWeapon({
             maxStacks: 5,
             levelSetting: 'weapon_refine',
             stats: [
-                new StatTable('crit_rate', [8, 10, 12, 14, 16]),
+                new StatTable('crit_rate', percent(weaponPassiveTables.RoyalBow.p1)),
             ],
             subConditions: [
                 new ConditionBoolean({
@@ -46,7 +48,7 @@ export const RoyalBow = new DbObjectWeapon({
             title: 'talent_name.weapon_royal_avg_crit_rate',
             description: 'talent_descr.weapon_royal_avg_crit_rate',
             stats: [
-                new StatTable('royal_crit_rate', [8, 10, 12, 14, 16]),
+                new StatTable('royal_crit_rate', percent(weaponPassiveTables.RoyalBow.p1)),
             ],
         }),
     ],

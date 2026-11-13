@@ -2,6 +2,7 @@ import { ConditionStacks } from "../../../classes/Condition/Stacks";
 import { DbObjectWeapon } from "../../../classes/DbObject/Weapon";
 import { StatTable } from "../../../classes/StatTable";
 import { weaponStatTables } from "../../generated/WeaponStatTables";
+import { weaponPassiveTables } from "../../generated/WeaponPassiveTables";
 
 export const IbisPiercer = new DbObjectWeapon({
     name: 'ibis_piercer',
@@ -17,10 +18,10 @@ export const IbisPiercer = new DbObjectWeapon({
             serializeId: 1,
             title: 'talent_name.weapon_ibis_piercer',
             description: 'talent_descr.weapon_ibis_piercer',
-            maxStacks: 2,
+            maxStacks: weaponPassiveTables.IbisPiercer.p3[0],
             levelSetting: 'weapon_refine',
             stats: [
-                new StatTable('mastery', [40, 50, 60, 70, 80]),
+                new StatTable('mastery', weaponPassiveTables.IbisPiercer.p1),
             ],
         }),
     ],

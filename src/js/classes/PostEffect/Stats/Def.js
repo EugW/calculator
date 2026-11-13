@@ -1,8 +1,11 @@
-import { makeStatTotalItem } from "../../Feature2/Compile/Helpers";
 import { PostEffectStats } from "../Stats";
 
 export class PostEffectStatsDef extends PostEffectStats {
+    getBaseReadStats() {
+        return ['def*'];
+    }
+
     getBaseValueTree(data, opts) {
-        return makeStatTotalItem('def', data.stats);
+        return this.statTotalItem('def', data);
     }
 }

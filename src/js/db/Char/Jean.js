@@ -14,10 +14,12 @@ import { FeatureDamageSkill } from '../../classes/Feature2/Damage/Skill';
 import { FeatureHeal } from '../../classes/Feature2/Heal';
 import { FeatureMultiplier } from '../../classes/Feature2/Multiplier';
 import { FeatureMultiplierList } from '../../classes/Feature2/Multiplier/List';
+import { RECEIVERS } from '../../classes/Team/Receivers';
 import { StatTable } from '../../classes/StatTable';
 import { ValueTable } from '../../classes/ValueTable';
 import { charTables } from '../generated/CharTables';
 import { charTalentTables } from '../generated/CharTalentTables';
+import { percent } from "../Params";
 
 const Talents = new DbObjectTalents({
     attack: {
@@ -120,13 +122,13 @@ const Talents = new DbObjectTalents({
 });
 
 const TalentValues = {
-    A1Heal: 15,
+    A1Heal: percent(charTalentTables.Jean.a1.p2),
     A4Enegry: 20,
-    C1SkillDmg: 40,
-    C2AtkSpeed: 15,
-    C2MoveSpeed: 15,
-    C4AnemoRes: -40,
-    C6DmgReduction: 35,
+    C1SkillDmg: percent(charTalentTables.Jean.c1.p1),
+    C2AtkSpeed: percent(charTalentTables.Jean.c2.p1),
+    C2MoveSpeed: percent(charTalentTables.Jean.c2.p2),
+    C4AnemoRes: -percent(charTalentTables.Jean.c4.p1),
+    C6DmgReduction: percent(charTalentTables.Jean.c6.p1),
 };
 
 export const Jean = new DbObjectChar({
@@ -330,6 +332,7 @@ export const Jean = new DbObjectChar({
                 new ConditionBoolean({
                     name: 'jean_peoples_aegis',
                     serializeId: 2,
+                    receivers: RECEIVERS.TEAM,
                     title: 'talent_name.jean_peoples_aegis',
                     description: 'talent_descr.jean_peoples_aegis',
                     stats: {
@@ -353,6 +356,7 @@ export const Jean = new DbObjectChar({
                 new ConditionBoolean({
                     name: 'jean_lands_of_dandelion',
                     serializeId: 3,
+                    receivers: RECEIVERS.TEAM,
                     title: 'talent_name.jean_lands_of_dandelion',
                     description: 'talent_descr.jean_lands_of_dandelion',
                     stats: {
@@ -382,31 +386,5 @@ export const Jean = new DbObjectChar({
             ],
         },
     ]),
-    partyData: {
-        conditions: [
-            new ConditionBoolean({
-                name: 'party.jean_peoples_aegis',
-                serializeId: 1,
-                rotation: 'party',
-                title: 'talent_name.jean_peoples_aegis',
-                description: 'talent_descr.jean_peoples_aegis',
-                info: {constellation: 2},
-                stats: {
-                    atk_speed_normal: TalentValues.C2AtkSpeed,
-                    move_speed: TalentValues.C2MoveSpeed,
-                },
-            }),
-            new ConditionBoolean({
-                name: 'party.jean_lands_of_dandelion',
-                serializeId: 2,
-                rotation: 'party',
-                title: 'talent_name.jean_lands_of_dandelion',
-                description: 'talent_descr.jean_lands_of_dandelion',
-                info: {constellation: 4},
-                stats: {
-                    enemy_res_anemo: TalentValues.C4AnemoRes,
-                },
-            }),
-        ],
-    },
+    retiredParty: [[1, 'checkbox'], [2, 'checkbox']],
 });

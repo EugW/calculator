@@ -2,15 +2,16 @@ import { Condition } from "../../classes/Condition";
 import { ConditionAnd } from "../../classes/Condition/And";
 import { ConditionAscensionChar } from "../../classes/Condition/Ascension/Char";
 import { ConditionBoolean } from "../../classes/Condition/Boolean";
-import { ConditionBooleanChar } from "../../classes/Condition/Boolean/Char";
 import { ConditionConstellation } from "../../classes/Condition/Constellation";
+import { ConditionDropdownTeamMember } from "../../classes/Condition/Dropdown/TeamMember";
 import { ConditionHexereiResonance } from "../../classes/Condition/HexereiResonance";
-import { ConditionNot } from "../../classes/Condition/Not";
 import { ConditionNumber } from "../../classes/Condition/Number";
+import { ConditionSelectedReceiver } from "../../classes/Condition/SelectedReceiver";
 import { ConditionStatic } from "../../classes/Condition/Static";
 import { DbObjectChar } from "../../classes/DbObject/Char";
 import { DbObjectConstellation } from "../../classes/DbObject/Constellation";
 import { DbObjectTalents } from "../../classes/DbObject/Talents";
+import { RECEIVERS } from "../../classes/Team/Receivers";
 import { CMulti } from "../../classes/Feature2/Compile/Types/Block";
 import { FeatureDamageBurst } from "../../classes/Feature2/Damage/Burst";
 import { FeatureDamageCharged } from "../../classes/Feature2/Damage/Charged";
@@ -24,6 +25,7 @@ import { FeatureMultiplier } from "../../classes/Feature2/Multiplier";
 import { StatTable } from "../../classes/StatTable";
 import { charTables } from "../generated/CharTables";
 import { charTalentTables } from "../generated/CharTalentTables";
+import { percent } from "../Params";
 
 const Talents = new DbObjectTalents({
     attack: {
@@ -151,11 +153,11 @@ const Talents = new DbObjectTalents({
 
 const WillToWinMax = 100;
 const C1WillToWinMax = 300;
-const A4AtkBonus = 15;
-const WitchNormalChargedBonus = 40;
-const C2EvilsbaneBladeDmg = 500;
-const C2PartyEm = 200;
-const C6CritDmg = 175;
+const A4AtkBonus = percent(charTalentTables.Lohen.a4.p1);
+const WitchNormalChargedBonus = percent(charTalentTables.Lohen.sp.p2);
+const C2EvilsbaneBladeDmg = percent(charTalentTables.Lohen.c2.p1);
+const C2PartyEm = charTalentTables.Lohen.c2.p2;
+const C6CritDmg = percent(charTalentTables.Lohen.c6.p2);
 
 class ConditionLohenWillToWinHalf extends Condition {
     getType() {
@@ -198,11 +200,6 @@ const condHexereiResonance = new ConditionHexereiResonance({});
 const lohenWillToWinMax = (settings) => {
     return settings.char_constellation >= 1 ? C1WillToWinMax : WillToWinMax;
 };
-const condPartyNotLohen = new ConditionNot([
-    new ConditionBooleanChar({
-        chars: ['lohen'],
-    }),
-]);
 
 export const Lohen = new DbObjectChar({
     name: 'lohen',
@@ -542,6 +539,10 @@ export const Lohen = new DbObjectChar({
             max: lohenWillToWinMax,
             allowMinZero: 1,
         }),
+        // A4: "for 8s after another nearby party member triggers a Cryo
+        // Reaction, that character's ATK is increased by 15%, while Lohen's
+        // ATK is increased by 15%". The toggle is Lohen's part; the
+        // triggering member is chosen, as for Venti's Secret Rite.
         new ConditionBoolean({
             name: 'lohen_flippant_masterpiece',
             serializeId: 3,
@@ -552,6 +553,27 @@ export const Lohen = new DbObjectChar({
                 atk_percent: A4AtkBonus,
             },
             condition: new ConditionAscensionChar({ascension: 4}),
+        }),
+        new ConditionDropdownTeamMember({
+            name: 'lohen_flippant_masterpiece_receiver',
+            serializeId: 9,
+            othersOnly: true,
+            title: 'buffs_name.selected_receiver',
+            description: 'buffs_descr.selected_receiver',
+            info: {ascension: 4},
+            condition: new ConditionAscensionChar({ascension: 4}),
+        }),
+        new Condition({
+            isHidden: true,
+            receivers: RECEIVERS.OTHERS,
+            stats: {
+                atk_percent: A4AtkBonus,
+            },
+            condition: new ConditionAnd([
+                new ConditionAscensionChar({ascension: 4}),
+                new ConditionBoolean({name: 'lohen_flippant_masterpiece'}),
+                new ConditionSelectedReceiver({name: 'lohen_flippant_masterpiece_receiver'}),
+            ]),
         }),
         new ConditionBoolean({
             name: 'lohen_when_the_mood_strikes',
@@ -596,12 +618,27 @@ export const Lohen = new DbObjectChar({
         },
         {
             conditions: [
+                // The description row's text values (the strike's 500%);
+                // hidden because the toggle below shows the same text.
                 new ConditionStatic({
+                    isHidden: true,
                     title: 'talent_name.lohen_in_flight_i_strike_whatever_flies',
                     description: 'talent_descr.lohen_in_flight_i_strike_whatever_flies',
                     stats: {
                         text_percent_dmg: C2EvilsbaneBladeDmg,
                         text_mastery: C2PartyEm,
+                    },
+                }),
+                // C2: "increase the Elemental Mastery of other nearby party
+                // members by 200 for 8s".
+                new ConditionBoolean({
+                    name: 'lohen_in_flight_i_strike_whatever_flies',
+                    serializeId: 8,
+                    receivers: RECEIVERS.OTHERS,
+                    title: 'talent_name.lohen_in_flight_i_strike_whatever_flies',
+                    description: 'talent_descr.lohen_in_flight_i_strike_whatever_flies',
+                    stats: {
+                        mastery: C2PartyEm,
                     },
                 }),
             ],
@@ -646,39 +683,5 @@ export const Lohen = new DbObjectChar({
             ],
         },
     ]),
-    partyData: {
-        conditions: [
-            new ConditionBoolean({
-                name: 'party.lohen_witch_homework',
-                serializeId: 1,
-                rotation: 'party',
-                title: 'talent_name.lohen_unhealing_thorn',
-                description: 'talent_descr.lohen_unhealing_thorn',
-                info: {hexerei: true},
-            }),
-            new ConditionBoolean({
-                name: 'party.lohen_flippant_masterpiece',
-                serializeId: 2,
-                rotation: 'party',
-                title: 'talent_name.lohen_flippant_masterpiece',
-                description: 'talent_descr.lohen_flippant_masterpiece',
-                info: {ascension: 4},
-                stats: {
-                    atk_percent: A4AtkBonus,
-                },
-            }),
-            new ConditionBoolean({
-                name: 'party.lohen_in_flight_i_strike_whatever_flies',
-                serializeId: 3,
-                rotation: 'party',
-                title: 'talent_name.lohen_in_flight_i_strike_whatever_flies',
-                description: 'talent_descr.lohen_in_flight_i_strike_whatever_flies',
-                info: {constellation: 2},
-                stats: {
-                    mastery: C2PartyEm,
-                },
-                condition: condPartyNotLohen,
-            }),
-        ],
-    },
+    retiredParty: [[1, 'checkbox'], [2, 'checkbox'], [3, 'checkbox']],
 });

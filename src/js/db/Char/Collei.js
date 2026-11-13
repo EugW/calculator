@@ -16,8 +16,10 @@ import { FeatureDamageSkill } from "../../classes/Feature2/Damage/Skill";
 import { FeatureMultiplier } from "../../classes/Feature2/Multiplier";
 import { StatTable } from "../../classes/StatTable";
 import { ValueTable } from "../../classes/ValueTable";
+import { RECEIVERS } from "../../classes/Team/Receivers";
 import { charTables } from "../generated/CharTables";
 import { charTalentTables } from "../generated/CharTalentTables";
+import { percent } from "../Params";
 
 const Talents = new DbObjectTalents({
     attack: {
@@ -96,10 +98,10 @@ const Talents = new DbObjectTalents({
 });
 
 const TalentValues = {
-    A1Damage: 40,
-    C1Recharge: 20,
-    C4Mastery: 60,
-    C6Damage: 200,
+    A1Damage: percent(charTalentTables.Collei.a1.p2),
+    C1Recharge: percent(charTalentTables.Collei.c1.p1),
+    C4Mastery: charTalentTables.Collei.c4.p1,
+    C6Damage: percent(charTalentTables.Collei.c6.p1),
 };
 
 export const Collei = new DbObjectChar({
@@ -309,12 +311,24 @@ export const Collei = new DbObjectChar({
         },
         {
             conditions: [
-                new ConditionStatic({
+                new ConditionBoolean({
+                    name: 'collei_gift_of_the_woods',
+                    serializeId: 2,
                     title: 'talent_name.collei_gift_of_the_woods',
                     description: 'talent_descr.collei_gift_of_the_woods',
                     stats: {
                         text_value: TalentValues.C4Mastery,
                     },
+                }),
+                // Using Trump-Card Kitty increases all nearby party members'
+                // Elemental Mastery (not including Collei herself).
+                new Condition({
+                    isHidden: true,
+                    receivers: RECEIVERS.OTHERS,
+                    stats: {
+                        mastery: TalentValues.C4Mastery,
+                    },
+                    condition: new ConditionBoolean({name: 'collei_gift_of_the_woods'}),
                 }),
             ],
         },
@@ -339,22 +353,5 @@ export const Collei = new DbObjectChar({
             ],
         },
     ]),
-    partyData: {
-        conditions: [
-            new ConditionBoolean({
-                name: 'party.collei_gift_of_the_woods',
-                serializeId: 1,
-                rotation: 'party',
-                title: 'talent_name.collei_gift_of_the_woods',
-                description: 'talent_descr.collei_gift_of_the_woods',
-                info: {
-                    constellation: 4,
-                },
-                stats: {
-                    text_value: TalentValues.C4Mastery,
-                    mastery: TalentValues.C4Mastery,
-                },
-            }),
-        ],
-    },
+    retiredParty: [[1, 'checkbox']],
 });

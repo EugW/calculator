@@ -2,20 +2,24 @@ import { BuildData } from "../src/js/classes/Build/Data";
 import { FeatureDamageStellarConduct } from "../src/js/classes/Feature2/Damage/StellarConduct";
 import { FeatureMultiplier } from "../src/js/classes/Feature2/Multiplier";
 import { StatTable } from "../src/js/classes/StatTable";
+import { Team } from "../src/js/classes/Team";
 import { Lang } from "../src/js/ui/Lang";
-import { Beidou } from "../src/js/db/Char/Beidou";
+import { DB } from "../src/js/db/DB";
 import { Cyno } from "../src/js/db/Char/Cyno";
 import { Qiqi } from "../src/js/db/Char/Qiqi";
 import { Sandrone } from "../src/js/db/Char/Sandrone";
 import { Wriothesley } from "../src/js/db/Char/Wriothesley";
-import { Xilonen } from "../src/js/db/Char/Xilonen";
 import { YaeMiko } from "../src/js/db/Char/YaeMiko";
 import { charTalentTables } from "../src/js/db/generated/CharTalentTables";
+import { finalStats, makeBuild } from "./support/team";
+import { matchCarrierTotals } from "./support/teamConversion";
+import { qiqiStellarTeam } from "./support/stellarTeam";
 
 global.window = {};
 global.localStorage = {};
 require("../src/js/lang/eng.js");
 global.UI = {Lang: new Lang()};
+global.DB = DB;
 
 function applyConditions(data, conditions) {
     for (const condition of conditions) {
@@ -33,21 +37,30 @@ function getCondition(char, name) {
     return char.getAllConditions().find((condition) => condition.getName() === name);
 }
 
-test("Beidou C6 party Radiance adds Cryo RES shred and active EM without duplicating Polestar math", () => {
-    const data = new BuildData({
-        polestar_field: true,
-        "party.beidou_radiance_stellarconduct": true,
-        "party.beidou_bane_of_the_evil": true,
-    }, {});
+test("Beidou C6 delivers Cryo RES shred and active EM without duplicating Polestar math", () => {
+    const previousDB = global.DB;
+    global.DB = DB;
+    try {
+        const beidou = makeBuild('Beidou');
+        beidou.setCharLevels({level: 90, ascension: 6, constellation: 6});
+        const receiver = makeBuild('Ayaka');
+        const team = Team.fromMember(beidou);
+        team.setMember(1, receiver);
+        team.modifySettings({polestar_field: true});
+        team.setOnFieldMember(receiver);
+        const before = finalStats(receiver);
 
-    applyConditions(data, Beidou.getPartyConditions());
-
-    expect(data.stats.get("enemy_res_electro")).toBe(-15);
-    expect(data.stats.get("enemy_res_cryo")).toBe(-15);
-    expect(data.stats.get("mastery")).toBe(200);
+        beidou.setCharSettings({beidou_bane_of_the_evil: true, beidou_radiance_stellarconduct: true});
+        const after = finalStats(receiver);
+        expect(after.get('enemy__res_electro') - before.get('enemy__res_electro')).toBeCloseTo(-0.15, 10);
+        expect(after.get('enemy__res_cryo') - before.get('enemy__res_cryo')).toBeCloseTo(-0.15, 10);
+        expect(after.get('mastery') - before.get('mastery')).toBe(200);
+    } finally {
+        global.DB = previousDB;
+    }
 });
 
-test("Qiqi C6 party Glimpse of Mystery adds flat Stellar-Conduct damage from Qiqi ATK", () => {
+test("Qiqi C6 delivers flat Stellar-Conduct damage from her own ATK", () => {
     const feature = new FeatureDamageStellarConduct({
         category: "skill",
         element: "cryo",
@@ -57,14 +70,8 @@ test("Qiqi C6 party Glimpse of Mystery adds flat Stellar-Conduct damage from Qiq
             }),
         ],
     });
-    const data = new BuildData({
-        enemy_res_cryo: 0,
-        "party.qiqi_glimpse_of_mystery": 1,
-    }, {
-        atk_base: 1000,
-        qiqi_atk_total: 1000,
-    });
-    data.multipliers = Qiqi.getPartyMultipliers();
+    const {receiver} = qiqiStellarTeam();
+    const data = receiver.getBuildData();
 
     const result = feature.getResult(data)["skill.stellarconduct_test_hit"];
 
@@ -76,7 +83,6 @@ test("Qiqi imported Herald coordinated attack row is wired to Radiance Herald", 
     const data = new BuildData({
         char_level: 90,
         enemy_level: 90,
-        enemy_res_cryo: 0,
         qiqi_herald_of_frost_radiance: true,
     }, {
         atk_base: 1000,
@@ -91,7 +97,6 @@ test("Qiqi imported Herald coordinated attack row is wired to Radiance Herald", 
 test("Qiqi imported Burst Stellar-Conduct row uses direct Stellar-Conduct formula", () => {
     const feature = getFeature(Qiqi, "burst.qiqi_preserver_of_fortune_stellarconduct");
     const data = new BuildData({
-        enemy_res_cryo: 0,
         qiqi_radiance_stellarconduct: true,
     }, {
         atk_base: 1000,
@@ -104,14 +109,14 @@ test("Qiqi imported Burst Stellar-Conduct row uses direct Stellar-Conduct formul
     expect(result.normal).toBeCloseTo(expected, 5);
 });
 
-test("Yae Miko party Sakura level grants the generated C2 EM table", () => {
-    const data = new BuildData({
-        "party.yae_miko_sesshou_sakura_level": 4,
-    }, {});
-
-    applyConditions(data, YaeMiko.getPartyConditions());
-
-    expect(data.stats.get("mastery")).toBe(200);
+test("Yae Miko Sakura level grants the generated C2 EM to the active teammate", () => {
+    const receiver = makeBuild('Ayaka');
+    const yae = makeBuild('YaeMiko');
+    const team = Team.fromMember(receiver);
+    team.setMember(1, yae);
+    yae.setCharLevels({level: 90, ascension: 6, constellation: 2});
+    yae.setCharSettings({yae_miko_sesshou_sakura_level: 4});
+    expect(finalStats(receiver).get('mastery')).toBe(200);
 });
 
 test("Yae Miko enhanced Sesshou Sakura rows add Edict damage to each Sakura level", () => {
@@ -120,7 +125,6 @@ test("Yae Miko enhanced Sesshou Sakura rows add Edict damage to each Sakura leve
     const data = new BuildData({
         char_level: 90,
         enemy_level: 90,
-        enemy_res_electro: 0,
         yae_miko_edict_of_cleansing: true,
     }, {
         atk_base: 1000,
@@ -141,7 +145,6 @@ test("Yae Miko enhanced Sesshou Sakura rows add Edict damage to each Sakura leve
         char_constellation: 2,
         char_level: 90,
         enemy_level: 90,
-        enemy_res_electro: 0,
         yae_miko_edict_of_cleansing: true,
     }, {
         atk_base: 1000,
@@ -156,7 +159,6 @@ test("Cyno Starsame is direct Stellar-Conduct damage with ATK and EM scaling", (
     const feature = getFeature(Cyno, "skill.cyno_duststalker_bolt_starsame");
     const data = new BuildData({
         char_ascension: 4,
-        enemy_res_electro: 0,
         cyno_wolfs_swiftness: true,
         cyno_radiance_stellarconduct: true,
         polestar_included_hits: 2,
@@ -182,14 +184,18 @@ test("Sandrone Light of Rationalisme adds capped base Stellar Glimmer damage fro
     selfData.postEffects = Sandrone.getPostEffects();
     selfData.applyPostEffects();
 
-    const partyData = new BuildData({}, {
-        sandrone_atk_total: 2000,
+    // Party model retired: the carrier's live ATK now delivers to a real team.
+    const receiver = makeBuild('Ayaka');
+    const sandrone = makeBuild('Sandrone');
+    const team = Team.fromMember(receiver);
+    team.setMember(1, sandrone);
+    const stats = finalStats(sandrone);
+    sandrone.modifyBuffsSettings({
+        'custom_buffs.atk': 2000 - stats.get('atk_base') - stats.get('atk'),
     });
-    partyData.postEffects = Sandrone.getPartyPostEffects();
-    partyData.applyPostEffects();
 
     expect(selfData.stats.get("stellarglimmer_multi")).toBeCloseTo(0.14, 5);
-    expect(partyData.stats.get("stellarglimmer_multi")).toBeCloseTo(0.14, 5);
+    expect(finalStats(receiver).get("stellarglimmer_multi")).toBeCloseTo(0.14, 5);
 });
 
 test("Sandrone Radiance switch renders Light of Rationalisme values", () => {
@@ -206,7 +212,6 @@ test("Sandrone A1 swaps Prism Shot to the refined Stellar-Conduct branch above 5
     const normalConduct = getFeature(Sandrone, "skill.sandrone_prism_shot_stellarconduct");
     const refinedConduct = getFeature(Sandrone, "skill.sandrone_refined_prism_shot_stellarconduct");
     const data = new BuildData({
-        enemy_res_cryo: 0,
         sandrone_radiance_stellarconduct: true,
         sandrone_decoding_power: 60,
         char_ascension: 1,
@@ -223,14 +228,14 @@ test("Sandrone A1 swaps Prism Shot to the refined Stellar-Conduct branch above 5
     expect(refinedResult.normal).toBeCloseTo(expected, 5);
 });
 
-test("Sandrone C1 party toggle grants Stellar Glimmer damage bonus", () => {
-    const data = new BuildData({
-        "party.sandrone_morrow_after_the_golden_dusk": true,
-    }, {});
-
-    applyConditions(data, Sandrone.getPartyConditions());
-
-    expect(data.stats.get("dmg_stellarglimmer")).toBe(30);
+test("Sandrone C1 delivers Stellar Glimmer damage bonus to the team", () => {
+    const receiver = makeBuild('Ayaka');
+    const sandrone = makeBuild('Sandrone');
+    const team = Team.fromMember(receiver);
+    team.setMember(1, sandrone);
+    sandrone.setCharLevels({level: 90, ascension: 6, constellation: 1});
+    sandrone.setCharSettings({sandrone_morrow_after_the_golden_dusk: true});
+    expect(finalStats(receiver).get("dmg_stellarglimmer")).toBeCloseTo(0.3, 10);
 });
 
 test("Wriothesley C1 Radiance title-only toggles add feature-local Stellar-Conduct DMG bonus", () => {
@@ -242,7 +247,6 @@ test("Wriothesley C1 Radiance title-only toggles add feature-local Stellar-Condu
     const repellingToggle = getCondition(Wriothesley, "wriothesley_c1_next_repelling_stellar_bonus");
     const lusterToggle = getCondition(Wriothesley, "wriothesley_c1_next_luster_bonus");
     const baseSettings = {
-        enemy_res_cryo: 0,
         char_constellation: 2,
         char_ascension: 1,
         char_skill_attack: 1,
@@ -307,7 +311,6 @@ test("Wriothesley C6 Repelling icicle is 20 percent of the enhanced 5th Stellar-
     const repelling = getFeature(Wriothesley, "skill.wriothesley_repelling_fist_5_stellarconduct");
     const icicle = getFeature(Wriothesley, "skill.wriothesley_c6_repelling_icicle_stellarconduct");
     const data = new BuildData({
-        enemy_res_cryo: 0,
         char_constellation: 6,
         char_ascension: 1,
         char_skill_attack: 1,
@@ -344,23 +347,16 @@ test("Stellar-Conduct does not consume Xilonen C4 base damage bonus", () => {
             }),
         ],
     });
-    const baseData = new BuildData({
-        enemy_res_cryo: 0,
-    }, {
-        atk_base: 1000,
-        xilonen_def_total: 2000,
-    });
-    const xilonenData = new BuildData({
-        enemy_res_cryo: 0,
-        "party.xilonen_suchitls_trance": true,
-    }, {
-        atk_base: 1000,
-        xilonen_def_total: 2000,
-    });
-    xilonenData.multipliers = Xilonen.getPartyMultipliers();
+    const receiver = makeBuild('Ayaka');
+    const xilonen = makeBuild('Xilonen');
+    xilonen.setCharLevels({level: 90, ascension: 6, constellation: 4});
+    const team = Team.fromMember(receiver);
+    team.setMember(1, xilonen);
+    matchCarrierTotals(xilonen, {def_total: 2000});
 
-    const baseResult = feature.getResult(baseData)["skill.stellarconduct_test_hit"];
-    const xilonenResult = feature.getResult(xilonenData)["skill.stellarconduct_test_hit"];
+    const baseResult = feature.getResult(receiver.getBuildData())["skill.stellarconduct_test_hit"];
+    xilonen.setCharSettings({xilonen_suchitls_trance: true});
+    const xilonenResult = feature.getResult(receiver.getBuildData())["skill.stellarconduct_test_hit"];
 
     expect(xilonenResult.normal).toBeCloseTo(baseResult.normal, 5);
 });

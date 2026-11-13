@@ -3,6 +3,7 @@ import { baseStatName, getUsedStats } from "./Compile/Stats";
 import { CBlock } from "./Compile/Types";
 import { CBlockPost, CIsolatedBlock, CStatDecrease, CStatIncrease, CVar } from "./Compile/Types/Block";
 import { CVarValue } from "./Compile/Types/Item";
+import { extraStatName } from "../PostEffect/Channels";
 
 const MAX_REPLACE_ITERATIONS = 10;
 
@@ -145,6 +146,12 @@ export class FeatureCompiler {
                 vars.push(statVar);
                 localAssig.push(new CStatIncrease([new CVarValue({ref: statVar})], {stat: post.stat}));
                 revert.unshift(new CStatDecrease([new CVarValue({ref: statVar})], {stat: post.stat}));
+                if (post.extra) {
+                    // Premod reads subtract the extra part (PostEffect/Channels).
+                    let extraStat = extraStatName(post.stat);
+                    localAssig.push(new CStatIncrease([new CVarValue({ref: statVar})], {stat: extraStat}));
+                    revert.unshift(new CStatDecrease([new CVarValue({ref: statVar})], {stat: extraStat}));
+                }
             }
 
             assign.push(

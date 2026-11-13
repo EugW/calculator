@@ -1,4 +1,5 @@
 import { Artifact } from "../Artifact";
+import { serializeWorkerMember } from "../Team";
 import { WorkerFactory } from "../WorkerFactory";
 
 export class WorkerFactorySuggestWeapons extends WorkerFactory {
@@ -79,7 +80,7 @@ export class WorkerFactorySuggestWeapons extends WorkerFactory {
     }
 
     getWorkersPayload(data) {
-        data.build = data.build.serialize();
+        data.build = serializeWorkerMember(data.build);
 
         if (data.storage && data.storage.artifacts) {
             let serialized = [];

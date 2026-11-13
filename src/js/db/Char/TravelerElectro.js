@@ -1,11 +1,13 @@
 import { Condition } from "../../classes/Condition";
+import { ConditionAnd } from "../../classes/Condition/And";
 import { ConditionAscensionChar } from "../../classes/Condition/Ascension/Char";
 import { ConditionBoolean } from "../../classes/Condition/Boolean";
 import { ConditionBooleanValue } from "../../classes/Condition/Boolean/Value";
 import { ConditionConstellation } from "../../classes/Condition/Constellation";
+import { ConditionDropdownTeamMember } from "../../classes/Condition/Dropdown/TeamMember";
 import { ConditionDropdownTravelerResonated } from "../../classes/Condition/Dropdown/TravelerResonated";
 import { ConditionNot } from "../../classes/Condition/Not";
-import { ConditionNumber } from "../../classes/Condition/Number";
+import { ConditionSelectedReceiver } from "../../classes/Condition/SelectedReceiver";
 import { ConditionStacks } from "../../classes/Condition/Stacks";
 import { ConditionStatic } from "../../classes/Condition/Static";
 import { DbObjectChar } from "../../classes/DbObject/Char";
@@ -25,11 +27,13 @@ import { FeatureStatic } from "../../classes/Feature2/Static";
 import { PostEffectStats } from "../../classes/PostEffect/Stats";
 import { PostEffectStatsRecharge } from "../../classes/PostEffect/Stats/Recharge";
 import { PostEffectStatsStatic } from "../../classes/PostEffect/Stats/Static";
+import { RECEIVERS } from "../../classes/Team/Receivers";
 import { StatTable } from "../../classes/StatTable";
 import { StatTableAscensionScale } from "../../classes/StatTable/Ascension/Scale";
 import { ValueTable } from "../../classes/ValueTable";
 import { charTables } from "../generated/CharTables";
 import { charTalentTables } from "../generated/CharTalentTables";
+import { percent, times } from "../Params";
 
 const Talents = new DbObjectTalents({
     attack: {
@@ -135,10 +139,27 @@ const Talents = new DbObjectTalents({
     },
 });
 
+// Abundance Amulet: "When a character is near an Abundance Amulet, they
+// will absorb it": the member who picks it up is chosen, the Traveler
+// included, as for Xiangling's chili pepper.
+const amuletPickedUp = new ConditionAnd([
+    new ConditionBoolean({name: 'traveler_abundance_amulet'}),
+    new ConditionSelectedReceiver({name: 'traveler_abundance_amulet_receiver'}),
+]);
+
+const A4Recharge = percent(charTalentTables.TravelerElectro.a4.p1);
+const AmuletRecharge = times(charTalentTables.TravelerElectro.s2.p4[0], 0.01);
+
 const rechargePreA4Post = new PostEffectStatsStatic({
+    receivers: RECEIVERS.TEAM,
+    // Game data: Player_Electric_ElementalArt_Magatama_Pickable /
+    // UNIQUE_Player_Electric_ElementalArt_Magatama_EfficiencyUp writes
+    // Actor_ChargeEfficiencyExtraDelta (extra) with no stat read. KQM
+    // (Electro Traveler): the amulet ER affects neither Raiden/Mona A4, nor
+    // Emblem 4pc, nor Engulfing. The default channels hold.
     percent: new StatTable('recharge', [20]),
     conditions: [
-        new ConditionBoolean({name: 'traveler_abundance_amulet'}),
+        amuletPickedUp,
         new ConditionNot([
             new ConditionAscensionChar({ascension: 4}),
         ]),
@@ -146,10 +167,19 @@ const rechargePreA4Post = new PostEffectStatsStatic({
 });
 
 const rechargePostA4Post = new PostEffectStatsRecharge({
-    percent: new StatTable('recharge', [10]),
-    flatBonus: new ValueTable([0.2]),
+    receivers: RECEIVERS.TEAM,
+    // Game data: Player_Electric_ElementalArt_Magatama_Pickable /
+    // UNIQUE_Player_Electric_ElementalArt_Magatama_ExtraEfficiencyUp (gated
+    // by ByUnlockTalentParam Player_Electric_ElementalArt_ExtraChargeEfficiency,
+    // A4 Resounding Roar) writes Actor_ChargeEfficiencyExtraDelta (extra)
+    // from FIGHT_PROP_NONEXTRA_CHARGE_EFFICIENCY (premod). KQM (Electro
+    // Traveler): A4 only takes the Traveler's original ER, so its own write
+    // does not feed it; GO reads input.premod.enerRech_ into
+    // teamBuff.total.enerRech_. The default channels hold.
+    percent: new StatTable('recharge', [A4Recharge]),
+    flatBonus: new ValueTable([AmuletRecharge]),
     conditions: [
-        new ConditionBoolean({name: 'traveler_abundance_amulet'}),
+        amuletPickedUp,
         new ConditionAscensionChar({ascension: 4}),
     ],
 });
@@ -158,9 +188,13 @@ const rechargePostA4Post = new PostEffectStatsRecharge({
 const condTravelerAether = new ConditionBoolean({name: 'traveler_aether'});
 const condLumineDefault = new ConditionNot([condTravelerAether]);
 
-const ForeignDetonateBonus = 100;
-const ForeignDetonateDelayed = 200;
-const ForeignDetonateCooldown = 15;
+const ForeignDetonateBonus = percent(charTalentTables.TravelerElectro.sp.p8);
+const ForeignDetonateDelayed = percent(charTalentTables.TravelerElectro.sp.p11);
+const ForeignDetonateCooldown = charTalentTables.TravelerElectro.sp.p9;
+const C2ElectroRes = percent(charTalentTables.TravelerElectro.c2.p2);
+const C2Duration = charTalentTables.TravelerElectro.c2.p1;
+const C4EnergyThreshold = percent(charTalentTables.TravelerElectro.c4.p1);
+const C6FallingThunderBonus = charTalentTables.TravelerElectro.c6.p1;
 
 const bladeReadyCondition = new ConditionBooleanValue({
     setting: 'traveler_electro_blade_thunder',
@@ -335,7 +369,7 @@ export const TravelerElectro = new DbObjectChar({
             element: 'electro',
             multipliers: [
                 new FeatureMultiplier({
-                    scalingMultiplier: 2,
+                    scalingMultiplier: C6FallingThunderBonus,
                     scalingSource: 'constellation6',
                     leveling: 'char_skill_burst',
                     values: Talents.get('burst.traveler_falling_thunder_dmg'),
@@ -453,6 +487,12 @@ export const TravelerElectro = new DbObjectChar({
             title: 'talent_name.traveler_abundance_amulet',
             description: 'talent_descr.traveler_abundance_amulet',
         }),
+        new ConditionDropdownTeamMember({
+            name: 'traveler_abundance_amulet_receiver',
+            serializeId: 8,
+            title: 'buffs_name.selected_receiver',
+            description: 'buffs_descr.selected_receiver',
+        }),
         new ConditionStatic({
             title: 'talent_name.traveler_thunderflash',
             description: 'talent_descr.traveler_thunderflash',
@@ -465,7 +505,7 @@ export const TravelerElectro = new DbObjectChar({
             title: 'talent_name.traveler_resounding_roar',
             description: 'talent_descr.traveler_resounding_roar',
             stats: {
-                text_percent: 10,
+                text_percent: A4Recharge,
             },
             info: {ascension: 4},
             subConditions: [
@@ -521,14 +561,16 @@ export const TravelerElectro = new DbObjectChar({
         },
         {
             conditions: [
+                // Falling Thunder Electro RES shred is an enemy debuff (TEAM).
                 new ConditionBoolean({
                     name: 'traveler_violet_vehemence',
                     serializeId: 1,
+                    receivers: RECEIVERS.TEAM,
                     title: 'talent_name.traveler_violet_vehemence',
                     description: 'talent_descr.traveler_violet_vehemence',
                     stats: {
-                        enemy_res_electro: -15,
-                        text_duration: 8,
+                        enemy_res_electro: C2ElectroRes,
+                        text_duration: C2Duration,
                     },
                 }),
             ],
@@ -548,7 +590,7 @@ export const TravelerElectro = new DbObjectChar({
                     title: 'talent_name.traveler_fickle_cloudstrike',
                     description: 'talent_descr.traveler_fickle_cloudstrike',
                     stats: {
-                        text_percent1: 35,
+                        text_percent1: C4EnergyThreshold,
                         text_percent2: 100,
                     },
                 }),
@@ -575,73 +617,5 @@ export const TravelerElectro = new DbObjectChar({
             ],
         },
     ]),
-    partyData: {
-        loadStats: {
-            stats: ['recharge_total'],
-        },
-        conditions: [
-            new ConditionNumber({
-                name: 'traveler_recharge',
-                title: 'stat.recharge',
-                partyStat: 'recharge_total',
-                serializeId: 1,
-                format: 'decimal',
-                max: 1000,
-            }),
-            new ConditionBoolean({
-                name: 'party.traveler_abundance_amulet',
-                serializeId: 4,
-                title: 'talent_name.traveler_abundance_amulet',
-                description: 'talent_descr.traveler_abundance_amulet',
-            }),
-            new ConditionBoolean({
-                name: 'party.traveler_resounding_roar',
-                serializeId: 2,
-                rotation: 'party',
-                title: 'talent_name.traveler_resounding_roar',
-                description: 'talent_descr.traveler_resounding_roar',
-                info: {ascension: 4},
-                stats: {
-                    text_percent: 10,
-                },
-            }),
-            new ConditionBoolean({
-                name: 'party.traveler_violet_vehemence',
-                serializeId: 3,
-                rotation: 'party',
-                title: 'talent_name.traveler_violet_vehemence',
-                description: 'talent_descr.traveler_violet_vehemence',
-                info: {constellation: 2},
-                stats: {
-                    enemy_res_electro: -15,
-                    text_duration: 8,
-                },
-            }),
-            new ConditionStatic({
-                title: 'talent_name.traveler_fickle_cloudstrike',
-                description: 'talent_descr.traveler_fickle_cloudstrike',
-                info: {constellation: 4},
-                stats: {
-                    text_percent1: 35,
-                    text_percent2: 100,
-                },
-            }),
-        ],
-        postEffects: [
-            new PostEffectStatsStatic({
-                percent: new StatTable('recharge', [20]),
-                conditions: [
-                    new ConditionBoolean({name: 'party.traveler_abundance_amulet'}),
-                ],
-            }),
-            new PostEffectStats({
-                from: 'traveler_recharge',
-                percent: new StatTable('recharge', [0.1]),
-                conditions: [
-                    new ConditionBoolean({name: 'party.traveler_abundance_amulet'}),
-                    new ConditionBoolean({name: 'party.traveler_resounding_roar',}),
-                ],
-            }),
-        ],
-    },
+    retiredParty: [[1, 'number'], [2, 'checkbox'], [3, 'checkbox'], [4, 'checkbox']],
 });

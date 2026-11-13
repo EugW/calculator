@@ -4,6 +4,8 @@ import { ConditionLevels } from "../../../classes/Condition/Levels";
 import { ConditionStacks } from "../../../classes/Condition/Stacks";
 import { ConditionStatic } from "../../../classes/Condition/Static";
 import { StatTable } from "../../../classes/StatTable";
+import { artifactSetTables } from "../../generated/ArtifactSetTables";
+import { percent } from "../../Params";
 
 export const NymphsDream = new ArtifactSet({
     serializeId: 44,
@@ -23,7 +25,7 @@ export const NymphsDream = new ArtifactSet({
                     description: 'set_descr.nymphs_dream_2',
                     settings: {},
                     stats: {
-                        dmg_hydro: 15,
+                        dmg_hydro: artifactSetTables.NymphsDream.pc2.dmg_hydro,
                     },
                 })
             ],
@@ -41,8 +43,8 @@ export const NymphsDream = new ArtifactSet({
                 new ConditionLevels({
                     levelSetting: 'set.nymphs_dream_4',
                     stats: [
-                        new StatTable('atk_percent', [7, 16, 25]),
-                        new StatTable('dmg_hydro', [4, 9, 15]),
+                        new StatTable('atk_percent', [percent(artifactSetTables.NymphsDream.pc4.p2), percent(artifactSetTables.NymphsDream.pc4.p3), percent(artifactSetTables.NymphsDream.pc4.p4)]),
+                        new StatTable('dmg_hydro', [percent(artifactSetTables.NymphsDream.pc4.p5), percent(artifactSetTables.NymphsDream.pc4.p6), percent(artifactSetTables.NymphsDream.pc4.p7)]),
                     ],
                     subConditions: [
                         new ConditionBooleanValue({

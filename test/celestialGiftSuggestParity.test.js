@@ -3,6 +3,7 @@ import { ArtifactsSuggest } from "../src/js/classes/ArtifactsSuggest";
 import { CalcSet } from "../src/js/classes/CalcSet";
 import { Condition } from "../src/js/classes/Condition";
 import { Stats } from "../src/js/classes/Stats";
+import { deserializeWorkerMember, serializeWorkerMember, Team } from "../src/js/classes/Team";
 import { DB } from "../src/js/db/DB";
 
 global.DB = DB;
@@ -18,23 +19,48 @@ const MAIN_STATS = {
     circlet: 'crit_dmg',
 };
 
-function makeBuild(buildCase, teamwideSettings = {}) {
+function makeChar(charKey) {
     const build = new CalcSet();
-    const char = DB.Chars.get('Klee');
+    const char = DB.Chars.get(charKey);
 
     build.setChar(char);
     build.setWeapon(DB.Weapons.get(char.weapon).getFirst(true));
-    build.setEnemy(DB.Enemies.getFirst().getFirst());
+
+    return build;
+}
+
+// A teammate with Witch's Homework wearing Celestial Gift 4-piece, effect on.
+function makeWearer(charKey) {
+    const build = makeChar(charKey);
+    const name = build.char.get().name;
+    build.setCharSettings({[name + '_witch_homework']: true});
+    build.replaceArtifacts(['flower', 'plume', 'sands', 'goblet'].map((slot) => {
+        return new Artifact(5, 20, slot, 'CelestialGift', MAIN_STATS[slot], []);
+    }));
+    build.setArtifactsSettings({'set.celestial_gift_4': true});
+    return build;
+}
+
+/**
+ * Klee and the build case's real Hexerei teammates, optionally with an
+ * additional Celestial Gift wearer.
+ */
+function makeBuild(buildCase, teammateCase) {
+    const build = makeChar('Klee');
 
     if (buildCase.charSettings) {
         build.setCharSettings(buildCase.charSettings);
     }
 
-    if (buildCase.partyCharIds) {
-        build.setPartyChars(buildCase.partyCharIds);
-    }
-
-    build.setBuffsSettings(Object.assign({}, buildCase.buffSettings || {}, teamwideSettings));
+    const team = Team.fromMember(build);
+    let slot = 1;
+    if (teammateCase.wearer) team.setMember(slot++, makeWearer(teammateCase.wearer));
+    (buildCase.witchTeammates || []).forEach((charKey) => {
+        const mate = makeChar(charKey);
+        const name = mate.char.get().name;
+        mate.setCharSettings({[name + '_witch_homework']: true});
+        team.setMember(slot++, mate);
+    });
 
     return build;
 }
@@ -82,7 +108,7 @@ function makeArtifactSettings(personalEnabled) {
 
 function cloneWorkerInput(build, artifacts) {
     return {
-        build: CalcSet.deserialize(build.serialize()),
+        build: deserializeWorkerMember(serializeWorkerMember(build)),
         artifacts: artifacts.map((artifact) => Artifact.deserialize(artifact.serialize())),
     };
 }
@@ -101,15 +127,12 @@ function countCombinations(artifacts) {
     return SLOTS.reduce((total, slot) => total * counts[slot], 1);
 }
 
-function uiFeatureValue(baseBuild, artifacts, artifactSettings) {
+function uiFeatureValue(baseBuild, artifacts) {
     const build = baseBuild.clone();
 
     for (const artifact of artifacts) {
         build.setArtifact(artifact);
     }
-
-    build.setArtifactsSettings(Object.assign({}, artifactSettings));
-    build.artifacts.removeInvalidSettings();
 
     const feature = build.calcFeatures(1)[FEATURE_NAME];
     return feature ? feature[FEATURE_TYPE] || 0 : 0;
@@ -126,43 +149,28 @@ function describeArtifacts(artifacts) {
         .join(', ');
 }
 
-test('Celestial Gift personal and teamwide suggester math matches UI rebuild math', () => {
-    const ventiId = DB.Chars.get('Venti').getId();
+test('Celestial Gift personal and teammate suggester math matches UI rebuild math', () => {
+    // A teammate wearing Celestial Gift: Durin (Pyro, Klee's element) or Mona
+    // (Hydro). With two members' Witch's Homework the party has Secret Rite.
+    // When Klee also wears the set, the teammate's copy yields to one of them.
+    const teammateCases = [
+        {name: 'alone'},
+        {name: 'pyro-wearer', wearer: 'Durin'},
+        {name: 'hydro-wearer', wearer: 'Mona'},
+    ];
     const buildCases = [
         {
             name: 'no-witch',
             charSettings: {},
-            buffSettings: {},
-            partyCharIds: [],
-            teamwideCases: [
-                {name: 'none', settings: {}},
-                {name: 'party-pyro-20', settings: {'set_other.celestial_gift_4': 'pyro'}},
-                {name: 'party-hydro-20', settings: {'set_other.celestial_gift_4': 'hydro'}},
-            ],
         },
         {
             name: 'self-witch',
             charSettings: {klee_witch_homework: true},
-            buffSettings: {},
-            partyCharIds: [],
-            teamwideCases: [
-                {name: 'none', settings: {}},
-                {name: 'party-pyro-20', settings: {'set_other.celestial_gift_4': 'pyro'}},
-                {name: 'party-hydro-20', settings: {'set_other.celestial_gift_4': 'hydro'}},
-            ],
         },
         {
             name: 'hexerei',
             charSettings: {klee_witch_homework: true},
-            buffSettings: {'party.venti_witch_homework': true},
-            partyCharIds: [ventiId],
-            teamwideCases: [
-                {name: 'none', settings: {}},
-                {name: 'party-pyro-40', settings: {'set_other.celestial_gift_4_hexerei': 'pyro'}},
-                {name: 'party-hydro-40', settings: {'set_other.celestial_gift_4_hexerei': 'hydro'}},
-                {name: 'party-pyro-hydro-40', settings: {'set_other.celestial_gift_4_hexerei': 'pyro;hydro'}},
-                {name: 'party-pyro-alias', settings: {'set_other.celestial_gift_4': 'pyro'}},
-            ],
+            witchTeammates: ['Venti'],
         },
     ];
     const personalCases = [
@@ -177,13 +185,15 @@ test('Celestial Gift personal and teamwide suggester math matches UI rebuild mat
         for (const personalCase of personalCases) {
             const artifactSettings = makeArtifactSettings(personalCase.enabled);
 
-            for (const teamwideCase of buildCase.teamwideCases) {
+            for (const teammateCase of teammateCases) {
                 const scenario = [
                     buildCase.name,
                     personalCase.name,
-                    teamwideCase.name,
+                    teammateCase.name,
                 ].join(' / ');
-                const baseBuild = makeBuild(buildCase, teamwideCase.settings);
+                const baseBuild = makeBuild(buildCase, teammateCase);
+                // The assumptions are the member's set-bonus profile.
+                baseBuild.setArtifactsSettings(artifactSettings);
                 const workerInput = cloneWorkerInput(baseBuild, artifacts);
                 const suggester = new ArtifactsSuggest({
                     build: workerInput.build,
@@ -191,7 +201,6 @@ test('Celestial Gift personal and teamwide suggester math matches UI rebuild mat
                     featureName: FEATURE_NAME,
                     featureType: FEATURE_TYPE,
                     settings: {
-                        sets_settings: artifactSettings,
                         stats: {},
                         setMinValues: {},
                         setMaxValues: {},
@@ -210,7 +219,7 @@ test('Celestial Gift personal and teamwide suggester math matches UI rebuild mat
                 let previousUiValue = Infinity;
                 for (let i = 0; i < results.length; ++i) {
                     const result = results[i];
-                    const uiValue = uiFeatureValue(baseBuild, result.artifacts, artifactSettings);
+                    const uiValue = uiFeatureValue(baseBuild, result.artifacts);
 
                     if (!valuesClose(result.value, uiValue)) {
                         mismatches.push([

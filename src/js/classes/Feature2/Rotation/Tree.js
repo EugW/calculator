@@ -4,26 +4,41 @@ import { CIsolatedBlock, CMulti, CStatIncrease, CSubtract, CVar, CVarIncrease } 
 import { CDamageRotation } from "../Compile/Types/Damage";
 import { CConst, CVarValue } from "../Compile/Types/Item";
 import { FeatureCompiler } from "../Compiler";
+import { Stats } from "../../Stats";
+import { moveTree } from "../../Team/Namespace";
 
 const reactions = ['', 'melt', 'vaporize', 'quicken'];
 
+/**
+ * The program of a compiled team rotation (RotationCompiler) for one
+ * member, the viewer.
+ *
+ * The program's input is the viewer's data at the start of the rotation. At
+ * each state the viewer's stats change to the state's (the difference is
+ * added to the program's stats, so the stats the optimizer varies stay
+ * variables), and the state's post-effects apply to the hits after it. A hit
+ * is built with its member's data at its state and moved into the viewer's
+ * program namespace (Team/Namespace.moveTree).
+ */
 export class Feature2RotationTree {
+    /**
+     * @param {Array} items compiled items
+     * @param {Object} opts {viewerSlot, counts: function(hit): boolean, ignoreSideEffects}
+     */
     constructor(items, opts) {
-        items = [].concat(items);
-
-        this.infoBlock;
-        if (items.length > 0 && items[0].type == 'info') {
-            this.infoBlock = items.shift();
-        }
-
         this.items = items;
         this.opts = Object.assign({}, opts);
+        this.viewerSlot = this.opts.viewerSlot;
+        this.counts = this.opts.counts || (() => true);
     }
 
     getTree(origData, usedStats) {
+        // Only hits of this element or damage type (a Features tab row).
+        this.filter = origData.settings ? origData.settings.rotation_include : '';
+
         let [blocks, totalNormal, totalCrit, totalAverage] = this.processBlock(this.items, origData, {
             usedStats: usedStats,
-        });
+        }, null);
 
         return new CDamageRotation(blocks, {vars: [
             new CVarValue({ref: totalNormal}),
@@ -32,7 +47,13 @@ export class Feature2RotationTree {
         ]});
     }
 
-    processBlock(items, origData, opts) {
+    /**
+     * @param {Array} items
+     * @param {BuildData} origData the viewer's data where the block starts
+     * @param {Object} opts
+     * @param {BuildData|null} entry the viewer's data in the state the block starts in
+     */
+    processBlock(items, origData, opts, entry) {
         let totalNormal = new CVar([new CConst({value: 0})], {name: 'total_normal'});
         let totalCrit = new CVar([new CConst({value: 0})], {name: 'total_crit'});
         let totalAverage = new CVar([new CConst({value: 0})], {name: 'total_average'});
@@ -44,7 +65,8 @@ export class Feature2RotationTree {
         ];
 
         let data = origData.clone();
-        let filter = data.settings ? data.settings.rotation_include : '';
+        let current = entry;
+        let filter = this.filter;
         let curentItems = [];
         let curentCondItems = [];
         let currentPost = [];
@@ -57,14 +79,14 @@ export class Feature2RotationTree {
 
         for (let item of items) {
             if (item.type == 'feature') {
-                data.settings.reaction = getReactionName(item);
+                if (!this.counts(item)) { continue; }
 
-                let activeFeature = getActiveFeature(item.feature, data);
+                let memberData = hitData(item);
+                let activeFeature = getActiveFeature(item.feature, memberData);
                 if (!activeFeature) { continue; }
-                if (!activeFeature.usedInRotation()) { continue; }
 
                 if (filter) {
-                    let element = activeFeature.getElement(data);
+                    let element = activeFeature.getElement(memberData);
                     let damageType = activeFeature.getDamageType();
 
                     if (filter != element && filter != damageType) {
@@ -72,17 +94,35 @@ export class Feature2RotationTree {
                     }
                 }
 
-                let featureTree = activeFeature.getTree(data);
+                let featureTree = moveTree(activeFeature.getTree(memberData), item.slot, this.viewerSlot);
                 statReplace(featureTree, opts);
+
+                if (featureTree.getType() == 'damage_contribution_result') {
+                    // A hit the team deals together: its three results are
+                    // ranked inside it (CDamageContribution).
+                    let vars = featureTree.makeVars();
+                    curentItems = curentItems.concat(vars.blocks);
+                    for (let [value, total] of [[vars.normal, totalNormal], [vars.crit, totalCrit], [vars.average, totalAverage]]) {
+                        curentItems.push(new CVarIncrease([
+                            new CMulti([
+                                new CConst({value: item.count, comment: 'rotation_hit_count'}),
+                                new CVarValue({ref: value}),
+                            ]),
+                        ], {ref: total}));
+                    }
+                    continue;
+                }
 
                 let normalDmgItems = [
                     new CConst({value: item.count, comment: 'rotation_hit_count'}),
                     new CMulti(featureTree.items),
                 ];
 
-                let hitMulti = activeFeature.getRotationHitMiltiplier(data);
+                let hitMulti = activeFeature.getRotationHitMiltiplier(memberData);
                 if (typeof hitMulti === 'object') {
-                    normalDmgItems.push(hitMulti);
+                    let hitTree = moveTree(hitMulti, item.slot, this.viewerSlot);
+                    statReplace(hitTree, opts);
+                    normalDmgItems.push(hitTree);
                 } else if (hitMulti != 1) {
                     normalDmgItems.push(
                         new CConst({value: hitMulti, comment: 'rotation_hit_multi'})
@@ -134,7 +174,7 @@ export class Feature2RotationTree {
                         new CVarValue({ref: varChance}),
                     ]),
                 ], {ref: totalAverage}));
-            } else if (item.type == 'condition') {
+            } else if (item.type == 'state') {
                 if (curentItems.length || curentCondItems.length || currentPost.length) {
                     let isolated = createIsolatedBlock(curentItems, curentCondItems, currentPost, opts);
                     if (isolated) {
@@ -145,8 +185,11 @@ export class Feature2RotationTree {
                     currentPost = [];
                 }
 
-                for (let stat of Object.keys(item.stats)) {
-                    if (/^text_/.test(stat)) continue;
+                // The viewer's stats change to the state's.
+                let next = item.members.get(this.viewerSlot);
+                let changes = current ? Stats.diff(current.stats, next.stats) : new Stats();
+                for (let stat of Object.keys(changes)) {
+                    if (/^text_/.test(stat) || typeof changes[stat] != 'number') continue;
 
                     let statOpts = {stat: stat};
 
@@ -159,20 +202,17 @@ export class Feature2RotationTree {
 
                     curentCondItems.push(
                         new CStatIncrease([
-                            new CConst({value: item.stats.get(stat)})
+                            new CConst({value: changes[stat]})
                         ], statOpts)
                     );
                 }
 
-                if (opts.usedStats) {
-                    item.stats.truncate(opts.usedStats);
-                }
-
-                data.addStats(item.stats);
-                data.addSettings(item.settings);
+                current = next;
+                data = next.clone();
                 let changeStats = opts && opts.stats ? Object.keys(opts.stats) : [];
 
-                for (let postItem of item.postEffects) {
+                // The state's post-effects apply to the hits after it.
+                for (let postItem of data.getActivePostEffects()) {
                     if (!postItem.getTree) {
                         continue;
                     }
@@ -197,7 +237,7 @@ export class Feature2RotationTree {
                     currentPost = [];
                 }
 
-                let [repBlocks, repNormal, repCrit, repAverage] = this.processBlock(item.items, data, copyOptsStats(opts));
+                let [repBlocks, repNormal, repCrit, repAverage] = this.processBlock(item.items, data, copyOptsStats(opts), current);
 
                 curentItems.push(createIsolatedBlock([
                     ...repBlocks,
@@ -222,30 +262,12 @@ export class Feature2RotationTree {
                     currentPost = [];
                 }
 
-                if (item.percent > 0) {
-                    let ratio = item.percent / 100;
-                    let [repBlocks, repNormal, repCrit, repAverage] = this.processBlock([
-                        ...item.conditions,
-                        ...item.items,
-                    ], data, copyOptsStats(opts));
+                // The block's hits with its conditions for the uptime, and
+                // without them for the rest.
+                for (let [branch, ratio] of [[item.on, item.percent / 100], [item.off, 1 - item.percent / 100]]) {
+                    if (ratio <= 0) continue;
 
-                    curentItems.push(createIsolatedBlock([
-                        ...repBlocks,
-                        ...[[repNormal, totalNormal], [repCrit, totalCrit], [repAverage, totalAverage]].map((i) => {
-                            let [rep, total] = i;
-                            return new CVarIncrease([
-                                new CMulti([
-                                    new CConst({value: ratio}),
-                                    new CVarValue({ref: rep}),
-                                ]),
-                            ], {ref: total});
-                        }),
-                    ], [], [], opts));
-                }
-
-                if (item.percent < 100) {
-                    let ratio = (1 - item.percent / 100);
-                    let [repBlocks, repNormal, repCrit, repAverage] = this.processBlock(item.items, data, copyOptsStats(opts));
+                    let [repBlocks, repNormal, repCrit, repAverage] = this.processBlock(branch, data, copyOptsStats(opts), current);
 
                     curentItems.push(createIsolatedBlock([
                         ...repBlocks,
@@ -271,6 +293,51 @@ export class Feature2RotationTree {
         }
 
         return [blocks, totalNormal, totalCrit, totalAverage];
+    }
+}
+
+/**
+ * A hit's data: its member's data at its state, with the hit's reaction.
+ *
+ * @param {Object} hit a compiled hit
+ * @returns {BuildData} a copy
+ */
+export function hitData(hit) {
+    let data = hit.state.members.get(hit.slot).clone();
+    data.settings.reaction = getReactionName(hit);
+    if (hit.insideBlock) {
+        data.settings.inside_rotation_block = 1;
+    }
+    return data;
+}
+
+/**
+ * A hit the whole team deals (Feature2/Reaction/Team): it counts in the
+ * team's total and in no member's own.
+ *
+ * @param {Array.<Feature2>} features the features of a hit
+ * @returns {boolean}
+ */
+export function isTeamHit(features) {
+    return features.some((feature) => feature.isTeamHit());
+}
+
+/**
+ * Call a function for every hit of compiled items, blocks included.
+ *
+ * @param {Array} items
+ * @param {function(Object)} callback
+ */
+export function forEachHit(items, callback) {
+    for (let item of items) {
+        if (item.type == 'feature') {
+            callback(item);
+        } else if (item.type == 'repeat') {
+            forEachHit(item.items, callback);
+        } else if (item.type == 'uptime') {
+            forEachHit(item.on, callback);
+            forEachHit(item.off, callback);
+        }
     }
 }
 
@@ -307,7 +374,7 @@ export function getReactionName(item) {
     return reactions[item.reaction || 0];
 }
 
-function getActiveFeature(features, data) {
+export function getActiveFeature(features, data) {
     features = Array.isArray(features) ? features : [features];
 
     for (let feature of features) {
@@ -324,7 +391,7 @@ function reorderItems(items) {
     for (let item of items) {
         if (item.type == 'feature') {
             result.push(item);
-        } else if (item.type == 'condition') {
+        } else if (item.type == 'state') {
             if (accum) {
                 result = result.concat(accum);
                 accum = [];

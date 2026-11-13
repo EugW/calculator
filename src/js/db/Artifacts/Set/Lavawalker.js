@@ -1,6 +1,8 @@
 import { ArtifactSet } from "../../../classes/ArtifactSet";
 import { ConditionEnemyStatus } from "../../../classes/Condition/Boolean/EnemyStatus";
 import { ConditionStatic } from "../../../classes/Condition/Static";
+import { artifactSetTables } from "../../generated/ArtifactSetTables";
+import { percent } from "../../Params";
 
 export const Lavawalker = new ArtifactSet({
     serializeId: 14,
@@ -19,7 +21,7 @@ export const Lavawalker = new ArtifactSet({
                     title: 'set_bonus.lavawalker_2',
                     description: 'set_descr.lavawalker_2',
                     stats: {
-                        res_pyro: 40,
+                        res_pyro: artifactSetTables.Lavawalker.pc2.res_pyro,
                     },
                 })
             ],
@@ -35,7 +37,7 @@ export const Lavawalker = new ArtifactSet({
                     title: 'set_bonus.lavawalker_4',
                     description: 'set_descr.lavawalker_4',
                     stats: {
-                        dmg_all: 35,
+                        dmg_all: percent(artifactSetTables.Lavawalker.pc4.p1),
                     },
                     subConditions: [
                         new ConditionEnemyStatus({

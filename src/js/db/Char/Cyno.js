@@ -2,9 +2,13 @@ import { Condition } from "../../classes/Condition";
 import { ConditionAnd } from "../../classes/Condition/And";
 import { ConditionAscensionChar } from "../../classes/Condition/Ascension/Char";
 import { ConditionBoolean } from "../../classes/Condition/Boolean";
+import { ConditionOnField } from "../../classes/Condition/Field";
+import { ConditionTeam } from "../../classes/Condition/Team";
+import { ConditionBooleanValue } from "../../classes/Condition/Boolean/Value";
 import { ConditionConstellation } from "../../classes/Condition/Constellation";
 import { ConditionNot } from "../../classes/Condition/Not";
 import { ConditionOr } from "../../classes/Condition/Or";
+import { ConditionReceiver } from "../../classes/Condition/Receiver";
 import { ConditionStacks } from "../../classes/Condition/Stacks";
 import { ConditionStatic } from "../../classes/Condition/Static";
 import { DbObjectChar } from "../../classes/DbObject/Char";
@@ -19,10 +23,12 @@ import { FeatureDamagePlungeShockWave } from "../../classes/Feature2/Damage/Plun
 import { FeatureDamageSkill } from "../../classes/Feature2/Damage/Skill";
 import { FeatureMultiplier } from "../../classes/Feature2/Multiplier";
 import { FeatureMultiplierTarget } from "../../classes/Feature2/Multiplier/Target";
+import { RECEIVERS } from "../../classes/Team/Receivers";
 import { StatTable } from "../../classes/StatTable";
 import { ValueTable } from "../../classes/ValueTable";
 import { charTables } from "../generated/CharTables";
 import { charTalentTables } from "../generated/CharTalentTables";
+import { percent } from "../Params";
 
 const Talents = new DbObjectTalents({
     attack: {
@@ -147,17 +153,24 @@ const Talents = new DbObjectTalents({
 
 const TalentValues = {
     BurstMastery: 100,
-    A1SkillDmgBonus: 35,
-    A1DustStalkerDmg: 100,
-    A1StarsameDmg: 200,
-    A4NormalMasteryDmg: 150,
-    A4DustStalkerMasteryDmg: 250,
-    A4StarsameMasteryDmg: 600,
-    C1AtkSpeed: 20,
-    C1Mastery: 200,
-    C2ElectroDmg: 10,
-    C2StellarConductDmg: 16,
+    A1SkillDmgBonus: percent(charTalentTables.Cyno.a1.p1),
+    A1DustStalkerDmg: percent(charTalentTables.Cyno.a1.p2),
+    A1StarsameDmg: percent(charTalentTables.Cyno.a1.p3),
+    A4NormalMasteryDmg: percent(charTalentTables.Cyno.a4.p1),
+    A4DustStalkerMasteryDmg: percent(charTalentTables.Cyno.a4.p2),
+    A4StarsameMasteryDmg: percent(charTalentTables.Cyno.a4.p3),
+    C1AtkSpeed: percent(charTalentTables.Cyno.c1.p1),
+    C1Mastery: charTalentTables.Cyno.c1.p3,
+    C2ElectroDmg: percent(charTalentTables.Cyno.c2.p1),
+    C2StellarConductDmg: percent(charTalentTables.Cyno.c2.p5),
+    C2MaxStacks: charTalentTables.Cyno.c2.p3,
 };
+
+// Together We Rise passes to the incoming active character when switching
+// from Cyno on the field.
+const activeReceiver = new ConditionReceiver({
+    condition: new ConditionOnField(),
+});
 
 export const Cyno = new DbObjectChar({
     name: 'cyno',
@@ -550,7 +563,7 @@ export const Cyno = new DbObjectChar({
             title: 'talent_name.cyno_a_star_with_which_to_start_the_journey',
             description: 'talent_descr.cyno_a_star_with_which_to_start_the_journey',
             subConditions: [
-                new ConditionBoolean({name: 'polestar_field'}),
+                new ConditionTeam({condition: new ConditionBoolean({name: 'polestar_field'})}),
             ],
         }),
     ],
@@ -581,6 +594,21 @@ export const Cyno = new DbObjectChar({
                         new ConditionBoolean({name: 'cyno_radiance_stellarconduct'}),
                     ],
                 }),
+                // The incoming active character takes on Together We Rise;
+                // Cyno keeps his own copy above.
+                new Condition({
+                    isHidden: true,
+                    receivers: RECEIVERS.OTHERS,
+                    stats: {
+                        mastery: TalentValues.C1Mastery,
+                    },
+                    condition: new ConditionAnd([
+                        new ConditionBoolean({name: 'cyno_together_we_rise'}),
+                        new ConditionBoolean({name: 'cyno_radiance_stellarconduct'}),
+                        new ConditionTeam({condition: new ConditionBoolean({name: 'polestar_field'})}),
+                        activeReceiver,
+                    ]),
+                }),
             ],
         },
         {
@@ -590,7 +618,7 @@ export const Cyno = new DbObjectChar({
                     serializeId: 3,
                     title: 'talent_name.cyno_homecoming_of_spirits',
                     description: 'talent_descr.cyno_homecoming_of_spirits_buffed',
-                    maxStacks: 5,
+                    maxStacks: TalentValues.C2MaxStacks,
                     stats: [
                         new StatTable('dmg_electro', [TalentValues.C2ElectroDmg]),
                     ],
@@ -600,7 +628,7 @@ export const Cyno = new DbObjectChar({
                     serializeId: 6,
                     title: 'talent_name.cyno_homecoming_of_spirits',
                     description: 'talent_descr.cyno_homecoming_of_spirits_buffed',
-                    maxStacks: 5,
+                    maxStacks: TalentValues.C2MaxStacks,
                     stats: [
                         new StatTable('dmg_stellarconduct', [TalentValues.C2StellarConductDmg]),
                     ],
@@ -608,6 +636,27 @@ export const Cyno = new DbObjectChar({
                         new ConditionBoolean({name: 'cyno_together_we_rise'}),
                     ],
                 }),
+                // Characters affected by Together We Rise raise their
+                // Stellar-Conduct DMG, one hidden copy per stack; Cyno keeps
+                // his own copy above.
+                ...[1, 2, 3, 4, 5].map((level) => new Condition({
+                    isHidden: true,
+                    receivers: RECEIVERS.OTHERS,
+                    stats: {
+                        dmg_stellarconduct: TalentValues.C2StellarConductDmg,
+                    },
+                    condition: new ConditionAnd([
+                        new ConditionBooleanValue({
+                            setting: 'cyno_homecoming_of_spirits_stellarconduct',
+                            cond: 'ge',
+                            value: level,
+                        }),
+                        new ConditionBoolean({name: 'cyno_together_we_rise'}),
+                        new ConditionBoolean({name: 'cyno_radiance_stellarconduct'}),
+                        new ConditionTeam({condition: new ConditionBoolean({name: 'polestar_field'})}),
+                        activeReceiver,
+                    ]),
+                })),
             ],
         },
         {
@@ -645,34 +694,5 @@ export const Cyno = new DbObjectChar({
             ],
         },
     ]),
-    partyData: {
-        conditions: [
-            new ConditionBoolean({
-                name: 'party.cyno_together_we_rise',
-                serializeId: 1,
-                rotation: 'party',
-                title: 'talent_name.cyno_unceasing_vigil',
-                description: 'talent_descr.cyno_unceasing_vigil_buffed',
-                info: {constellation: 1},
-                stats: {
-                    mastery: TalentValues.C1Mastery,
-                },
-            }),
-            new ConditionStacks({
-                name: 'party.cyno_homecoming_of_spirits_stellarconduct',
-                serializeId: 2,
-                rotation: 'party',
-                title: 'talent_name.cyno_homecoming_of_spirits',
-                description: 'talent_descr.cyno_homecoming_of_spirits_buffed',
-                info: {constellation: 2},
-                maxStacks: 5,
-                stats: [
-                    new StatTable('dmg_stellarconduct', [TalentValues.C2StellarConductDmg]),
-                ],
-                subConditions: [
-                    new ConditionBoolean({name: 'party.cyno_together_we_rise'}),
-                ],
-            }),
-        ],
-    },
+    retiredParty: [[1, 'checkbox'], [2, 'stacks']],
 });

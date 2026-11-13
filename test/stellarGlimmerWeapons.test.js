@@ -1,4 +1,8 @@
 import { DB } from "../src/js/db/DB";
+import { Team } from "../src/js/classes/Team";
+import { makeBuild } from "./support/team";
+
+global.DB = DB;
 
 function getWeapon(type, key) {
     return DB.Weapons.get(type).get(key);
@@ -196,44 +200,30 @@ test('Forged by the Golden Melody cycles and stacks a matching copied mode', () 
 
 test('Jade Vista counts at most three party members and separates same-element first', () => {
     const weapon = getWeapon('bow', 'JadeVista');
-    const [elements, , same, different] = weapon.getConditions();
+    const [, , same, different] = weapon.getConditions();
 
-    function partyStats(refine, party) {
-        const settings = {
-            weapon_refine: refine,
-            char_element: 'cryo',
-            ...party,
-        };
-        Object.assign(settings, elements.getData(settings).settings);
+    function partyStats(refine, teammates) {
+        const carrier = makeBuild('Diona');
+        carrier.setWeapon(weapon);
+        carrier.setWeaponLevels({level: 90, ascension: 6, refine});
+        const team = Team.fromMember(carrier);
+        teammates.forEach((key, index) => team.setMember(index + 1, makeBuild(key)));
+        const settings = carrier.getBuildData().settings;
         return {
             same: same.getData(settings).stats,
             different: different.getData(settings).stats,
         };
     }
 
-    let stats = partyStats(1, {
-        resonance_element_1: 'cryo',
-        resonance_element_2: 'cryo',
-        resonance_element_3: 'hydro',
-    });
+    let stats = partyStats(1, ['Kaeya', 'Ayaka', 'Barbara']);
     expect(stats.same.get('mastery')).toBe(128);
     expect(stats.different.get('atk_percent')).toBe(12);
 
-    stats = partyStats(5, {
-        resonance_element_1: 'cryo',
-        resonance_element_2: 'cryo',
-        resonance_element_3: 'cryo',
-        resonance_element_4: 'hydro',
-    });
+    stats = partyStats(5, ['Kaeya', 'Ayaka', 'Chongyun']);
     expect(stats.same.get('mastery')).toBe(384);
     expect(stats.different.get('atk_percent')).toBe(0);
 
-    stats = partyStats(5, {
-        resonance_element_1: 'hydro',
-        resonance_element_2: 'pyro',
-        resonance_element_3: 'electro',
-        resonance_element_4: 'anemo',
-    });
+    stats = partyStats(5, ['Barbara', 'Amber', 'Lisa']);
     expect(stats.same.get('mastery')).toBe(0);
     expect(stats.different.get('atk_percent')).toBe(72);
 

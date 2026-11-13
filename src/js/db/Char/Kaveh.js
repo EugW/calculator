@@ -1,10 +1,9 @@
 import { Condition } from "../../classes/Condition";
 import { ConditionAscensionChar } from "../../classes/Condition/Ascension/Char";
 import { ConditionBoolean } from "../../classes/Condition/Boolean";
-import { ConditionBooleanLevels } from "../../classes/Condition/Boolean/Levels";
+import { ConditionOnField } from "../../classes/Condition/Field";
 import { ConditionConstellation } from "../../classes/Condition/Constellation";
 import { ConditionLevels } from "../../classes/Condition/Levels";
-import { ConditionNumberTalent } from "../../classes/Condition/Number/Talent";
 import { ConditionStacks } from "../../classes/Condition/Stacks";
 import { ConditionStatic } from "../../classes/Condition/Static";
 import { DbObjectChar } from "../../classes/DbObject/Char";
@@ -19,10 +18,12 @@ import { FeatureDamagePlungeShockWave } from "../../classes/Feature2/Damage/Plun
 import { FeatureDamageSkill } from "../../classes/Feature2/Damage/Skill";
 import { FeatureHeal } from "../../classes/Feature2/Heal";
 import { FeatureMultiplier } from "../../classes/Feature2/Multiplier";
+import { RECEIVERS } from "../../classes/Team/Receivers";
 import { StatTable } from "../../classes/StatTable";
 import { ValueTable } from "../../classes/ValueTable";
 import { charTables } from "../generated/CharTables";
 import { charTalentTables } from "../generated/CharTalentTables";
+import { percent } from "../Params";
 
 const Talents = new DbObjectTalents({
     attack: {
@@ -109,14 +110,22 @@ const Talents = new DbObjectTalents({
 });
 
 const TalentValues = {
-    A1BloomHeal: 300,
-    A4Mastery: 25,
-    C1DendroRes: 50,
-    C1Healing: 25,
-    C2AtkSpeed: 15,
-    C4BloomDmg: 60,
-    C6Dmg: 61.8,
+    A1BloomHeal: percent(charTalentTables.Kaveh.a1.p2),
+    A4Mastery: charTalentTables.Kaveh.a4.p2,
+    A4MaxStacks: charTalentTables.Kaveh.a4.p1,
+    C1DendroRes: percent(charTalentTables.Kaveh.c1.p2),
+    C1Healing: percent(charTalentTables.Kaveh.c1.p3),
+    C2AtkSpeed: percent(charTalentTables.Kaveh.c2.p1),
+    C4BloomDmg: percent(charTalentTables.Kaveh.c4.p1),
+    C6Dmg: percent(charTalentTables.Kaveh.c6.p1),
 };
+
+/**
+ * Kaveh on the field, in the source's settings: Painted Dome's effects end
+ * when he leaves it. The old model gave teammates the Dendro Core bonus
+ * without this; the conversion row opens it to reproduce that recording.
+ */
+export const kavehOnField = new ConditionOnField();
 
 export const Kaveh = new DbObjectChar({
     name: 'kaveh',
@@ -266,13 +275,19 @@ export const Kaveh = new DbObjectChar({
                 attack_infusion: 'dendro',
             },
         }),
+        // Painted Dome: "All Dendro Cores created by all your own party
+        // members through Bloom and Lunar-Bloom reactions will deal
+        // additional DMG when they burst ... These effects will be canceled
+        // once Kaveh leaves the field."
         new ConditionLevels({
             levelSetting: 'char_skill_burst',
+            receivers: RECEIVERS.TEAM,
             stats: [
                 Talents.getAlias('burst.kaveh_bloom_dmg_bonus', 'dmg_reaction_rupture'),
             ],
             subConditions: [
                 new ConditionBoolean({name: 'kaveh_painted_dome'}),
+                kavehOnField,
             ],
         }),
         new ConditionStatic({
@@ -291,7 +306,7 @@ export const Kaveh = new DbObjectChar({
             serializeId: 2,
             title: 'talent_name.kaveh_a_craftsmans_curious_conceptions',
             description: 'talent_descr.kaveh_a_craftsmans_curious_conceptions',
-            maxStacks: 4,
+            maxStacks: TalentValues.A4MaxStacks,
             info: {ascension: 4},
             stats: [
                 new StatTable('mastery', [TalentValues.A4Mastery]),
@@ -365,37 +380,5 @@ export const Kaveh = new DbObjectChar({
             ],
         },
     ]),
-    partyData: {
-        conditions: [
-            new ConditionNumberTalent({
-                name: 'kaveh_char_skill_burst',
-                title: 'talent_name.stats_level_burst',
-                partySetting: 'char_skill_burst',
-                serializeId: 1,
-            }),
-            new ConditionBoolean({
-                name: 'party.kaveh_profferings_of_dur_untash',
-                serializeId: 2,
-                title: 'talent_name.kaveh_profferings_of_dur_untash',
-                description: 'talent_descr.char_constellation_burst',
-                settings: {
-                    kaveh_char_skill_burst_bonus: 3,
-                },
-                info: {
-                    constellation: 3,
-                },
-            }),
-            new ConditionBooleanLevels({
-                name: 'party.kaveh_painted_dome',
-                serializeId: 3,
-                rotation: 'party',
-                title: 'talent_name.kaveh_painted_dome',
-                description: 'talent_descr.kaveh_painted_dome_talent_2',
-                levelSetting: 'kaveh_char_skill_burst',
-                stats: [
-                    Talents.getAlias('burst.kaveh_bloom_dmg_bonus', 'dmg_reaction_rupture'),
-                ],
-            }),
-        ],
-    },
+    retiredParty: [[1, 'number'], [2, 'checkbox'], [3, 'checkbox']],
 });

@@ -1,5 +1,6 @@
 import { ArtifactsSuggest } from "../src/js/classes/ArtifactsSuggest";
 import { CalcSet } from "../src/js/classes/CalcSet";
+import { Team } from "../src/js/classes/Team";
 import { WGSLMegaKernelCompiler } from "../src/js/classes/Feature2/WGSLCompiler";
 import { Serializer } from "../src/js/classes/Serializer";
 import { DB } from "../src/js/db/DB";
@@ -11,6 +12,7 @@ const ROTATION_BUILD = 'blDwggkkkdbcdDcDmgfbbfcBefubbedtgCgiCnkPoachfuccedveBpkM
 
 test('GPU optimizer compiles a serialized rotation objective and matches CPU evaluation on device', async () => {
     const build = CalcSet.deserialize(Serializer.unpack(ROTATION_BUILD));
+    Team.fromMember(build);
     const artifacts = Object.values(build.getArtifacts()).filter(Boolean);
     const suggester = new ArtifactsSuggest({
         build,

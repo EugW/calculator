@@ -1,5 +1,6 @@
-import { Stats } from "../Stats";
 import { Condition } from "../Condition";
+import { Stats } from "../Stats";
+import { partyView } from "../Team/Party";
 
 export class ConditionCalcElements extends Condition {
     getData(settings) {
@@ -9,19 +10,19 @@ export class ConditionCalcElements extends Condition {
         let different_chars = 0;
 
         if (this.isActive(settings)) {
-            for (const name of ['char_element', 'resonance_element_1', 'resonance_element_2', 'resonance_element_3']) {
-                const element = settings[name] || '';
+            let view = partyView(settings);
+            if (view.self.element) {
+                elements[view.self.element] = 1;
+            }
+
+            for (const member of view.others) {
+                const element = member.element;
                 if (!element) continue;
 
                 elements[element] = 1;
-
-                if (name == 'char_element') {
-                    continue;
-                }
-
                 ++different_chars;
 
-                if (settings.char_element == element) {
+                if (view.self.element == element) {
                     ++same_elements;
                 } else {
                     ++different_elements;

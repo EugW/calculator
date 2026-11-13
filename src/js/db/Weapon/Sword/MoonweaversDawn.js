@@ -2,9 +2,11 @@ import { ConditionStaticRefine } from "../../../classes/Condition/Static/Refine"
 import { DbObjectWeapon } from "../../../classes/DbObject/Weapon";
 import { StatTable } from "../../../classes/StatTable";
 import { weaponStatTables } from "../../generated/WeaponStatTables";
+import { weaponPassiveTables } from "../../generated/WeaponPassiveTables";
+import { percent } from "../../Params";
 
-const energyCapacity60Bonus = new StatTable('dmg_burst', [16, 20, 24, 28, 32]);
-const energyCapacity40Bonus = new StatTable('dmg_burst', [28, 35, 42, 49, 56]);
+const energyCapacity60Bonus = new StatTable('dmg_burst', percent(weaponPassiveTables.MoonweaversDawn.p2));
+const energyCapacity40Bonus = new StatTable('dmg_burst', percent(weaponPassiveTables.MoonweaversDawn.p3));
 
 /**
  * Extra Elemental Burst DMG from the equipping character's Energy Capacity:
@@ -51,15 +53,15 @@ export const MoonweaversDawn = new DbObjectWeapon({
             title: 'talent_name.weapon_moonweavers_dawn',
             description: 'talent_descr.weapon_moonweavers_dawn_1',
             stats: [
-                new StatTable('dmg_burst', [20, 25, 30, 35, 40]),
+                new StatTable('dmg_burst', percent(weaponPassiveTables.MoonweaversDawn.p1)),
             ],
         }),
         new ConditionMoonweaversDawnEnergy({
             title: 'talent_name.weapon_moonweavers_dawn',
             description: 'talent_descr.weapon_moonweavers_dawn_2',
             stats: [
-                new StatTable('text_percent_energy_60', [16, 20, 24, 28, 32]),
-                new StatTable('text_percent_energy_40', [28, 35, 42, 49, 56]),
+                new StatTable('text_percent_energy_60', percent(weaponPassiveTables.MoonweaversDawn.p2)),
+                new StatTable('text_percent_energy_40', percent(weaponPassiveTables.MoonweaversDawn.p3)),
             ],
         }),
     ],

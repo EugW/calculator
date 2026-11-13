@@ -3,6 +3,7 @@ import { ArtifactsSuggest } from "../src/js/classes/ArtifactsSuggest";
 import { CalcSet } from "../src/js/classes/CalcSet";
 import { Condition } from "../src/js/classes/Condition";
 import { Stats } from "../src/js/classes/Stats";
+import { deserializeWorkerMember, serializeWorkerMember, Team } from "../src/js/classes/Team";
 import { DB } from "../src/js/db/DB";
 
 global.DB = DB;
@@ -24,11 +25,14 @@ function makeBuild(teamwideSettings = {}) {
 
     build.setChar(char);
     build.setWeapon(DB.Weapons.get(char.weapon).getFirst(true));
-    build.setEnemy(DB.Enemies.getFirst().getFirst());
 
-    if (Object.keys(teamwideSettings).length) {
-        build.setBuffsSettings(teamwideSettings);
-    }
+    const wearer = new CalcSet();
+    wearer.setChar(DB.Chars.get('Kachina'));
+    wearer.setWeapon(DB.Weapons.get('polearm').getFirst(true));
+    wearer.replaceArtifacts(SLOTS.slice(0, 4).map((slot) =>
+        new Artifact(5, 20, slot, 'ScrollOfTheEmberedCitysHero', MAIN_STATS[slot], [])));
+    wearer.setArtifactsSettings(teamwideSettings);
+    Team.fromMember(build).setMember(1, wearer);
 
     return build;
 }
@@ -74,7 +78,7 @@ function makeSetSettings() {
 
 function cloneWorkerInput(build, artifacts) {
     return {
-        build: CalcSet.deserialize(build.serialize()),
+        build: deserializeWorkerMember(serializeWorkerMember(build)),
         artifacts: artifacts.map((artifact) => Artifact.deserialize(artifact.serialize())),
     };
 }
@@ -121,13 +125,13 @@ function describeArtifacts(artifacts) {
 test('Scroll of the Hero of Cinder City personal and teamwide suggester math matches UI rebuild math', () => {
     const teamwideCases = [
         {name: 'none', settings: {}},
-        {name: 'scroll_12', settings: {'set_other.scroll_of_the_hero_of_cinder_city_4_1': true}},
-        {name: 'scroll_28', settings: {'set_other.scroll_of_the_hero_of_cinder_city_4_2': true}},
+        {name: 'scroll_12', settings: {'set.scroll_of_the_hero_of_cinder_city_4_1': true}},
+        {name: 'scroll_28', settings: {'set.scroll_of_the_hero_of_cinder_city_4_2': true}},
         {
             name: 'scroll_12+28',
             settings: {
-                'set_other.scroll_of_the_hero_of_cinder_city_4_1': true,
-                'set_other.scroll_of_the_hero_of_cinder_city_4_2': true,
+                'set.scroll_of_the_hero_of_cinder_city_4_1': true,
+                'set.scroll_of_the_hero_of_cinder_city_4_2': true,
             },
         },
     ];

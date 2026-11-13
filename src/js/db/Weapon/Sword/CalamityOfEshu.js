@@ -1,8 +1,11 @@
-import { ConditionBoolean } from "../../../classes/Condition/Boolean";
+import { ConditionShielded } from "../../../classes/Condition/Field";
+import { ConditionRetired } from "../../../classes/Condition/Retired";
 import { ConditionStaticRefine } from "../../../classes/Condition/Static/Refine";
 import { DbObjectWeapon } from "../../../classes/DbObject/Weapon";
 import { StatTable } from "../../../classes/StatTable";
 import { weaponStatTables } from "../../generated/WeaponStatTables";
+import { weaponPassiveTables } from "../../generated/WeaponPassiveTables";
+import { percent } from "../../Params";
 
 export const CalamityOfEshu = new DbObjectWeapon({
     name: 'calamity_of_eshu',
@@ -12,37 +15,20 @@ export const CalamityOfEshu = new DbObjectWeapon({
     rarity: 4,
     weapon: 'sword',
     statTable: weaponStatTables.CalamityOfEshu,
-    settingsSets: [
-        {
-            name: 'no_shield',
-            settings: {
-                "common.char_status_shield": 0,
-            },
-        },
-        {
-            name: 'with_shield',
-            settings: {
-                "common.char_status_shield": 1,
-            },
-        },
-    ],
     conditions: [
-        new ConditionBoolean({
-            name: 'common.char_status_shield',
-            serializeId: 1,
-            title: 'buffs_name.resonance_geo_shield',
-        }),
+        // Shield state follows the team's on-field shield.
+        new ConditionRetired({serializeId: 1, type: 'checkbox'}),
         new ConditionStaticRefine({
             title: 'talent_name.calamity_of_eshu',
             description: 'talent_descr.calamity_of_eshu',
             stats: [
-                new StatTable('dmg_normal', [20, 25, 30, 35, 40]),
-                new StatTable('dmg_charged', [20, 25, 30, 35, 40]),
-                new StatTable('crit_rate_normal', [8, 10, 12, 14, 16]),
-                new StatTable('crit_rate_charged', [8, 10, 12, 14, 16]),
+                new StatTable('dmg_normal', percent(weaponPassiveTables.CalamityOfEshu.p1)),
+                new StatTable('dmg_charged', percent(weaponPassiveTables.CalamityOfEshu.p1)),
+                new StatTable('crit_rate_normal', percent(weaponPassiveTables.CalamityOfEshu.p2)),
+                new StatTable('crit_rate_charged', percent(weaponPassiveTables.CalamityOfEshu.p2)),
             ],
             subConditions: [
-                new ConditionBoolean({name: 'common.char_status_shield'}),
+                new ConditionShielded(),
             ],
         }),
     ],

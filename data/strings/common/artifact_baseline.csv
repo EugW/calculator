@@ -1,0 +1,19 @@
+category;name;rus;eng
+artifact_baseline;title;Исходная сборка для прогноза;Prediction baseline
+artifact_baseline;description;Прогноз сравнивает результаты с подобранной исходной сборкой. Она отличается от экипированной сборки при тех же настройках.;The prediction compares outcomes with the optimized baseline. It differs from your equipped build under the same settings.
+artifact_baseline;current;Сейчас;Current
+artifact_baseline;baseline;Исходная сборка;Baseline
+artifact_baseline;difference;Разница;Difference
+artifact_baseline;slot;Слот;Slot
+artifact_baseline;empty;Нет артефакта;Empty
+artifact_baseline;excluded;Текущая сборка исключена из поиска:;The current build is excluded from the search:
+artifact_baseline;dont_ask;Больше не спрашивать для этой сборки и настроек;Don’t ask again for this build and settings
+artifact_baseline;equip;Экипировать исходную сборку;Equip baseline build
+artifact_baseline;settings;Открыть настройки подбора;Open Suggest settings
+artifact_baseline;continue;Всё равно продолжить;Continue anyway
+artifact_baseline;off;выключено;off
+artifact_baseline;required;Не выполнено требование: {set}, {pieces} предмета.;Required set missing: {set}, {pieces} pieces.
+artifact_baseline;not_candidate;{slot}: экипированный артефакт исключён фильтрами.;{slot}: the equipped piece is excluded by the filters.
+artifact_baseline;stat_constraints;Сборка не проходит ограничения характеристик.;The build does not meet the stat constraints.
+artifact_action;action_stale_baseline;Данные исходной сборки изменились — повторите прогноз.;The baseline inputs changed — run the prediction again.
+artifact_action;action_invalid_baseline;Не удалось прочитать исходную сборку — повторите прогноз.;The baseline could not be read — run the prediction again.

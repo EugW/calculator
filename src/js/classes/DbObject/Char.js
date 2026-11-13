@@ -1,4 +1,4 @@
-import { Condition } from "../Condition";
+import { ConditionRetired } from "../Condition/Retired";
 import { DbObject } from "../DbObject";
 
 export class DbObjectChar extends DbObject {
@@ -9,7 +9,12 @@ export class DbObjectChar extends DbObject {
         this.element = data.element;
         this.weapon = data.weapon;
         this.origin = data.origin || '';
-        this.partyData = data.partyData;
+        // Serialize IDs of party conditions moved into the character's own
+        // effects, as [id, type]. Old party data (format 1 links, saved
+        // builds) still decodes; the values are dropped.
+        this.retiredParty = (data.retiredParty || []).map(([serializeId, type]) => {
+            return new ConditionRetired({serializeId, type});
+        });
         this.talents = data.talents;
         this.gameId = [];
         this.depotIds = data.depotIds || [];
@@ -22,11 +27,6 @@ export class DbObjectChar extends DbObject {
             this.gameId = [data.gameId];
         }
 
-        if (this.partyData && Array.isArray(this.partyData.conditions) && data.serializeId) {
-            for (let cond of this.partyData.conditions) {
-                cond.entityId = data.serializeId;
-            }
-        }
     }
 
     getName() {
@@ -53,10 +53,6 @@ export class DbObjectChar extends DbObject {
         return this.origin;
     }
 
-    hasPartyData() {
-        return !!this.partyData;
-    }
-
     getAllConditions() {
         let result = this.getConditions();
 
@@ -67,37 +63,8 @@ export class DbObjectChar extends DbObject {
         return result;
     }
 
-    isLoadParty() {
-        return this.partyData && this.partyData.loadStats;
-    }
-
-    getPartyConditions() {
-        let burst = this.talents.get('burst.energy_cost');
-        let result = [];
-
-        if (burst) {
-            result.push(
-                new Condition({stats: {party_burst_energy_cost: burst.getValue(1)}}),
-            );
-        }
-
-        if (this.partyData && this.partyData.conditions) {
-            result = result.concat(this.partyData.conditions);
-        }
-
-        return result;
-    }
-
-    getPartyPostEffects() {
-        return this.partyData && this.partyData.postEffects || [];
-    }
-
-    getPartyFeatures() {
-        return this.partyData && this.partyData.features || [];
-    }
-
-    getPartyMultipliers() {
-        return this.partyData && this.partyData.multipliers || [];
+    getLegacyPartyConditions() {
+        return this.retiredParty;
     }
 
     getTalentTable(name) {

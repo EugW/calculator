@@ -1,8 +1,8 @@
+// The database joins this worker's module graph; see webpack.config.js.
+import "../db";
 import { Artifact } from "../classes/Artifact";
 import { ArtifactsSuggest } from "../classes/ArtifactsSuggest";
-import { CalcSet } from "../classes/CalcSet";
-
-importScripts('db.js?'+ __VERSION__);
+import { deserializeWorkerMember } from "../classes/Team";
 
 self.onmessage = async function(input) {
     try {
@@ -12,7 +12,7 @@ self.onmessage = async function(input) {
         }
 
         let suggester = new ArtifactsSuggest({
-            build: CalcSet.deserialize(input.data.calcset),
+            build: deserializeWorkerMember(input.data.calcset),
             artifacts: artifactsList,
             featureName: input.data.feature,
             featureType: input.data.featureType,

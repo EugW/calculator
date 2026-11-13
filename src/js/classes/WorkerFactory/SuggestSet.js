@@ -1,4 +1,5 @@
 import { WorkerFactory } from "../WorkerFactory";
+import { serializeWorkerMember } from "../Team";
 
 export class WorkerFactorySuggestSet extends WorkerFactory {
     createWorker() {
@@ -16,7 +17,7 @@ export class WorkerFactorySuggestSet extends WorkerFactory {
     }
 
     getWorkersPayload(data) {
-        data.calcset = data.calcset.serialize();
+        data.calcset = serializeWorkerMember(data.calcset);
         return [data];
     }
 }

@@ -1,4 +1,5 @@
 import { Stats } from "../../Stats";
+import { teamElements } from "../../Team/Party";
 import { ConditionBoolean } from "../Boolean";
 
 const samplersElements = ['pyro', 'cryo', 'electro', 'hydro'];
@@ -38,10 +39,7 @@ export class ConditionBooleanXilonen extends ConditionBoolean {
     getSamplers(settings) {
         let result = [];
 
-        for (const name of ['char_element', 'resonance_element_1', 'resonance_element_2', 'resonance_element_3']) {
-            const element = settings[name] || '';
-            if (!element) continue;
-
+        for (const element of teamElements(settings)) {
             if (samplersElements.includes(element)) {
                 result.push(element);
             }

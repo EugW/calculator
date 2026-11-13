@@ -3,6 +3,8 @@ import { ConditionStaticRefine } from "../../../classes/Condition/Static/Refine"
 import { DbObjectWeapon } from "../../../classes/DbObject/Weapon";
 import { StatTable } from "../../../classes/StatTable";
 import { weaponStatTables } from "../../generated/WeaponStatTables";
+import { weaponPassiveTables } from "../../generated/WeaponPassiveTables";
+import { percent } from "../../Params";
 
 export const VividNotions = new DbObjectWeapon({
     name: 'vivid_notions',
@@ -17,15 +19,15 @@ export const VividNotions = new DbObjectWeapon({
             title: 'talent_name.weapon_vivid_notions',
             description: 'talent_descr.weapon_vivid_notions_1',
             stats: [
-                new StatTable('atk_percent', [28, 35, 42, 49, 56]),
+                new StatTable('atk_percent', weaponPassiveTables.VividNotions.atk_percent),
             ],
         }),
         new ConditionStaticRefine({
             title: 'talent_name.weapon_vivid_notions',
             description: 'talent_descr.weapon_vivid_notions_2',
             stats: [
-                new StatTable('text_percent_1', [28, 35, 42, 49, 56]),
-                new StatTable('text_percent_2', [40, 50, 60, 70, 80]),
+                new StatTable('text_percent_1', percent(weaponPassiveTables.VividNotions.p3)),
+                new StatTable('text_percent_2', percent(weaponPassiveTables.VividNotions.p4)),
             ],
         }),
         new ConditionBooleanRefine({
@@ -34,7 +36,7 @@ export const VividNotions = new DbObjectWeapon({
             title: 'talent_name.weapon_vivid_notions_3_1',
             description: 'talent_descr.weapon_vivid_notions_3',
             stats: [
-                new StatTable('crit_dmg_plunge', [28, 35, 42, 49, 56]),
+                new StatTable('crit_dmg_plunge', percent(weaponPassiveTables.VividNotions.p3)),
             ],
         }),
         new ConditionBooleanRefine({
@@ -43,7 +45,7 @@ export const VividNotions = new DbObjectWeapon({
             title: 'talent_name.weapon_vivid_notions_3_2',
             description: 'talent_descr.weapon_vivid_notions_3',
             stats: [
-                new StatTable('crit_dmg_plunge', [40, 50, 60, 70, 80]),
+                new StatTable('crit_dmg_plunge', percent(weaponPassiveTables.VividNotions.p4)),
             ],
         }),
     ],

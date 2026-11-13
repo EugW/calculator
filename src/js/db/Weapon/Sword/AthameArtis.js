@@ -1,10 +1,16 @@
 import { ConditionAnd } from "../../../classes/Condition/And";
+import { ConditionBoolean } from "../../../classes/Condition/Boolean";
+import { ConditionOnField } from "../../../classes/Condition/Field";
 import { ConditionBooleanRefine } from "../../../classes/Condition/Boolean/Refine";
 import { ConditionHexereiResonance } from "../../../classes/Condition/HexereiResonance";
+import { ConditionReceiver } from "../../../classes/Condition/Receiver";
 import { ConditionStaticRefine } from "../../../classes/Condition/Static/Refine";
 import { DbObjectWeapon } from "../../../classes/DbObject/Weapon";
 import { StatTable } from "../../../classes/StatTable";
+import { RECEIVERS } from "../../../classes/Team/Receivers";
 import { weaponStatTables } from "../../generated/WeaponStatTables";
+import { weaponPassiveTables } from "../../generated/WeaponPassiveTables";
+import { percent, times } from "../../Params";
 
 export const AthameArtis = new DbObjectWeapon({
     name: 'athame_artis',
@@ -19,7 +25,7 @@ export const AthameArtis = new DbObjectWeapon({
             title: 'talent_name.weapon_athame_artis',
             description: 'talent_descr.weapon_athame_artis_1',
             stats: [
-                new StatTable('crit_dmg_burst', [16, 20, 24, 28, 32]),
+                new StatTable('crit_dmg_burst', percent(weaponPassiveTables.AthameArtis.p1)),
             ],
         }),
         new ConditionBooleanRefine({
@@ -28,45 +34,48 @@ export const AthameArtis = new DbObjectWeapon({
             title: 'talent_name.weapon_athame_artis',
             description: 'talent_descr.weapon_athame_artis_2',
             stats: [
-                new StatTable('atk_percent', [20, 25, 30, 35, 40]),
-                new StatTable('text_percent_atk', [20, 25, 30, 35, 40]),
-                new StatTable('text_percent_atk_party', [16, 20, 24, 28, 32]),
+                new StatTable('atk_percent', percent(weaponPassiveTables.AthameArtis.p3)),
+                new StatTable('text_percent_atk', percent(weaponPassiveTables.AthameArtis.p3)),
+                new StatTable('text_percent_atk_party', percent(weaponPassiveTables.AthameArtis.p4)),
             ],
         }),
         // Hexerei: 75% amplification to ATK buffs - hidden, auto-applies with Hexerei resonance
         new ConditionStaticRefine({
             isHidden: true,
             stats: [
-                new StatTable('atk_percent', [15, 18.75, 22.5, 26.25, 30]), // 75% of base ATK buff
+                new StatTable('atk_percent', percent(times(weaponPassiveTables.AthameArtis.p3, weaponPassiveTables.AthameArtis.p5))), // share of the base ATK buff
             ],
             condition: new ConditionAnd([
                 new ConditionBooleanRefine({name: 'weapon_athame_artis'}),
                 new ConditionHexereiResonance({}),
             ]),
         }),
-    ],
-    partyConditions: [
-        // Party ATK buff (Day King's Splendor Solis)
-        new ConditionBooleanRefine({
-            name: 'weapon_athame_artis_party',
-            serializeId: 1,
-            title: 'weapon_name.athame_artis',
-            description: 'talent_descr.weapon_athame_artis_2',
+        // Nearby active party members other than the equipping character.
+        // The old party condition excluded another copy of this party buff.
+        new ConditionStaticRefine({
+            isHidden: true,
+            receivers: RECEIVERS.OTHERS,
+            stack: 'athame_artis',
             stats: [
-                new StatTable('atk_percent', [16, 20, 24, 28, 32]),
-                new StatTable('text_percent_atk', [20, 25, 30, 35, 40]),
-                new StatTable('text_percent_atk_party', [16, 20, 24, 28, 32]),
+                new StatTable('atk_percent', percent(weaponPassiveTables.AthameArtis.p4)),
             ],
+            condition: new ConditionAnd([
+                new ConditionBoolean({name: 'weapon_athame_artis'}),
+                new ConditionReceiver({condition: new ConditionOnField()}),
+            ]),
         }),
         // Party Hexerei: 75% amplification - hidden, auto-applies with Hexerei resonance
         new ConditionStaticRefine({
             isHidden: true,
+            receivers: RECEIVERS.OTHERS,
+            stack: 'athame_artis',
             stats: [
-                new StatTable('atk_percent', [12, 15, 18, 21, 24]), // 75% of party ATK buff
+                new StatTable('atk_percent', percent(times(weaponPassiveTables.AthameArtis.p4, weaponPassiveTables.AthameArtis.p5))), // share of the party ATK buff
             ],
             condition: new ConditionAnd([
-                new ConditionBooleanRefine({name: 'weapon_athame_artis_party'}),
+                new ConditionBoolean({name: 'weapon_athame_artis'}),
                 new ConditionHexereiResonance({}),
+                new ConditionReceiver({condition: new ConditionOnField()}),
             ]),
         }),
     ],

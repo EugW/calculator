@@ -95,6 +95,11 @@ export class WeaponView extends React.Component {
     }
 
     render() {
+        // Embedded in the Build tab: content only, the Build tab owns the header.
+        if (this.props.embedded) {
+            return this.tabContent();
+        }
+
         return (
             <ReactTab
                 title={this.strings.title}
@@ -125,6 +130,7 @@ export class WeaponView extends React.Component {
                 </FullHeightStatic>
                 <FullHeightScrollable>
                     <ConditionList
+                        app={this.props.app}
                         addClass="last"
                         items={conditions}
                         settings={settings}

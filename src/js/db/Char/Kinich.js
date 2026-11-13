@@ -18,6 +18,7 @@ import { StatTable } from "../../classes/StatTable";
 import { ValueTable } from "../../classes/ValueTable";
 import { charTables } from "../generated/CharTables";
 import { charTalentTables } from "../generated/CharTalentTables";
+import { percent } from "../Params";
 
 const Talents = new DbObjectTalents({
     attack: {
@@ -70,11 +71,11 @@ const Talents = new DbObjectTalents({
             },
             {
                 unit: '',
-                table: new StatTable('nightsoul_points_limit', charTalentTables.Kinich.s2.p3),
+                table: new StatTable('nightsoul_points_limit', charTalentTables.Kinich.s2.p4),
             },
             {
                 unit: 'sec',
-                table: new StatTable('cd', charTalentTables.Kinich.s2.p4),
+                table: new StatTable('cd', charTalentTables.Kinich.s2.p3),
             },
         ],
     },
@@ -106,13 +107,13 @@ const Talents = new DbObjectTalents({
 });
 
 const TalentValues = {
-    A4BonusScale: 320,
-    C1MoveSpeed: 30,
-    C1CritDmg: 100,
-    C2DendroRes: -30,
-    C2SkillDmg: 100,
-    C4BurstDmg: 70,
-    C6BounceDmg: 700,
+    A4BonusScale: percent(charTalentTables.Kinich.a4.p2),
+    C1MoveSpeed: percent(charTalentTables.Kinich.c1.p1),
+    C1CritDmg: percent(charTalentTables.Kinich.c1.p3),
+    C2DendroRes: -percent(charTalentTables.Kinich.c2.p1),
+    C2SkillDmg: percent(charTalentTables.Kinich.c2.p3),
+    C4BurstDmg: percent(charTalentTables.Kinich.c4.p3),
+    C6BounceDmg: percent(charTalentTables.Kinich.c6.p1),
 };
 
 export const Kinich = new DbObjectChar({
@@ -367,19 +368,7 @@ export const Kinich = new DbObjectChar({
             ],
         },
     ]),
-    partyData: {
-        conditions: [
-            new ConditionBoolean({
-                name: 'party.kinich_tiger_beetles_palm_1',
-                serializeId: 1,
-                rotation: 'party',
-                title: 'talent_name.kinich_tiger_beetles_palm',
-                description: 'talent_descr.kinich_tiger_beetles_palm_1',
-                info: {constellation: 2},
-                stats: {
-                    enemy_res_dendro: TalentValues.C2DendroRes,
-                },
-            }),
-        ],
-    },
+    // The released 7.2 has a party row for C2's Dendro RES decrease. Here
+    // the decrease is the enemy's, for the whole team, from his own control.
+    retiredParty: [[1, 'checkbox']],
 });

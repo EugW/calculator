@@ -3,9 +3,7 @@ import { ConditionAnd } from "../../classes/Condition/And";
 import { ConditionAscensionChar } from "../../classes/Condition/Ascension/Char";
 import { ConditionBoolean } from "../../classes/Condition/Boolean";
 import { ConditionConstellation } from "../../classes/Condition/Constellation";
-import { ConditionNumber } from "../../classes/Condition/Number";
 import { ConditionNumberFurina } from "../../classes/Condition/Number/Furina";
-import { ConditionNumberTalent } from "../../classes/Condition/Number/Talent";
 import { ConditionStacks } from "../../classes/Condition/Stacks";
 import { ConditionStatic } from "../../classes/Condition/Static";
 import { DbObjectChar } from "../../classes/DbObject/Char";
@@ -23,12 +21,15 @@ import { FeatureMultiplierFurinaSkill } from "../../classes/Feature2/Multiplier/
 import { FeatureMultiplierList } from "../../classes/Feature2/Multiplier/List";
 import { FeatureMultiplierTarget } from "../../classes/Feature2/Multiplier/Target";
 import { FeaturePostEffectValue } from "../../classes/Feature2/PostEffectValue";
+import { CHANNELS } from "../../classes/PostEffect/Channels";
 import { PostEffectStats } from "../../classes/PostEffect/Stats";
 import { PostEffectStatsHP } from "../../classes/PostEffect/Stats/HP";
+import { RECEIVERS } from "../../classes/Team/Receivers";
 import { StatTable } from "../../classes/StatTable";
 import { ValueTable } from "../../classes/ValueTable";
 import { charTables } from "../generated/CharTables";
 import { charTalentTables } from "../generated/CharTalentTables";
+import { percent, times } from "../Params";
 
 const Talents = new DbObjectTalents({
     attack: {
@@ -162,17 +163,28 @@ const Talents = new DbObjectTalents({
 
 const TalentValues = {
     BurstFanfareLimit: 300,
-    C1FanfareGain: 150,
-    C1FanfareLimit: 100,
-    C2FanfareLimit: 400,
-    C2MaxHpBonus: 0.35,
-    C2MaxHpBonusCap: 140,
-    C6HpDmg1: 18,
-    C6HpDmg2: 25,
-    C6Heal: 4,
+    C1FanfareGain: charTalentTables.Furina.c1.p1,
+    C1FanfareLimit: charTalentTables.Furina.c1.p2,
+    C2FanfareLimit: charTalentTables.Furina.c2.p3,
+    C2MaxHpBonus: percent(charTalentTables.Furina.c2.p2),
+    C2MaxHpBonusCap: percent(charTalentTables.Furina.c2.p5),
+    C6HpDmg1: percent(charTalentTables.Furina.c6.p2),
+    C6HpDmg2: percent(charTalentTables.Furina.c6.p7),
+    C6Heal: percent(charTalentTables.Furina.c6.p4),
+    A1Heal: percent(charTalentTables.Furina.a1.p3),
+    A4DmgBonus: percent(charTalentTables.Furina.a4.p1),
+    A4DmgBonusPerHp: percent(times(charTalentTables.Furina.a4.p1, 0.001)),
+    A4DmgBonusMax: percent(charTalentTables.Furina.a4.p2),
+    A4HealBonus: percent(charTalentTables.Furina.a4.p3),
+    A4HealBonusMax: percent(charTalentTables.Furina.a4.p4),
 };
 
+// Burst Fanfare -> team DMG%: reads the Fanfare counter, not a stat. The
+// game (UNIQUE_Furina_ElementalBurst_AvatarChangeHP_Buff) writes it with
+// ModifyDamageMixin damagePercentageRatio, not an Actor property, so there
+// is no premod/extra channel to declare; the default (extra) is kept.
 const fanfareDmgPost = new PostEffectStats({
+    receivers: RECEIVERS.TEAM,
     from: 'furina_fanfare_stacks',
     levelSetting: 'char_skill_burst',
     maxBase: TalentValues.BurstFanfareLimit + TalentValues.C1FanfareLimit,
@@ -182,7 +194,11 @@ const fanfareDmgPost = new PostEffectStats({
     }),
 });
 
+// Burst Fanfare -> incoming healing bonus: reads the Fanfare counter, not a
+// stat. The game (same buff, Actor_HealedAddDelta) has no "Extra" healing
+// variant and healing_recv has no extra lane here; the default is kept.
 const fanfareHealingPost = new PostEffectStats({
+    receivers: RECEIVERS.TEAM,
     from: 'furina_fanfare_stacks',
     levelSetting: 'char_skill_burst',
     maxBase: TalentValues.BurstFanfareLimit + TalentValues.C1FanfareLimit,
@@ -192,11 +208,17 @@ const fanfareHealingPost = new PostEffectStats({
     }),
 });
 
+// C2 (gameplay; internal openConfig Furina_Constellation_6, verified against
+// the AvatarTalentExcelConfigData chain): Fanfare above the limit -> Max HP%.
+// The game (UNIQUE_Furina_Constellation_6_Buff) writes Actor_MaxHPRatio, i.e.
+// without "Extra": a premod (non-extra) HP% write, so premod HP readers such
+// as Key of Khaj-Nisut's EM and Furina's own A4 count it.
 const fanfareHpPost = new PostEffectStats({
     from: 'furina_fanfare_stacks',
     exceed: TalentValues.BurstFanfareLimit + TalentValues.C1FanfareLimit,
     percent: new StatTable('hp_percent', [TalentValues.C2MaxHpBonus]),
     statCap: new ValueTable([TalentValues.C2MaxHpBonusCap]),
+    writes: CHANNELS.PREMOD,
     conditions: [
         new ConditionConstellation({constellation: 2}),
     ],
@@ -427,7 +449,7 @@ export const Furina = new DbObjectChar({
                 new FeatureMultiplier({
                     scaling: 'hp*',
                     source: 'ascension1',
-                    values: new ValueTable([2]),
+                    values: new ValueTable([TalentValues.A1Heal]),
                 }),
             ],
             condition: new ConditionAscensionChar({ascension: 1}),
@@ -455,7 +477,7 @@ export const Furina = new DbObjectChar({
             description: 'talent_descr.furina_endless_waltz',
             info: {ascension: 1},
             stats: {
-                text_percent_heal: 2,
+                text_percent_heal: TalentValues.A1Heal,
             },
             subConditions: [
                 new ConditionAscensionChar({ascension: 1}),
@@ -466,10 +488,10 @@ export const Furina = new DbObjectChar({
             description: 'talent_descr.furina_unheard_confession',
             info: {ascension: 4},
             stats: {
-                text_percent_dmg: 0.7,
-                text_percent_dmg_max: 28,
-                text_percent_heal: 0.4,
-                text_percent_heal_max: 16,
+                text_percent_dmg: TalentValues.A4DmgBonus,
+                text_percent_dmg_max: TalentValues.A4DmgBonusMax,
+                text_percent_heal: TalentValues.A4HealBonus,
+                text_percent_heal_max: TalentValues.A4HealBonusMax,
             },
             subConditions: [
                 new ConditionAscensionChar({ascension: 4}),
@@ -500,9 +522,12 @@ export const Furina = new DbObjectChar({
         }),
     ],
     postEffects: [
+        // A4 Unheard Confession: the game (Furina_PermanentSkill_2_Handler)
+        // reads FIGHT_PROP_MAX_HP, the total HP, for the Salon DMG bonus.
         new PostEffectStatsHP({
-            percent: new StatTable('dmg_skill_furina', [0.0007]),
-            statCap: new StatTable('', [28]),
+            percent: new StatTable('dmg_skill_furina', [TalentValues.A4DmgBonusPerHp]),
+            statCap: new StatTable('', [TalentValues.A4DmgBonusMax]),
+            reads: CHANNELS.TOTAL,
             conditions: [
                 new ConditionAscensionChar({ascension: 4}),
             ],
@@ -586,48 +611,5 @@ export const Furina = new DbObjectChar({
             ],
         },
     ]),
-    partyData: {
-        loadStats: {
-            settings: ['char_skill_burst'],
-        },
-        conditions: [
-            new ConditionNumberTalent({
-                name: 'furina_char_skill_burst',
-                title: 'talent_name.stats_level_burst',
-                partySetting: 'char_skill_burst',
-                serializeId: 1,
-            }),
-            new ConditionNumber({
-                name: 'party_furina_fanfare_stacks',
-                serializeId: 2,
-                rotation: 'party',
-                title: 'talent_name.furina_fanfare_stacks',
-                max: TalentValues.BurstFanfareLimit + TalentValues.C1FanfareLimit,
-                countable: true,
-            }),
-            new ConditionBoolean({
-                name: 'party.furina_constellation_3',
-                serializeId: 3,
-                title: 'talent_name.furina_my_secret_is_hidden_within_me_no_one_will_know_my_name',
-                description: 'talent_descr.char_constellation_burst',
-                info: {constellation: 3},
-                settings: {
-                    furina_char_skill_burst_bonus: 3,
-                },
-            }),
-        ],
-        postEffects: [
-            new PostEffectStats({
-                from: 'party_furina_fanfare_stacks',
-                maxBase: TalentValues.BurstFanfareLimit + TalentValues.C1FanfareLimit,
-                levelSetting: 'furina_char_skill_burst',
-                maxLevelSetting: 10,
-                percent: [
-                    Talents.getAlias('burst.furina_fanfare_dmg_ratio', 'dmg_all'),
-                    Talents.getAlias('burst.furina_fanfare_heal_ratio', 'healing_recv'),
-                ],
-                condition: new ConditionBoolean({'name': 'party_furina_fanfare_stacks'}),
-            }),
-        ],
-    },
+    retiredParty: [[1, 'number'], [2, 'number'], [3, 'checkbox']],
 });

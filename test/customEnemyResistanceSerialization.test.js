@@ -1,5 +1,6 @@
 import { CalcObjectEnemy } from "../src/js/classes/CalcObject/Enemy";
 import { CalcSet } from "../src/js/classes/CalcSet";
+import { Team } from "../src/js/classes/Team";
 import { Serializer } from "../src/js/classes/Serializer";
 import { DB } from "../src/js/db/DB";
 
@@ -16,9 +17,10 @@ function makeBuild() {
 }
 
 test("custom enemy resistances below -200 survive packed hash reload", () => {
-    const build = makeBuild();
+    const team = Team.fromMember(makeBuild());
+    team.enemy.set(null);
 
-    build.setEnemyResistances({
+    team.enemy.setResistances({
         phys: -250,
         anemo: -275,
         cryo: -300,
@@ -29,9 +31,9 @@ test("custom enemy resistances below -200 survive packed hash reload", () => {
         dendro: -290,
     });
 
-    const clone = CalcSet.deserialize(Serializer.unpack(build.getHash()));
+    const clone = Team.deserialize(Serializer.unpack(Serializer.pack(team)));
 
-    expect(clone.getEnemy().getResistances()).toEqual({
+    expect(clone.enemy.getResistances()).toEqual({
         phys: -250,
         anemo: -275,
         cryo: -300,

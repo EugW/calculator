@@ -1,4 +1,5 @@
 import { BuildData } from "../../Build/Data";
+import { teammateElements } from "../../Team/Party";
 import { FeatureMultiplier } from "../Multiplier";
 
 export class FeatureMultiplierVarkaA1 extends FeatureMultiplier {
@@ -19,8 +20,7 @@ export class FeatureMultiplierVarkaA1 extends FeatureMultiplier {
                 anemo: 1, // Varka himself
             };
 
-            for (const name of ['resonance_element_1', 'resonance_element_2', 'resonance_element_3']) {
-                const element = data.settings[name] || '';
+            for (const element of teammateElements(data.settings)) {
                 if (counts[element] !== undefined) {
                     counts[element]++;
                 }

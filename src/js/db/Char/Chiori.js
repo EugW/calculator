@@ -20,6 +20,7 @@ import { StatTable } from "../../classes/StatTable";
 import { ValueTable } from "../../classes/ValueTable";
 import { charTables } from "../generated/CharTables";
 import { charTalentTables } from "../generated/CharTalentTables";
+import { percent } from "../Params";
 
 const Talents = new DbObjectTalents({
     attack: {
@@ -137,9 +138,10 @@ const Talents = new DbObjectTalents({
 });
 
 const TalentValues = {
-    A1Damage: 100,
-    C2DamageRatio: 170,
-    C6DefScale: 235,
+    A1Damage: percent(charTalentTables.Chiori.a1.p1),
+    C2DamageRatio: percent(charTalentTables.Chiori.c2.p3),
+    C6DefScale: percent(charTalentTables.Chiori.c6.p2),
+    A4GeoDmg: percent(charTalentTables.Chiori.a4.p1),
 };
 
 export const Chiori = new DbObjectChar({
@@ -386,7 +388,7 @@ export const Chiori = new DbObjectChar({
             description: 'talent_descr.chiori_the_finishing_touch',
             info: {ascension: 4},
             stats: {
-                dmg_geo: 20,
+                dmg_geo: TalentValues.A4GeoDmg,
             },
             subConditions: [
                 new ConditionAscensionChar({ascension: 4}),

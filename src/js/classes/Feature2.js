@@ -12,7 +12,7 @@ const FIELD_NAMES = process.env.NODE_ENV !== 'production' ? [
     'damageBonuses', 'critRateBonuses', 'critDamageBonuses', 'reactionBonuses',
     'subtractBoL', 'partyHeal', 'noSelfHeal',
     'rotationHitCount', 'rotationHitDescription',
-    'dmgStats', 'elementSetting',
+    'dmgStats', 'elementSetting', 'receivers',
 ] : [];
 
 export class Feature2 {
@@ -39,6 +39,7 @@ export class Feature2 {
         this.rotationHitCount = params.rotationHitCount || 1;
         this.critRateBonuses = params.critRateBonuses || [];
         this.critDamageBonuses = params.critDamageBonuses || [];
+        this.receivers = params.receivers;
     }
 
     getDamageType() {
@@ -78,6 +79,22 @@ export class Feature2 {
      */
     isRotation() {
         return false;
+    }
+
+    /**
+     * @returns {boolean} whether the whole team deals it, not one member
+     *     (Feature2/Reaction/Team)
+     */
+    isTeamHit() {
+        return false;
+    }
+
+    /**
+     * @returns {boolean} whether new rotation hits are offered it; a hit a
+     *     saved rotation has is kept either way
+     */
+    isRotationChoice() {
+        return true;
     }
 
     /**
@@ -203,14 +220,15 @@ export class Feature2 {
 
     /**
      * @param {BuildData} data
+     * @param {FeatureCompiler} [compiler] prepared for these settings; only stats may vary
      * @returns {Object}
      */
-    getResult(data) {
+    getResult(data, compiler) {
         if (!this.checkConditions(data)) {
             return {};
         }
 
-        let compiler = this.getCompiled(data);
+        compiler ||= this.getCompiled(data);
         let [normal, crit, average] = compiler.execute(data);
 
         return {
@@ -277,12 +295,17 @@ export class Feature2 {
         return tree;
     }
 
+    /**
+     * @param {MemberView|CalcSet} build
+     * @param {Object} [opts] {checkCallback}; {features} lists these features
+     *     (by name) instead of the build's
+     */
     static buildDropdown(build, opts) {
         opts = Object.assign({}, opts);
 
         let result = [];
         let buildData = build.getBuildData();
-        let features = build.getFeaturesHash(buildData, opts);
+        let features = opts.features || build.getFeaturesHash(buildData, opts);
         let tree = Feature2.getTree(features);
 
         for (let section of Object.keys(tree)) {

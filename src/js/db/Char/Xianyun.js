@@ -1,8 +1,10 @@
 import { Condition } from "../../classes/Condition";
+import { ConditionAnd } from "../../classes/Condition/And";
 import { ConditionAscensionChar } from "../../classes/Condition/Ascension/Char";
 import { ConditionBoolean } from "../../classes/Condition/Boolean";
+import { ConditionOnField } from "../../classes/Condition/Field";
 import { ConditionConstellation } from "../../classes/Condition/Constellation";
-import { ConditionNumber } from "../../classes/Condition/Number";
+import { ConditionReceiver } from "../../classes/Condition/Receiver";
 import { ConditionStacksLevels } from "../../classes/Condition/Stacks/Levels";
 import { ConditionStatic } from "../../classes/Condition/Static";
 import { DbObjectChar } from "../../classes/DbObject/Char";
@@ -19,9 +21,11 @@ import { FeatureMultiplier } from "../../classes/Feature2/Multiplier";
 import { FeatureMultiplierList } from "../../classes/Feature2/Multiplier/List";
 import { FeatureMultiplierTarget } from "../../classes/Feature2/Multiplier/Target";
 import { StatTable } from "../../classes/StatTable";
+import { RECEIVERS } from "../../classes/Team/Receivers";
 import { ValueTable } from "../../classes/ValueTable";
 import { charTables } from "../generated/CharTables";
 import { charTalentTables } from "../generated/CharTalentTables";
+import { percent, plus, times } from "../Params";
 
 
 const Talents = new DbObjectTalents({
@@ -124,6 +128,22 @@ const Talents = new DbObjectTalents({
         ],
     },
 });
+
+const A1CritRate1 = percent(charTalentTables.Xianyun.a1.p1);
+const A1CritRate2 = percent(charTalentTables.Xianyun.a1.p2);
+const A1CritRate3 = percent(charTalentTables.Xianyun.a1.p3);
+const A1CritRate4 = percent(charTalentTables.Xianyun.a1.p4);
+const A4AtkRatio = percent(charTalentTables.Xianyun.a4.p1);
+const A4AtkRatioC2 = percent(times(charTalentTables.Xianyun.a4.p1, plus(1, charTalentTables.Xianyun.c2.p3)));
+const A4DmgMax = times(charTalentTables.Xianyun.a4.p1, charTalentTables.Xianyun.a4.p2);
+const A4DmgMaxC2 = times(charTalentTables.Xianyun.a4.p1, plus(1, charTalentTables.Xianyun.c2.p3), charTalentTables.Xianyun.a4.p2);
+const C2Atk = percent(charTalentTables.Xianyun.c2.p1);
+const C4Heal1 = percent(charTalentTables.Xianyun.c4.p1);
+const C4Heal2 = percent(charTalentTables.Xianyun.c4.p2);
+const C4Heal3 = percent(charTalentTables.Xianyun.c4.p3);
+const C6CritDmg1 = percent(charTalentTables.Xianyun.c6.p1);
+const C6CritDmg2 = percent(charTalentTables.Xianyun.c6.p2);
+const C6CritDmg3 = percent(charTalentTables.Xianyun.c6.p3);
 
 export const Xianyun = new DbObjectChar({
     name: 'xianyun',
@@ -287,7 +307,7 @@ export const Xianyun = new DbObjectChar({
             multipliers: [
                 new FeatureMultiplier({
                     source: 'constellation4',
-                    values: new StatTable('xianyun_mystery_1_heal', [50]),
+                    values: new StatTable('xianyun_mystery_1_heal', [C4Heal1]),
                 }),
             ],
             condition: new ConditionConstellation({constellation: 4}),
@@ -298,7 +318,7 @@ export const Xianyun = new DbObjectChar({
             multipliers: [
                 new FeatureMultiplier({
                     source: 'constellation4',
-                    values: new StatTable('xianyun_mystery_2_heal', [80]),
+                    values: new StatTable('xianyun_mystery_2_heal', [C4Heal2]),
                 }),
             ],
             condition: new ConditionConstellation({constellation: 4}),
@@ -309,19 +329,29 @@ export const Xianyun = new DbObjectChar({
             multipliers: [
                 new FeatureMultiplier({
                     source: 'constellation4',
-                    values: new StatTable('xianyun_mystery_3_heal', [150]),
+                    values: new StatTable('xianyun_mystery_3_heal', [C4Heal3]),
                 }),
             ],
             condition: new ConditionConstellation({constellation: 4}),
         }),
     ],
     multipliers: [
+        // Consider, the Adeptus in Her Realm raises nearby active
+        // characters' Plunging Attack shockwave DMG from Xianyun's live ATK.
+        // The burst talent level and the C2 second level come from the source.
         new FeatureMultiplier({
+            receivers: RECEIVERS.TEAM,
             leveling: 'xianyun_a4_level',
             source: 'ascension4',
-            values: new ValueTable([200, 400]),
-            capValue: new ValueTable([9000, 18000]),
-            condition: new ConditionBoolean({name: 'xianyun_consider_the_adeptus_in_her_realm'}),
+            values: new ValueTable([A4AtkRatio, A4AtkRatioC2]),
+            capValue: new ValueTable([A4DmgMax, A4DmgMaxC2]),
+            condition: new ConditionAnd([
+                new ConditionBoolean({name: 'xianyun_consider_the_adeptus_in_her_realm'}),
+                new ConditionAscensionChar({ascension: 4}),
+                new ConditionReceiver({
+                    condition: new ConditionOnField(),
+                }),
+            ]),
             target: new FeatureMultiplierTarget({
                 tags: ['plunge_shockwave'],
             }),
@@ -331,16 +361,18 @@ export const Xianyun = new DbObjectChar({
         new ConditionStacksLevels({
             name: 'xianyun_galefeather_pursuit',
             serializeId: 1,
+            // Storm Pinion reaches all nearby party members.
+            receivers: RECEIVERS.TEAM,
             title: 'talent_name.xianyun_galefeather_pursuit',
             description: 'talent_descr.xianyun_galefeather_pursuit',
             maxStacks: 4,
             stats: [
-                new StatTable('text_percent_1', [4]),
-                new StatTable('text_percent_2', [6]),
-                new StatTable('text_percent_3', [8]),
-                new StatTable('text_percent_4', [10]),
+                new StatTable('text_percent_1', [A1CritRate1]),
+                new StatTable('text_percent_2', [A1CritRate2]),
+                new StatTable('text_percent_3', [A1CritRate3]),
+                new StatTable('text_percent_4', [A1CritRate4]),
             ],
-            realStats: new StatTable('crit_rate_plunge', [4, 6, 8, 10]),
+            realStats: new StatTable('crit_rate_plunge', [A1CritRate1, A1CritRate2, A1CritRate3, A1CritRate4]),
             info: {ascension: 1},
             subConditions: [
                 new ConditionAscensionChar({ascension: 1}),
@@ -352,8 +384,8 @@ export const Xianyun = new DbObjectChar({
             title: 'talent_name.xianyun_consider_the_adeptus_in_her_realm',
             description: 'talent_descr.xianyun_consider_the_adeptus_in_her_realm',
             stats: {
-                text_percent_atk: 200,
-                text_value_max: 9000,
+                text_percent_atk: A4AtkRatio,
+                text_value_max: A4DmgMax,
             },
             info: {ascension: 4},
             subConditions: [
@@ -378,15 +410,15 @@ export const Xianyun = new DbObjectChar({
                     title: 'talent_name.xianyun_aloof_from_the_world',
                     description: 'talent_descr.xianyun_aloof_from_the_world_1',
                     stats: {
-                        atk_percent: 20,
+                        atk_percent: C2Atk,
                     },
                 }),
                 new ConditionStatic({
                     title: 'talent_name.xianyun_aloof_from_the_world',
                     description: 'talent_descr.xianyun_aloof_from_the_world_2',
                     stats: {
-                        text_percent_atk: 400,
-                        text_value_max: 18000,
+                        text_percent_atk: A4AtkRatioC2,
+                        text_value_max: A4DmgMaxC2,
                     },
                     settings: {
                         xianyun_a4_level: 2,
@@ -409,9 +441,9 @@ export const Xianyun = new DbObjectChar({
                     title: 'talent_name.xianyun_mystery_millet_gourmet',
                     description: 'talent_descr.xianyun_mystery_millet_gourmet',
                     stats: {
-                        text_percent_1: 50,
-                        text_percent_2: 80,
-                        text_percent_3: 150,
+                        text_percent_1: C4Heal1,
+                        text_percent_2: C4Heal2,
+                        text_percent_3: C4Heal3,
                     },
                 }),
             ],
@@ -434,82 +466,14 @@ export const Xianyun = new DbObjectChar({
                     description: 'talent_descr.xianyun_they_call_her_cloud_retainer',
                     maxStacks: 3,
                     stats: [
-                        new StatTable('text_percent_1', [15]),
-                        new StatTable('text_percent_2', [35]),
-                        new StatTable('text_percent_3', [70]),
+                        new StatTable('text_percent_1', [C6CritDmg1]),
+                        new StatTable('text_percent_2', [C6CritDmg2]),
+                        new StatTable('text_percent_3', [C6CritDmg3]),
                     ],
-                    realStats: new StatTable('crit_dmg_xianyun', [15, 35, 70]),
+                    realStats: new StatTable('crit_dmg_xianyun', [C6CritDmg1, C6CritDmg2, C6CritDmg3]),
                 }),
             ],
         },
     ]),
-    partyData: {
-        loadStats: {
-            stats: ['atk_total'],
-        },
-        conditions: [
-            new ConditionNumber({
-                name: 'xianyun_atk_total',
-                title: 'talent_name.stats_total_atk',
-                partyStat: 'atk_total',
-                serializeId: 1,
-                rotation: 'party',
-                max: 10000,
-            }),
-            new ConditionStacksLevels({
-                name: 'party.xianyun_galefeather_pursuit',
-                serializeId: 2,
-                title: 'talent_name.xianyun_galefeather_pursuit',
-                description: 'talent_descr.xianyun_galefeather_pursuit',
-                maxStacks: 4,
-                stats: [
-                    new StatTable('text_percent_1', [4]),
-                    new StatTable('text_percent_2', [6]),
-                    new StatTable('text_percent_3', [8]),
-                    new StatTable('text_percent_4', [10]),
-                ],
-                realStats: new StatTable('crit_rate_plunge', [4, 6, 8, 10]),
-                info: {ascension: 1},
-            }),
-            new ConditionBoolean({
-                name: 'party.xianyun_consider_the_adeptus_in_her_realm',
-                serializeId: 3,
-                title: 'talent_name.xianyun_consider_the_adeptus_in_her_realm',
-                description: 'talent_descr.xianyun_consider_the_adeptus_in_her_realm',
-                stats: {
-                    text_percent_atk: 200,
-                    text_value_max: 9000,
-                },
-                rotation: 'party',
-                info: {ascension: 4},
-            }),
-            new ConditionBoolean({
-                name: 'party.xianyun_aloof_from_the_world',
-                serializeId: 4,
-                title: 'talent_name.xianyun_aloof_from_the_world',
-                description: 'talent_descr.xianyun_aloof_from_the_world_2',
-                info: {constellation: 2},
-                stats: {
-                    text_percent_atk: 400,
-                    text_value_max: 18000,
-                },
-                settings: {
-                    xianyun_a4_level_party: 2,
-                },
-            }),
-        ],
-        multipliers: [
-            new FeatureMultiplier({
-                scaling: 'xianyun_atk_total',
-                leveling: 'xianyun_a4_level_party',
-                source: 'xianyun',
-                values: new ValueTable([200, 400]),
-                capValue: new ValueTable([9000, 18000]),
-                condition: new ConditionBoolean({name: 'party.xianyun_consider_the_adeptus_in_her_realm'}),
-                target: new FeatureMultiplierTarget({
-                    tags: ['plunge_shockwave'],
-                }),
-            }),
-        ],
-    },
+    retiredParty: [[1, 'number'], [2, 'stacks'], [3, 'checkbox'], [4, 'checkbox']],
 });

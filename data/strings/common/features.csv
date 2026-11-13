@@ -137,7 +137,8 @@ feature_rotation;reaction;Трансформ. реакции;Transform. Reaction
 feature_rotation;lunarreaction;Лунные реакции;Lunar Reactions
 feature_rotation;lunardirect;Лунный урон;Direct Lunar DMG
 feature_rotation;skill;Элемент. навык;Elemental Skill
-feature_rotation;total;Урона всего;Total DMG
+feature_rotation;total;Урон команды;Team DMG
+feature_rotation_self;total;Урона всего;Total DMG
 feature_rotation;heal_total;Лечения всего;Total Healing
 feature_rotation;heal_total_self;Лечение персонажа;Self healing
 feature_rotation;heal_total_party;Лечения членов отряда;Party members healing
@@ -146,6 +147,7 @@ feature_section;burst;Взрыв стихий;Elemental Burst
 feature_section;other;Прочее;Other
 feature_section;reaction;Элементальные реакции;Elemental Reactions
 feature_section;rotation;Ротация;Rotation
+feature_section;rotation_self;Ротация: текущий персонаж;Rotation: current character
 feature_section;select_feature;Выберите показатель;Select feature
 feature_section;select_feature_info;Сравнить другой показатель;Compare other feature
 feature_section;skill;Элементальный навык;Elemental Skill

@@ -1,6 +1,7 @@
 import { Artifact } from "../src/js/classes/Artifact";
 import { ArtifactsSuggest } from "../src/js/classes/ArtifactsSuggest";
 import { CalcSet } from "../src/js/classes/CalcSet";
+import { Team } from "../src/js/classes/Team";
 import { CPostEffect } from "../src/js/classes/Feature2/Compile/Types/Block";
 import { CStat } from "../src/js/classes/Feature2/Compile/Types/Item";
 import { WGSLMegaKernelCompiler } from "../src/js/classes/Feature2/WGSLCompiler";
@@ -138,7 +139,7 @@ test('WGSL constraint dispatch uses the same indices as objective dispatch', () 
 test('Hu Tao active skill metadata compiles HP-dependent ATK constraint adjustment', () => {
     const build = new CalcSet();
     build.setChar(DB.Chars.get('Hutao'));
-    build.setEnemy(DB.Enemies.getFirst().getFirst());
+    Team.fromMember(build);
     build.setCharSettings({hutao_paramita_papilio: true});
 
     const mainStats = {

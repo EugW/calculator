@@ -1,6 +1,7 @@
 import { BuildSettings } from "../src/js/classes/Build/Settings";
 import { CalcObject } from "../src/js/classes/CalcObject";
 import { CalcSet } from "../src/js/classes/CalcSet";
+import { Team } from "../src/js/classes/Team";
 import {
     ConditionRadianceStellarGlimmer,
     RADIANCE_STELLARCONDUCT,
@@ -160,48 +161,8 @@ test.each([
     expect(swirl.checkSubconditions({[selfConductName]: true})).toBe(false);
 });
 
-test.each([
-    [
-        'Odette',
-        Odette,
-        'party.odette_radiance_stellarconduct',
-        'party.odette_radiance_stellarswirl',
-        true,
-    ],
-    [
-        'Diona',
-        Diona,
-        'party.diona_cats_tail_radiance_stellarconduct',
-        'party.diona_cats_tail_radiance_stellarswirl',
-        false,
-    ],
-    [
-        'Qiqi',
-        Qiqi,
-        'party.qiqi_herald_of_frost_radiance_stellarconduct',
-        'party.qiqi_herald_of_frost_radiance_stellarswirl',
-        false,
-    ],
-])('%s party Radiance controls use Conduct-priority red-cross gates', (
-    characterName,
-    character,
-    partyConductName,
-    partySwirlName,
-    requiresPolestar,
-) => {
-    const conditions = character.getPartyConditions();
-    const conduct = getNamedCondition(conditions, partyConductName);
-    const swirl = getNamedCondition(conditions, partySwirlName);
-    const baseSettings = requiresPolestar ? {polestar_field: true} : {};
-
-    expect(conduct.checkSubconditions(baseSettings)).toBe(true);
-    expect(conduct.checkSubconditions({
-        ...baseSettings,
-        [partySwirlName]: true,
-    })).toBe(true);
-    expect(swirl.checkSubconditions({})).toBe(true);
-    expect(swirl.checkSubconditions({[partyConductName]: true})).toBe(false);
-});
+// Party Radiance controls retired: Odette and Qiqi now use the source controls
+// checked above; actual team delivery and save/load are covered in the batch delivery tests.
 
 test.each([
     ['Mizuki', Mizuki, 'mizuki_radiance_stellarswirl'],
@@ -220,7 +181,7 @@ test.each([
 test.each([
     ['Mizuki', 'mizuki_radiance_stellarswirl'],
     ['Vesna', 'vesna_radiance_stellarswirl'],
-])('%s Swirl state stays cleared after Polestar Field is turned off', (
+])('%s Swirl is off while Polestar Field is on, and back after it is turned off', (
     character,
     selfSwirlName,
 ) => {
@@ -229,43 +190,48 @@ test.each([
 
     try {
         const calc = new CalcSet();
+        calc.setChar(DB.Chars.get(character));
+        const team = Team.fromMember(calc);
 
         calc.setCharSettings({[selfSwirlName]: true});
-        calc.modifyBuffsSettings({polestar_field: true});
-        expect(calc.char.getSettings()[selfSwirlName]).toBe(false);
+        team.modifySettings({polestar_field: true});
+        // The member's own setting is kept; evaluations see it off.
+        expect(calc.char.getSettings()[selfSwirlName]).toBe(true);
+        expect(calc.getBuildData().settings[selfSwirlName]).toBe(false);
 
-        calc.modifyBuffsSettings({polestar_field: false});
-        expect(calc.char.getSettings()[selfSwirlName]).toBe(false);
+        team.modifySettings({polestar_field: false});
+        expect(calc.getBuildData().settings[selfSwirlName]).toBe(true);
     } finally {
         global.DB = previousDB;
     }
 });
 
-test('rotation-style addSettings updates cannot restore a Polestar-blocked Swirl state', () => {
+test('a Swirl state added while Polestar Field is on is off until Polestar Field is turned off', () => {
     const previousDB = global.DB;
     global.DB = DB;
 
     try {
         const calc = new CalcSet();
+        calc.setChar(DB.Chars.get('Mizuki'));
+        const team = Team.fromMember(calc);
         const swirlSettings = {
             mizuki_radiance_stellarswirl: true,
             vesna_radiance_stellarswirl: true,
         };
 
+        // A rotation step adds the Swirl states while the team's Polestar
+        // Field is on.
+        team.modifySettings({polestar_field: true});
         calc.char.addSettings(swirlSettings);
-        calc.buffs.addSettings({polestar_field: true});
         calc.normalizeRadianceStellarGlimmerSettings();
-        expect(calc.char.getSettings()).toMatchObject({
+        expect(calc.getBuildData().settings).toMatchObject({
             mizuki_radiance_stellarswirl: false,
             vesna_radiance_stellarswirl: false,
         });
 
-        calc.buffs.addSettings({polestar_field: false});
+        team.modifySettings({polestar_field: false});
         calc.normalizeRadianceStellarGlimmerSettings();
-        expect(calc.char.getSettings()).toMatchObject({
-            mizuki_radiance_stellarswirl: false,
-            vesna_radiance_stellarswirl: false,
-        });
+        expect(calc.getBuildData().settings).toMatchObject(swirlSettings);
     } finally {
         global.DB = previousDB;
     }

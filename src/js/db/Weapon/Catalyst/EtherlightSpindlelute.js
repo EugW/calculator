@@ -2,6 +2,7 @@ import { ConditionBooleanRefine } from "../../../classes/Condition/Boolean/Refin
 import { DbObjectWeapon } from "../../../classes/DbObject/Weapon";
 import { StatTable } from "../../../classes/StatTable";
 import { weaponStatTables } from "../../generated/WeaponStatTables";
+import { weaponPassiveTables } from "../../generated/WeaponPassiveTables";
 
 export const EtherlightSpindlelute = new DbObjectWeapon({
     name: 'etherlight_spindlelute',
@@ -18,7 +19,7 @@ export const EtherlightSpindlelute = new DbObjectWeapon({
             title: 'talent_name.weapon_etherlight_spindlelute',
             description: 'talent_descr.weapon_etherlight_spindlelute',
             stats: [
-                new StatTable('mastery', [100, 125, 150, 175, 200]),
+                new StatTable('mastery', weaponPassiveTables.EtherlightSpindlelute.p1),
             ],
         }),
     ],

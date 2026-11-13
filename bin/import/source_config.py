@@ -49,6 +49,10 @@ class DataSource:
     def text_map_dir(self) -> Path:
         return self.root / 'TextMap'
 
+    @property
+    def bin_output_dir(self) -> Path:
+        return self.root / 'BinOutput'
+
 
 _cached_source: DataSource | None = None
 
@@ -170,6 +174,15 @@ def excel_path(filename: str) -> Path:
     path = get_excel_dir() / filename
     if not path.is_file():
         raise DataSourceError(f'Required Excel table is missing: {path}')
+    return path
+
+
+def bin_output_path(*parts: str) -> Path:
+    """A file or directory under BinOutput (ability and talent configs)."""
+
+    path = get_data_source().bin_output_dir.joinpath(*parts)
+    if not path.exists():
+        raise DataSourceError(f'Required BinOutput path is missing: {path}')
     return path
 
 

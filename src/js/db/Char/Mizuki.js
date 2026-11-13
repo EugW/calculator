@@ -2,9 +2,8 @@ import { Condition } from "../../classes/Condition";
 import { ConditionAnd } from "../../classes/Condition/And";
 import { ConditionAscensionChar } from "../../classes/Condition/Ascension/Char";
 import { ConditionBoolean } from "../../classes/Condition/Boolean";
+import { ConditionTeam } from "../../classes/Condition/Team";
 import { ConditionConstellation } from "../../classes/Condition/Constellation";
-import { ConditionNumber } from "../../classes/Condition/Number";
-import { ConditionNumberTalent } from "../../classes/Condition/Number/Talent";
 import { ConditionNot } from "../../classes/Condition/Not";
 import { ConditionRadianceStellarGlimmer, RADIANCE_STELLARSWIRL } from "../../classes/Condition/RadianceStellarGlimmer";
 import { ConditionStatic } from "../../classes/Condition/Static";
@@ -24,12 +23,14 @@ import { FeatureMultiplier } from "../../classes/Feature2/Multiplier";
 import { FeatureMultiplierList } from "../../classes/Feature2/Multiplier/List";
 import { FeatureMultiplierTarget } from "../../classes/Feature2/Multiplier/Target";
 import { FeaturePostEffectValue } from "../../classes/Feature2/PostEffectValue";
-import { PostEffectStats } from "../../classes/PostEffect/Stats";
+import { CHANNELS } from "../../classes/PostEffect/Channels";
 import { PostEffectStatsMastery } from "../../classes/PostEffect/Stats/Mastery";
 import { StatTable } from "../../classes/StatTable";
 import { ValueTable } from "../../classes/ValueTable";
+import { RECEIVERS } from "../../classes/Team/Receivers";
 import { charTables } from "../generated/CharTables";
 import { charTalentTables } from "../generated/CharTalentTables";
+import { percent } from "../Params";
 
 const Talents = new DbObjectTalents({
     attack: {
@@ -128,25 +129,25 @@ const Talents = new DbObjectTalents({
     },
 });
 
-const A4Mastery = 100;
-const C1SwirlBonus = 1100;
-const C1StellarSwirlBonus = 550;
-const C1AnemoDmg = 1000;
-const C1StellarSwirlDmg = 400;
-const C2ElemBonus = 4;
-const C2Resistance = -20;
-const C4ExtraHeal = 266;
-const C6SwirlCritRate = 30;
+const A4Mastery = charTalentTables.Mizuki.a4.p1;
+const C1SwirlBonus = percent(charTalentTables.Mizuki.c1.p1);
+const C1StellarSwirlBonus = percent(charTalentTables.Mizuki.c1.p6);
+const C1AnemoDmg = percent(charTalentTables.Mizuki.c1.p4);
+const C1StellarSwirlDmg = percent(charTalentTables.Mizuki.c1.p5);
+const C2ElemBonus = percent(charTalentTables.Mizuki.c2.p1);
+const C2Resistance = -percent(charTalentTables.Mizuki.c2.p2);
+const C4ExtraHeal = percent(charTalentTables.Mizuki.c4.p2);
+const C6SwirlCritRate = percent(charTalentTables.Mizuki.c6.p1);
 const C6SwirlCritDmg = 100;
-const C6StellarSwirlCritRate = 10;
-const C6StellarSwirlCritDmg = 20;
-const C6CritRatePerEm = 0.04;
-const C6CritDmgPerEm = 0.16;
-const C6EmThreshold = 500;
-const C6CritRateCap = 20;
-const C6CritDmgCap = 80;
-const VastDmg = 1000;
-const VastMasteryRatio = 0.1;
+const C6StellarSwirlCritRate = percent(charTalentTables.Mizuki.c6.p7);
+const C6StellarSwirlCritDmg = percent(charTalentTables.Mizuki.c6.p8);
+const C6CritRatePerEm = percent(charTalentTables.Mizuki.c6.p3);
+const C6CritDmgPerEm = percent(charTalentTables.Mizuki.c6.p4);
+const C6EmThreshold = charTalentTables.Mizuki.c6.p2;
+const C6CritRateCap = percent(charTalentTables.Mizuki.c6.p5);
+const C6CritDmgCap = percent(charTalentTables.Mizuki.c6.p6);
+const VastDmg = percent(charTalentTables.Mizuki.sp.p1);
+const VastMasteryRatio = charTalentTables.Mizuki.sp.p3;
 
 const radianceSwirlName = 'mizuki_radiance_stellarswirl';
 
@@ -172,35 +173,47 @@ const stellarSwirlEmBonusPerPoint = Talents.getMulti({
 });
 
 const buffSwirl = new PostEffectStatsMastery({
+    receivers: RECEIVERS.TEAM,
     levelSetting: 'char_skill_elemental',
     percent: swirlEmBonusPerPoint,
+    // Game data: Avatar_Mizuki_MasteryToSwirhurt caches FIGHT_PROP_ELEMENT_MASTERY (total).
+    reads: CHANNELS.TOTAL,
     conditions: [
         new ConditionBoolean({name: 'mizuki_dreamdrifter'}),
     ],
 });
 
 const buffStellarSwirl = new PostEffectStatsMastery({
+    receivers: RECEIVERS.TEAM,
     levelSetting: 'char_skill_elemental',
     percent: stellarSwirlEmBonusPerPoint,
+    // Game data: Avatar_Mizuki_MasteryToSwirhurt caches FIGHT_PROP_ELEMENT_MASTERY (total).
+    reads: CHANNELS.TOTAL,
     conditions: [
         new ConditionBoolean({name: 'mizuki_dreamdrifter'}),
     ],
 });
 
 const buffVastMastery = new PostEffectStatsMastery({
+    receivers: RECEIVERS.TEAM,
     percent: new StatTable('mastery', [VastMasteryRatio]),
+    // Game data: Avatar_Mizuki_ExtraProudSkill reads FIGHT_PROP_NONEXTRA_ELEMENT_MASTERY
+    // into NonExtraMasteryCache and writes Actor_ElemMasteryExtraDelta: default.
     conditions: [
         new ConditionBoolean({name: 'mizuki_dreamdrifter'}),
     ],
 });
 
 const buffElemental = new PostEffectStatsMastery({
+    receivers: RECEIVERS.TEAM,
     percent: [
-        new StatTable('dmg_pyro', [C2ElemBonus / 100]),
-        new StatTable('dmg_hydro', [C2ElemBonus / 100]),
-        new StatTable('dmg_electro', [C2ElemBonus / 100]),
-        new StatTable('dmg_cryo', [C2ElemBonus / 100]),
+        new StatTable('dmg_pyro', [C2ElemBonus]),
+        new StatTable('dmg_hydro', [C2ElemBonus]),
+        new StatTable('dmg_electro', [C2ElemBonus]),
+        new StatTable('dmg_cryo', [C2ElemBonus]),
     ],
+    // Game data: Avatar_Mizuki_Talent_2 (gameplay C2) reads FIGHT_PROP_NONEXTRA_ELEMENT_MASTERY
+    // and writes Actor_*AddHurtExtraDelta: default (GO reads total here; the data overrules it).
     conditions: [
         new ConditionBoolean({name: 'mizuki_dreamdrifter'}),
         new ConditionConstellation({constellation: 2}),
@@ -211,6 +224,8 @@ const buffC6CritRate = new PostEffectStatsMastery({
     percent: new StatTable('crit_rate', [C6CritRatePerEm]),
     exceed: C6EmThreshold,
     statCap: new ValueTable([C6CritRateCap]),
+    // Game data: Avatar_Mizuki_Talent_6 (gameplay C6) reads FIGHT_PROP_NONEXTRA_ELEMENT_MASTERY
+    // and writes Actor_CriticalExtraDelta: default.
     conditions: [
         new ConditionBoolean({name: 'mizuki_dreamdrifter'}),
         new ConditionConstellation({constellation: 6}),
@@ -221,6 +236,8 @@ const buffC6CritDmg = new PostEffectStatsMastery({
     percent: new StatTable('crit_dmg', [C6CritDmgPerEm]),
     exceed: C6EmThreshold,
     statCap: new ValueTable([C6CritDmgCap]),
+    // Game data: Avatar_Mizuki_Talent_6 (gameplay C6) reads FIGHT_PROP_NONEXTRA_ELEMENT_MASTERY
+    // and writes Actor_CriticalHurtExtraDelta: default.
     conditions: [
         new ConditionBoolean({name: 'mizuki_dreamdrifter'}),
         new ConditionConstellation({constellation: 6}),
@@ -509,7 +526,7 @@ export const Mizuki = new DbObjectChar({
             description: 'talent_descr.yumemizuki_mizuki_vast_be_the_dream_2',
             info: {special: true},
             condition: new ConditionNot([
-                new ConditionBoolean({name: 'polestar_field'}),
+                new ConditionTeam({condition: new ConditionBoolean({name: 'polestar_field'})}),
             ]),
         }),
         new ConditionStatic({
@@ -523,7 +540,10 @@ export const Mizuki = new DbObjectChar({
         }),
     ],
     multipliers: [
+        // Game data: Avatar_Mizuki_Talent_1_New (gameplay C1) caches FIGHT_PROP_ELEMENT_MASTERY
+        // (total) as OwnerMasteryCache; scaling 'mastery*' already reads the total.
         new FeatureMultiplier({
+            receivers: RECEIVERS.TEAM,
             scaling: 'mastery*',
             source: 'constellation1',
             values: new ValueTable([C1SwirlBonus]),
@@ -538,6 +558,7 @@ export const Mizuki = new DbObjectChar({
             }),
         }),
         new FeatureMultiplier({
+            receivers: RECEIVERS.TEAM,
             scaling: 'mastery*',
             source: 'constellation1',
             values: new ValueTable([C1StellarSwirlBonus]),
@@ -580,10 +601,11 @@ export const Mizuki = new DbObjectChar({
         {
             conditions: [
                 new ConditionStatic({
+                    receivers: RECEIVERS.TEAM,
                     title: 'talent_name.yumemizuki_mizuki_your_echo_i_meet_in_dreams',
                     description: 'talent_descr.yumemizuki_mizuki_your_echo_i_meet_in_dreams_buffed',
                     stats: {
-                        text_percent_dmg: C2ElemBonus / 100,
+                        text_percent_dmg: C2ElemBonus,
                         enemy_res_pyro: C2Resistance,
                         enemy_res_hydro: C2Resistance,
                         enemy_res_cryo: C2Resistance,
@@ -625,6 +647,7 @@ export const Mizuki = new DbObjectChar({
         {
             conditions: [
                 new ConditionStatic({
+                    receivers: RECEIVERS.TEAM,
                     title: 'talent_name.yumemizuki_mizuki_the_heart_lingers_long',
                     description: 'talent_descr.yumemizuki_mizuki_the_heart_lingers_long_buffed',
                     stats: {
@@ -640,172 +663,5 @@ export const Mizuki = new DbObjectChar({
             ],
         },
     ]),
-    partyData: {
-        loadStats: {
-            stats: ['mastery_total'],
-            settings: ['char_skill_elemental'],
-        },
-        conditions: [
-            new Condition({
-                stats: {party_burst_energy_cost: Talents.get('burst.energy_cost').getValue()},
-            }),
-            new Condition({
-                settings: {
-                    mizuki_char_skill_elemental_bonus: 3,
-                },
-                subConditions: [
-                    new ConditionBoolean({name: 'party.mizuki_constellation_3'}),
-                ],
-            }),
-            new ConditionNumber({
-                name: 'mizuki_mastery',
-                title: 'stat.mastery',
-                partyStat: 'mastery_total',
-                serializeId: 1,
-                rotation: 'party',
-                max: 10000,
-            }),
-            new ConditionNumberTalent({
-                name: 'mizuki_char_skill_elemental',
-                title: 'talent_name.stats_level_skill',
-                partySetting: 'char_skill_elemental',
-                serializeId: 2,
-            }),
-            new ConditionBoolean({
-                name: 'party.mizuki_dreamdrifter',
-                serializeId: 3,
-                title: 'talent_name.yumemizuki_mizuki_dreamdrifter',
-                description: 'talent_descr.yumemizuki_mizuki_dreamdrifter',
-                rotation: 'party',
-            }),
-            new ConditionStatic({
-                title: 'talent_name.yumemizuki_mizuki_vast_be_the_dream',
-                description: 'talent_descr.yumemizuki_mizuki_vast_be_the_dream_3',
-                info: {special: true},
-                stats: {
-                    text_percent: VastMasteryRatio * 100,
-                },
-                condition: new ConditionBoolean({name: 'party.mizuki_dreamdrifter'}),
-            }),
-            new ConditionBoolean({
-                name: 'party.mizuki_in_mist_like_waters',
-                serializeId: 4,
-                title: 'talent_name.yumemizuki_mizuki_in_mist_like_waters',
-                description: 'talent_descr.yumemizuki_mizuki_in_mist_like_waters_buffed',
-                rotation: 'party',
-                info: {constellation: 1},
-                stats: {
-                    text_percent_dmg: C1SwirlBonus,
-                },
-                subConditions: [
-                    new ConditionBoolean({name: 'party.mizuki_dreamdrifter'}),
-                ],
-            }),
-            new ConditionBoolean({
-                name: 'party.mizuki_your_echo_i_meet_in_dreams',
-                serializeId: 5,
-                title: 'talent_name.yumemizuki_mizuki_your_echo_i_meet_in_dreams',
-                description: 'talent_descr.yumemizuki_mizuki_your_echo_i_meet_in_dreams_buffed',
-                rotation: 'party',
-                info: {constellation: 2},
-                stats: {
-                    text_percent_dmg: C2ElemBonus / 100,
-                    enemy_res_pyro: C2Resistance,
-                    enemy_res_hydro: C2Resistance,
-                    enemy_res_cryo: C2Resistance,
-                    enemy_res_electro: C2Resistance,
-                    enemy_res_anemo: C2Resistance,
-                },
-                subConditions: [
-                    new ConditionBoolean({name: 'party.mizuki_dreamdrifter'}),
-                ],
-            }),
-            new ConditionBoolean({
-                name: 'party.mizuki_constellation_3',
-                serializeId: 6,
-                title: 'talent_name.yumemizuki_mizuki_till_dawns_moon_ends_night',
-                description: 'talent_descr.char_constellation_skill',
-                info: {constellation: 3},
-            }),
-            new ConditionBoolean({
-                name: 'party.mizuki_the_heart_lingers_long',
-                serializeId: 7,
-                title: 'talent_name.yumemizuki_mizuki_the_heart_lingers_long',
-                description: 'talent_descr.yumemizuki_mizuki_the_heart_lingers_long_buffed',
-                info: {constellation: 6},
-                stats: {
-                    crit_rate_swirl: C6SwirlCritRate,
-                    crit_dmg_swirl: C6SwirlCritDmg,
-                    crit_rate_stellarswirl: C6StellarSwirlCritRate,
-                    crit_dmg_stellarswirl: C6StellarSwirlCritDmg,
-                },
-            }),
-        ],
-        multipliers: [
-            new FeatureMultiplier({
-                scaling: 'mizuki_mastery',
-                source: 'yumemizuki_mizuki',
-                values: new ValueTable([C1SwirlBonus]),
-                condition: new ConditionAnd([
-                    new ConditionBoolean({name: 'party.mizuki_dreamdrifter'}),
-                    new ConditionBoolean({name: 'party.mizuki_in_mist_like_waters'}),
-                ]),
-                target: new FeatureMultiplierTarget({
-                    tags: ['swirl'],
-                    options: ['reaction_flat'],
-                }),
-            }),
-            new FeatureMultiplier({
-                scaling: 'mizuki_mastery',
-                source: 'yumemizuki_mizuki',
-                values: new ValueTable([C1StellarSwirlBonus]),
-                condition: new ConditionAnd([
-                    new ConditionBoolean({name: 'party.mizuki_dreamdrifter'}),
-                    new ConditionBoolean({name: 'party.mizuki_in_mist_like_waters'}),
-                ]),
-                target: new FeatureMultiplierTarget({
-                    tags: ['stellarswirl_immediate'],
-                    options: ['stellarswirl_flat'],
-                }),
-            }),
-        ],
-        postEffects: [
-            new PostEffectStats({
-                from: 'mizuki_mastery',
-                levelSetting: 'mizuki_char_skill_elemental',
-                percent: swirlEmBonusPerPoint,
-                conditions: [
-                    new ConditionBoolean({name: 'party.mizuki_dreamdrifter'}),
-                ],
-            }),
-            new PostEffectStats({
-                from: 'mizuki_mastery',
-                levelSetting: 'mizuki_char_skill_elemental',
-                percent: stellarSwirlEmBonusPerPoint,
-                conditions: [
-                    new ConditionBoolean({name: 'party.mizuki_dreamdrifter'}),
-                ],
-            }),
-            new PostEffectStats({
-                from: 'mizuki_mastery',
-                percent: new StatTable('mastery', [VastMasteryRatio]),
-                conditions: [
-                    new ConditionBoolean({name: 'party.mizuki_dreamdrifter'}),
-                ],
-            }),
-            new PostEffectStats({
-                from: 'mizuki_mastery',
-                percent: [
-                    new StatTable('dmg_pyro', [C2ElemBonus / 100]),
-                    new StatTable('dmg_hydro', [C2ElemBonus / 100]),
-                    new StatTable('dmg_electro', [C2ElemBonus / 100]),
-                    new StatTable('dmg_cryo', [C2ElemBonus / 100]),
-                ],
-                conditions: [
-                    new ConditionBoolean({name: 'party.mizuki_dreamdrifter'}),
-                    new ConditionBoolean({name: 'party.mizuki_your_echo_i_meet_in_dreams'}),
-                ],
-            }),
-        ],
-    },
+    retiredParty: [[1, 'number'], [2, 'number'], [3, 'checkbox'], [4, 'checkbox'], [5, 'checkbox'], [6, 'checkbox'], [7, 'checkbox']],
 });

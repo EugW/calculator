@@ -1,4 +1,5 @@
 import { CalcSet } from "../src/js/classes/CalcSet";
+import { Team } from "../src/js/classes/Team";
 import { DB } from "../src/js/db/DB";
 
 global.DB = DB;
@@ -8,8 +9,8 @@ function makeBuild() {
     const char = DB.Chars.getFirst();
 
     build.setChar(char);
+    Team.fromMember(build);
     build.setWeapon(DB.Weapons.get(char.weapon).getFirst());
-    build.setEnemy(DB.Enemies.getFirst().getFirst());
 
     return build;
 }

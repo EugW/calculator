@@ -4,6 +4,8 @@ import { FeatureDamage } from "../../../classes/Feature2/Damage";
 import { FeatureMultiplier } from "../../../classes/Feature2/Multiplier";
 import { StatTable } from "../../../classes/StatTable";
 import { weaponStatTables } from "../../generated/WeaponStatTables";
+import { weaponPassiveTables } from "../../generated/WeaponPassiveTables";
+import { percent } from "../../Params";
 
 export const KagotsurubeIsshin = new DbObjectWeapon({
     name: 'kagotsurube_isshin',
@@ -20,8 +22,8 @@ export const KagotsurubeIsshin = new DbObjectWeapon({
             title: 'talent_name.weapon_kagotsurube_isshin',
             description: 'talent_descr.weapon_kagotsurube_isshin',
             stats: [
-                new StatTable('text_percent', [180]),
-                new StatTable('atk_percent', [15]),
+                new StatTable('text_percent', [percent(weaponPassiveTables.KagotsurubeIsshin.p1[0])]),
+                new StatTable('atk_percent', [percent(weaponPassiveTables.KagotsurubeIsshin.p2[0])]),
             ],
         }),
     ],
@@ -31,7 +33,7 @@ export const KagotsurubeIsshin = new DbObjectWeapon({
             multipliers: [
                 new FeatureMultiplier({
                     leveling: 'weapon_refine',
-                    values: new StatTable('kagotsurube_isshin_dmg', [180]),
+                    values: new StatTable('kagotsurube_isshin_dmg', [percent(weaponPassiveTables.KagotsurubeIsshin.p1[0])]),
                 }),
             ],
         }),

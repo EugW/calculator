@@ -1,7 +1,9 @@
 import { Condition } from "../../classes/Condition";
 import { ConditionAscensionChar } from "../../classes/Condition/Ascension/Char";
 import { ConditionBoolean } from "../../classes/Condition/Boolean";
+import { ConditionOnField } from "../../classes/Condition/Field";
 import { ConditionConstellation } from "../../classes/Condition/Constellation";
+import { ConditionReceiver } from "../../classes/Condition/Receiver";
 import { ConditionStatic } from "../../classes/Condition/Static";
 import { DbObjectChar } from "../../classes/DbObject/Char";
 import { DbObjectConstellation } from "../../classes/DbObject/Constellation";
@@ -17,10 +19,13 @@ import { FeatureHeal } from "../../classes/Feature2/Heal";
 import { FeatureMultiplier } from "../../classes/Feature2/Multiplier";
 import { FeatureMultiplierList } from "../../classes/Feature2/Multiplier/List";
 import { FeaturePostEffectValue } from "../../classes/Feature2/PostEffectValue";
+import { CHANNELS } from "../../classes/PostEffect/Channels";
 import { PostEffectStatsHP } from "../../classes/PostEffect/Stats/HP";
 import { StatTable } from "../../classes/StatTable";
+import { RECEIVERS } from "../../classes/Team/Receivers";
 import { charTables } from "../generated/CharTables";
 import { charTalentTables } from "../generated/CharTalentTables";
+import { percent } from "../Params";
 
 const Talents = new DbObjectTalents({
     attack: {
@@ -131,9 +136,23 @@ const Talents = new DbObjectTalents({
     },
 });
 
+const A4Heal = percent(charTalentTables.Yaoyao.a4.p2);
+const C1DendroDmg = percent(charTalentTables.Yaoyao.c1.p2);
+const C4MasteryRatio = charTalentTables.Yaoyao.c4.p1;
+const C4MasteryBonus = percent(charTalentTables.Yaoyao.c4.p1);
+const C4MasteryMax = charTalentTables.Yaoyao.c4.p3;
+const C6MegaDmg = percent(charTalentTables.Yaoyao.c6.p2);
+const C6MegaHeal = percent(charTalentTables.Yaoyao.c6.p3);
+
 const masteryBonusPost = new PostEffectStatsHP({
-    percent: new StatTable('mastery', [0.003]),
-    statCap: new StatTable('', [120]),
+    // Game data: Avatar_Yaoyao_Constellation_4 computes FIGHT_PROP_MAX_HP *
+    // Yaoyao_Constellation_4_Ratio (0.003, cap 120) into
+    // Actor_ElemMasteryExtraDelta. FIGHT_PROP_MAX_HP is the total HP read
+    // (md/buff_chains.md), as for Baizhu, Candace and Kirara; GO reads
+    // input.premod.hp here (a guess). The write stays extra (the default).
+    reads: CHANNELS.TOTAL,
+    percent: new StatTable('mastery', [C4MasteryRatio]),
+    statCap: new StatTable('', [C4MasteryMax]),
     conditions: [
         new ConditionConstellation({constellation: 4}),
         new ConditionBoolean({name: 'yaoyao_winsome'}),
@@ -267,7 +286,7 @@ export const Yaoyao = new DbObjectChar({
             multipliers: [
                 new FeatureMultiplier({
                     source: 'constellation6',
-                    values: new StatTable('yaoyao_megaradish_dmg', [75]),
+                    values: new StatTable('yaoyao_megaradish_dmg', [C6MegaDmg]),
                 }),
             ],
             condition: new ConditionConstellation({constellation: 6}),
@@ -288,7 +307,7 @@ export const Yaoyao = new DbObjectChar({
                 new FeatureMultiplier({
                     scaling: 'hp*',
                     source: 'constellation6',
-                    values: new StatTable('yaoyao_megaradish_heal', [7.5]),
+                    values: new StatTable('yaoyao_megaradish_heal', [C6MegaHeal]),
                 }),
             ],
             condition: new ConditionConstellation({constellation: 6}),
@@ -299,7 +318,7 @@ export const Yaoyao = new DbObjectChar({
                 new FeatureMultiplier({
                     scaling: 'hp*',
                     source: 'ascension4',
-                    values: new StatTable('yaoyao_in_others_shoes_heal', [0.8]),
+                    values: new StatTable('yaoyao_in_others_shoes_heal', [A4Heal]),
                 }),
             ],
             condition: new ConditionAscensionChar({ascension: 4}),
@@ -363,7 +382,7 @@ export const Yaoyao = new DbObjectChar({
             description: 'talent_descr.yaoyao_in_others_shoes',
             info: {ascension: 4},
             stats: {
-                text_percent_hp: 0.8,
+                text_percent_hp: A4Heal,
             },
             subConditions: [
                 new ConditionAscensionChar({ascension: 4}),
@@ -376,13 +395,23 @@ export const Yaoyao = new DbObjectChar({
     constellation: new DbObjectConstellation([
         {
             conditions: [
+                // Active characters within the radish AoE.
                 new ConditionBoolean({
                     name: 'yaoyao_adeptus_tutelage',
                     serializeId: 2,
                     title: 'talent_name.yaoyao_adeptus_tutelage',
                     description: 'talent_descr.yaoyao_adeptus_tutelage',
+                    displayStats: {dmg_dendro: C1DendroDmg},
+                }),
+                new Condition({
+                    isHidden: true,
+                    receivers: RECEIVERS.TEAM,
+                    subConditions: [
+                        new ConditionBoolean({name: 'yaoyao_adeptus_tutelage'}),
+                        new ConditionReceiver({condition: new ConditionOnField()}),
+                    ],
                     stats: {
-                        dmg_dendro: 15,
+                        dmg_dendro: C1DendroDmg,
                     },
                 }),
             ],
@@ -412,8 +441,8 @@ export const Yaoyao = new DbObjectChar({
                     title: 'talent_name.yaoyao_winsome',
                     description: 'talent_descr.yaoyao_winsome',
                     stats: {
-                        text_percent_hp: 0.3,
-                        text_value_max: 120,
+                        text_percent_hp: C4MasteryBonus,
+                        text_value_max: C4MasteryMax,
                     }
                 }),
             ],
@@ -433,26 +462,12 @@ export const Yaoyao = new DbObjectChar({
                     title: 'talent_name.yaoyao_beneficent',
                     description: 'talent_descr.yaoyao_beneficent',
                     stats: {
-                        text_percent_atk: 75,
-                        text_percent_heal: 7.5,
+                        text_percent_atk: C6MegaDmg,
+                        text_percent_heal: C6MegaHeal,
                     },
                 }),
             ],
         },
     ]),
-    partyData: {
-        conditions: [
-            new ConditionBoolean({
-                name: 'party.yaoyao_adeptus_tutelage',
-                serializeId: 1,
-                rotation: 'party',
-                title: 'talent_name.yaoyao_adeptus_tutelage',
-                description: 'talent_descr.yaoyao_adeptus_tutelage',
-                info: {constellation: 1},
-                stats: {
-                    dmg_dendro: 15,
-                },
-            }),
-        ],
-    },
+    retiredParty: [[1, 'checkbox']],
 });

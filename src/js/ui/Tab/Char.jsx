@@ -70,9 +70,15 @@ export class CharView extends React.Component {
 
     handleCharChange() {
         let currentChar = this.props.app.getChar().object;
+        let current = this.props.app.currentSet();
+        // A character is in one team slot only.
+        let teammates = this.props.app.getTeam().getMembers()
+            .filter((member) => member !== current)
+            .map((member) => member.char.getId());
 
         UI.CharSelectReact.show({
             selectedId: currentChar.getId(),
+            excludeIds: teammates,
             showReset: true,
             callback: (char) => {
                 if (char) {
@@ -114,6 +120,11 @@ export class CharView extends React.Component {
     }
 
     render() {
+        // Embedded in the Build tab: content only, the Build tab owns the header.
+        if (this.props.embedded) {
+            return this.tabContent();
+        }
+
         return (
             <ReactTab
                 title={this.strings.title}
@@ -143,6 +154,7 @@ export class CharView extends React.Component {
                 </FullHeightStatic>
                 <FullHeightScrollable>
                     <ConditionList
+                        app={this.props.app}
                         addClass="last"
                         items={conditions}
                         settings={settings}

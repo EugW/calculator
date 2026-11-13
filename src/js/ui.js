@@ -36,27 +36,27 @@ import { ArtifactSetSettingsModal } from './ui/Modal/ArtifactSetSettings.jsx';
 import { ArtifactSetTab } from './ui/Tab/ArtifactSetTab';
 import { ArtifactsGeneratorTab } from './ui/Tab/ArtifactsGenerator';
 import { ArtifactsStorageTab } from './ui/Tab/ArtifactStorage';
-import { ArtifactsTab } from './ui/Tab/Artifacts';
+import { GoodImportTab } from './ui/Tab/GoodImport';
 import { ArtifactSubstatTab } from './ui/Tab/ArtifactSubstatTab';
 import { ArtifactTooltip } from './ui/Components/ArtifactTooltip.jsx';
 import { ArtifactWindow } from './ui/Window/ArtifactWindow'
 import { BestArtifactTab } from "./ui/Tab/BestArtifacts.jsx";
 import { BuffsTab } from './ui/Tab/Buffs';
-import { CharTab } from './ui/Tab/Char';
+import { BuildTab } from './ui/Tab/Build';
+import { TeamTab } from './ui/Tab/Team';
 import { CharTalentModal } from './ui/Modal/CharTalent.jsx';
 import { CompareTab } from './ui/Tab/Compare';
 import { ConfirmModal } from './ui/Modal/Confirm.jsx';
 import { ContactsModal } from './ui/Modal/Contacts.jsx';
-import { EnemyTab } from './ui/Tab/Enemy';
 import { EnkaImportModal } from './ui/Modal/EnkaImport';
 import { FeaturesTab } from './ui/Tab/Features';
-import { FoodTab } from './ui/Tab/Food';
 import { HelpModal } from './ui/Modal/Help.jsx';
+import { DamageGraphModal } from './ui/Modal/DamageGraph.jsx';
 import { Lang } from './ui/Lang';
 import { Layout } from './ui/Layout';
 import { MessageModal } from './ui/Modal/Message.jsx';
 import { ModalLockArtifacts } from './ui/Modal/Select/LockArtifacts';
-import { ModalPartyLoad } from './ui/Modal/Select/PartyLoad';
+import { ModalSavedBuild } from './ui/Modal/Select/SavedBuild';
 import { ModalSelectArtifactSet } from './ui/Modal/Select/ArtifactSet';
 import { ModalSelectChar } from './ui/Modal/Select/Char';
 import { ModalSelectEnemy } from './ui/Modal/Select/Enemy';
@@ -70,8 +70,6 @@ import { ShareTab } from './ui/Tab/Share';
 import { StatsTab } from './ui/Tab/Stats';
 import { Sync } from './ui/Components/Sync.jsx';
 import { WeaponSuggestTab } from './ui/Tab/WeaponSuggest';
-import { WeaponTab } from './ui/Tab/Weapon';
-import { GoodImportModal } from './ui/Modal/GoodImport.jsx';
 import { PresetTab } from './ui/Tab/Preset.jsx';
 window.UI = {
     Layout: new Layout(),
@@ -87,12 +85,10 @@ window.UI = {
     ArtifactSubstatTab: new ArtifactSubstatTab(),
     BestArtifactTab: new BestArtifactTab({position: 'right'}),
     BuffsTab: new BuffsTab({position: 'right'}),
-    CharTab: new CharTab({position: 'right'}),
-    WeaponTab: new WeaponTab({position: 'right'}),
-    EnemyTab: new EnemyTab({position: 'right'}),
-    ArtifactsTab: new ArtifactsTab({position: 'right'}),
-    FoodTab: new FoodTab({position: 'right'}),
+    TeamTab: new TeamTab({position: 'right'}),
+    BuildTab: new BuildTab({position: 'right'}),
     ArtifactsStorageTab: new ArtifactsStorageTab({position: 'right'}),
+    GoodImportTab: new GoodImportTab({position: 'right'}),
     RotationTab: new RotationTab({position: 'right'}),
     CompareTab: new CompareTab({position: 'right'}),
 
@@ -104,8 +100,7 @@ window.UI = {
     WindowMessage: new MessageModal(),
     WindowContacts: new ContactsModal(),
     WindowHelp: new HelpModal(),
-    // WindowGood: new WindowGood(), // jq
-    WindowGood: new GoodImportModal(),
+    DamageGraphModal: new DamageGraphModal(),
     WindowSelectFeatureList: new SelectFeatureListModal(),
     WindowSelectGroupList: new SelectGroupListModal(),
 
@@ -118,7 +113,7 @@ window.UI = {
     LockArtifacts: new ModalLockArtifacts(),
     EnkaImport: new EnkaImportModal(),
 
-    PartyLoad: new ModalPartyLoad(),
+    SavedBuild: new ModalSavedBuild(),
 
     // tooltips
     TooltipArtifact: new ArtifactTooltip(),

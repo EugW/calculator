@@ -3,7 +3,7 @@ import "../../../css/Components/ObjectBlock.css"
 
 import { Stats } from '../../classes/Stats';
 import { Lang } from '../Lang';
-import { CharIcon, EnemyIcon, WeaponIcon } from './Icons';
+import { CharIcon, WeaponIcon } from './Icons';
 import { NumberInput } from './Inputs/Input';
 import { Slider } from './Inputs/Slider';
 import { BetaWarning } from './TextBlocks';
@@ -157,59 +157,6 @@ export class WeaponObjectBlock extends React.Component {
     }
 }
 
-export class EnemyObjectBlock extends React.Component {
-    constructor(props) {
-        super(props);
-
-        this.lang = new Lang();
-
-        this.strings = {
-            level: this.lang.get('object_view.level')
-        };
-    }
-
-    render() {
-        let enemy = this.props.enemy;
-        let level = this.props.settings.enemy_level;
-        let enemyName = enemy ? enemy.getName() : 'modal_window.enemy_custom';
-
-        return (
-            <>
-                <ObjectBlock>
-                    <EnemyIcon
-                        enemy={this.props.enemy}
-                        onClick={this.props.onObjectChange}
-                    />
-                    <div className="info">
-                        <ObjectName name={this.lang.get(enemyName)} />
-                        <div className="level">
-                            <div className="level-name">{this.strings.level}</div>
-                            <div className="level-manual">
-                                <NumberInput
-                                    minValue={1}
-                                    maxValue={110}
-                                    nonEmpty={true}
-                                    value={level}
-                                    onChange={this.props.onLevelChange}
-                                    addClass="level-input-3"
-                                />
-                            </div>
-                            <div className="level-slider">
-                                <Slider
-                                    min={1}
-                                    max={110}
-                                    value={level}
-                                    onChange={this.props.onLevelChange}
-                                />
-                            </div>
-                        </div>
-                    </div>
-                </ObjectBlock>
-            </>
-        );
-    }
-}
-
 function ObjectBlock(props) {
     return (
         <div className="calc-object-block">
@@ -305,23 +252,23 @@ class ObjectName extends React.Component {
         classList.remove('shrink3');
         classList.remove('overflow');
 
-        let maxWidth = this.block.closest('.tab-content').clientWidth - 103;
-        if (!maxWidth) {
+        // The name block fills the room beside the icon and never grows
+        // with its text (min-width: 0 on .info), so an overflow is the text
+        // wider than the box.
+        if (this.block.scrollWidth <= this.block.clientWidth) {
             return;
         }
 
-        if (this.block.clientWidth > maxWidth) {
-            classList.add('shrink');
-            if (this.block.clientWidth > maxWidth) {
-                classList.remove('shrink');
-                classList.add('shrink2');
-                if (this.block.clientWidth > maxWidth) {
-                    classList.remove('shrink2');
-                    classList.add('shrink3');
-                }
+        classList.add('shrink');
+        if (this.block.scrollWidth > this.block.clientWidth) {
+            classList.remove('shrink');
+            classList.add('shrink2');
+            if (this.block.scrollWidth > this.block.clientWidth) {
+                classList.remove('shrink2');
+                classList.add('shrink3');
             }
-            classList.add('overflow');
         }
+        classList.add('overflow');
     }
 
     render() {

@@ -2,10 +2,11 @@ import { Condition } from "../../classes/Condition";
 import { ConditionAnd } from "../../classes/Condition/And";
 import { ConditionAscensionChar } from "../../classes/Condition/Ascension/Char";
 import { ConditionBoolean } from "../../classes/Condition/Boolean";
+import { ConditionOnField } from "../../classes/Condition/Field";
 import { ConditionConstellation } from "../../classes/Condition/Constellation";
 import { ConditionHexereiResonance } from "../../classes/Condition/HexereiResonance";
 import { ConditionNot } from "../../classes/Condition/Not";
-import { ConditionNumber } from "../../classes/Condition/Number";
+import { ConditionReceiver } from "../../classes/Condition/Receiver";
 import { ConditionWitchHomework } from "../../classes/Condition/WitchHomework";
 import { ConditionStacks } from "../../classes/Condition/Stacks";
 import { ConditionStatic } from "../../classes/Condition/Static";
@@ -21,11 +22,14 @@ import { FeatureDamagePlungeShockWave } from "../../classes/Feature2/Damage/Plun
 import { FeatureDamageSkill } from "../../classes/Feature2/Damage/Skill";
 import { FeatureMultiplier } from "../../classes/Feature2/Multiplier";
 import { FeatureMultiplierTarget } from "../../classes/Feature2/Multiplier/Target";
-import { PostEffectStats } from "../../classes/PostEffect/Stats";
+import { CHANNELS } from "../../classes/PostEffect/Channels";
+import { PostEffectStatsDef } from "../../classes/PostEffect/Stats/Def";
+import { RECEIVERS } from "../../classes/Team/Receivers";
 import { StatTable } from "../../classes/StatTable";
 import { ValueTable } from "../../classes/ValueTable";
 import { charTables } from "../generated/CharTables";
 import { charTalentTables } from "../generated/CharTalentTables";
+import { percent } from "../Params";
 
 
 const Talents = new DbObjectTalents({
@@ -118,25 +122,31 @@ const Talents = new DbObjectTalents({
 });
 
 const TalentValues = {
-    A1HpThreshold: 50,
-    A1SkillBonus: 25,
-    A1DefBonusBuffed: 240,
-    A4Mastery: 125,
-    C1Energy: 1.2,
-    C1DefBonusBuffed: 50,
-    C2DefBonus: 30,
-    C2FatalBlossomBuffed: 300,
-    C4PlungeDmg: 30,
+    A1HpThreshold: percent(charTalentTables.Albedo.a1.p1),
+    A1SkillBonus: percent(charTalentTables.Albedo.a1.p2),
+    A1DefBonusBuffed: percent(charTalentTables.Albedo.a1.p3),
+    A4Mastery: charTalentTables.Albedo.a4.p1,
+    C1Energy: charTalentTables.Albedo.c1.p1,
+    C1DefBonusBuffed: percent(charTalentTables.Albedo.c1.p2),
+    C2DefBonus: percent(charTalentTables.Albedo.c2.p1),
+    C2FatalBlossomBuffed: percent(charTalentTables.Albedo.c2.p2),
+    C4PlungeDmg: percent(charTalentTables.Albedo.c4.p1),
+    C4PlungeDmgBuffed: percent(charTalentTables.Albedo.c4.p3),
     C6ShieldDmg: 17,
-    C6FatalBlossomBuffed: 250,
+    C6FatalBlossomBuffed: percent(charTalentTables.Albedo.c6.p2),
+    SpSolarDmgMax: percent(charTalentTables.Albedo.sp.p2),
+    SpSilverDmgMax: percent(charTalentTables.Albedo.sp.p4),
 };
 
 const condWitchHomeworkOn = new ConditionBoolean({name: 'albedo_witch_homework'});
 const condWitchHomeworkOff = new ConditionNot([condWitchHomeworkOn]);
-const condPartyWitchHomeworkOn = new ConditionBoolean({name: 'party.albedo_witch_homework'});
-const condPartyWitchHomeworkOff = new ConditionNot([condPartyWitchHomeworkOn]);
 const condHexereiResonanceOn = new ConditionHexereiResonance({});
 const condIsWitch = new ConditionWitchHomework({});
+// Descent of Divinity and Dust of Purification affect active party members
+// within the Solar Isotoma field.
+const condActiveReceiver = new ConditionReceiver({
+    condition: new ConditionOnField(),
+});
 
 export const Albedo = new DbObjectChar({
     name: 'albedo',
@@ -149,6 +159,22 @@ export const Albedo = new DbObjectChar({
     origin: 'mondstadt',
     talents: Talents,
     statTable: charTables.Albedo,
+    // Every `scaling: 'def*'` multiplier below reads the total DEF: the
+    // game computes each of these hits from FIGHT_PROP_CUR_DEFENSE (total).
+    // Skill blossoms: UNIQUE_Albedo_Monolith_Field_Attacker and
+    // UNIQUE_Albedo_Monolith_Hexenzirkel_Field_Attacker (damageExtra
+    // Damage_Art x CUR_DEFENSE); A1 Hexerei bonus:
+    // UNIQUE_Albedo_AlchemyTrap_BloomAttackUp_Hexenzirkel (damageExtra
+    // Ratio x CUR_DEFENSE); burst blossoms:
+    // Albedo_AlchemicalBreakOut_FullBloom_OnSelf{1,2,3} and
+    // Albedo_HexenzirkelSkill_AlchemicalBreakOut_FullBloom_OnTarget
+    // (damageExtra Talent_2_Ratio x CUR_DEFENSE); C6 burst bonus:
+    // UNIQUE_Albedo_Hexenzirkel_Burst_Talent_6 (damageExtra Talent_6_Ratio
+    // x CUR_DEFENSE); C2 burst bonus: AlchemicalBreakOut_End sets
+    // _ABILITY_Albedo_AlchemicalBreakOut_FullBloomExtraDmg from
+    // CUR_DEFENSE x DEF2ATK_Ratio x BloomLevel. GO reads input.total.def
+    // for all of them. def* is already total, so no params. KQM has no
+    // Albedo stat-interaction test.
     features: [
         new FeatureDamageNormal({
             name: 'normal_hit_1',
@@ -348,6 +374,20 @@ export const Albedo = new DbObjectChar({
             info: {hexerei: true},
         }),
         new ConditionBoolean({
+            name: 'albedo_solar_isotoma_buff',
+            serializeId: 6,
+            title: 'talent_name.albedo_solar_isotoma_buff',
+            description: 'talent_descr.albedo_solar_isotoma_buff',
+            info: {hexerei: true},
+        }),
+        new ConditionBoolean({
+            name: 'albedo_silver_isotoma_buff',
+            serializeId: 8,
+            title: 'talent_name.albedo_silver_isotoma_buff',
+            description: 'talent_descr.albedo_silver_isotoma_buff',
+            info: {hexerei: true},
+        }),
+        new ConditionBoolean({
             name: 'albedo_calcite_might',
             serializeId: 1,
             title: 'talent_name.albedo_calcite_might',
@@ -382,8 +422,15 @@ export const Albedo = new DbObjectChar({
         new ConditionBoolean({
             name: 'albedo_homuncular_nature',
             serializeId: 2,
+            receivers: RECEIVERS.TEAM,
             title: 'talent_name.albedo_homuncular_nature',
             description: 'talent_descr.albedo_homuncular_nature',
+            // Game data: UNIQUE_Albedo_AlchemicalBreakOut_ElemMasteryUp
+            // writes the flat ElemMasteryDelta into Actor_ElemMasteryDelta
+            // (no "Extra": a premod write) with no stat read. Conditions
+            // write premod: default confirmed, no params. GO writes a flat
+            // eleMas team buff. KQM (Sucrose evidence): flat EM buffs such
+            // as Albedo's A4 count for Sucrose's A4.
             stats: {
                 mastery: TalentValues.A4Mastery,
             },
@@ -393,7 +440,57 @@ export const Albedo = new DbObjectChar({
             ],
         }),
     ],
+    postEffects: [
+        // Solar Isotoma team DMG (Hexerei). Game data:
+        // UNIQUE_Avatar_Albedo_HexenzirkelSkill_OG_BuffHandler_OnSelf
+        // computes Defence_InCalc_OG from FIGHT_PROP_CUR_DEFENSE (total)
+        // / 1000 x Ratio_OG, capped by Ratio_OG_Max, applied by
+        // UNIQUE_Avatar_Albedo_HexenzirkelSkill_OG_Buff (ModifyDamageMixin
+        // damagePercentageRatio on Normal/Charged/Falling/Skill/Burst).
+        // GO reads input.total.def. No ability writes extra DEF, so the
+        // number is the same either way today.
+        new PostEffectStatsDef({
+            reads: CHANNELS.TOTAL,
+            receivers: RECEIVERS.TEAM,
+            percent: ['normal', 'charged', 'plunge', 'skill', 'burst'].map(
+                type => new StatTable('dmg_' + type, [4 / 1000]),
+            ),
+            statCap: new ValueTable([TalentValues.SpSolarDmgMax]),
+            conditions: [
+                condWitchHomeworkOn,
+                condHexereiResonanceOn,
+                new ConditionBoolean({name: 'albedo_solar_isotoma_buff'}),
+            ],
+        }),
+        // Silver Isotoma team DMG (Hexerei, Hexerei receivers only). Game
+        // data: UNIQUE_Avatar_Albedo_HexenzirkelSkill_NG_BuffHandler_OnSelf
+        // computes Defence_InCalc_NG from FIGHT_PROP_CUR_DEFENSE (total)
+        // / 1000 x Ratio_NG, capped by Ratio_NG_Max, applied by
+        // UNIQUE_Avatar_Albedo_HexenzirkelSkill_NG_Buff. GO reads
+        // input.total.def. No ability writes extra DEF, so the number is
+        // the same either way today.
+        new PostEffectStatsDef({
+            reads: CHANNELS.TOTAL,
+            receivers: RECEIVERS.TEAM,
+            percent: ['normal', 'charged', 'plunge', 'skill', 'burst'].map(
+                type => new StatTable('dmg_' + type, [10 / 1000]),
+            ),
+            statCap: new ValueTable([TalentValues.SpSilverDmgMax]),
+            conditions: [
+                condWitchHomeworkOn,
+                condHexereiResonanceOn,
+                new ConditionBoolean({name: 'albedo_silver_isotoma_buff'}),
+                new ConditionReceiver({condition: condIsWitch}),
+            ],
+        }),
+    ],
     multipliers: [
+        // C2 Fatal Reckoning burst bonus: 30% of DEF per stack. Game data:
+        // AlchemicalBreakOut_End sets
+        // _ABILITY_Albedo_AlchemicalBreakOut_FullBloomExtraDmg from
+        // FIGHT_PROP_CUR_DEFENSE (total) x DEF2ATK_Ratio x BloomLevel; GO
+        // reads input.total.def. scaling 'def*' is already total:
+        // confirmed, no params.
         new FeatureMultiplier({
             scaling: 'def*',
             source: 'constellation2',
@@ -431,6 +528,10 @@ export const Albedo = new DbObjectChar({
                     description: 'talent_descr.albedo_flower_of_eden_buffed',
                     hideCondition: [condWitchHomeworkOff],
                     condition: condWitchHomeworkOn,
+                    // Game data: UNIQUE_Avatar_Albedo_Hexenzirkel_Talent_1
+                    // writes DefenceRatio into Actor_DefenceRatio (no
+                    // "Extra": a premod write) with no stat read.
+                    // Conditions write premod: default confirmed, no params.
                     stats: {
                         text_decimal_energy: TalentValues.C1Energy,
                         def_percent: TalentValues.C1DefBonusBuffed,
@@ -463,7 +564,26 @@ export const Albedo = new DbObjectChar({
                     stats: [
                         new StatTable('text_percent_dmg', [TalentValues.C2DefBonus]),
                     ],
-                })
+                }),
+                // The stacks are consumed on trigger; the resulting EM buff
+                // has its own duration and activation assumption. Flat 125
+                // EM like the A4 above (same ElemMasteryDelta): a premod
+                // write, default confirmed, no params.
+                new ConditionBoolean({
+                    name: 'albedo_opening_of_hanerozoic_buff',
+                    serializeId: 14,
+                    receivers: RECEIVERS.TEAM,
+                    title: 'talent_name.albedo_homuncular_nature',
+                    description: 'talent_descr.albedo_opening_of_phanerozoic_buffed',
+                    hideCondition: [condWitchHomeworkOff],
+                    condition: new ConditionAnd([
+                        condWitchHomeworkOn,
+                        new ConditionAscensionChar({ascension: 4}),
+                    ]),
+                    stats: {
+                        mastery: TalentValues.A4Mastery,
+                    },
+                }),
             ],
         },
         {
@@ -482,11 +602,9 @@ export const Albedo = new DbObjectChar({
                     serializeId: 4,
                     title: 'talent_name.albedo_descent_of_divinity',
                     description: 'talent_descr.albedo_descent_of_divinity',
+                    displayStats: {dmg_plunge: TalentValues.C4PlungeDmg},
                     hideCondition: [condWitchHomeworkOn],
                     condition: condWitchHomeworkOff,
-                    stats: {
-                        dmg_plunge: TalentValues.C4PlungeDmg,
-                    },
                 }),
                 new ConditionBoolean({
                     name: 'albedo_descent_of_divinity',
@@ -495,9 +613,15 @@ export const Albedo = new DbObjectChar({
                     description: 'talent_descr.albedo_descent_of_divinity_buffed',
                     hideCondition: [condWitchHomeworkOff],
                     condition: condWitchHomeworkOn,
-                    stats: {
-                        dmg_plunge: TalentValues.C4PlungeDmg,
-                    },
+                }),
+                new Condition({
+                    isHidden: true,
+                    receivers: RECEIVERS.TEAM,
+                    condition: new ConditionAnd([
+                        new ConditionBoolean({name: 'albedo_descent_of_divinity'}),
+                        condActiveReceiver,
+                    ]),
+                    stats: {dmg_plunge: TalentValues.C4PlungeDmg},
                 }),
                 new ConditionBoolean({
                     name: 'albedo_descent_of_divinity_3s',
@@ -508,9 +632,17 @@ export const Albedo = new DbObjectChar({
                         condWitchHomeworkOn,
                         new ConditionBoolean({name: 'albedo_descent_of_divinity'}),
                     ]),
-                    stats: {
-                        dmg_plunge: TalentValues.C4PlungeDmg,
-                    },
+                }),
+                new Condition({
+                    isHidden: true,
+                    receivers: RECEIVERS.TEAM,
+                    condition: new ConditionAnd([
+                        condWitchHomeworkOn,
+                        new ConditionBoolean({name: 'albedo_descent_of_divinity'}),
+                        new ConditionBoolean({name: 'albedo_descent_of_divinity_3s'}),
+                        condActiveReceiver,
+                    ]),
+                    stats: {dmg_plunge: TalentValues.C4PlungeDmgBuffed},
                 }),
             ]
         },
@@ -530,11 +662,9 @@ export const Albedo = new DbObjectChar({
                     serializeId: 5,
                     title: 'talent_name.albedo_dust_of_purification',
                     description: 'talent_descr.albedo_dust_of_purification',
+                    displayStats: {dmg_all: TalentValues.C6ShieldDmg},
                     hideCondition: [condWitchHomeworkOn],
                     condition: condWitchHomeworkOff,
-                    stats: {
-                        dmg_all: TalentValues.C6ShieldDmg,
-                    },
                 }),
                 new ConditionBoolean({
                     name: 'albedo_dust_of_purification',
@@ -543,9 +673,15 @@ export const Albedo = new DbObjectChar({
                     description: 'talent_descr.albedo_dust_of_purification_buffed',
                     hideCondition: [condWitchHomeworkOff],
                     condition: condWitchHomeworkOn,
-                    stats: {
-                        dmg_all: TalentValues.C6ShieldDmg,
-                    },
+                }),
+                new Condition({
+                    isHidden: true,
+                    receivers: RECEIVERS.TEAM,
+                    condition: new ConditionAnd([
+                        new ConditionBoolean({name: 'albedo_dust_of_purification'}),
+                        condActiveReceiver,
+                    ]),
+                    stats: {dmg_all: TalentValues.C6ShieldDmg},
                 }),
                 new ConditionBoolean({
                     name: 'albedo_dust_of_purification_20s',
@@ -560,191 +696,6 @@ export const Albedo = new DbObjectChar({
             ]
         },
     ]),
-    partyData: {
-        loadStats: {
-            stats: ['def_total'],
-        },
-        conditions: [
-            new ConditionBoolean({
-                name: 'party.albedo_witch_homework',
-                serializeId: 8,
-                rotation: 'party',
-                title: 'talent_name.albedo_book_of_blinding_light',
-                description: 'talent_descr.albedo_book_of_blinding_light',
-                info: {hexerei: true},
-            }),
-            new ConditionNumber({
-                name: 'albedo_def_total',
-                title: 'talent_name.stats_total_def',
-                partyStat: 'def_total',
-                serializeId: 10,
-                rotation: 'party',
-                max: 10000,
-            }),
-            new ConditionBoolean({
-                name: 'party.albedo_solar_isotoma_buff',
-                serializeId: 11,
-                rotation: 'party',
-                title: 'talent_name.albedo_solar_isotoma_buff',
-                description: 'talent_descr.albedo_solar_isotoma_buff',
-                condition: condHexereiResonanceOn,
-                hideCondition: [condPartyWitchHomeworkOff],
-                info: {hexerei: true},
-            }),
-            new ConditionBoolean({
-                name: 'party.albedo_silver_isotoma_buff',
-                serializeId: 12,
-                rotation: 'party',
-                title: 'talent_name.albedo_silver_isotoma_buff',
-                description: 'talent_descr.albedo_silver_isotoma_buff',
-                condition: new ConditionAnd([condIsWitch, condHexereiResonanceOn]),
-                hideCondition: [condPartyWitchHomeworkOff],
-                info: {hexerei: true},
-            }),
-            new ConditionBoolean({
-                name: 'party.albedo_homuncular_nature',
-                serializeId: 1,
-                rotation: 'party',
-                title: 'talent_name.albedo_homuncular_nature',
-                description: 'talent_descr.albedo_homuncular_nature',
-                stats: {
-                    mastery: TalentValues.A4Mastery,
-                },
-                info: {
-                    ascension: 4,
-                },
-            }),
-            new ConditionBoolean({
-                name: 'party.albedo_descent_of_divinity',
-                serializeId: 2,
-                rotation: 'party',
-                title: 'talent_name.albedo_descent_of_divinity',
-                description: 'talent_descr.albedo_descent_of_divinity',
-                hideCondition: [condPartyWitchHomeworkOn],
-                condition: condPartyWitchHomeworkOff,
-                stats: {
-                    dmg_plunge: TalentValues.C4PlungeDmg,
-                },
-                info: {
-                    constellation: 4,
-                },
-            }),
-            new ConditionBoolean({
-                name: 'party.albedo_descent_of_divinity',
-                serializeId: 2,
-                rotation: 'party',
-                title: 'talent_name.albedo_descent_of_divinity',
-                description: 'talent_descr.albedo_descent_of_divinity_buffed',
-                hideCondition: [condPartyWitchHomeworkOff],
-                condition: condPartyWitchHomeworkOn,
-                stats: {
-                    dmg_plunge: TalentValues.C4PlungeDmg,
-                },
-                info: {
-                    constellation: 4,
-                },
-            }),
-            new ConditionBoolean({
-                name: 'party.albedo_descent_of_divinity_3s',
-                serializeId: 7,
-                rotation: 'party',
-                title: 'talent_name.albedo_descent_of_divinity',
-                hideCondition: [condPartyWitchHomeworkOff],
-                condition: new ConditionAnd([
-                    condPartyWitchHomeworkOn,
-                    new ConditionBoolean({name: 'party.albedo_descent_of_divinity'}),
-                ]),
-                stats: {
-                    dmg_plunge: TalentValues.C4PlungeDmg,
-                },
-                info: {
-                    constellation: 4,
-                },
-            }),
-            new ConditionBoolean({
-                name: 'party.albedo_opening_of_hanerozoic_buffed',
-                serializeId: 5,
-                rotation: 'party',
-                hideCondition: [condPartyWitchHomeworkOff],
-                condition: condPartyWitchHomeworkOn,
-                title: 'talent_name.albedo_opening_of_phanerozoic',
-                description: 'talent_descr.albedo_opening_of_phanerozoic_buffed',
-                info: { constellation: 2 },
-            }),
-            new ConditionBoolean({
-                name: 'party.albedo_opening_of_hanerozoic_buffed_10s',
-                serializeId: 9,
-                rotation: 'party',
-                title: 'talent_name.albedo_homuncular_nature',
-                hideCondition: [condPartyWitchHomeworkOff],
-                condition: new ConditionAnd([
-                    condPartyWitchHomeworkOn,
-                    new ConditionBoolean({name: 'party.albedo_opening_of_hanerozoic_buffed'}),
-                    new ConditionBoolean({name: 'party.albedo_homuncular_nature'}),
-                ]),
-                stats: {
-                    mastery: 125,
-                },
-                info: { constellation: 2 },
-            }),
-            new ConditionBoolean({
-                name: 'party.albedo_dust_of_purification',
-                serializeId: 3,
-                rotation: 'party',
-                title: 'talent_name.albedo_dust_of_purification',
-                statTitle: 'talent_name.whisper_of_the_jinn_mastery',
-                description: 'talent_descr.albedo_dust_of_purification',
-                hideCondition: [condPartyWitchHomeworkOn],
-                condition: condPartyWitchHomeworkOff,
-                stats: {
-                    dmg_all: TalentValues.C6ShieldDmg,
-                },
-                info: {
-                    constellation: 6,
-                },
-            }),
-            new ConditionBoolean({
-                name: 'party.albedo_dust_of_purification',
-                serializeId: 3,
-                rotation: 'party',
-                title: 'talent_name.albedo_dust_of_purification',
-                statTitle: 'talent_name.whisper_of_the_jinn_mastery',
-                description: 'talent_descr.albedo_dust_of_purification_buffed',
-                hideCondition: [condPartyWitchHomeworkOff],
-                condition: condPartyWitchHomeworkOn,
-                stats: {
-                    dmg_all: TalentValues.C6ShieldDmg,
-                },
-                info: {
-                    constellation: 6,
-                },
-            }),
-        ],
-        postEffects: [
-            new PostEffectStats({
-                from: 'albedo_def_total',
-                percent: new StatTable('dmg_all', [4 / 1000]),
-                statCap: new ValueTable([12]),
-                conditions: [
-                    condPartyWitchHomeworkOn,
-                    condHexereiResonanceOn,
-                    new ConditionBoolean({name: 'albedo_def_total'}),
-                    new ConditionBoolean({name: 'party.albedo_solar_isotoma_buff'}),
-                ],
-            }),
-            new PostEffectStats({
-                from: 'albedo_def_total',
-                percent: new StatTable('dmg_all', [10 / 1000]),
-                statCap: new ValueTable([30]),
-                conditions: [
-                    condPartyWitchHomeworkOn,
-                    condHexereiResonanceOn,
-                    new ConditionBoolean({name: 'albedo_def_total'}),
-                    new ConditionBoolean({name: 'party.albedo_silver_isotoma_buff'}),
-                    condIsWitch,
-                ],
-            }),
-        ],
-    }
+    retiredParty: [[8, 'checkbox'], [10, 'number'], [11, 'checkbox'], [12, 'checkbox'], [1, 'checkbox'], [2, 'checkbox'], [7, 'checkbox'], [5, 'checkbox'], [9, 'checkbox'], [3, 'checkbox']],
 });
 

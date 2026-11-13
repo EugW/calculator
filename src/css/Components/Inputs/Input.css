@@ -142,6 +142,8 @@
     border-right: 0;
     margin-right: 0;
     flex-grow: 1;
+    /* An input keeps its default width in a flex row unless allowed to shrink. */
+    min-width: 0;
     text-align: left;
     padding-left: 10px;
     height: 28px;

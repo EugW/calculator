@@ -1,5 +1,7 @@
 import { ArtifactSet } from "../../../classes/ArtifactSet";
 import { ConditionStatic } from "../../../classes/Condition/Static";
+import { artifactSetTables } from "../../generated/ArtifactSetTables";
+import { percent } from "../../Params";
 
 export const Gambler = new ArtifactSet({
     serializeId: 10,
@@ -18,7 +20,7 @@ export const Gambler = new ArtifactSet({
                     title: 'set_bonus.gambler_2',
                     description: 'set_descr.gambler_2',
                     stats: {
-                        dmg_skill: 20,
+                        dmg_skill: percent(artifactSetTables.Gambler.pc2.p1),
                     },
                 })
             ],

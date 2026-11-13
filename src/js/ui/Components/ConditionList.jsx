@@ -7,6 +7,8 @@ import { Lang } from "../Lang";
 import { Checkbox, NumberInput } from "./Inputs/Input";
 import { Dropdown } from "./Inputs/Dropdown";
 import { GroupBox } from "./Inputs/GroupBox";
+import { deliveredControlNames } from "../../classes/Team/ConditionValues";
+import { isLegacySource } from "../../classes/Team/Legacy";
 import { Stats } from "../../classes/Stats";
 
 let lang = new Lang();
@@ -15,6 +17,10 @@ export class ConditionList extends React.Component {
     render() {
         let items = [];
         let counter = 0;
+        // The controls' owner: the viewed member, or the given source (an
+        // entry of the team's legacy source).
+        let member = this.props.source || this.props.app?.currentSet();
+        let deliveries = member && this.props.app ? deliveredControlNames(member) : new Set();
 
         for (let item of this.props.items) {
             ++counter;
@@ -35,12 +41,16 @@ export class ConditionList extends React.Component {
                     key={key}
                     item={item}
                     settings={this.props.settings || {}}
+                    controlSettings={this.props.controlSettings}
                     onlySelectable={this.props.onlySelectable}
                     ignoreSubconditions={this.props.ignoreSubconditions}
+                    showHidden={this.props.showHidden}
                     hideControls={this.props.hideControls}
                     onChange={this.props.onChange}
                     noWrap={this.props.noWrap}
                     charId={this.props.charId}
+                    app={deliveries.has(item.getName()) ? this.props.app : null}
+                    source={member}
                 />
             );
         }
@@ -64,10 +74,6 @@ function ConditionItem(props) {
         return null;
     }
 
-    if (type == 'party_weapon') {
-        return <PartyWeaponItem {...props} />;
-    }
-
     let subcond = true;
     if (!props.ignoreSubconditions) {
         subcond = cond.checkSubconditions(props.settings);
@@ -77,7 +83,7 @@ function ConditionItem(props) {
         return null;
     }
 
-    if (cond.isHidden(props.settings)) {
+    if (!props.showHidden && cond.isHidden(props.settings)) {
         return null;
     }
 
@@ -89,13 +95,20 @@ function ConditionItem(props) {
         return null;
     }
 
-    let stats = cond.getStats(props.settings);
+    let stats = cond.getDisplayStats(props.settings);
+    let controlSettings = props.controlSettings || props.settings;
+    if (!props.controlSettings && props.app) {
+        const source = props.source || props.app.currentSet();
+        // This is the shared default input, even when the source has a
+        // separate value for receiving its own buff.
+        controlSettings = Object.assign({}, props.settings, {[cond.getName()]: source.getSettings()[cond.getName()]});
+    }
     let separateControlLine = cond.params.separateControlLine && !props.hideControls;
     let control = props.hideControls ? '' : <div className="control">
         <ConditionControl
             item={cond}
             type={type}
-            settings={props.settings}
+            settings={controlSettings}
             onChange={props.onChange}
             subcond={subcond}
         />
@@ -108,15 +121,11 @@ function ConditionItem(props) {
             <div className="top-line">
                 {separateControlLine ? '' : control}
                 <div className="title">{cond.getTitle(stats)}</div>
-                <ConditionLoadStat
-                    stat={cond.params.loadPartyStat}
-                    name={cond.getName()}
-                    onChange={props.onChange}
-                />
                 <ConditionInfo item={cond} />
             </div>
             {separateControlLine ? <div className="top-line condition-control-line">{control}</div> : ''}
             <ConditionDescription item={cond} stats={stats} />
+            {props.app && !props.hideControls ? <ConditionReceivers item={cond} app={props.app} source={props.source} /> : null}
         </div>
     );
 
@@ -127,142 +136,48 @@ function ConditionItem(props) {
     return result;
 }
 
-class PartyWeaponItem extends React.Component {
-    constructor(props) {
-        super(props);
-
-        this.state = {
-            visible: [],
-        };
-    }
-
-    addLine() {
-        let itemsCnt = this.props.item.getMaxDisplay();
-        let index;
-
-        for (let i = 2; i <= itemsCnt; ++i) {
-            if (!this.state.visible[i-2]) {
-                index = i;
-                break;
-            }
-        }
-
-        if (index) {
-            this.state.visible[index-2] = true;
-            this.setState({visible: this.state.visible});
-        }
-    }
-
-    removeLine(number) {
-        if (number >= 2 && number <= this.props.item.getMaxDisplay()) {
-            this.state.visible[number-2] = false;
-
-            let levelCond = this.props.item.createLevelCond(number);
-            this.props.onChange(levelCond.getName(), false);
-
-            let statCond = this.props.item.createStatCond(number);
-            if (statCond) {
-                this.props.onChange(statCond.getName(), 0);
-            }
-
-            let modeCond = this.props.item.createModeCond(number);
-            if (modeCond) {
-                this.props.onChange(modeCond.getName(), '');
-            }
-        }
-    }
-
-    loadStats(number) {
-        let statName = this.props.item.params.partyStat;
-        let statCond = this.props.item.createStatCond(number);
-
-        if (statName && statCond) {
-            UI.PartyLoad.show({
-                stats: [statName + '_total'],
-                callback: (data) => {
-                    let value = data.stats.getTotal(statName);
-                    value = Stats.format(statName, value);
-                    value = value.replace(/[^\d\.]/g, '');
-
-                    this.props.onChange(statCond.getName(), value);
-                }
-            });
-        }
-    }
-
-    genControls() {
-        let cond = this.props.item;
-        let items = [];
-        let itemsCnt = this.props.item.getMaxDisplay();
-
-        for (let i = 1; i <= itemsCnt; ++i) {
-            let levelCond = cond.createLevelCond(i);
-            let statCond = cond.createStatCond(i);
-            let modeCond = cond.createModeCond(i);
-            let isVisible = i == 1 || this.state.visible[i-2] || levelCond.isActive(this.props.settings) || modeCond?.isActive(this.props.settings);
-
-            if (i >= 2 && isVisible) {
-                this.state.visible[i-2] = true;
-            }
-
-            items.push(
-                <div key={i} className={isVisible ? '' : 'hidden'}>
-                    <div className="top-line">
-                        {statCond ? <div className="control">
+/**
+ * Per-recipient values inherit until the user explicitly overrides them. The
+ * source is the viewed member, or an entry of the team's legacy source.
+ */
+export function ConditionReceivers({item, app, source = app.currentSet()}) {
+    const team = app.getTeam();
+    // A member's value for itself is its own; an entry delivers to every member.
+    if (team.getMembers().length < (isLegacySource(source) ? 1 : 2)) return null;
+    const name = item.getName();
+    const sourceId = source.getSourceId();
+    const evaluation = app.teamView().evaluation();
+    return (
+        <details className="condition-receivers">
+            <summary>{lang.get('team.condition_receivers')}</summary>
+            {team.getMembers().map((receiver) => {
+                const receiverId = receiver.char.getId();
+                const values = team.getConditionValues(sourceId, receiverId);
+                const overridden = Object.prototype.hasOwnProperty.call(values, name);
+                const settings = evaluation.sourceView(source, evaluation.member(receiver).settings());
+                const fallback = source.getSettings()[name] ?? (item.getType().startsWith('dropdown') ? '' : 0);
+                return (
+                    <div className="condition-receiver" key={receiverId} data-receiver={receiverId}>
+                        <div className="condition-receiver-name">{lang.get(receiver.char.object.getName())}</div>
+                        <Checkbox
+                            title={lang.get('team.condition_override')}
+                            checked={overridden}
+                            onChange={(checked) => app.setConditionValue(sourceId, receiverId, name, checked ? fallback : null)}
+                        />
+                        {overridden ? <div className="control">
                             <ConditionControl
-                                item={statCond}
-                                type={statCond.getType()}
-                                settings={this.props.settings}
-                                onChange={this.props.onChange}
+                                item={item}
+                                type={item.getType()}
+                                settings={Object.assign({}, settings, values)}
+                                subcond={item.checkSubconditions(settings)}
+                                onChange={(key, value) => app.setConditionValue(sourceId, receiverId, key, value)}
                             />
-                        </div> : ''}
-                        <div className="control">
-                            <ConditionControl
-                                item={levelCond}
-                                type={levelCond.getType()}
-                                settings={this.props.settings}
-                                onChange={this.props.onChange}
-                            />
-                        </div>
-                        <div className="title">{cond.getTitle()}</div>
-                        {statCond && cond.params.partyStat ? <div className="weapon party-load" onClick={() => this.loadStats(i)} /> : ''}
-                        {i == 1 ? <ConditionInfo item={cond} /> : ''}
-                        {i == 1 ?
-                            (itemsCnt > 1 ? <div className="info" onClick={() => this.addLine()}>+</div> : '')
-                            : <div className="info" onClick={() => this.removeLine(i)}>-</div>
-                        }
+                        </div> : <span className="condition-inherited">{lang.get('team.condition_inherit')}</span>}
                     </div>
-                    {modeCond ? <div className="top-line party-weapon-mode-line">
-                        <div className="control party-weapon-mode-control">
-                            <ConditionControl
-                                item={modeCond}
-                                type={modeCond.getType()}
-                                settings={this.props.settings}
-                                onChange={this.props.onChange}
-                            />
-                        </div>
-                    </div> : ''}
-                </div>
-            );
-        }
-
-        return items;
-    }
-
-    render() {
-        let cond = this.props.item;
-        let type = cond.getType();
-        let stats = cond.getStats(this.props.settings);
-
-        return (
-            <GroupBox>
-                <div className="condition-list-item party-weapon">
-                    {this.genControls()}
-                    <ConditionDescription item={cond} stats={stats} />
-                </div>
-            </GroupBox>
-        );
-    }
+                );
+            })}
+        </details>
+    );
 }
 
 function ConditionControl(props) {
@@ -421,43 +336,6 @@ function ConditionDescription(props) {
     return (
         <div className={'description' + (icon ? ' with-icon' : '')}>{icon}{parse(descr)}</div>
     );
-}
-
-class ConditionLoadStat extends React.Component {
-    handleSelectStat() {
-        UI.PartyLoad.show({
-            stats: [this.props.stat],
-            callback: (data) => {
-                let stat = this.props.stat;
-                let isTotal = /_total/.exec(stat);
-                stat = stat.replace('_total', '');
-                let value;
-
-                if (isTotal) {
-                    value = data.stats.getTotal(stat);
-                } else {
-                    value = data.stats.get(stat);
-                }
-                value = Stats.format(stat, value);
-                value = value.replace(/[^\d\.]/g, '');
-
-                this.props.onChange(this.props.name, value);
-            }
-        });
-    }
-
-    render() {
-        if (!this.props.stat || !this.props.name) {
-            return '';
-        }
-
-        return (
-            <div
-                className="party-load"
-                onClick={() => this.handleSelectStat()}
-            />
-        );
-    }
 }
 
 function dropwdownValue(item) {

@@ -21,6 +21,7 @@ import { StatTable } from "../../classes/StatTable";
 import { ValueTable } from "../../classes/ValueTable";
 import { charTables } from "../generated/CharTables";
 import { charTalentTables } from "../generated/CharTalentTables";
+import { percent } from "../Params";
 
 const Talents = new DbObjectTalents({
     attack: {
@@ -137,11 +138,11 @@ const Talents = new DbObjectTalents({
     },
 });
 
-const A1Healing = 15;
-const A4MasteryDmg = 25;
-const A4MasteryHeal = 75;
-const C4SkillDmg = 9.7;
-const C6Mastery = 150;
+const A1Healing = percent(charTalentTables.Kuki.a1.p2);
+const A4MasteryDmg = percent(charTalentTables.Kuki.a4.p2);
+const A4MasteryHeal = percent(charTalentTables.Kuki.a4.p1);
+const C4SkillDmg = percent(charTalentTables.Kuki.c4.p1);
+const C6Mastery = charTalentTables.Kuki.c6.p3;
 
 export const KukiShinobu = new DbObjectChar({
     name: 'kuki_shinobu',

@@ -6,7 +6,9 @@ import { Lang } from "../../Lang";
 import { Stats, isPercent } from "../../../classes/Stats";
 import { FeatureCompiler } from "../../../classes/Feature2/Compiler";
 import { CConst } from "../../../classes/Feature2/Compile/Types/Item";
-import { CMulti, CSum } from "../../../classes/Feature2/Compile/Types/Block";
+import { CSum } from "../../../classes/Feature2/Compile/Types/Block";
+import { CONTRIBUTION_WEIGHTS } from "../../../classes/Feature2/Compile/Types/Damage";
+import { enemyStatName, enemyStatOf } from "../../../classes/Team/EnemyStats";
 
 const ROOT_TYPES = {
     'base_damage': LeafRoot,
@@ -26,6 +28,7 @@ const ROOT_TYPES = {
     'block_subtract': LeafRootSubtract,
     'block_sum_plus': LeafRootSum,
     'block_crit_dmg': LeafRootSum,
+    'block_sum': LeafRootSum,
 };
 
 const INLINE_TYPES = {
@@ -77,7 +80,9 @@ export class FeatureViewTree extends React.Component {
 
         buildData.applyPostEffects();
 
-        let tree = this.props.feature.getTree(buildData);
+        let feature = this.props.feature;
+        let result = feature.getResult(buildData.clone())[feature.getName()];
+        let tree = feature.getTree(buildData);
         let element = this.props.feature.getElement(buildData);
         let compiler = new FeatureCompiler(tree, buildData.postItems);
         buildData.stats.ensure(compiler.usedStats);
@@ -85,7 +90,7 @@ export class FeatureViewTree extends React.Component {
 
         let staticStats = [];
         for (let stat of compiler.usedStats) {
-            if (['enemy_def_reduce', 'enemy_def_ignore'].includes(stat)) {
+            if ([enemyStatName('enemy_def_reduce'), 'def_ignore'].includes(stat)) {
                 continue;
             }
             if (!buildData.stats.get(stat) && !buildData.stats.get(stat +'_base')) {
@@ -101,66 +106,232 @@ export class FeatureViewTree extends React.Component {
             resistanceValue: buildData.getResistance(element),
         };
 
-        let items = [];
-        for (let item of ungroupTree(tree.items)) {
-            let type = item.getType();
-            let leaf = ROOT_TYPES[type];
-            if (!leaf) {
-                console.log('unknown root type '+ type);
-                continue;
-            }
-
-            compiler.processBlock(item, processOpts);
-
-            items.push(React.createElement(leaf, {
-                key: 'item'+ (items.length),
-                tree: item,
-                data: buildData,
-                title: type,
-            }));
-        }
-
-        let type = tree.getType();
-        let leaf = ROOT_TYPES[type];
-        if (leaf) {
-            let resultTree = tree;
-            if (this.props.isCrit && tree.critDmg) {
-                resultTree = new CMulti([
-                    ...tree.items,
-                    tree.critDmg,
-                ]);
-            }
-
-            items.unshift(React.createElement(leaf, {
-                key: 'base',
-                tree: resultTree,
-                data: buildData,
-                title: type,
-            }));
+        let process = (item) => compiler.processBlock(item, processOpts);
+        let items;
+        let hasCrit;
+        if (tree.getType() == 'damage_contribution_result') {
+            // A reaction the team deals together: the ranking, then every
+            // contributor's own formula.
+            let parts = tree.items.map((part) => contributionPart(part, buildData, this.props.build));
+            items = [<ContributionRanking key="ranking" parts={parts} />];
+            parts.forEach((part, index) => {
+                items.push(<ContributionTitle key={'part' + index} part={part} />);
+                items = items.concat(damageItems(part.tree, part.data, process, false, 'part' + index + '.'));
+            });
+            hasCrit = true;
         } else {
-            console.log('unknown root type '+ type);
-        }
-
-        if (this.props.isCrit && tree.critDmg) {
-            compiler.processBlock(tree.critDmg, processOpts);
-            let critType = tree.critDmg.getType();
-            let critLeaf = ROOT_TYPES[critType];
-            if (critLeaf) {
-                items.push(React.createElement(critLeaf, {
-                    key: 'crit_dmg',
-                    tree: tree.critDmg,
-                    data: buildData,
-                    title: 'crit_dmg',
-                }));
-            }
+            hasCrit = !!tree.critDmg && !result?.noCritValues;
+            items = damageItems(tree, buildData, process, !!result?.noCritValues, '');
         }
 
         return (
             <div className="feature-detail-tree">
+                <FeatureResults result={result} hasCrit={hasCrit} />
                 {items}
             </div>
         );
     }
+}
+
+/**
+ * The blocks of a damage tree: its result, its factors, its CRIT Rate and
+ * CRIT DMG.
+ *
+ * @param {CBlock} tree
+ * @param {BuildData} data
+ * @param {function(CBlock)} process prepares a block for showing
+ * @param {boolean} noCrit whether the result has no CRIT values (heals, shields)
+ * @param {string} prefix of the blocks' keys
+ * @returns {Array}
+ */
+function damageItems(tree, data, process, noCrit, prefix) {
+    let items = [];
+    for (let item of ungroupTree(tree.items)) {
+        let type = item.getType();
+        let leaf = ROOT_TYPES[type];
+        if (!leaf) {
+            console.log('unknown root type '+ type);
+            continue;
+        }
+
+        process(item);
+
+        items.push(React.createElement(leaf, {
+            key: prefix + 'item'+ (items.length),
+            tree: item,
+            data: data,
+            title: type,
+        }));
+    }
+
+    let type = tree.getType();
+    let leaf = ROOT_TYPES[type];
+    if (leaf) {
+        items.unshift(React.createElement(leaf, {
+            key: prefix + 'base',
+            tree: tree,
+            data: data,
+            title: type,
+        }));
+    } else {
+        console.log('unknown root type '+ type);
+    }
+
+    // Normal, average and crit are shown together: CRIT Rate and CRIT DMG are always inputs.
+    for (let [name, block] of [['crit_rate', tree.critRate], ['crit_dmg', tree.critDmg]]) {
+        if (!block || noCrit) continue;
+        process(block);
+        let critLeaf = ROOT_TYPES[block.getType()];
+        if (critLeaf) {
+            items.push(React.createElement(critLeaf, {
+                key: prefix + name,
+                tree: block,
+                data: data,
+                title: name,
+            }));
+        }
+    }
+
+    return items;
+}
+
+/**
+ * One contributor of a reaction the team deals together: its tree, its
+ * member and what it would deal alone.
+ *
+ * @param {CDamage} tree the contributor's tree (CDamageContribution's item)
+ * @param {BuildData} data the viewed member's final data
+ * @param {MemberView} view the viewed member
+ * @returns {{tree: CDamage, data: Object, name: string, normal: number, crit: number, rate: number}}
+ */
+function contributionPart(tree, data, view) {
+    let compiler = new FeatureCompiler(tree);
+    let opts = {dontProcessTree: true, dontProcessStaticValues: true};
+    compiler.prepare({}, opts);
+    compiler.compile(opts);
+    data.stats.ensure(compiler.usedStats);
+    let [normal, crit, average] = compiler.execute(data);
+
+    // A teammate's tree holds the stats it was built with, before the
+    // program's post-effects: show the final ones, as the viewed member's are.
+    tree.walk((item) => {
+        let type = item.getType();
+        if (type == 'item_stat') {
+            item.value = data.stats.get(item.stat);
+        } else if (type == 'item_stat_total') {
+            item.baseBalue = data.stats.get(item.statBaseName());
+            item.percentValue = data.stats.get(item.statPercentName());
+            item.flatValue = data.stats.get(item.statFlatName());
+            item.value = item.baseBalue * (1 + item.percentValue) + item.flatValue;
+        }
+    });
+
+    let member = tree.slot === undefined ? view.member : view.member.team.getMember(tree.slot);
+    return {
+        tree,
+        // The program's stats, read with the contributor's own level (the
+        // reaction's base value is named after it).
+        data: {stats: data.stats, settings: {char_level: member.char.getLevels().level}},
+        name: lang.get(member.char.get().getName()),
+        normal,
+        crit,
+        rate: crit > normal ? (average - normal) / (crit - normal) : 0,
+    };
+}
+
+/**
+ * How the contributions are ranked, shown without CRIT: 60% of the highest,
+ * 30% of the second, 5% of each of the rest. The results above rank them
+ * after every contributor's CRIT roll.
+ */
+function ContributionRanking(props) {
+    let sorted = [...props.parts].sort((a, b) => b.normal - a.normal);
+    let weight = (index) => CONTRIBUTION_WEIGHTS[Math.min(index, CONTRIBUTION_WEIGHTS.length - 1)];
+
+    let items = [];
+    sorted.forEach((part, index) => {
+        if (index) {
+            items.push(<span className="op" key={'plus' + index}>+</span>);
+        }
+        items.push(
+            <div key={'weight' + index} className="feature-detail-block const">
+                <div className="stat-value">{Stats.format('text_percent', weight(index) * 100, {no_decimal_zero: true})}</div>
+            </div>
+        );
+        items.push(<span className="op" key={'times' + index}>*</span>);
+        items.push(
+            <div key={'value' + index} className="feature-detail-block const">
+                <div className="stat-value">{Stats.format('atk', part.normal, {zero: true})}</div>
+                <div className="stat-name">{part.name}</div>
+            </div>
+        );
+    });
+    if (sorted.length) {
+        let total = sorted.reduce((sum, part, index) => sum + part.normal * weight(index), 0);
+        items.push(<div key="equals" className="feature-detail-block operator">=</div>);
+        items.push(
+            <div key="total" className="feature-detail-block const">
+                <div className="stat-value">{Stats.format('atk', total, {zero: true})}</div>
+            </div>
+        );
+    }
+
+    return (
+        <div className="block">
+            <div className="line">
+                <span className="block-name">{lang.get('features_view.block_damage_contribution_result')}</span>
+            </div>
+            <div className="line">{items}</div>
+            <div className="note">{lang.get('features_view.contribution_ranking')}</div>
+        </div>
+    );
+}
+
+/**
+ * Heads a contributor's formula: its member, and what it would deal alone
+ * without and with a CRIT, at its own CRIT Rate.
+ */
+function ContributionTitle(props) {
+    let part = props.part;
+    let damage = (value) => Stats.format('atk', value, {zero: true});
+
+    return (
+        <div className="block">
+            <div className="line">
+                <span className="block-name">{part.name}: {lang.get('features_view.comment_reaction_contribution')}</span>
+                <span className="block-value">
+                    {damage(part.normal)} / {damage(part.crit)}, {lang.get('features_view.block_crit_rate')} {Stats.format('text_percent', part.rate * 100, {decimal_digits: 1, no_decimal_zero: true, zero: true})}
+                </span>
+            </div>
+        </div>
+    );
+}
+
+/**
+ * The feature's result: normal, average and crit together (one value for heals and shields).
+ */
+function FeatureResults(props) {
+    let result = props.result;
+    if (!result) {
+        return '';
+    }
+
+    let values = props.hasCrit
+        ? [['normal', result.normal], ['average', result.average], ['crit', result.crit]]
+        : [['value', result.normal]];
+
+    return (
+        <div className="block results">
+            <div className="line">
+                {values.map(([name, value]) => (
+                    <div key={name} className="feature-detail-block const result">
+                        <div className="stat-value">{Stats.format('atk', value, {zero: true})}</div>
+                        <div className="stat-name">{lang.get('features_view.graph_result_' + name)}</div>
+                    </div>
+                ))}
+            </div>
+        </div>
+    );
 }
 
 function LeafRoot(props) {
@@ -655,7 +826,8 @@ function LeafInlineConst(props) {
 
     if (props.tree.stat) {
         comment = langStat(props.tree.stat, props.data);
-        if (isPercent(props.tree.stat)) {
+        // A teammate's stat (m2__crit_rate) is the stat.
+        if (isPercent(props.tree.stat.replace(/^m\d+__/, ''))) {
             value = Stats.format('text_percent', props.tree.value * 100, {decimal_digits: digits, no_decimal_zero: true});
         }
     } else if (props.tree.comment) {
@@ -715,7 +887,8 @@ function TreeValue(props) {
 }
 
 function langStat(name, data) {
-    name = name.replace('enemy_res', 'res');
+    // A teammate's stat reads as the stat (m2__atk: ATK).
+    name = (enemyStatOf(name) || name).replace(/^m\d+__/, '').replace('enemy_res', 'res');
 
     let result = lang.any(
         'features_view.stat_' + name,

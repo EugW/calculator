@@ -4,6 +4,7 @@ import { ConditionStaticRefine } from "../../../classes/Condition/Static/Refine"
 import { DbObjectWeapon } from "../../../classes/DbObject/Weapon";
 import { StatTable } from "../../../classes/StatTable";
 import { weaponStatTables } from "../../generated/WeaponStatTables";
+import { weaponPassiveTables } from "../../generated/WeaponPassiveTables";
 
 export const BalladOfTheFjords = new DbObjectWeapon({
     name: 'ballad_of_the_fjords',
@@ -20,7 +21,7 @@ export const BalladOfTheFjords = new DbObjectWeapon({
             description: 'talent_descr.weapon_ballad_of_the_fjords',
             levelSetting: 'weapon_refine',
             stats: [
-                new StatTable('mastery', [120, 150, 180, 210, 240]),
+                new StatTable('mastery', weaponPassiveTables.BalladOfTheFjords.p1),
             ],
             subConditions: [
                 new ConditionBooleanValue({

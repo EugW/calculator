@@ -2,6 +2,8 @@ import { ConditionStacks } from "../../../classes/Condition/Stacks";
 import { DbObjectWeapon } from "../../../classes/DbObject/Weapon";
 import { StatTable } from "../../../classes/StatTable";
 import { weaponStatTables } from "../../generated/WeaponStatTables";
+import { weaponPassiveTables } from "../../generated/WeaponPassiveTables";
+import { percent } from "../../Params";
 
 export const SplendorOfStillWaters = new DbObjectWeapon({
     name: 'splendor_of_tranquil_waters',
@@ -20,7 +22,7 @@ export const SplendorOfStillWaters = new DbObjectWeapon({
             maxStacks: 3,
             levelSetting: 'weapon_refine',
             stats: [
-                new StatTable('dmg_skill', [8, 10, 12, 14, 16]),
+                new StatTable('dmg_skill', percent(weaponPassiveTables.SplendorOfStillWaters.p1)),
             ],
         }),
         new ConditionStacks({
@@ -31,7 +33,7 @@ export const SplendorOfStillWaters = new DbObjectWeapon({
             maxStacks: 2,
             levelSetting: 'weapon_refine',
             stats: [
-                new StatTable('hp_percent', [14, 16, 20, 24, 28]),
+                new StatTable('hp_percent', percent(weaponPassiveTables.SplendorOfStillWaters.p4)),
             ],
         }),
     ],

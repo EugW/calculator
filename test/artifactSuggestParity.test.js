@@ -3,6 +3,7 @@ import { ArtifactsSuggest } from "../src/js/classes/ArtifactsSuggest";
 import { CalcSet } from "../src/js/classes/CalcSet";
 import { Condition } from "../src/js/classes/Condition";
 import { Stats } from "../src/js/classes/Stats";
+import { deserializeWorkerMember, serializeWorkerMember, Team } from "../src/js/classes/Team";
 import { DB } from "../src/js/db/DB";
 
 global.DB = DB;
@@ -18,20 +19,27 @@ const MAIN_STATS = {
     circlet: 'crit_dmg',
 };
 const EPSILON = 0.00001;
+const TEAMWIDE_SETS = [
+    {char: 'Aino', set: 'NightOfTheSkysUnveiling', setting: 'set.night_of_the_skys_unveiling_4'},
+    {char: 'Lisa', set: 'SilkenMoonsSerenade', setting: 'set.silken_moons_serenade_4'},
+];
 
 function makeBuild(teamwideSettings = {}) {
     const build = new CalcSet();
     const char = DB.Chars.get('Columbina');
-    const partyChar = DB.Chars.get('Aino');
 
     build.setChar(char);
     build.setWeapon(DB.Weapons.get(char.weapon).getFirst(true));
-    build.setEnemy(DB.Enemies.getFirst().getFirst());
-    build.setPartyChars([partyChar.getId()]);
-
-    if (Object.keys(teamwideSettings).length) {
-        build.setBuffsSettings(teamwideSettings);
-    }
+    const team = Team.fromMember(build);
+    TEAMWIDE_SETS.forEach((source, index) => {
+        const member = new CalcSet();
+        member.setChar(DB.Chars.get(source.char));
+        member.setWeapon(DB.Weapons.get(member.char.object.weapon).getFirst(true));
+        member.replaceArtifacts(SLOTS.slice(0, 4).map((slot) =>
+            new Artifact(5, 20, slot, source.set, MAIN_STATS[slot], [])));
+        member.setArtifactsSettings({[source.setting]: !!teamwideSettings[source.setting]});
+        team.setMember(index + 1, member);
+    });
 
     return build;
 }
@@ -92,17 +100,7 @@ function getLunarArtifactSetIds() {
 }
 
 function getTeamwideLunarArtifactSettings() {
-    return DB.Buffs.get('Artifacts').getConditions()
-        .filter((condition) => {
-            const name = condition.getName && condition.getName();
-
-            return name &&
-                name.startsWith('set_other.') &&
-                condition.getType && condition.getType() == 'checkbox' &&
-                conditionHasLunarStat(condition);
-        })
-        .map((condition) => condition.getName())
-        .sort();
+    return TEAMWIDE_SETS.map((source) => source.setting);
 }
 
 function makeTeamwideCases(settingNames) {
@@ -116,7 +114,7 @@ function makeTeamwideCases(settingNames) {
         for (let i = 0; i < settingNames.length; ++i) {
             if (mask & (1 << i)) {
                 settings[settingNames[i]] = true;
-                active.push(settingNames[i].replace('set_other.', ''));
+                active.push(settingNames[i].replace('set.', ''));
             }
         }
 
@@ -245,7 +243,7 @@ function makeArtifactSetSettings(setIds) {
 
 function cloneWorkerInput(build, artifacts) {
     return {
-        build: CalcSet.deserialize(build.serialize()),
+        build: deserializeWorkerMember(serializeWorkerMember(build)),
         artifacts: artifacts.map((artifact) => Artifact.deserialize(artifact.serialize())),
     };
 }

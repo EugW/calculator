@@ -1,4 +1,5 @@
 import {CalcObject} from "../CalcObject";
+import { Condition } from "../Condition";
 import { StatTable } from "../StatTable";
 
 export const SKILL_LEVELS = new StatTable('', [1, 2, 4, 6, 8, 10]);
@@ -62,7 +63,7 @@ export class CalcObjectCharacter extends CalcObject {
         };
     }
 
-    getConditions() {
+    getConditions(options) {
         let result = super.getConditions();
 
         if (!this.object) {
@@ -75,6 +76,16 @@ export class CalcObjectCharacter extends CalcObject {
         }
 
         result = result.concat(DB.Conditions.Character);
+        if (options && options.serialize) {
+            // A control loaded from a released party row may belong to a
+            // constellation the character does not have (a virtual
+            // character, Team/Legacy). Keep explicitly saved inputs.
+            const names = new Set(Condition.unwrap(result).map((cond) => cond.getName()));
+            result = result.concat(Condition.unwrap(this.object.getAllConditions()).filter((cond) => {
+                const name = cond.getName();
+                return !names.has(name) && Object.prototype.hasOwnProperty.call(this.settings, name);
+            }));
+        }
 
         return result;
     }
@@ -183,7 +194,7 @@ export class CalcObjectCharacter extends CalcObject {
             burst: burst,
         });
 
-        let settings = result.deserializeConditions(input);
+        let settings = result.deserializeConditions(input, result.object.getAllConditions().concat(DB.Conditions.Character));
         if (!settings) return null;
 
         result.setSettings(settings);

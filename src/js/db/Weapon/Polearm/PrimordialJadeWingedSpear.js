@@ -3,6 +3,8 @@ import { ConditionStacks } from "../../../classes/Condition/Stacks";
 import { DbObjectWeapon } from "../../../classes/DbObject/Weapon";
 import { StatTable } from "../../../classes/StatTable";
 import { weaponStatTables } from "../../generated/WeaponStatTables";
+import { weaponPassiveTables } from "../../generated/WeaponPassiveTables";
+import { percent } from "../../Params";
 
 export const PrimordialJadeWingedSpear = new DbObjectWeapon({
     name: 'primordial_jade_winged_spear',
@@ -21,8 +23,8 @@ export const PrimordialJadeWingedSpear = new DbObjectWeapon({
             maxStacks: 7,
             levelSetting: 'weapon_refine',
             stats: [
-                new StatTable('atk_percent', [3.2, 3.9, 4.6, 5.3, 6]),
-                new StatTable('text_percent', [12, 15, 18, 21, 24]),
+                new StatTable('atk_percent', percent(weaponPassiveTables.PrimordialJadeWingedSpear.p1)),
+                new StatTable('text_percent', percent(weaponPassiveTables.PrimordialJadeWingedSpear.p2)),
             ],
         }),
         new ConditionBooleanValue({
@@ -33,7 +35,7 @@ export const PrimordialJadeWingedSpear = new DbObjectWeapon({
             value: 7,
             setting: 'primordial_jade_winged_spear',
             stats: [
-                new StatTable('dmg_all', [12, 15, 18, 21, 24]),
+                new StatTable('dmg_all', percent(weaponPassiveTables.PrimordialJadeWingedSpear.p2)),
             ],
         }),
     ],

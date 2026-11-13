@@ -32,6 +32,7 @@ import { StatTableAscensionScale } from "../../classes/StatTable/Ascension/Scale
 import { ValueTable } from "../../classes/ValueTable";
 import { charTables } from "../generated/CharTables";
 import { charTalentTables } from "../generated/CharTalentTables";
+import { percent } from "../Params";
 
 
 const Talents = new DbObjectTalents({
@@ -138,14 +139,18 @@ const Talents = new DbObjectTalents({
     },
 });
 
-const shield_hp_scale = 10;
-const dew_heal = 7;
-const skill_bonus_ratio = 45;
-const skill_bonus_max = 5000;
-const ForeignTideboundBonus = 150;
-const ForeignTideboundHpBonus = 100;
-const ForeignTideboundHeal = 25;
-const ForeignTideboundCooldown = 15;
+const shield_hp_scale = percent(charTalentTables.TravelerHydro.c4.p1);
+const dew_heal = percent(charTalentTables.TravelerHydro.a1.p3);
+const skill_bonus_ratio = percent(charTalentTables.TravelerHydro.a4.p1);
+const skill_bonus_max = charTalentTables.TravelerHydro.a4.p2;
+const ForeignTideboundBonus = percent(charTalentTables.TravelerHydro.sp.p8);
+const ForeignTideboundHpBonus = percent(charTalentTables.TravelerHydro.sp.p14);
+const ForeignTideboundHeal = percent(charTalentTables.TravelerHydro.sp.p12);
+const ForeignTideboundCooldown = charTalentTables.TravelerHydro.sp.p9;
+const C1Energy = charTalentTables.TravelerHydro.c1.p1;
+const C2SpeedDown = percent(charTalentTables.TravelerHydro.c2.p1);
+const C2Duration = charTalentTables.TravelerHydro.c2.p2;
+const C6Heal = percent(charTalentTables.TravelerHydro.c6.p1);
 
 const condTravelerAether = new ConditionBoolean({name: 'traveler_aether'});
 const condLumineDefault = new ConditionNot([condTravelerAether]);
@@ -577,7 +582,7 @@ export const TravelerHydro = new DbObjectChar({
                     title: 'talent_name.traveler_hydro_swelling_lake',
                     description: 'talent_descr.traveler_hydro_swelling_lake',
                     stats: {
-                        text_value: 2,
+                        text_value: C1Energy,
                     },
                 }),
             ],
@@ -588,8 +593,8 @@ export const TravelerHydro = new DbObjectChar({
                     title: 'talent_name.traveler_hydro_trickling_purity',
                     description: 'talent_descr.traveler_hydro_trickling_purity',
                     stats: {
-                        text_percent_reduce: 30,
-                        text_duration: 3,
+                        text_percent_reduce: C2SpeedDown,
+                        text_duration: C2Duration,
                     },
                 }),
             ],
@@ -610,7 +615,7 @@ export const TravelerHydro = new DbObjectChar({
                     description: 'talent_descr.traveler_hydro_pouring_descent',
                     stats: {
                         text_percent_hp: shield_hp_scale,
-                        text_percent_hp_2: 10,
+                        text_percent_hp_2: shield_hp_scale,
                     },
                 }),
             ],
@@ -630,22 +635,10 @@ export const TravelerHydro = new DbObjectChar({
                     title: 'talent_name.traveler_hydro_tides_of_justice',
                     description: 'talent_descr.traveler_hydro_tides_of_justice',
                     stats: {
-                        text_percent_hp: 6,
+                        text_percent_hp: C6Heal,
                     },
                 }),
             ],
         },
     ]),
-    partyData: {
-        conditions: [
-            new ConditionStatic({
-                title: 'talent_name.traveler_hydro_tides_of_justice',
-                description: 'talent_descr.traveler_hydro_tides_of_justice',
-                info: {constellation: 6},
-                stats: {
-                    text_percent_hp: 6,
-                },
-            }),
-        ],
-    },
 });

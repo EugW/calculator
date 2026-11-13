@@ -3,6 +3,8 @@ import { ConditionStaticRefine } from "../../../classes/Condition/Static/Refine"
 import { DbObjectWeapon } from "../../../classes/DbObject/Weapon";
 import { StatTable } from "../../../classes/StatTable";
 import { weaponStatTables } from "../../generated/WeaponStatTables";
+import { weaponPassiveTables } from "../../generated/WeaponPassiveTables";
+import { percent } from "../../Params";
 
 export const Verdict = new DbObjectWeapon({
     name: 'verdict',
@@ -17,7 +19,7 @@ export const Verdict = new DbObjectWeapon({
             title: 'talent_name.weapon_verdict',
             description: 'talent_descr.weapon_verdict_1',
             stats: [
-                new StatTable('atk_percent', [20, 25, 30, 35, 40]),
+                new StatTable('atk_percent', weaponPassiveTables.Verdict.atk_percent),
             ],
         }),
         new ConditionStacks({
@@ -28,7 +30,7 @@ export const Verdict = new DbObjectWeapon({
             maxStacks: 2,
             levelSetting: 'weapon_refine',
             stats: [
-                new StatTable('dmg_skill', [18, 22.5, 27, 31.5, 36]),
+                new StatTable('dmg_skill', percent(weaponPassiveTables.Verdict.p1)),
             ],
         })
     ],

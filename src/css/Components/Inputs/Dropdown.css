@@ -145,7 +145,10 @@
     z-index: 2000;
 }
 
-.dropdown-wrapper.feature-dropdown .dropdown-options .dropdown-option {
+/* The options of a feature dropdown wrap: a name shows in full. In a portal
+   they are outside the wrapper and carry the class themselves. */
+.dropdown-wrapper.feature-dropdown .dropdown-options .dropdown-option,
+.dropdown-options.dropdown-portal.feature-dropdown .dropdown-option {
     height: auto;
     min-height: 26px;
     padding-top: 4px;
@@ -154,19 +157,22 @@
     line-height: 18px;
 }
 
-.dropdown-wrapper.feature-dropdown .dropdown-options .dropdown-option > .text {
+.dropdown-wrapper.feature-dropdown .dropdown-options .dropdown-option > .text,
+.dropdown-options.dropdown-portal.feature-dropdown .dropdown-option > .text {
     margin-top: 0;
     overflow: visible;
     text-overflow: clip;
     white-space: normal;
 }
 
-.dropdown-wrapper.feature-dropdown .dropdown-options .dropdown-text-content {
+.dropdown-wrapper.feature-dropdown .dropdown-options .dropdown-text-content,
+.dropdown-options.dropdown-portal.feature-dropdown .dropdown-text-content {
     display: inline;
     white-space: normal;
 }
 
-.dropdown-wrapper.feature-dropdown .dropdown-options .dropdown-option.selected::after {
+.dropdown-wrapper.feature-dropdown .dropdown-options .dropdown-option.selected::after,
+.dropdown-options.dropdown-portal.feature-dropdown .dropdown-option.selected::after {
     top: 50%;
     transform: translateY(-65%) rotate(45deg);
 }

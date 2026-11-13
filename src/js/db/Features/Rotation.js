@@ -901,4 +901,14 @@ export const Rotation = new DbObjectRotation({
     // Valeriy: 951-952
     'attack.valeriy_direct_fire_mortar': 951,
     'burst.valeriy_thunderburst_shell': 952,
+    // Rows only the team model has start at 10000, apart from the numbers
+    // the released calculator gives out: its 7.2 gave 950-952, which the
+    // first three below had before this model was released, to Mitya and
+    // Valeriy.
+    // Reactions the team deals together (Feature2/Reaction/Team): 10000-10004
+    'reaction.lunarcharged': 10000,
+    'reaction.lunarcrystallize': 10001,
+    'reaction.stellarswirl_anemo': 10002,
+    'reaction.stellarswirl_vortex_1': 10003,
+    'reaction.stellarswirl_vortex_2': 10004,
 });

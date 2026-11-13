@@ -3,6 +3,8 @@ import { ConditionBoolean } from "../../../classes/Condition/Boolean";
 import { ConditionStacks } from "../../../classes/Condition/Stacks";
 import { ConditionStatic } from "../../../classes/Condition/Static";
 import { StatTable } from "../../../classes/StatTable";
+import { artifactSetTables } from "../../generated/ArtifactSetTables";
+import { percent } from "../../Params";
 
 export const VermillionHereafter = new ArtifactSet({
     serializeId: 39,
@@ -21,7 +23,7 @@ export const VermillionHereafter = new ArtifactSet({
                     title: 'set_bonus.vermillion_hereafter_2',
                     description: 'set_descr.vermillion_hereafter_2',
                     stats: {
-                        atk_percent: 18,
+                        atk_percent: artifactSetTables.VermillionHereafter.pc2.atk_percent,
                     },
                 })
             ],
@@ -35,7 +37,7 @@ export const VermillionHereafter = new ArtifactSet({
                     title: 'set_bonus.vermillion_hereafter_4',
                     description: 'set_descr.vermillion_hereafter_4_1',
                     stats: {
-                        atk_percent: 8,
+                        atk_percent: percent(artifactSetTables.VermillionHereafter.pc4.p2),
                     },
                 }),
                 new ConditionStacks({
@@ -43,9 +45,9 @@ export const VermillionHereafter = new ArtifactSet({
                     serializeId: 24,
                     title: 'set_bonus.vermillion_hereafter_4',
                     description: 'set_descr.vermillion_hereafter_4_2',
-                    maxStacks: 4,
+                    maxStacks: artifactSetTables.VermillionHereafter.pc4.p4,
                     stats: [
-                        new StatTable('atk_percent', [10]),
+                        new StatTable('atk_percent', [percent(artifactSetTables.VermillionHereafter.pc4.p3)]),
                     ],
                     condition: new ConditionBoolean({
                         name: 'set.vermillion_hereafter_4_burst',

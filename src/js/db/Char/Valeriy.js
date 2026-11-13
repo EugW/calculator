@@ -3,11 +3,13 @@ import { ConditionAnd } from "../../classes/Condition/And";
 import { ConditionAscensionChar } from "../../classes/Condition/Ascension/Char";
 import { ConditionBoolean } from "../../classes/Condition/Boolean";
 import { ConditionConstellation } from "../../classes/Condition/Constellation";
+import { ConditionOnField } from "../../classes/Condition/Field";
 import { ConditionNot } from "../../classes/Condition/Not";
 import { ConditionNumber } from "../../classes/Condition/Number";
-import { ConditionNumberTalent } from "../../classes/Condition/Number/Talent";
+import { ConditionReceiver } from "../../classes/Condition/Receiver";
 import { ConditionStacks } from "../../classes/Condition/Stacks";
 import { ConditionStatic } from "../../classes/Condition/Static";
+import { ConditionTeam } from "../../classes/Condition/Team";
 import { DbObjectChar } from "../../classes/DbObject/Char";
 import { DbObjectConstellation } from "../../classes/DbObject/Constellation";
 import { DbObjectTalents } from "../../classes/DbObject/Talents";
@@ -22,9 +24,11 @@ import { FeatureMultiplierList } from "../../classes/Feature2/Multiplier/List";
 import { FeatureMultiplierTarget } from "../../classes/Feature2/Multiplier/Target";
 import { FeatureShield } from "../../classes/Feature2/Shield";
 import { StatTable } from "../../classes/StatTable";
+import { RECEIVERS } from "../../classes/Team/Receivers";
 import { ValueTable } from "../../classes/ValueTable";
 import { charTables } from "../generated/CharTables";
 import { charTalentTables } from "../generated/CharTalentTables";
+import { percent, plus, times } from "../Params";
 
 const Talents = new DbObjectTalents({
     attack: {
@@ -110,25 +114,26 @@ const Talents = new DbObjectTalents({
     links: [11370001, 11370002, 11370003, 11330003],
 });
 
+// Passive and constellation values. Typed where the game data has no
+// position: the 15 stacks of Offensive Directive and Impact Momentum's range
+// (at least 40 to use it, 100 at most) are fixed inside the abilities.
 const OffensiveDirectiveStacks = 15;
 const ImpactMomentumMin = 40;
 const ImpactMomentumMax = 100;
-const C4ImpactMomentumMax = 130;
-const A4ElectroAtkPerMomentum = 0.3;
-const A4StellarConductAtkPerMomentum = 0.9;
-const C2Mastery = 100;
-const C2ShieldAtkPerExcessMomentum = 8;
-const C2ExcessMomentumMax = 20;
-const C6DmgBonus = 100;
-const C6ElectroCritRate = 10;
-const C6StellarConductCritDmg = 40;
+// "Impact Momentum's limit is increased by 30": C4_MaxCV_Add_Ratio.
+const C4ImpactMomentumMax = times(ImpactMomentumMax, plus(1, charTalentTables.Valeriy.c4.p1));
+const A4ElectroAtkPerMomentum = percent(charTalentTables.Valeriy.a4.p1);
+const A4StellarConductAtkPerMomentum = percent(charTalentTables.Valeriy.a4.p2);
+const C2ShieldAtkPerExcessMomentum = percent(charTalentTables.Valeriy.c2.p1);
+const C2Mastery = charTalentTables.Valeriy.c2.p2;
+const C2ExcessMomentumMax = charTalentTables.Valeriy.c2.p3;
+const C6DmgBonus = percent(charTalentTables.Valeriy.c6.p1);
+const C6ElectroCritRate = percent(charTalentTables.Valeriy.c6.p3);
+const C6StellarConductCritDmg = percent(charTalentTables.Valeriy.c6.p4);
 
 const radianceName = 'valeriy_radiance_stellarconduct';
 const directiveName = 'valeriy_offensive_directive';
 const momentumName = 'valeriy_impact_momentum';
-const partyRadianceName = 'party.valeriy_radiance_stellarconduct';
-const partyDirectiveName = 'party.valeriy_offensive_directive';
-const partyMomentumName = 'party.valeriy_impact_momentum';
 
 // Feature-local bucket for the C6 Point-Blank Bombardment and Thunderburst Shell bonus.
 const breachDmgBonus = 'dmg_valeriy_breach';
@@ -136,6 +141,22 @@ const breachDmgBonus = 'dmg_valeriy_breach';
 const maxMomentum = (settings) => (settings.char_constellation || 0) >= 4
     ? C4ImpactMomentumMax
     : ImpactMomentumMax;
+
+/**
+ * "Valeriy enters the Radiance: Stellar-Conduct state while within a Polestar
+ * Field": the state needs the team's field, whatever the saved control says.
+ * The released calculator read the control alone, and its numbers were
+ * recorded that way; the conversion row and the solo baseline open this gate.
+ */
+export const valeriyPolestarField = new ConditionTeam({condition: new ConditionBoolean({name: 'polestar_field'})});
+const inRadiance = () => new ConditionAnd([
+    new ConditionBoolean({name: radianceName}),
+    valeriyPolestarField,
+]);
+const directiveActive = () => new ConditionStacks({name: directiveName, maxStacks: OffensiveDirectiveStacks});
+// "A nearby active character in the party": the team's on-field member,
+// Valeriy included.
+const activeRecipient = () => new ConditionReceiver({condition: new ConditionOnField()});
 
 // Outside Radiance, Offensive Directive raises ordinary Electro NA/CA/Plunge/Skill/Burst DMG.
 const electroDirectTarget = () => new FeatureMultiplierTarget({
@@ -151,13 +172,23 @@ const stellarConductFlatTarget = () => new FeatureMultiplierTarget({
 });
 
 /**
- * Builds the two Offensive Directive branches plus their A4 per-Momentum terms.
- * Self and party versions only differ in where Valeriy's ATK, talent level and
- * state switches are read from.
+ * Offensive Directive: "When a nearby active character in the party deals
+ * Electro DMG to an opponent with a Normal Attack, Charged Attack, Plunging
+ * Attack, Elemental Skill, or Elemental Burst, 1 stack of Offensive Directive
+ * is consumed to increase that DMG, with the increase based on Valeriy's
+ * ATK" (in the Radiance: Stellar-Conduct state: Electro DMG considered
+ * Stellar-Conduct reaction DMG), and Into the Breach (A4): "Each point of
+ * Impact Momentum consumed increases this DMG Bonus by an amount equal to
+ * 0.9% / 0.3% of Valeriy's ATK."
+ *
+ * Delivered to the on-field member and computed in Valeriy's scope: his ATK,
+ * his talent level, his stacks and state. Game data: Avatar_Valeriy_ExtraAttack,
+ * UNIQUE_Valeriy_Cannon_Buff_ForCurLocalAvatar adds damageExtra from
+ * FIGHT_PROP_CUR_ATTACK (the total; a scaling on ATK reads it as it is), by
+ * the attack tags of the two branches (ability_channels.txt: s1.p7, s1.p8,
+ * a4.p1, a4.p2).
  */
-function offensiveDirectiveMultipliers({scaling, leveling, source, directive, radiance, momentum, a4Condition}) {
-    const directiveActive = () => new ConditionStacks({name: directive, maxStacks: OffensiveDirectiveStacks});
-    const inRadiance = () => new ConditionBoolean({name: radiance});
+function offensiveDirectiveMultipliers() {
     const branches = [
         {
             table: 'attack.valeriy_offensive_directive_electro',
@@ -176,23 +207,23 @@ function offensiveDirectiveMultipliers({scaling, leveling, source, directive, ra
     const result = [];
     for (const branch of branches) {
         result.push(new FeatureMultiplier({
-            scaling: scaling,
-            leveling: leveling,
-            source: source,
+            receivers: RECEIVERS.TEAM,
+            leveling: 'char_skill_attack',
             values: Talents.get(branch.table),
-            condition: new ConditionAnd([directiveActive(), branch.state()]),
+            condition: new ConditionAnd([directiveActive(), branch.state(), activeRecipient()]),
             target: branch.target(),
         }));
         result.push(new FeatureMultiplier({
-            scaling: scaling,
-            source: source || 'ascension4',
+            receivers: RECEIVERS.TEAM,
+            source: 'ascension4',
             values: new ValueTable([branch.perMomentum]),
-            stacksLeveling: momentum,
+            stacksLeveling: momentumName,
             maxStacks: C4ImpactMomentumMax,
             condition: new ConditionAnd([
-                ...(a4Condition ? [a4Condition()] : []),
+                new ConditionAscensionChar({ascension: 4}),
                 directiveActive(),
                 branch.state(),
+                activeRecipient(),
             ]),
             target: branch.target(),
         }));
@@ -344,7 +375,7 @@ export const Valeriy = new DbObjectChar({
             info: {special: true},
             rotation: 'self',
             subConditions: [
-                new ConditionBoolean({name: 'polestar_field'}),
+                valeriyPolestarField,
             ],
         }),
         new ConditionStacks({
@@ -379,13 +410,7 @@ export const Valeriy = new DbObjectChar({
             condition: new ConditionAscensionChar({ascension: 4}),
         }),
     ],
-    multipliers: offensiveDirectiveMultipliers({
-        leveling: 'char_skill_attack',
-        directive: directiveName,
-        radiance: radianceName,
-        momentum: momentumName,
-        a4Condition: () => new ConditionAscensionChar({ascension: 4}),
-    }),
+    multipliers: offensiveDirectiveMultipliers(),
     constellation: new DbObjectConstellation([
         {
             conditions: [
@@ -397,9 +422,16 @@ export const Valeriy = new DbObjectChar({
         },
         {
             conditions: [
+                // C2: "All nearby party members gain 100 Elemental Mastery
+                // for 18s after Valeriy uses his Elemental Skill." Game data:
+                // Avatar_Valeriy_ElementalArt,
+                // UNIQUE_Valeriy_ElementalArt_Shield_C2_Mastery writes
+                // Actor_ElemMasteryDelta (premod), no stat read: a flat
+                // condition needs nothing.
                 new ConditionBoolean({
                     name: 'valeriy_ranks_that_charge_as_one',
                     serializeId: 4,
+                    receivers: RECEIVERS.TEAM,
                     title: 'talent_name.valeriy_ranks_that_charge_as_one',
                     description: 'talent_descr.valeriy_ranks_that_charge_as_one',
                     rotation: 'self',
@@ -448,15 +480,26 @@ export const Valeriy = new DbObjectChar({
         },
         {
             conditions: [
+                // "Their DMG is increased by 100%": his own two hits.
                 new Condition({
                     isHidden: true,
                     stats: {
                         [breachDmgBonus]: C6DmgBonus,
                     },
                 }),
+                // "Opponents they hit have the CRIT Rate of Electro DMG they
+                // take increased by 10% for 7s. If the Electro DMG taken is
+                // Stellar-Conduct reaction DMG, that DMG instance's CRIT DMG
+                // is also increased by 40%": a state of the opponent, for
+                // every member's Electro DMG. Game data:
+                // Avatar_Valeriy_Constellation_6,
+                // UNIQUE_Valeriy_Constellation_6_Piercing_Debuff adds
+                // bonusCritical and bonusCriticalHurt to hits: CRIT of the
+                // hits, no member's stat (md/buff_chains.md).
                 new ConditionBoolean({
                     name: 'valeriy_the_strength_to_breach_enemy_lines',
                     serializeId: 6,
+                    receivers: RECEIVERS.TEAM,
                     title: 'talent_name.valeriy_the_strength_to_breach_enemy_lines',
                     description: 'talent_descr.valeriy_the_strength_to_breach_enemy_lines',
                     rotation: 'self',
@@ -468,96 +511,5 @@ export const Valeriy = new DbObjectChar({
             ],
         },
     ]),
-    partyData: {
-        loadStats: {
-            stats: ['atk_total'],
-            settings: ['char_skill_attack'],
-        },
-        conditions: [
-            new ConditionNumber({
-                name: 'valeriy_atk_total',
-                serializeId: 1,
-                title: 'talent_name.stats_total_atk',
-                partyStat: 'atk_total',
-                max: 10000,
-            }),
-            new ConditionNumberTalent({
-                name: 'valeriy_char_skill_attack',
-                serializeId: 2,
-                title: 'talent_name.valeriy_sword_and_shield',
-                partySetting: 'char_skill_attack',
-            }),
-            new ConditionBoolean({
-                name: 'party.valeriy_constellation_3',
-                serializeId: 3,
-                title: 'talent_name.valeriy_vigilance_at_close_quarters',
-                info: {constellation: 3},
-                settings: {
-                    valeriy_char_skill_attack_bonus: 3,
-                },
-            }),
-            new ConditionBoolean({
-                name: partyRadianceName,
-                serializeId: 4,
-                title: 'talent_name.valeriy_subzero_conditioning',
-                description: 'talent_descr.valeriy_subzero_conditioning',
-                info: {special: true},
-                rotation: 'party',
-                subConditions: [
-                    new ConditionBoolean({name: 'polestar_field'}),
-                ],
-            }),
-            new ConditionStacks({
-                name: partyDirectiveName,
-                serializeId: 5,
-                title: 'talent_name.n11370002',
-                description: 'talent_descr.n11370002',
-                rotation: 'party',
-                maxStacks: OffensiveDirectiveStacks,
-            }),
-            new ConditionNumber({
-                name: partyMomentumName,
-                serializeId: 6,
-                title: 'talent_name.valeriy_into_the_breach',
-                description: 'talent_descr.valeriy_into_the_breach',
-                info: {ascension: 4},
-                rotation: 'party',
-                min: ImpactMomentumMin,
-                max: C4ImpactMomentumMax,
-                forceSettings: true,
-                noStat: true,
-            }),
-            new ConditionBoolean({
-                name: 'party.valeriy_ranks_that_charge_as_one',
-                serializeId: 7,
-                title: 'talent_name.valeriy_ranks_that_charge_as_one',
-                description: 'talent_descr.valeriy_ranks_that_charge_as_one',
-                info: {constellation: 2},
-                rotation: 'party',
-                stats: {
-                    mastery: C2Mastery,
-                },
-            }),
-            new ConditionBoolean({
-                name: 'party.valeriy_the_strength_to_breach_enemy_lines',
-                serializeId: 8,
-                title: 'talent_name.valeriy_the_strength_to_breach_enemy_lines',
-                description: 'talent_descr.valeriy_the_strength_to_breach_enemy_lines',
-                info: {constellation: 6},
-                rotation: 'party',
-                stats: {
-                    crit_rate_electro: C6ElectroCritRate,
-                    crit_dmg_electro_stellarconduct: C6StellarConductCritDmg,
-                },
-            }),
-        ],
-        multipliers: offensiveDirectiveMultipliers({
-            scaling: 'valeriy_atk_total',
-            leveling: 'valeriy_char_skill_attack',
-            source: 'valeriy',
-            directive: partyDirectiveName,
-            radiance: partyRadianceName,
-            momentum: partyMomentumName,
-        }),
-    },
+    retiredParty: [[1, 'number'], [2, 'number'], [3, 'checkbox'], [4, 'checkbox'], [5, 'stacks'], [6, 'number'], [7, 'checkbox'], [8, 'checkbox']],
 });

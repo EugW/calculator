@@ -1,14 +1,13 @@
+// The database joins this worker's module graph; see webpack.config.js.
+import "../db";
 import { Artifact } from "../classes/Artifact";
-import { CalcSet } from "../classes/CalcSet";
-import { Condition } from "../classes/Condition";
+import { deserializeWorkerMember } from "../classes/Team";
 import { ArtifactGenerator, getMainStatCombinations } from "../classes/Generator/Artifacts";
 import { ArtifactGeneratorKQM } from "../classes/Generator/ArtifactsKQM";
 import { sendWorkerProgeressInc, sendWorkerProgeressTotal } from "../classes/WorkerFactory";
 
-importScripts('db.js?'+ __VERSION__);
-
 self.onmessage = function(input) {
-    let buildBase = CalcSet.deserialize(input.data.build);
+    let buildBase = deserializeWorkerMember(input.data.build);
     let featureName = input.data.feature;
 
     let items = input.data.items;
@@ -35,7 +34,9 @@ self.onmessage = function(input) {
             ascension: 6,
             refine: item.refine,
         });
-        build.setWeaponSettings(item.settings);
+        // A scenario can describe the enemy (affected by Hydro): that part
+        // is the team's.
+        build.setWeaponSettings(build.team.applyShared(item.settings));
 
         if (input.data.artifactMode == 'generate') {
             let params = {
@@ -48,7 +49,6 @@ self.onmessage = function(input) {
                     mode: generatorSettings.mode,
                     minRecharge: generatorSettings.minRecharge,
                     kqms: generatorSettings.kqms,
-                    required_sets_settings: generatorSettings.required_sets_settings
                 },
             };
             params.combinations = getMainStatCombinations(params);
@@ -64,19 +64,11 @@ self.onmessage = function(input) {
             for (let art of result[0].artifacts) {
                 artifacts.push(art.serialize());
             }
+            // Set effects read the member's set-bonus profile.
             build.replaceArtifacts(result[0].artifacts);
-
-            let artConditions = build.getConditions({objects: 'artifacts'});
-            let allSettings = Condition.allConditionsOn(artConditions);
-            if (generatorSettings.required_sets_settings) {
-                allSettings = Object.assign(allSettings, generatorSettings.required_sets_settings);
-            }
-            build.setArtifactsSettings(allSettings);
         }
 
-        let feature = build.getFeatureByName(featureName);
-        let data = build.getBuildData();
-        let featureResult = feature.getResult(data)[featureName];
+        let featureResult = build.getFeatureResultByName(featureName);
 
         if (featureResult) {
             let resultItem = {

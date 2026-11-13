@@ -2,6 +2,8 @@ import { ConditionStaticRefine } from "../../../classes/Condition/Static/Refine"
 import { DbObjectWeapon } from "../../../classes/DbObject/Weapon";
 import { StatTable } from "../../../classes/StatTable";
 import { weaponStatTables } from "../../generated/WeaponStatTables";
+import { weaponPassiveTables } from "../../generated/WeaponPassiveTables";
+import { percent } from "../../Params";
 
 export const SacrificialBow = new DbObjectWeapon({
     name: 'sacrificial_bow',
@@ -16,8 +18,8 @@ export const SacrificialBow = new DbObjectWeapon({
             title: 'talent_name.weapon_sacrificial_passive',
             description: 'talent_descr.weapon_sacrificial_passive',
             stats: [
-                new StatTable('text_percent', [40, 50, 60, 70, 80]),
-                new StatTable('text_cooldown', [30, 26, 22, 19, 16]),
+                new StatTable('text_percent', percent(weaponPassiveTables.SacrificialBow.p1)),
+                new StatTable('text_cooldown', weaponPassiveTables.SacrificialBow.p2),
             ],
         }),
     ],

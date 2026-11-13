@@ -4,6 +4,8 @@ import { FeatureDamage } from "../../../classes/Feature2/Damage";
 import { FeatureMultiplier } from "../../../classes/Feature2/Multiplier";
 import { StatTable } from "../../../classes/StatTable";
 import { weaponStatTables } from "../../generated/WeaponStatTables";
+import { weaponPassiveTables } from "../../generated/WeaponPassiveTables";
+import { percent } from "../../Params";
 
 export const FilletBlade = new DbObjectWeapon({
     name: 'fillet_blade',
@@ -18,7 +20,7 @@ export const FilletBlade = new DbObjectWeapon({
             title: 'talent_name.weapon_fillet_blade',
             description: 'talent_descr.weapon_fillet_blade',
             stats: [
-                new StatTable('text_percent_dmg', [240, 280, 320, 360, 400]),
+                new StatTable('text_percent_dmg', percent(weaponPassiveTables.FilletBlade.p2)),
             ],
         }),
     ],
@@ -28,7 +30,7 @@ export const FilletBlade = new DbObjectWeapon({
             multipliers: [
                 new FeatureMultiplier({
                     leveling: 'weapon_refine',
-                    values: new StatTable('weapon_additional_dmg', [240, 280, 320, 360, 400]),
+                    values: new StatTable('weapon_additional_dmg', percent(weaponPassiveTables.FilletBlade.p2)),
                 }),
             ],
         }),

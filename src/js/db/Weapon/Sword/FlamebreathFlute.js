@@ -2,6 +2,8 @@ import { ConditionBooleanRefine } from "../../../classes/Condition/Boolean/Refin
 import { DbObjectWeapon } from "../../../classes/DbObject/Weapon";
 import { StatTable } from "../../../classes/StatTable";
 import { weaponStatTables } from "../../generated/WeaponStatTables";
+import { weaponPassiveTables } from "../../generated/WeaponPassiveTables";
+import { percent } from "../../Params";
 
 export const FlamebreathFlute = new DbObjectWeapon({
     name: 'flamebreath_flute',
@@ -18,7 +20,7 @@ export const FlamebreathFlute = new DbObjectWeapon({
             title: 'talent_name.weapon_flamebreath_flute',
             description: 'talent_descr.weapon_flamebreath_flute',
             stats: [
-                new StatTable('def_percent', [16, 20, 24, 28, 32]),
+                new StatTable('def_percent', percent(weaponPassiveTables.FlamebreathFlute.p1)),
             ],
         }),
     ],

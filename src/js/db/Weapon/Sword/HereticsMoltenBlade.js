@@ -4,9 +4,11 @@ import { ConditionNumber } from "../../../classes/Condition/Number";
 import { DbObjectWeapon } from "../../../classes/DbObject/Weapon";
 import { StatTable } from "../../../classes/StatTable";
 import { weaponStatTables } from "../../generated/WeaponStatTables";
+import { weaponPassiveTables } from "../../generated/WeaponPassiveTables";
+import { percent } from "../../Params";
 
-const atkMinimum = new StatTable('atk_percent', [18, 22.5, 27, 31.5, 36]);
-const atkMaximum = new StatTable('atk_percent', [36, 45, 54, 63, 72]);
+const atkMinimum = new StatTable('atk_percent', percent(weaponPassiveTables.HereticsMoltenBlade.p3));
+const atkMaximum = new StatTable('atk_percent', percent(weaponPassiveTables.HereticsMoltenBlade.p4));
 
 class ConditionHereticsMoltenBlade extends ConditionBooleanRefine {
     getStats(settings) {
@@ -14,10 +16,10 @@ class ConditionHereticsMoltenBlade extends ConditionBooleanRefine {
         const refine = settings.weapon_refine;
         const minimum = atkMinimum.getValue(refine);
         const maximum = atkMaximum.getValue(refine);
-        const distance = Math.min(7, Math.max(0,
+        const distance = Math.min(weaponPassiveTables.HereticsMoltenBlade.p5[0], Math.max(0,
             parseFloat(settings.weapon_heretics_molten_blade_distance) || 0));
 
-        stats.add('atk_percent', minimum + (maximum - minimum) * distance / 7);
+        stats.add('atk_percent', minimum + (maximum - minimum) * distance / weaponPassiveTables.HereticsMoltenBlade.p5[0]);
         return stats;
     }
 }
@@ -37,8 +39,8 @@ export const HereticsMoltenBlade = new DbObjectWeapon({
             title: 'talent_name.weapon_heretics_molten_blade',
             description: 'talent_descr.weapon_heretics_molten_blade',
             stats: [
-                new StatTable('text_percent_min', [18, 22.5, 27, 31.5, 36]),
-                new StatTable('text_percent_max', [36, 45, 54, 63, 72]),
+                new StatTable('text_percent_min', percent(weaponPassiveTables.HereticsMoltenBlade.p3)),
+                new StatTable('text_percent_max', percent(weaponPassiveTables.HereticsMoltenBlade.p4)),
             ],
         }),
         new ConditionNumber({
@@ -46,7 +48,7 @@ export const HereticsMoltenBlade = new DbObjectWeapon({
             serializeId: 2,
             title: 'talent_name.weapon_heretics_molten_blade_distance',
             min: 0,
-            max: 7,
+            max: weaponPassiveTables.HereticsMoltenBlade.p5[0],
             allowMinZero: true,
             format: 'decimal',
             noStat: true,

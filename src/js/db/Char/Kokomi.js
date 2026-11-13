@@ -20,10 +20,12 @@ import { FeatureMultiplier } from "../../classes/Feature2/Multiplier";
 import { FeatureMultiplierList } from "../../classes/Feature2/Multiplier/List";
 import { FeatureMultiplierKokomi } from "../../classes/Feature2/Multiplier/Kokomi";
 import { FeatureMultiplierTarget } from "../../classes/Feature2/Multiplier/Target";
+import { PostEffectStatsStatic } from "../../classes/PostEffect/Stats/Static";
 import { StatTable } from "../../classes/StatTable";
 import { ValueTable } from "../../classes/ValueTable";
 import { charTables } from "../generated/CharTables";
 import { charTalentTables } from "../generated/CharTalentTables";
+import { percent } from "../Params";
 
 
 const Talents = new DbObjectTalents({
@@ -132,13 +134,27 @@ const Talents = new DbObjectTalents({
 const TalentValues = {
     PassiveHealing: 25,
     PassiveCritRate: -100,
-    A4HealingMultiplier: 15,
-    C1AttackDmg: 30,
-    C2SkillHeal: 4.5,
-    C2BurstHeal: 0.6,
-    C4AttackSpeed: 10,
-    C6HydroDmg: 40,
+    A4HealingMultiplier: percent(charTalentTables.Kokomi.a4.p1),
+    C1AttackDmg: percent(charTalentTables.Kokomi.c1.p1),
+    C2SkillHeal: percent(charTalentTables.Kokomi.c2.p2),
+    C2BurstHeal: percent(charTalentTables.Kokomi.c2.p3),
+    C4AttackSpeed: percent(charTalentTables.Kokomi.c4.p1),
+    C6HydroDmg: percent(charTalentTables.Kokomi.c6.p2),
 };
+
+// C6 Sango Isshin: Hydro DMG +40% after a heal in the Ceremonial Garment.
+// Game data: Avatar_Kokomi_ElementalBurst_Heal /
+// UNIQUE_Avatar_Kokomi_ElementalBurst_OverHeal_Buff writes
+// Actor_WaterAddHurtExtraDelta: a flat bonus in the extra part, so it is a
+// post-effect (a condition's stats are always premod; md/buff_chains.md).
+const c6HydroDmgPost = new PostEffectStatsStatic({
+    percent: new StatTable('dmg_hydro', [TalentValues.C6HydroDmg]),
+    conditions: [
+        new ConditionConstellation({constellation: 6}),
+        new ConditionBoolean({name: 'sangonomiya_kokomi_sango_isshin'}),
+        new ConditionBoolean({name: 'kokomi_ceremonial_garment'}),
+    ],
+});
 
 export const Kokomi = new DbObjectChar({
     name: 'sangonomiya_kokomi',
@@ -372,6 +388,9 @@ export const Kokomi = new DbObjectChar({
             }),
         }),
     ],
+    postEffects: [
+        c6HydroDmgPost,
+    ],
     constellation: new DbObjectConstellation([
         {
             conditions: [
@@ -435,15 +454,12 @@ export const Kokomi = new DbObjectChar({
                     serializeId: 3,
                     title: 'talent_name.sangonomiya_kokomi_sango_isshin',
                     description: 'talent_descr.sangonomiya_kokomi_sango_isshin',
-                    stats: {
-                        dmg_hydro: TalentValues.C6HydroDmg,
-                    },
+                    // The Hydro DMG is c6HydroDmgPost (an extra write); shown
+                    // here for the description.
+                    displayStats: {dmg_hydro: TalentValues.C6HydroDmg},
                     condition: new ConditionBoolean({name: 'kokomi_ceremonial_garment'}),
                 }),
             ],
         },
     ]),
-    partyData: {
-        conditions: [],
-    },
 });

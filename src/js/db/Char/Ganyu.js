@@ -1,6 +1,9 @@
 import { Condition } from "../../classes/Condition";
+import { ConditionAnd } from "../../classes/Condition/And";
 import { ConditionAscensionChar } from "../../classes/Condition/Ascension/Char";
 import { ConditionBoolean } from "../../classes/Condition/Boolean";
+import { ConditionOnField } from "../../classes/Condition/Field";
+import { ConditionReceiver } from "../../classes/Condition/Receiver";
 import { ConditionStacks } from "../../classes/Condition/Stacks";
 import { ConditionStatic } from "../../classes/Condition/Static";
 import { DbObjectChar } from "../../classes/DbObject/Char";
@@ -17,8 +20,10 @@ import { FeatureMultiplier } from "../../classes/Feature2/Multiplier";
 import { FeaturePostEffectValue } from "../../classes/Feature2/PostEffectValue";
 import { PostEffectStatsHP } from "../../classes/PostEffect/Stats/HP";
 import { StatTable } from "../../classes/StatTable";
+import { RECEIVERS } from "../../classes/Team/Receivers";
 import { charTables } from "../generated/CharTables";
 import { charTalentTables } from "../generated/CharTalentTables";
+import { percent } from "../Params";
 
 const Talents = new DbObjectTalents({
     attack: {
@@ -113,9 +118,9 @@ const Talents = new DbObjectTalents({
 });
 
 const TalentValues = {
-    A1CritRate: 20,
-    A4CryoDmg: 20,
-    C1EnemyResCryo: -15,
+    A1CritRate: percent(charTalentTables.Ganyu.a1.p2),
+    A4CryoDmg: percent(charTalentTables.Ganyu.a4.p1),
+    C1EnemyResCryo: percent(charTalentTables.Ganyu.c1.p1),
     C4DmgBonus: 5,
 };
 
@@ -130,6 +135,14 @@ export const Ganyu = new DbObjectChar({
     origin: 'liyue',
     talents: Talents,
     statTable: charTables.Ganyu,
+    // Every plain damage multiplier below scales on ATK and reads the total
+    // by construction (scaling 'atk*' equivalent: the game computes these
+    // hits with a plain damagePercentage and no FIGHT_PROP read;
+    // ConfigAbility_Avatar_Ganyu.json contains no FIGHT_PROP read at all).
+    // GO uses dmgNode('atk', ...) (total) for all of them. KQM Ganyu has no
+    // EM/ATK/HP/ER buff-chain test (only frames, ICD, snapshot timing).
+    // The A1 CRIT on the Frostflake hits below is a flat bonus, not a stat
+    // read (GO puts it under premod critRate_ of the hit). Needs nothing.
     features: [
         new FeatureDamageNormal({
             name: 'normal_hit_1',
@@ -263,6 +276,13 @@ export const Ganyu = new DbObjectChar({
                 }),
             ],
         }),
+        // Ice Lotus inherited HP display (216% of Max HP at skill 10).
+        // Game data: SkillObj_Ganyu_IceBreaker_Dummy modifier UNIQUE_IceBreaker_HP
+        // writes the gadget's Actor_MaxHPRatio from the MaxHPRatio special (the
+        // talent ratio); it names no premod/total read for the owner's Max HP
+        // (gadget inheritance is engine-internal, as for Itto's Ushi). GO prods
+        // input.total.hp. Default kept; the same number either way while nothing
+        // writes extra HP (md/buff_chains.md).
         new FeaturePostEffectValue({
             category: 'skill',
             name: 'ganyu_lotus_hp',
@@ -287,6 +307,12 @@ export const Ganyu = new DbObjectChar({
         }),
     ],
     conditions: [
+        // A1 Undivided Heart: flat +20% CRIT Rate on Frostflake Arrows and blooms
+        // for 5s after firing one. No stat read (a flat toggle; conditions write
+        // premod by construction): default confirmed, no params. GO puts it under
+        // the hit's premod critRate_. KQM: the first bloom does not count itself,
+        // and the buff persists through swaps (rotation/snapshot timing, not
+        // chaining).
         new ConditionBoolean({
             name: 'ganyu_undivided_heart',
             serializeId: 1,
@@ -300,26 +326,49 @@ export const Ganyu = new DbObjectChar({
                 new ConditionAscensionChar({ascension: 1}),
             ],
         }),
+        // A4 Harmony Between Heaven and Earth: flat +20% Cryo DMG Bonus to the
+        // active member inside Celestial Shower's AoE. No stat read (flat toggles
+        // write premod): default confirmed, no params. GO puts cryo_dmg_ under
+        // teamBuff.premod. KQM: the burst does not buff its own cast (snapshot),
+        // but carries over when recast off cooldown (rotation timing, not
+        // chaining).
         new ConditionBoolean({
             name: 'ganyu_harmony',
             serializeId: 2,
             title: 'talent_name.ganyu_harmony_between_heaven_and_earth',
             description: 'talent_descr.ganyu_harmony_between_heaven_and_earth',
             info: {ascension: 4},
-            stats: {
-                dmg_cryo: TalentValues.A4CryoDmg,
-            },
+            displayStats: {dmg_cryo: TalentValues.A4CryoDmg},
             subConditions: [
                 new ConditionAscensionChar({ascension: 4}),
             ],
+        }),
+        // Celestial Shower grants Cryo DMG to active party members in its AoE.
+        new Condition({
+            isHidden: true,
+            receivers: RECEIVERS.TEAM,
+            stats: {dmg_cryo: TalentValues.A4CryoDmg},
+            condition: new ConditionAnd([
+                new ConditionBoolean({name: 'ganyu_harmony'}),
+                new ConditionAscensionChar({ascension: 4}),
+                new ConditionReceiver({
+                    condition: new ConditionOnField(),
+                }),
+            ]),
         }),
     ],
     constellation: new DbObjectConstellation([
         {
             conditions: [
+                // C1 Dew-Drinker: flat -15% Cryo RES on opponents hit by a level-2
+                // Frostflake Arrow or bloom (plus 2 Energy for Ganyu). An enemy
+                // debuff with no stat read (GO: teamBuff.premod cryo_enemyRes_):
+                // needs nothing. KQM: the shred applies to the first shot's own
+                // bloom.
                 new ConditionBoolean({
                     name: 'ganyu_dew_drinker',
                     serializeId: 3,
+                    receivers: RECEIVERS.TEAM,
                     title: 'talent_name.ganyu_dew_drinker',
                     description: 'talent_descr.ganyu_dew_drinker',
                     settings: {},
@@ -331,6 +380,8 @@ export const Ganyu = new DbObjectChar({
         },
         {
             conditions: [
+                // C2 The Auspicious: +1 Trail of the Qilin charge. No stat read:
+                // needs nothing.
                 new ConditionStatic({
                     title: 'talent_name.ganyu_the_auspicious',
                     description: 'talent_descr.ganyu_the_auspicious',
@@ -348,9 +399,13 @@ export const Ganyu = new DbObjectChar({
         },
         {
             conditions: [
+                // C4 Westward Sojourn: opponents in Celestial Shower's AoE take
+                // +5% DMG per stack (5 stacks = +25%), flat with no stat read
+                // (GO: teamBuff.premod all_dmg_): needs nothing.
                 new ConditionStacks({
                     name: 'ganyu_westward_sojourn',
                     serializeId: 4,
+                    receivers: RECEIVERS.TEAM,
                     title: 'talent_name.ganyu_westward_sojourn',
                     description: 'talent_descr.ganyu_westward_sojourn',
                     maxStacks: 5,
@@ -371,6 +426,8 @@ export const Ganyu = new DbObjectChar({
         },
         {
             conditions: [
+                // C6 The Clement: the next Frostflake Arrow within 30s of Trail of
+                // the Qilin needs no charging. No stat read: needs nothing.
                 new ConditionStatic({
                     title: 'talent_name.ganyu_the_clement',
                     description: 'talent_descr.ganyu_the_clement',
@@ -378,42 +435,5 @@ export const Ganyu = new DbObjectChar({
             ],
         },
     ]),
-    partyData: {
-        conditions: [
-            new ConditionBoolean({
-                name: 'party.ganyu_harmony',
-                serializeId: 1,
-                rotation: 'party',
-                title: 'talent_name.ganyu_harmony_between_heaven_and_earth',
-                description: 'talent_descr.ganyu_harmony_between_heaven_and_earth',
-                stats: {
-                    dmg_cryo: TalentValues.A4CryoDmg,
-                },
-                info: {ascension: 4},
-            }),
-            new ConditionBoolean({
-                name: 'party.ganyu_dew_drinker',
-                serializeId: 3,
-                rotation: 'party',
-                title: 'talent_name.ganyu_dew_drinker',
-                description: 'talent_descr.ganyu_dew_drinker',
-                stats: {
-                    enemy_res_cryo: TalentValues.C1EnemyResCryo,
-                },
-                info: {constellation: 1},
-            }),
-            new ConditionStacks({
-                name: 'party.ganyu_westward_sojourn',
-                serializeId: 2,
-                rotation: 'party',
-                title: 'talent_name.ganyu_westward_sojourn',
-                description: 'talent_descr.ganyu_westward_sojourn',
-                maxStacks: 5,
-                stats: [
-                    new StatTable('dmg_all', [TalentValues.C4DmgBonus]),
-                ],
-                info: {constellation: 4},
-            }),
-        ],
-    },
+    retiredParty: [[1, 'checkbox'], [2, 'stacks'], [3, 'checkbox']],
 });

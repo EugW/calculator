@@ -1,6 +1,9 @@
 import { Condition } from "../../classes/Condition";
+import { ConditionAnd } from "../../classes/Condition/And";
 import { ConditionAscensionChar } from "../../classes/Condition/Ascension/Char";
 import { ConditionBoolean } from "../../classes/Condition/Boolean";
+import { ConditionOnField } from "../../classes/Condition/Field";
+import { ConditionReceiver } from "../../classes/Condition/Receiver";
 import { ConditionStatic } from "../../classes/Condition/Static";
 import { DbObjectChar } from "../../classes/DbObject/Char";
 import { DbObjectConstellation } from "../../classes/DbObject/Constellation";
@@ -14,8 +17,10 @@ import { FeatureHeal } from "../../classes/Feature2/Heal";
 import { FeatureMultiplier } from "../../classes/Feature2/Multiplier";
 import { FeatureMultiplierList } from "../../classes/Feature2/Multiplier/List";
 import { StatTable } from "../../classes/StatTable";
+import { RECEIVERS } from "../../classes/Team/Receivers";
 import { charTables } from "../generated/CharTables";
 import { charTalentTables } from "../generated/CharTalentTables";
+import { percent } from "../Params";
 
 const Talents = new DbObjectTalents({
     attack: {
@@ -114,7 +119,7 @@ const Talents = new DbObjectTalents({
 
 const TalentValues = {
     ChargedHealRatio: 4,
-    StaminaConsume: 12,
+    StaminaConsume: percent(charTalentTables.Barbara.a1.p1),
     C2CdBonus: 15,
     C2HydroBonus: 15,
 };
@@ -274,7 +279,11 @@ export const Barbara = new DbObjectChar({
         }),
     ],
     conditions: [
-        new ConditionStatic({
+        // The toggle assumes the receiving characters are within Melody Loop.
+        new ConditionBoolean({
+            name: 'barbara_glorious_season',
+            serializeId: 2,
+            receivers: RECEIVERS.TEAM,
             title: 'talent_name.barbara_glorious_season',
             description: 'talent_descr.barbara_glorious_season',
             stats: {
@@ -305,6 +314,9 @@ export const Barbara = new DbObjectChar({
         },
         {
             conditions: [
+                // During the ability's duration, your active character gains
+                // a 15% Hydro DMG Bonus. The source toggle stays serializable;
+                // the bonus itself is delivered hidden to active recipients.
                 new ConditionBoolean({
                     name: 'barbara_vitality_burst',
                     serializeId: 1,
@@ -312,8 +324,21 @@ export const Barbara = new DbObjectChar({
                     description: 'talent_descr.barbara_vitality_burst',
                     stats: {
                         text_percent_cd: TalentValues.C2CdBonus,
+                    },
+                    displayStats: {dmg_hydro: TalentValues.C2HydroBonus},
+                }),
+                new Condition({
+                    isHidden: true,
+                    receivers: RECEIVERS.TEAM,
+                    stats: {
                         dmg_hydro: TalentValues.C2HydroBonus,
-                    }
+                    },
+                    condition: new ConditionAnd([
+                        new ConditionBoolean({name: 'barbara_vitality_burst'}),
+                        new ConditionReceiver({
+                            condition: new ConditionOnField(),
+                        }),
+                    ]),
                 }),
             ],
         },
@@ -352,30 +377,5 @@ export const Barbara = new DbObjectChar({
             ],
         },
     ]),
-    partyData: {
-        conditions: [
-            new ConditionBoolean({
-                name: 'party.barbara_glorious_season',
-                serializeId: 2,
-                title: 'talent_name.barbara_glorious_season',
-                description: 'talent_descr.barbara_glorious_season',
-                info: {ascension: 1},
-                stats: {
-                    stamina_consume: TalentValues.StaminaConsume,
-                },
-            }),
-            new ConditionBoolean({
-                name: 'party.barbara_vitality_burst',
-                serializeId: 1,
-                rotation: 'party',
-                title: 'talent_name.barbara_vitality_burst',
-                description: 'talent_descr.barbara_vitality_burst',
-                info: {constellation: 2},
-                stats: {
-                    text_percent_cd: TalentValues.C2CdBonus,
-                    dmg_hydro: TalentValues.C2HydroBonus,
-                },
-            }),
-        ],
-    },
+    retiredParty: [[1, 'checkbox'], [2, 'checkbox']],
 });

@@ -1,8 +1,11 @@
-import { makeStatTotalItem } from "../../Feature2/Compile/Helpers";
 import { PostEffectStats } from "../Stats";
 
 export class PostEffectStatsRecharge extends PostEffectStats {
+    getBaseReadStats() {
+        return ['recharge*'];
+    }
+
     getBaseValueTree(data, opts) {
-        return makeStatTotalItem('recharge', data.stats);
+        return this.statTotalItem('recharge', data);
     }
 }

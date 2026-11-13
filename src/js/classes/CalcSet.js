@@ -2,32 +2,62 @@ import { BuildData } from "./Build/Data";
 import { CalcObjectArtifacts } from "./CalcObject/Artifacts";
 import { CalcObjectBuffs } from "./CalcObject/Buffs";
 import { CalcObjectCharacter } from "./CalcObject/Character"
-import { CalcObjectEnemy } from "./CalcObject/Enemy";
+import { CalcObjectEnemy, isEnemySetting } from "./CalcObject/Enemy";
 import { CalcObjectFood } from "./CalcObject/Food";
 import { CalcObjectReaction } from "./CalcObject/Reaction";
-import { CalcObjectRotation } from "./CalcObject/Rotation";
 import { CalcObjectStatic } from "./CalcObject/Static";
 import { CalcObjectWeapon } from "./CalcObject/Weapon";
 import { Condition } from "./Condition";
-import { PRIORITIES } from "./PostEffect";
-import { RotationCompiler } from "./RotationCompiler";
+import { Rotation } from "./Rotation";
+import { compileRotationFeatures } from "./RotationCompiler";
 import { Serializer } from "./Serializer";
 import { normalizeRadianceStellarGlimmer } from "./Build/Settings";
+import { deliveredFeature } from "./Team/DeliveredFeature";
+import { featuresDeliveredBy, MEMBER_OBJECTS } from "./Team/Evaluation";
+import { reachesSource } from "./Team/Receivers";
+import { isTeamSetting } from "./Team/Settings";
 
-export const objectsNames = ['char', 'weapon', 'artifacts', 'enemy', 'buffs', 'rotation', 'food', 'reaction', 'static'];
-const serializeObjectsNames = ['char', 'weapon', 'artifacts', 'enemy', 'buffs', 'rotation', 'food'];
+export const objectsNames = MEMBER_OBJECTS;
+// The parts a member is saved with. The rotation is the team's: a character
+// build saves the member's part of it (see savedRotation).
+const memberObjectsNames = ['char', 'weapon', 'artifacts', 'buffs', 'rotation', 'food'];
+/**
+ * First number of a serialized character build. 1 is the released layout,
+ * with the enemy and the party; 2 was never released and is not read. A
+ * team starts with Team.TEAM_FORMAT.
+ */
+export const BUILD_FORMAT = 3;
 
 export class CalcSet {
     constructor() {
+        /** @type {Team|null} team this build is a member of */
+        this.team      = null;
         this.char      = new CalcObjectCharacter();
         this.weapon    = new CalcObjectWeapon();
         this.artifacts = new CalcObjectArtifacts();
-        this.enemy     = new CalcObjectEnemy();
         this.buffs     = new CalcObjectBuffs();
-        this.rotation  = new CalcObjectRotation();
         this.food      = new CalcObjectFood();
         this.reaction  = new CalcObjectReaction();
         this.static    = new CalcObjectStatic();
+        /**
+         * @type {Rotation|null} the rotation a character build was saved
+         *     with: its part of its team's rotation (Rotation.memberPart), or
+         *     a rotation saved before rotations belonged to teams. A member of
+         *     a team has none: the team owns the rotation and takes this one
+         *     over when its own is empty (Team.adoptRotation).
+         */
+        this.savedRotation = null;
+        /** @type {Object|null} format-1 context used only when making a new team */
+        this.legacyTeam = null;
+    }
+
+    /**
+     * @returns {number} the number this member is identified by as a source
+     *     of effects: its character's ID. The entries of a team's legacy
+     *     source have their own (Team/Legacy).
+     */
+    getSourceId() {
+        return this.char.getId();
     }
 
     getChar() {
@@ -35,6 +65,10 @@ export class CalcSet {
     }
 
     setChar(data) {
+        if (this.team) {
+            this.team.checkCharacter(this, data.getId());
+        }
+
         let commonSettings = this.getCommonSettings('char');
         this.char.set(data);
 
@@ -48,8 +82,6 @@ export class CalcSet {
             this.setWeapon(DB.Weapons.get(data.weapon).getFirst());
         }
 
-        let chars = this.buffs.getPartyChars();
-        this.buffs.setPartyChars(chars.filter((id) => {return id != data.getId();}));
         this.setCharSettings(commonSettings);
     }
 
@@ -62,6 +94,7 @@ export class CalcSet {
     }
 
     setCharSettings(data) {
+        this.checkOwnSettings(data);
         this.char.setSettings(data);
         this.setCommonSettings(data);
         this.normalizeRadianceStellarGlimmerSettings();
@@ -82,29 +115,9 @@ export class CalcSet {
     }
 
     setWeaponSettings(data) {
+        this.checkOwnSettings(data);
         this.weapon.setSettings(data);
         this.setCommonSettings(data);
-    }
-
-    setEnemy(data) {
-        this.enemy.set(data);
-    }
-
-    setEnemyLevels(data) {
-        this.enemy.setLevels(data);
-    }
-
-    setEnemyResistances(data) {
-        this.enemy.setResistances(data);
-    }
-
-    setEnemySettings(data) {
-        this.enemy.setSettings(data);
-        this.setCommonSettings(data);
-    }
-
-    getEnemy() {
-        return this.enemy;
     }
 
     setArtifact(data) {
@@ -142,8 +155,14 @@ export class CalcSet {
     }
 
     setArtifactsSettings(data) {
+        this.checkOwnSettings(data);
         this.artifacts.setSettings(data);
         this.setCommonSettings(data);
+    }
+
+    modifyArtifactsSettings(data) {
+        this.checkOwnSettings(data);
+        this.artifacts.modifySettings(data);
     }
 
     isEquipped(data) {
@@ -155,35 +174,22 @@ export class CalcSet {
     }
 
     setBuffsSettings(data) {
+        this.checkOwnSettings(data);
         this.buffs.setSettings(data);
         this.setCommonSettings(data);
         this.normalizeRadianceStellarGlimmerSettings();
     }
 
     modifyBuffsSettings(data) {
-        let settings = this.buffs.modifySettings(data);
-        this.setCommonSettings(settings);
+        this.checkOwnSettings(data);
+        this.buffs.modifySettings(data);
+        this.setCommonSettings(data);
         this.normalizeRadianceStellarGlimmerSettings();
     }
 
-    setPartyChars(ids) {
-        this.buffs.setPartyChars(ids);
-    }
-
-    getPartyChars() {
-        return this.buffs.getPartyChars();
-    }
-
-    setRotation(data) {
-        this.rotation.set(data);
-    }
-
-    getRotation() {
-        return this.rotation.get();
-    }
-
     setFood(type, data, level) {
-        return this.food.set(type, data, level);
+        let result = this.food.set(type, data, level);
+        return result;
     }
 
     getFood(type) {
@@ -226,6 +232,8 @@ export class CalcSet {
     }
 
     normalizeRadianceStellarGlimmerSettings() {
+        // A team toggle never changes a member's own settings: Polestar Field
+        // overrides them in evaluations only (Build/Settings.applyTeamOverrides).
         const normalized = normalizeRadianceStellarGlimmer(this.getSettings());
 
         for (const objectName of objectsNames) {
@@ -364,66 +372,53 @@ export class CalcSet {
             result = Object.assign(result, this[name].getSettings());
         }
 
+        // Only the member's own: team state is read through the team scope
+        // (Team/Scope.teamSettings), never copied into a member.
         return result;
     }
 
+    /**
+     * A member's settings are its own. Team toggles belong to its team and
+     * the enemy's settings to the team's enemy: they are changed there
+     * (Team.modifySettings, the enemy's modifySettings; Team.splitSettings
+     * for settings that span owners, such as a weapon scenario).
+     *
+     * @param {Object} data
+     */
+    checkOwnSettings(data) {
+        for (const name of Object.keys(data || {})) {
+            if (isTeamSetting(name) || isEnemySetting(name)) {
+                throw new Error(`"${name}" is the team's setting, not a member's`);
+            }
+        }
+    }
+
+    /**
+     * Unprocessed stage 0 data of this build: final settings, stats before
+     * post-effects, and the post-effects and multipliers it receives.
+     */
     /* deprecated */
-    getBaseStats(bonus, addSettings) {
-        let result = new BuildData();
-        if (bonus) {
-            result.stats.concat(bonus);
-        }
-
-        result.settings.concat(this.getSettings(), addSettings);
-
-        let objects = objectsNames;
-
-        for (let i = 0; i < objects.length; ++i) {
-            let name = objects[i];
-            if (!this[name]) {
-                continue;
-            }
-
-            let conditions = this[name].getConditions();
-            for (let j = 0; j < conditions.length; ++j) {
-                let cond = conditions[j];
-                let condData = cond.getData(result.settings);
-
-                result.stats.concat(condData.stats);
-                result.settings.concat(result.settings, condData.settings);
-            }
-        }
-
-        for (let i = 0; i < objects.length; ++i) {
-            let name = objects[i];
-            if (!this[name]) {
-                continue;
-            }
-
-            let data = this[name].getStats(result.settings);
-
-            result.stats.concat(data.stats);
-            result.settings.concat(result.settings, data.settings);
-        }
-
-        // TODO fix this
-        if (result.stats.get('dmg_own')) {
-            result.stats.add('dmg_'+ result.settings.char_element, result.stats.get('dmg_own'));
-        }
-
-        result.multipliers = this.getMultipliers();
-        result.postEffects = this.getPostEffects();
-
-        return result;
+    getBaseStats() {
+        return this.view().getStats();
     }
 
     /* deprecated */
-    getBaseStatsWithSets(bonus, addSettings) {
-        let result = this.getBaseStats(bonus, addSettings);
-        let postEffects = this.getPostEffects();
+    getBaseStatsWithSets() {
+        return this.view().getBaseStatsWithSets();
+    }
 
-        result.stats.applyPostEffects(result.settings, postEffects, PRIORITIES.PRE_STATS);
-        return result;
+    /**
+     * This member in a new view of its team as it is now. Only a team is
+     * evaluated: a build on its own is evaluated as a team of one, which its
+     * owner makes (Team.fromMember).
+     *
+     * @returns {MemberView}
+     */
+    view() {
+        if (!this.team) {
+            throw new Error('A build is evaluated in its team: make a team of one for a build on its own (Team.fromMember)');
+        }
+        return this.team.view().member(this);
     }
 
     getPostEffects() {
@@ -453,21 +448,20 @@ export class CalcSet {
     }
 
     /* deprecated */
-    getStats(bonus, addSettings) {
-        return this.getBaseStats(bonus, addSettings);
+    getStats() {
+        return this.getBaseStats();
     }
 
-    getBuildData(bonus, addSettings) {
-        let result = this.getBaseStats(bonus, addSettings);
-        result.stats.processPercent();
-        return result;
+    /**
+     * Data for compiled programs: this build's processed stats, teammates'
+     * stats under their prefixes, and the post-effects of the whole team.
+     */
+    getBuildData() {
+        return this.view().getBuildData();
     }
 
-    calcFeatures(rotation) {
-        let data = this.getBuildData();
-        let result = this.getFeatures(data, rotation);
-
-        return result;
+    calcFeatures() {
+        return this.view().calcFeatures();
     }
 
     getFeaturesList(opts) {
@@ -479,103 +473,70 @@ export class CalcSet {
                 continue;
             }
 
-            let features;
-            if (name == 'rotation') {
-                if (!opts.ignoreRotation) {
-                    let compiled = this.compileRotation();
-                    if (compiled) {
-                        features = [compiled];
-                    }
-                }
-            } else {
-                features = this[name].getFeatures();
-            }
-
-            if (!features) {
-                continue;
-            }
-
-            result = result.concat(features);
+            result = result.concat(this[name].getFeatures().filter(reachesSource));
         }
 
+        result = result.concat(this.deliveredFeatures());
+        if (!opts.ignoreRotation) {
+            result = result.concat(this.rotationFeatures(opts.compiledRotation));
+        }
         return result;
     }
 
-    compileRotation() {
-        let compiler = new RotationCompiler(this, this.getRotation());
-        return compiler.compile();
+    /**
+     * The team's rotation as this member's features: the whole team's damage
+     * (rotation.total) and this member's own hits (rotation_self.total), see
+     * RotationCompiler.
+     *
+     * @param {Object|null} [compiled] the team's compiled rotation, when a
+     *     view of the team has it (TeamView.compiledRotation)
+     * @returns {Array.<FeatureRotation>}
+     */
+    rotationFeatures(compiled) {
+        return this.team ? compileRotationFeatures(this, compiled) : [];
+    }
+
+    /**
+     * Features teammates and the team's legacy source deliver to this
+     * member: damage this member deals, such as Nicole's Arcane Projections
+     * (see Team/DeliveredFeature).
+     *
+     * @returns {Array.<Feature2>}
+     */
+    deliveredFeatures() {
+        let result = [];
+        if (!this.team) {
+            return result;
+        }
+
+        for (let source of this.team.getSources()) {
+            if (source === this) continue;
+
+            for (let feature of featuresDeliveredBy(source)) {
+                result.push(deliveredFeature(feature, source.getSourceId()));
+            }
+        }
+        return result;
     }
 
     getFeaturesHash(data, opts) {
-        opts = Object.assign({}, opts);
-        let result = {};
-
-        for (let feat of this.getFeaturesList()) {
-            if (data && !feat.checkConditions(data)) {
-                continue;
-            }
-
-            if (opts.checkCallback && !opts.checkCallback(feat)) {
-                continue;
-            }
-
-            result[feat.getName()] = feat;
-        }
-
-        return result;
+        return this.view().getFeaturesHash(data, opts);
     }
 
     getFeatures(data) {
-        let result = {};
-
-        for (let feat of this.getFeaturesList()) {
-            result = Object.assign(result, feat.getResult(data));
-        }
-
-        // for (let feat of DB.Reactions) {
-        //     result = Object.assign(result, feat.getResult(data));
-        // }
-
-        return result;
+        return this.view().getFeatures(data);
     }
 
     getFeaturesNames() {
-        let result = {};
-        let data = this.getStats();
-        let features = this.getFeaturesList();
-
-        for (let i = 0; i < features.length; ++i) {
-            const feat = features[i];
-            Object.assign(result, feat.getFeatureNamesHash(data.stats, data.settings));
-        }
-
-        return result;
+        return this.view().getFeaturesNames();
     }
 
     getFeatureResultByName(name) {
-        let feature = this.getFeatureByName(name);
-        if (!feature) {
-            return;
-        }
-
-        let data = this.getBuildData();
-        return feature.getResult(data)[name];
+        return this.view().getFeatureResultByName(name);
     }
 
     getFeatureByName(name, buildData) {
-        if (!name) { return null; }
-
-        buildData ||= this.getBuildData();
-
-        for (let feat of this.getFeaturesList()) {
-            if (!feat.isActive(buildData)) { continue; }
-
-            if (name == feat.getName()) {
-                return feat;
-            }
-        }
-
-        return null;
+        return this.view().getFeatureByName(name, buildData);
     }
 
     getAllFeaturesByName(name, opts) {
@@ -591,42 +552,111 @@ export class CalcSet {
         return result;
     }
 
+    /**
+     * Copy for evaluation. A member's numbers depend on its team, so a member
+     * of a team is copied together with a copy of its team. A build on its
+     * own is copied alone.
+     *
+     * @returns {CalcSet}
+     */
     clone() {
-        return CalcSet.deserialize(this.serialize());
+        if (this.team) {
+            return this.team.clone().getMember(this.team.slotOf(this));
+        }
+
+        return this.characterBuild();
     }
 
-    cloneWithArtifactSettings() {
-        let build = CalcSet.deserialize(this.serialize());
-        build.artifacts.modifySettings(this.artifacts.getSettings());
+    /**
+     * This member as a character build on its own, for saved builds,
+     * presets, character links and a team's copies: no team, no team state
+     * and no old party list or party settings.
+     *
+     * @param {Object} [opts] {artifactSettings: true} also copies the artifact
+     *     settings exactly, member state the format keeps only when set included
+     * @returns {CalcSet}
+     */
+    characterBuild(opts) {
+        let body = this.serializeMember({rotation: !opts || opts.rotation !== false});
+        let build = body ? CalcSet.deserialize([BUILD_FORMAT].concat(body)) : null;
+        if (build && opts && opts.artifactSettings) {
+            build.artifacts.copySettingsFrom(this.artifacts);
+        }
         return build;
+    }
+
+    /**
+     * Copy for evaluations that change settings, such as rotation steps. A
+     * member of a team is copied together with a copy of its team, so the
+     * copy still sees its teammates.
+     */
+    cloneWithArtifactSettings() {
+        if (this.team) {
+            return this.team.cloneWithArtifactSettings().getMember(this.team.slotOf(this));
+        }
+
+        return this.characterBuild({artifactSettings: true});
     }
 
     getHash() {
         return Serializer.pack(this);
     }
 
+    /**
+     * Format 3: character data only. Enemy and field state belong to teams.
+     */
     serialize() {
-        let result = [1];
+        let body = this.serializeMember();
+        return body ? [BUILD_FORMAT].concat(body) : null;
+    }
 
-        // get user defined settings
+    /**
+     * A member of a team, without format ID and without the enemy, as the
+     * team format embeds it.
+     *
+     * @param {Object} [opts] {rotation: false} saves an empty rotation (a
+     *     team saves its rotation itself); {artifacts: CalcObjectArtifacts}
+     *     saves these artifacts in place of the member's (Team.serialize)
+     * @returns {Array.<number>|null}
+     */
+    serializeMember(opts) {
+        return this.serializeObjects(memberObjectsNames, opts);
+    }
+
+    /**
+     * @param {Object} [opts] {rotation: false} for an empty rotation
+     * @returns {Rotation} the rotation a character build of this member saves
+     */
+    rotationToSave(opts) {
+        if (opts && opts.rotation === false) {
+            return new Rotation();
+        }
+        if (this.team) {
+            return this.team.getRotation().memberPart(this.char.getId());
+        }
+        return this.savedRotation || new Rotation();
+    }
+
+    serializeObjects(names, opts) {
+        let result = [];
+
+        // Only what the user set is saved. Settings derived by conditions
+        // (from composition, field state, talent bonuses) are derived again
+        // when the build is evaluated; saving them would freeze them as input.
         let settings = this.getSettings();
 
-        // get condition defined settings
-        for (let name of objectsNames) {
-            if (!this[name]) continue;
-
-            for (let cond of this[name].getConditions()) {
-                let condData = cond.getData(settings);
-                Object.assign(settings, condData.settings);
+        for (let i of names) {
+            if (i == 'rotation') {
+                result = result.concat(this.rotationToSave(opts).serialize());
+                continue;
             }
-        }
 
-        for (let i of serializeObjectsNames) {
-            if (!this[i]) {
+            let object = (i == 'artifacts' && opts && opts.artifacts) || this[i];
+            if (!object) {
                 return null;
             }
 
-            let part = this[i].serialize(settings);
+            let part = object.serialize(Object.assign({}, settings));
             if (!part) {
                 return null;
             }
@@ -637,9 +667,40 @@ export class CalcSet {
         return result;
     }
 
+    /**
+     * @param {Array.<number>} input consumed from the front
+     * @returns {CalcSet|null} a standalone member
+     */
+    static deserializeMember(input) {
+        let result = new CalcSet();
+
+        result.char = CalcObjectCharacter.deserialize(input);
+        if (!result.char) return null;
+
+        result.weapon = CalcObjectWeapon.deserialize(input);
+        if (!result.weapon) return null;
+
+        result.artifacts = CalcObjectArtifacts.deserialize(input, {profile: true});
+        if (!result.artifacts) return null;
+
+        result.buffs = CalcObjectBuffs.deserialize(input);
+        if (!result.buffs) return null;
+
+        result.savedRotation = readSavedRotation(input, result.char.getId());
+
+        result.food = CalcObjectFood.deserialize(input);
+        if (!result.food) return null;
+
+        result.normalizeRadianceStellarGlimmerSettings();
+
+        return result;
+    }
+
     static deserialize(input) {
         let version = input.shift();
         let result = null;
+
+        if (version == BUILD_FORMAT) return CalcSet.deserializeMember(input);
 
         if (version == 1) {
             result = new CalcSet();
@@ -653,14 +714,18 @@ export class CalcSet {
             result.artifacts = CalcObjectArtifacts.deserialize(input);
             if (!result.artifacts) return null;
 
-            result.enemy = CalcObjectEnemy.deserialize(input);
-            if (!result.enemy) return null;
+            const enemy = CalcObjectEnemy.deserialize(input);
+            if (!enemy) return null;
 
-            result.buffs = CalcObjectBuffs.deserialize(input);
+            result.buffs = CalcObjectBuffs.deserialize(input, true);
             if (!result.buffs) return null;
+            result.legacyTeam = Object.assign({enemy}, result.buffs.legacyTeam);
+            delete result.buffs.legacyTeam;
+            if (result.legacyTeam.defReduce !== undefined) {
+                enemy.modifySettings({'enemy.def_reduce': result.legacyTeam.defReduce});
+            }
 
-            result.rotation = CalcObjectRotation.deserialize(input);
-            if (!result.rotation) return null;
+            result.savedRotation = readSavedRotation(input, result.char.getId());
 
             result.food = CalcObjectFood.deserialize(input);
             if (!result.food) return null;
@@ -670,4 +735,35 @@ export class CalcSet {
 
         return result;
     }
+}
+
+/**
+ * The rotation saved with a character build. It was its owner's own before
+ * rotations belonged to teams: the items that name no member are its.
+ *
+ * @param {Array.<number>} input consumed from the front
+ * @param {number} charId the build's character
+ * @returns {Rotation|null} null when it has no items
+ */
+function readSavedRotation(input, charId) {
+    // Builds saved before rotations existed end here.
+    let rotation = input.length ? Rotation.deserialize(input) : null;
+    if (!rotation || rotation.getItems().length == 0) {
+        return null;
+    }
+    return rotation.assignOwner(charId);
+}
+
+/**
+ * A new build of a character with its first weapon.
+ *
+ * @param {DbObjectChar} [char] the first character by default
+ * @returns {CalcSet}
+ */
+export function defaultBuild(char) {
+    char ||= DB.Chars.getFirst();
+    let build = new CalcSet();
+    build.setChar(char);
+    build.setWeapon(DB.Weapons.get(char.weapon).getFirst());
+    return build;
 }

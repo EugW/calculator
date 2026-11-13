@@ -13,6 +13,11 @@ import { Sandrone } from "../src/js/db/Char/Sandrone";
 import { Reactions } from "../src/js/db/Features/Reactions";
 import { DB } from "../src/js/db/DB";
 import { charTalentTables } from "../src/js/db/generated/CharTalentTables";
+import { Team } from "../src/js/classes/Team";
+import { finalStats, makeBuild } from "./support/team";
+import { qiqiStellarTeam } from "./support/stellarTeam";
+
+global.DB = DB;
 
 function applyConditions(data, conditions) {
     for (const condition of conditions) {
@@ -64,15 +69,9 @@ test("Qiqi C6 umbrella flat damage reaches each direct subtype exactly once", ()
         ],
     }));
 
+    const {receiver} = qiqiStellarTeam();
     for (const feature of features) {
-        const data = new BuildData({
-            enemy_res_cryo: 0,
-            "party.qiqi_glimpse_of_mystery": 1,
-        }, {
-            atk_base: 1000,
-            qiqi_atk_total: 1000,
-        });
-        data.multipliers = Qiqi.getPartyMultipliers();
+        const data = receiver.getBuildData();
 
         expect(feature.getResult(data)["skill.qiqi_stellar_test"].normal).toBeCloseTo(7000, 5);
     }
@@ -91,8 +90,10 @@ test("Mizuki normalizes per-100-EM skill tables without a 100x reaction buff", (
     data.postEffects = Mizuki.getPostEffects();
     data.applyPostEffects();
 
-    expect(data.stats.get("dmg_reaction_swirl")).toBeCloseTo(1.8, 5);
-    expect(data.stats.get("dmg_stellarswirl")).toBeCloseTo(0.18, 5);
+    // The bonus reads her total EM (md/buff_chains.md): 1000 plus Vast's own
+    // 10% share (extra EM).
+    expect(data.stats.get("dmg_reaction_swirl")).toBeCloseTo(1.8 * 1.1, 5);
+    expect(data.stats.get("dmg_stellarswirl")).toBeCloseTo(0.18 * 1.1, 5);
 });
 
 test("Mizuki C1 uses 1100/550 flat reaction ratios and swaps its extra hit under Swirl Radiance", () => {
@@ -173,7 +174,7 @@ test("Mizuki pending 6.7 effects cover Vast, C2 RES, C4 healing, and capped C6 s
     }
 });
 
-test("Mizuki party data shares 10% EM and fixed 30/100 versus 10/20 subtype CRIT", () => {
+test("Mizuki shares 10% EM and fixed 30/100 versus 10/20 subtype CRIT with the team", () => {
     const selfData = new BuildData({
         mizuki_dreamdrifter: true,
     }, {
@@ -183,21 +184,22 @@ test("Mizuki party data shares 10% EM and fixed 30/100 versus 10/20 subtype CRIT
     selfData.applyPostEffects();
     expect(selfData.stats.get("mastery")).toBeCloseTo(1270.5, 5);
 
-    const data = new BuildData({
-        "party.mizuki_dreamdrifter": true,
-        "party.mizuki_the_heart_lingers_long": true,
-    }, {
-        mizuki_mastery: 1000,
-    });
-    applyConditions(data, Mizuki.getPartyConditions());
-    data.postEffects = Mizuki.getPartyPostEffects();
-    data.applyPostEffects();
-
-    expect(data.stats.get("mastery")).toBe(100);
-    expect(data.stats.get("crit_rate_swirl")).toBe(30);
-    expect(data.stats.get("crit_dmg_swirl")).toBe(100);
-    expect(data.stats.get("crit_rate_stellarswirl")).toBe(10);
-    expect(data.stats.get("crit_dmg_stellarswirl")).toBe(20);
+    // The retired party row is now a real team: Dreamdrifter and C6 reach
+    // the on-field receiver from Mizuki's own totals.
+    const receiver = makeBuild('Tartaglia');
+    const carrier = makeBuild('Mizuki');
+    carrier.setCharLevels({level: 90, ascension: 6, constellation: 6});
+    const team = Team.fromMember(receiver);
+    team.setMember(1, carrier);
+    const stageZero = carrier.getBuildData().stats.get('mastery_base') +
+        carrier.getBuildData().stats.get('mastery');
+    carrier.modifyBuffsSettings({'custom_buffs.mastery': 1000 - stageZero});
+    carrier.setCharSettings({mizuki_dreamdrifter: true});
+    expect(finalStats(receiver).get("mastery")).toBeCloseTo(100, 5);
+    expect(finalStats(receiver).get("crit_rate_swirl")).toBeCloseTo(0.3, 10);
+    expect(finalStats(receiver).get("crit_dmg_swirl")).toBeCloseTo(1, 10);
+    expect(finalStats(receiver).get("crit_rate_stellarswirl")).toBeCloseTo(0.1, 10);
+    expect(finalStats(receiver).get("crit_dmg_stellarswirl")).toBeCloseTo(0.2, 10);
 });
 
 test("supplied Mizuki URL applies Vast's self EM effect", () => {
@@ -208,6 +210,7 @@ test("supplied Mizuki URL applies Vast's self EM effect", () => {
         const build = CalcSet.deserialize(Serializer.unpack(
             "bDxDwgakkkebcefBrbabaaabcbaerdEvbbbExaEwcdgDagCpdCyhdaadaaa",
         ));
+        Team.fromMember(build);
         const data = build.getBuildData();
         data.applyPostEffects();
 

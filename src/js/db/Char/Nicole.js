@@ -2,15 +2,16 @@ import { Condition } from "../../classes/Condition";
 import { ConditionAnd } from "../../classes/Condition/And";
 import { ConditionAscensionChar } from "../../classes/Condition/Ascension/Char";
 import { ConditionBoolean } from "../../classes/Condition/Boolean";
+import { ConditionOnField } from "../../classes/Condition/Field";
 import { ConditionBooleanCharElement } from "../../classes/Condition/Boolean/CharElement";
 import { ConditionBooleanDropdownValue } from "../../classes/Condition/Boolean/DropdownValue";
 import { ConditionConstellation } from "../../classes/Condition/Constellation";
 import { ConditionDropdown } from "../../classes/Condition/Dropdown";
 import { ConditionHexereiResonance } from "../../classes/Condition/HexereiResonance";
-import { ConditionNumber } from "../../classes/Condition/Number";
-import { ConditionNumberTalent } from "../../classes/Condition/Number/Talent";
 import { ConditionOr } from "../../classes/Condition/Or";
+import { ConditionReceiver } from "../../classes/Condition/Receiver";
 import { ConditionStatic } from "../../classes/Condition/Static";
+import { ConditionTeamElement } from "../../classes/Condition/TeamElement";
 import { ConditionWitchHomework } from "../../classes/Condition/WitchHomework";
 import { DbObjectChar } from "../../classes/DbObject/Char";
 import { DbObjectConstellation } from "../../classes/DbObject/Constellation";
@@ -28,9 +29,12 @@ import { FeatureMultiplierTarget } from "../../classes/Feature2/Multiplier/Targe
 import { FeaturePostEffectValue } from "../../classes/Feature2/PostEffectValue";
 import { FeatureShield } from "../../classes/Feature2/Shield";
 import { PostEffectStats } from "../../classes/PostEffect/Stats";
+import { CHANNELS } from "../../classes/PostEffect/Channels";
 import { StatTable } from "../../classes/StatTable";
+import { RECEIVERS } from "../../classes/Team/Receivers";
 import { charTables } from "../generated/CharTables";
 import { charTalentTables } from "../generated/CharTalentTables";
+import { percent } from "../Params";
 
 const Talents = new DbObjectTalents({
     attack: {
@@ -133,13 +137,13 @@ const Talents = new DbObjectTalents({
     },
 });
 
-const GuidanceAtkBonus = 300;
-const C2GraceAtkBonus = 300;
-const C2ResShred = 25;
-const WitchArcaneProjectionBonus = 300;
-const C1ArcaneProjectionUnityDmg = 600;
-const C4PathfinderBlessingBonus = 70;
-const C6DefIgnore = 40;
+const GuidanceAtkBonus = charTalentTables.Nicole.a1.p3;
+const C2GraceAtkBonus = charTalentTables.Nicole.c2.p1;
+const C2ResShred = percent(charTalentTables.Nicole.c2.p2);
+const WitchArcaneProjectionBonus = percent(charTalentTables.Nicole.sp.p1);
+const C1ArcaneProjectionUnityDmg = percent(charTalentTables.Nicole.c1.p1);
+const C4PathfinderBlessingBonus = percent(charTalentTables.Nicole.c4.p3);
+const C6DefIgnore = percent(charTalentTables.Nicole.c6.p1);
 const Elements = ['pyro', 'hydro', 'cryo', 'dendro', 'electro', 'anemo', 'geo'];
 
 const condGrace = new ConditionBooleanDropdownValue({
@@ -151,22 +155,55 @@ const condGuidance = new ConditionBooleanDropdownValue({
     value: 'guidance',
 });
 const condGraceOrGuidance = new ConditionOr([condGrace, condGuidance]);
-const condPartyGrace = new ConditionBooleanDropdownValue({
-    name: 'party.nicole_grace_of_kenosis',
-    value: 'grace',
-});
-const condPartyGuidance = new ConditionBooleanDropdownValue({
-    name: 'party.nicole_grace_of_kenosis',
-    value: 'guidance',
-});
-const condPartyGraceOrGuidance = new ConditionOr([condPartyGrace, condPartyGuidance]);
 const condWitchHomework = new ConditionBoolean({name: 'nicole_witch_homework'});
-const condPartyWitchHomework = new ConditionBoolean({name: 'party.nicole_witch_homework'});
-const condPartyArcaneProjectionUnity = new ConditionBoolean({name: 'party.nicole_do_not_be_afraid_child_who_is_loved'});
 const condHexereiResonance = new ConditionHexereiResonance({});
+const condC4Blessing = new ConditionAnd([
+    condGuidance,
+    new ConditionConstellation({constellation: 4}),
+    new ConditionBoolean({name: 'nicole_whether_left_or_right_no_matter_which_way_you_turn'}),
+]);
 
+// "When characters other than Nicole who have Guidance of Theosis leave the
+// field, their effect reverts to Grace of Kenosis"; from C6 it never reverts.
+const condOthersKeepGuidance = new ConditionOr([
+    new ConditionReceiver({
+        condition: new ConditionOnField(),
+    }),
+    new ConditionConstellation({constellation: 6}),
+]);
+
+/**
+ * C2: Guidance of Theosis shreds the RES of its holder's element, once per
+ * element. Holders are Nicole herself, the on-field member (Methexis) and,
+ * from C6, every member.
+ *
+ * @param {string} element
+ * @returns {Condition}
+ */
+function condGuidanceHolderElement(element) {
+    return new ConditionOr([
+        new ConditionBooleanCharElement({element: [element]}),
+        new ConditionAnd([
+            new ConditionAscensionChar({ascension: 1}),
+            new ConditionTeamElement({element: element, onField: true}),
+        ]),
+        new ConditionAnd([
+            new ConditionConstellation({constellation: 6}),
+            new ConditionTeamElement({element: element}),
+        ]),
+    ]);
+}
+
+// Grace of Kenosis ATK bonus (skill).
+// Game data: Avatar_Nicole_ElementalArt onAbilityStart sets
+// _ABILITY_Nicole_ElementalArt_AttackUp from FIGHT_PROP_NONEXTRA_ATTACK
+// (premod) x AttackUp_AttackTranferRatio (cap AttackUp_Max), written by
+// UNIQUE_Avatar_Nicole_AttackUp_Lv1/Lv2 as Actor_AttackExtraDelta (extra;
+// GO: input.premod.atk into teamBuff total atk). The default premod read
+// and extra write are confirmed.
 const graceAtkPost = new PostEffectStats({
-    from: 'atk_total',
+    receivers: RECEIVERS.TEAM,
+    from: 'atk*',
     levelSetting: 'char_skill_elemental',
     percent: Talents.getMulti({
         name: 'atk',
@@ -177,20 +214,15 @@ const graceAtkPost = new PostEffectStats({
     condition: condGraceOrGuidance,
 });
 
-const partyGraceAtkPost = new PostEffectStats({
-    from: 'nicole_atk_total',
-    levelSetting: 'nicole_char_skill_elemental',
-    percent: Talents.getMulti({
-        name: 'atk',
-        from: 'skill.nicole_grace_of_kenosis_atk_bonus_ratio',
-        multi: 0.01,
-    }),
-    statCap: Talents.get('skill.nicole_grace_of_kenosis_max_atk_bonus'),
-    condition: condPartyGraceOrGuidance,
-});
-
+// C4 Pathfinder's Blessing flat bonus (displayed row; the damage itself is
+// the delivered multiplier below).
+// Game data: UNIQUE_Avatar_Nicole_Constellation_4_Buff (ModifyDamageCountMixin)
+// damageExtra reads FIGHT_PROP_CUR_ATTACK (total) x Constellation_4_Buff_Ratio
+// (GO: prod(percent(dmgInc), input.total.atk)). No KQM test. The written
+// base_dmg_bonus_* stats have no extra lane, so only the read is declared.
 const pathfinderBlessingPost = new PostEffectStats({
-    from: 'atk_total',
+    reads: CHANNELS.TOTAL,
+    from: 'atk*',
     percent: [
         new StatTable('base_dmg_bonus_normal', [C4PathfinderBlessingBonus]),
         new StatTable('base_dmg_bonus_charged', [C4PathfinderBlessingBonus]),
@@ -204,57 +236,21 @@ const pathfinderBlessingPost = new PostEffectStats({
     ]),
 });
 
+// Delivered multipliers are computed in Nicole's scope: they scale on her ATK.
+// C4 Pathfinder's Blessing: game reads FIGHT_PROP_CUR_ATTACK (total, see the
+// post above; GO: input.total.atk). Secret Rite: game reads FIGHT_PROP_CUR_ATTACK
+// (total; Avatar_Nicole_PermanentSkill_3 UNIQUE handler ModifyDamageMixin
+// damageExtra, GO: input.total.atk). A scaling of 'atk*' already reads the
+// total, so plain damage multipliers need nothing.
 const pathfinderBlessingMultiplier = new FeatureMultiplier({
+    receivers: RECEIVERS.TEAM,
     source: 'constellation4',
     values: new StatTable('nicole_pathfinder_blessing', [C4PathfinderBlessingBonus]),
-    condition: new ConditionAnd([
-        condGuidance,
-        new ConditionBoolean({name: 'nicole_whether_left_or_right_no_matter_which_way_you_turn'}),
-    ]),
+    condition: condC4Blessing,
     target: new FeatureMultiplierTarget({
         damageTypes: ['normal', 'charged', 'plunge', 'skill', 'burst'],
     }),
 });
-
-const partyPathfinderBlessingMultiplier = new FeatureMultiplier({
-    scaling: 'nicole_atk_total',
-    source: 'nicole',
-    values: new StatTable('party_nicole_pathfinder_blessing', [C4PathfinderBlessingBonus]),
-    condition: new ConditionAnd([
-        condPartyGuidance,
-        new ConditionBoolean({name: 'party.nicole_whether_left_or_right_no_matter_which_way_you_turn'}),
-    ]),
-    target: new FeatureMultiplierTarget({
-        damageTypes: ['normal', 'charged', 'plunge', 'skill', 'burst'],
-    }),
-});
-
-function makeArcaneProjectionFeature(leveling) {
-    return new FeatureDamageArcaneProjection({
-        name: 'nicole_arcane_projection',
-        tags: ['nicole_arcane_projection', 'arcane_projection'],
-        multipliers: [
-            new FeatureMultiplier({
-                leveling: leveling,
-                values: Talents.get('burst.nicole_arcane_projection'),
-            }),
-        ],
-    });
-}
-
-function makeArcaneProjectionUnityFeature(condition) {
-    return new FeatureDamageArcaneProjection({
-        name: 'nicole_arcane_projection_unity',
-        tags: ['nicole_arcane_projection_unity', 'nicole_arcane_projection', 'arcane_projection'],
-        condition: condition,
-        multipliers: [
-            new FeatureMultiplier({
-                source: 'constellation1',
-                values: new StatTable('nicole_arcane_projection_unity', [C1ArcaneProjectionUnityDmg]),
-            }),
-        ],
-    });
-}
 
 export const Nicole = new DbObjectChar({
     name: 'nicole',
@@ -267,6 +263,13 @@ export const Nicole = new DbObjectChar({
     origin: 'mondstadt',
     talents: Talents,
     statTable: charTables.Nicole,
+    // Talent damage hits and the skill shield read the total ATK: the game
+    // computes the shield from FIGHT_PROP_CUR_ATTACK
+    // (Avatar_Nicole_ElementalArt_Shield_Handler_Temp) and talent hits scale
+    // Talent_Damage x FIGHT_PROP_CUR_ATTACK. Damage multipliers need nothing.
+    // A1/C2 flat +300 ATK, the C2 RES shred and C6 DEF ignore are flat
+    // conditions / enemy stats (game: Actor_AttackDelta, SubHurtDelta,
+    // ModifyDamageMixin ignore), need nothing.
     features: [
         new FeatureDamageNormal({
             name: 'normal_hit_1',
@@ -369,8 +372,33 @@ export const Nicole = new DbObjectChar({
                 }),
             ],
         }),
-        makeArcaneProjectionFeature('char_skill_burst'),
-        makeArcaneProjectionUnityFeature(new ConditionConstellation({constellation: 1})),
+        // Arcane Projections are damage of the active member who summons
+        // them, at Nicole's burst level: "This DMG scales based on the
+        // corresponding character's ATK and will be considered as having
+        // been dealt by them."
+        new FeatureDamageArcaneProjection({
+            name: 'nicole_arcane_projection',
+            receivers: RECEIVERS.TEAM,
+            tags: ['nicole_arcane_projection', 'arcane_projection'],
+            multipliers: [
+                new FeatureMultiplier({
+                    leveling: 'char_skill_burst',
+                    values: Talents.get('burst.nicole_arcane_projection'),
+                }),
+            ],
+        }),
+        new FeatureDamageArcaneProjection({
+            name: 'nicole_arcane_projection_unity',
+            receivers: RECEIVERS.TEAM,
+            tags: ['nicole_arcane_projection_unity', 'nicole_arcane_projection', 'arcane_projection'],
+            condition: new ConditionConstellation({constellation: 1}),
+            multipliers: [
+                new FeatureMultiplier({
+                    source: 'constellation1',
+                    values: new StatTable('nicole_arcane_projection_unity', [C1ArcaneProjectionUnityDmg]),
+                }),
+            ],
+        }),
         new FeaturePostEffectValue({
             category: 'other',
             name: 'nicole_grace_atk_bonus',
@@ -388,16 +416,22 @@ export const Nicole = new DbObjectChar({
         }),
     ],
     multipliers: [
+        // Hexerei: Secret Rite: "Increases the DMG dealt by Hexerei
+        // characters' Arcane Projections by 300% of Nicole's ATK."
         new FeatureMultiplier({
+            receivers: RECEIVERS.TEAM,
             scaling: 'atk*',
             source: 'nicole_light_in_the_darkness',
             values: new StatTable('nicole_light_in_the_darkness', [WitchArcaneProjectionBonus]),
             condition: new ConditionAnd([
                 condWitchHomework,
                 condHexereiResonance,
+                new ConditionReceiver({
+                    condition: new ConditionWitchHomework({}),
+                }),
             ]),
             target: new FeatureMultiplierTarget({
-                tags: ['nicole_arcane_projection'],
+                tags: ['arcane_projection'],
             }),
         }),
         pathfinderBlessingMultiplier,
@@ -423,6 +457,18 @@ export const Nicole = new DbObjectChar({
             condition: new ConditionAnd([
                 condGuidance,
                 new ConditionAscensionChar({ascension: 1}),
+            ]),
+        }),
+        new Condition({
+            isHidden: true,
+            receivers: RECEIVERS.OTHERS,
+            stats: {
+                atk: GuidanceAtkBonus,
+            },
+            condition: new ConditionAnd([
+                condGuidance,
+                new ConditionAscensionChar({ascension: 1}),
+                condOthersKeepGuidance,
             ]),
         }),
         new ConditionBoolean({
@@ -472,18 +518,23 @@ export const Nicole = new DbObjectChar({
                 }),
                 new Condition({
                     isHidden: true,
+                    receivers: RECEIVERS.TEAM,
                     stats: {
                         atk: C2GraceAtkBonus,
                     },
                     condition: condGraceOrGuidance,
                 }),
-                new Condition({
+                ...Elements.map((element) => new Condition({
                     isHidden: true,
+                    receivers: RECEIVERS.TEAM,
                     stats: {
-                        enemy_res_pyro: -C2ResShred,
+                        ['enemy_res_' + element]: -C2ResShred,
                     },
-                    condition: condGuidance,
-                }),
+                    condition: new ConditionAnd([
+                        condGuidance,
+                        condGuidanceHolderElement(element),
+                    ]),
+                })),
             ],
         },
         {
@@ -520,182 +571,18 @@ export const Nicole = new DbObjectChar({
         },
         {
             conditions: [
+                // From C6 every member holds Guidance of Theosis with Nicole.
                 new ConditionStatic({
+                    receivers: RECEIVERS.TEAM,
                     title: 'talent_name.nicole_this_is_the_path_walk_it_without_delay',
                     description: 'talent_descr.nicole_this_is_the_path_walk_it_without_delay',
                     stats: {
-                        enemy_def_ignore: C6DefIgnore,
+                        def_ignore: C6DefIgnore,
                     },
                     condition: condGuidance,
                 }),
             ],
         },
     ]),
-    partyData: {
-        loadStats: {
-            stats: ['atk_total'],
-            settings: ['char_skill_elemental', 'char_skill_burst'],
-        },
-        conditions: [
-            new ConditionNumber({
-                name: 'nicole_atk_total',
-                title: 'talent_name.stats_total_atk',
-                partyStat: 'atk_total',
-                serializeId: 1,
-                rotation: 'party',
-                max: 10000,
-            }),
-            new ConditionNumberTalent({
-                name: 'nicole_char_skill_elemental',
-                title: 'talent_name.stats_level_skill',
-                partySetting: 'char_skill_elemental',
-                serializeId: 2,
-            }),
-            new ConditionNumberTalent({
-                name: 'nicole_char_skill_burst',
-                title: 'talent_name.stats_level_burst',
-                partySetting: 'char_skill_burst',
-                serializeId: 9,
-            }),
-            new ConditionDropdown({
-                name: 'party.nicole_grace_of_kenosis',
-                serializeId: 3,
-                rotation: 'party',
-                title: 'talent_name.n11310001',
-                description: 'talent_descr.n11310001',
-                dropdownClass: 'medium-text',
-                separateControlLine: true,
-                values: [
-                    {title_str: 'talent_name.n11310001', value: 'grace', serializeId: 1},
-                    {title_str: 'talent_name.n11310002', value: 'guidance', serializeId: 2},
-                ],
-            }),
-            new Condition({
-                isHidden: true,
-                stats: {
-                    atk: GuidanceAtkBonus,
-                },
-                condition: condPartyGuidance,
-            }),
-            new ConditionBoolean({
-                name: 'party.nicole_witch_homework',
-                serializeId: 4,
-                rotation: 'party',
-                title: 'talent_name.nicole_light_in_the_darkness',
-                description: 'talent_descr.nicole_light_in_the_darkness',
-                info: {hexerei: true},
-            }),
-            new ConditionBoolean({
-                name: 'party.nicole_do_not_be_afraid_child_who_is_loved',
-                serializeId: 11,
-                rotation: 'party',
-                title: 'talent_name.nicole_do_not_be_afraid_child_who_is_loved',
-                description: 'talent_descr.nicole_do_not_be_afraid_child_who_is_loved',
-                info: {constellation: 1},
-                stats: {
-                    text_percent_dmg: C1ArcaneProjectionUnityDmg,
-                },
-            }),
-            new ConditionBoolean({
-                name: 'party.nicole_i_will_guide_you_and_show_you_the_path_you_should_tread',
-                serializeId: 5,
-                rotation: 'party',
-                title: 'talent_name.nicole_i_will_guide_you_and_show_you_the_path_you_should_tread',
-                description: 'talent_descr.nicole_i_will_guide_you_and_show_you_the_path_you_should_tread',
-                info: {constellation: 2},
-            }),
-            new ConditionBoolean({
-                name: 'party.nicole_you_will_hear_my_voice_beside_you',
-                serializeId: 8,
-                rotation: 'party',
-                title: 'talent_name.nicole_you_will_hear_my_voice_beside_you',
-                description: 'talent_descr.char_constellation_skill',
-                info: {constellation: 3},
-                settings: {
-                    nicole_char_skill_elemental_bonus: 3,
-                },
-            }),
-            new Condition({
-                isHidden: true,
-                stats: {
-                    atk: C2GraceAtkBonus,
-                },
-                condition: new ConditionAnd([
-                    condPartyGraceOrGuidance,
-                    new ConditionBoolean({name: 'party.nicole_i_will_guide_you_and_show_you_the_path_you_should_tread'}),
-                ]),
-            }),
-            ...Elements.map((element) => {
-                return new Condition({
-                    isHidden: true,
-                    stats: {
-                        ['enemy_res_' + element]: -C2ResShred,
-                    },
-                    condition: new ConditionAnd([
-                        condPartyGuidance,
-                        new ConditionBoolean({name: 'party.nicole_i_will_guide_you_and_show_you_the_path_you_should_tread'}),
-                        new ConditionBooleanCharElement({element: [element]}),
-                    ]),
-                });
-            }),
-            new ConditionBoolean({
-                name: 'party.nicole_whether_left_or_right_no_matter_which_way_you_turn',
-                serializeId: 6,
-                rotation: 'party',
-                title: 'talent_name.nicole_whether_left_or_right_no_matter_which_way_you_turn',
-                description: 'talent_descr.nicole_whether_left_or_right_no_matter_which_way_you_turn',
-                info: {constellation: 4},
-                stats: {
-                    text_atk_percent: C4PathfinderBlessingBonus,
-                },
-                condition: condPartyGuidance,
-            }),
-            new ConditionBoolean({
-                name: 'party.nicole_a_lamp_by_your_side_a_light_to_shine_the_way',
-                serializeId: 10,
-                rotation: 'party',
-                title: 'talent_name.nicole_a_lamp_by_your_side_a_light_to_shine_the_way',
-                description: 'talent_descr.char_constellation_burst',
-                info: {constellation: 5},
-                settings: {
-                    nicole_char_skill_burst_bonus: 3,
-                },
-            }),
-            new ConditionBoolean({
-                name: 'party.nicole_this_is_the_path_walk_it_without_delay',
-                serializeId: 7,
-                rotation: 'party',
-                title: 'talent_name.nicole_this_is_the_path_walk_it_without_delay',
-                description: 'talent_descr.nicole_this_is_the_path_walk_it_without_delay',
-                info: {constellation: 6},
-                stats: {
-                    enemy_def_ignore: C6DefIgnore,
-                },
-                condition: condPartyGuidance,
-            }),
-        ],
-        features: [
-            makeArcaneProjectionFeature('nicole_char_skill_burst'),
-            makeArcaneProjectionUnityFeature(condPartyArcaneProjectionUnity),
-        ],
-        postEffects: [
-            partyGraceAtkPost,
-        ],
-        multipliers: [
-            partyPathfinderBlessingMultiplier,
-            new FeatureMultiplier({
-                scaling: 'nicole_atk_total',
-                source: 'nicole_light_in_the_darkness',
-                values: new StatTable('party_nicole_light_in_the_darkness', [WitchArcaneProjectionBonus]),
-                condition: new ConditionAnd([
-                    condPartyWitchHomework,
-                    condHexereiResonance,
-                    new ConditionWitchHomework({}),
-                ]),
-                target: new FeatureMultiplierTarget({
-                    tags: ['arcane_projection'],
-                }),
-            }),
-        ],
-    },
+    retiredParty: [[1, 'number'], [2, 'number'], [9, 'number'], [3, 'dropdown'], [4, 'checkbox'], [11, 'checkbox'], [5, 'checkbox'], [8, 'checkbox'], [6, 'checkbox'], [10, 'checkbox'], [7, 'checkbox']],
 });

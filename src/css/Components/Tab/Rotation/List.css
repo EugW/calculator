@@ -80,6 +80,13 @@
     /* margin-left: 10px; */
 }
 
+.rotation-items-list .rotation-step-warning {
+    color: #f4d399;
+    font-size: 12px;
+    line-height: 18px;
+    padding-bottom: 4px;
+}
+
 .rotation-items-list .feature.invalid, .rotation-items-list .condition.invalid {
     border-color: #b10b0e;
 }

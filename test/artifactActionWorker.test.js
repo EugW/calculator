@@ -1,4 +1,5 @@
 import { WorkerFactory } from '../src/js/classes/WorkerFactory';
+import { serializeWorkerMember } from '../src/js/classes/Team';
 import { Artifact } from '../src/js/classes/Artifact';
 import { DB } from '../src/js/db/DB';
 const babel = require('@babel/core');
@@ -15,12 +16,18 @@ loaded.filename = filename;
 loaded.paths = NodeModule._nodeModulePaths(path.dirname(filename));
 loaded.require = request => {
     if (request === '../WorkerFactory') return {WorkerFactory};
+    if (request === '../Team') return {serializeWorkerMember};
     throw new Error('Unexpected worker dependency: ' + request);
 };
 loaded._compile(babel.transformSync(source, {filename, presets: [['@babel/preset-env', {targets: {node: 'current'}}]]}).code, filename);
 const Factory = loaded.exports.WorkerFactoryArtifactActionPredictor;
-const input = () => ({kind: 'craft', build: {serialize: () => ['build']}, inventory: [{serialize: () => ['artifact']}],
-    optimizerSettings: {stats: {recharge_min: 120}}, set: 'GladiatorFinale'});
+// A member of a team: a worker gets the whole team and the member's slot.
+const input = () => {
+    const build = {};
+    build.team = {serialize: () => ['team'], slotOf: (member) => member === build ? 2 : -1};
+    return {kind: 'craft', build, inventory: [{serialize: () => ['artifact']}],
+        optimizerSettings: {stats: {recharge_min: 120}}, set: 'GladiatorFinale'};
+};
 
 function setup() {
     const callback = jest.fn(), progressCallback = jest.fn(), errorCallback = jest.fn();
@@ -42,7 +49,7 @@ test('action worker serializes snapshots, forwards full workload, and accepts st
     const rvFilters = {outcomes: {enabled: true, min: 500, max: 900}, companions: {enabled: false, min: null, max: null}};
     factory.run({...input(), mode: 'full', pruneOutcomeSets: true, craftAffixes, rvFilters});
     expect(workers).toHaveLength(1);
-    expect(workers[0].postMessage.mock.calls[0][0]).toMatchObject({build: ['build'], inventory: [['artifact']],
+    expect(workers[0].postMessage.mock.calls[0][0]).toMatchObject({build: {team: ['team'], slot: 2}, inventory: [['artifact']],
         optimizerSettings: {stats: {recharge_min: 120}}, mode: 'full', pruneOutcomeSets: true, craftAffixes, rvFilters});
     const progress = {phase: 'full', current: 0, combinationTotal: '99000000000000000'};
     workers[0].onmessage({data: {progress}});
@@ -95,8 +102,10 @@ test('explicit source snapshots preserve IDs, repeated slots, history and locks 
     const workerFile = path.resolve(__dirname, '../src/js/workers/ArtifactActionPredictor.js');
     const calculate = jest.fn(async () => ({rows: []}));
     const workerRequire = request => {
+        // The database module installs the global DB, which the stubs below do not read.
+        if (request === '../db') return {};
         if (request.endsWith('/Artifact')) return {Artifact};
-        if (request.endsWith('/CalcSet')) return {CalcSet: {deserialize: () => 'baseline-build'}};
+        if (request.endsWith('/Team')) return {deserializeWorkerMember: () => 'baseline-build'};
         if (request.endsWith('/ArtifactActionPredictor')) return {evaluateArtifactActionPredictions: calculate};
         if (request.endsWith('/ArtifactActionOutcomes')) return require('../src/js/classes/ArtifactActionOutcomes');
         throw new Error('Unexpected dependency ' + request);
@@ -105,8 +114,7 @@ test('explicit source snapshots preserve IDs, repeated slots, history and locks 
     const code = babel.transformSync(fs.readFileSync(workerFile, 'utf8'), {
         filename: workerFile, presets: [['@babel/preset-env', {targets: {node: 'current'}}]],
     }).code;
-    require('node:vm').runInNewContext(code, {require: workerRequire, exports: {}, self: workerSelf,
-        importScripts: jest.fn(), __VERSION__: 'test'});
+    require('node:vm').runInNewContext(code, {require: workerRequire, exports: {}, self: workerSelf});
     await workerSelf.onmessage({data: {...payload, useGPU: true, inventory: [artifact.serialize()]}});
     expect(calculate).toHaveBeenCalledTimes(1);
     const decoded = calculate.mock.calls[0][0];
@@ -114,6 +122,43 @@ test('explicit source snapshots preserve IDs, repeated slots, history and locks 
     expect(decoded.reshapeTargets.map(target => target.artifact.getHash())).toEqual([artifact.getHash(), other.getHash()]);
     await workerSelf.onmessage({data: {...payload, useGPU: true, reshapeTargets: [], inventory: []}});
     expect(calculate.mock.calls[1][0].reshapeTargets).toEqual([]);
+});
+
+test('a baseline run answers the baseline record; the worker computes it on its own request', async () => {
+    const {factory, workers, callback, errorCallback} = setup();
+    factory.run({...input(), operation: 'baseline'});
+    const payload = workers[0].postMessage.mock.calls[0][0];
+    expect(payload.operation).toBe('baseline');
+    const baseline = {schema: 1, fingerprint: 'abc', value: 12, artifacts: []};
+    workers[0].onmessage({data: {baseline}});
+    expect(callback).toHaveBeenCalledWith(baseline);
+    factory.run({...input(), operation: 'baseline'});
+    workers.at(-1).onmessage({data: {baseline: {value: 1}}});
+    expect(errorCallback).toHaveBeenCalledWith({worker: 0, error: 'Invalid artifact action baseline'});
+    factory.dispose();
+
+    const workerFile = path.resolve(__dirname, '../src/js/workers/ArtifactActionPredictor.js');
+    const computeBaseline = jest.fn(async () => baseline);
+    const calculate = jest.fn(async () => ({rows: []}));
+    const workerRequire = request => {
+        if (request === '../db') return {};
+        if (request.endsWith('/Artifact')) return {Artifact};
+        if (request.endsWith('/Team')) return {deserializeWorkerMember: () => 'build'};
+        if (request.endsWith('/ArtifactActionPredictor')) {
+            return {computeArtifactActionBaseline: computeBaseline, evaluateArtifactActionPredictions: calculate};
+        }
+        if (request.endsWith('/ArtifactActionOutcomes')) return require('../src/js/classes/ArtifactActionOutcomes');
+        throw new Error('Unexpected dependency ' + request);
+    };
+    const workerSelf = {navigator: {gpu: {}}, postMessage: jest.fn()};
+    const code = babel.transformSync(fs.readFileSync(workerFile, 'utf8'), {
+        filename: workerFile, presets: [['@babel/preset-env', {targets: {node: 'current'}}]],
+    }).code;
+    require('node:vm').runInNewContext(code, {require: workerRequire, exports: {}, self: workerSelf});
+    await workerSelf.onmessage({data: {...payload, useGPU: true, inventory: []}});
+    expect(computeBaseline).toHaveBeenCalledTimes(1);
+    expect(calculate).not.toHaveBeenCalled();
+    expect(workerSelf.postMessage).toHaveBeenLastCalledWith({baseline});
 });
 
 test('cancellation and errors terminate action work and suppress late results', () => {

@@ -16,6 +16,7 @@ import { FeatureMultiplier } from "../../classes/Feature2/Multiplier";
 import { StatTable } from "../../classes/StatTable";
 import { charTables } from "../generated/CharTables";
 import { charTalentTables } from "../generated/CharTalentTables";
+import { percent } from "../Params";
 
 const Talents = new DbObjectTalents({
     attack: {
@@ -152,10 +153,12 @@ const Talents = new DbObjectTalents({
 
 const TalentValues = {
     BurstNormalBaseMulti: 200,
-    A4SkillBonus: 40,
-    C1CritRateSkill: 15,
-    C4AtkBonus: 9,
-    C6CritDmg: 12,
+    A4SkillBonus: percent(charTalentTables.Freminet.a4.p1),
+    C1CritRateSkill: percent(charTalentTables.Freminet.c1.p1),
+    C4AtkBonus: percent(charTalentTables.Freminet.c4.p1),
+    C4MaxStacks: charTalentTables.Freminet.c4.p3,
+    C6CritDmg: percent(charTalentTables.Freminet.c6.p1),
+    C6MaxStacks: charTalentTables.Freminet.c6.p3,
 };
 
 export const Freminet = new DbObjectChar({
@@ -456,7 +459,7 @@ export const Freminet = new DbObjectChar({
                     serializeId: 3,
                     title: 'talent_name.freminet_dance_of_the_snowy_moon_and_flute',
                     description: 'talent_descr.freminet_dance_of_the_snowy_moon_and_flute',
-                    maxStacks: 2,
+                    maxStacks: TalentValues.C4MaxStacks,
                     stats: [
                         new StatTable('atk_percent', [TalentValues.C4AtkBonus]),
                     ],
@@ -479,7 +482,7 @@ export const Freminet = new DbObjectChar({
                     serializeId: 4,
                     title: 'talent_name.freminet_moment_of_waking_and_resolve',
                     description: 'talent_descr.freminet_moment_of_waking_and_resolve',
-                    maxStacks: 3,
+                    maxStacks: TalentValues.C6MaxStacks,
                     stats: [
                         new StatTable('crit_dmg', [TalentValues.C6CritDmg]),
                     ],

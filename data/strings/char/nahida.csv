@@ -1,6 +1,4 @@
 category;name;rus;eng
-talent_name;party_max_mastery;Макс. МС членов отряда;Party members Max EM
-
 feature_skill;nahida_trikarma_purification_dmg;Урон Очищения трикармы;Tri-Karma Purification DMG
 feature_skill;nahida_trikarma_purification_mastery;Урон Очищения трикармы;Tri-Karma Purification DMG
 feature_skill;nahida_trikarma_purification_interval;Интервал активации Очищения трикармы;Tri-Karma Purification Trigger Interval

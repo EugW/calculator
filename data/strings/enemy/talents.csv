@@ -136,3 +136,6 @@ talent_name;enemy_summon_queen;Призывает королеву;Summmoning Qu
 talent_name;enemy_queen_defeated;Королева побеждена;Queen Defeated
 talent_name;enemy_king_reviving;Возрождает;Reviving
 talent_name;enemy_king_berserk;Берсерк;Berserk
+
+talent_name;enemy_def_reduce;Снижение защиты;DEF reduction
+talent_descr;enemy_def_reduce;Снижение name{защиты} противника, которое калькулятор не учитывает сам. Складывается со снижениями защиты от персонажей, всего не более value{90%}.;A reduction of the enemy's name{DEF} the calculator does not model. It adds to the characters' DEF reductions, value{90%} at most in total.

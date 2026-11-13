@@ -1,5 +1,10 @@
 import { CalcObject } from '../CalcObject';
 import { Stats } from '../Stats';
+import { isTeamSetting } from '../Team/Settings';
+import { LEGACY_BUFF_CONDITIONS } from '../Legacy/Buffs';
+import { LEGACY_BUFF_DATA } from '../Legacy/BuffData';
+import { LEGACY_PARTY_DATA } from '../Legacy/PartyData';
+import { legacyConditions } from '../Legacy/Condition';
 
 export const CUSTOM_STATS = {
     atk: {
@@ -105,10 +110,13 @@ export const CUSTOM_STATS = {
     dmg_burst: {
         serializeId: 33,
     },
+    // The enemy's DEF reduction is team state now: a control of the enemy.
+    // Format-1 values migrate to the enemy's DEF reduction control.
     enemy_def_reduce: {
         serializeId: 34,
+        retired: true,
     },
-    enemy_def_ignore: {
+    def_ignore: {
         serializeId: 35,
     },
     dmg_reaction_lunar: {
@@ -182,7 +190,6 @@ export class CalcObjectBuffs extends CalcObject {
     constructor() {
         super();
         this.buffs = DB.Buffs;
-        this.partyCharIds = [];
     }
 
     get() {
@@ -190,18 +197,7 @@ export class CalcObjectBuffs extends CalcObject {
     }
 
     getFeatures() {
-        let result = [];
-        let charIds = this.getPartyChars();
-
-        for (let charId of charIds) {
-            const char = DB.Chars.getById(charId);
-
-            if (char) {
-                result = result.concat(char.getPartyFeatures());
-            }
-        }
-
-        return result;
+        return [];
     }
 
     isBeta() {
@@ -217,167 +213,32 @@ export class CalcObjectBuffs extends CalcObject {
         return result;
     }
 
-    getConditions(opts) {
-        let result = [];
-        opts ||= {};
+    /**
+     * @returns {Array.<DbObjectBuff>} the member's own buffs; the party's
+     *     belong to the team (TeamEvaluation.resolveParty)
+     */
+    getMemberBuffs() {
+        return this.buffs.getList().filter((item) => !item.isParty());
+    }
 
-        for (const item of this.buffs.getList()) {
-            result = result.concat(item.getConditions());
-        }
-
-        let charIds = this.getPartyChars();
-
-        if (!opts.serialize) {
-            for (let i = 0; i < charIds.length; ++i) {
-                let charId = charIds[i];
-                const char = DB.Chars.getById(charId);
-
-                if (char) {
-                    result = result.concat(char.getPartyConditions());
-                }
-            }
-        }
-
-        return result;
+    getConditions() {
+        return this.getMemberBuffs().flatMap((item) => item.getConditions());
     }
 
     getMultipliers() {
-        let result = [];
-        for (const item of this.buffs.getList()) {
-            result = result.concat(item.getMultipliers());
-        }
-
-        let charIds = this.getPartyChars();
-        for (let charId of charIds) {
-            const char = DB.Chars.getById(charId);
-
-            if (char) {
-                result = result.concat(char.getPartyMultipliers());
-            }
-        }
-
-        return result;
+        return this.getMemberBuffs().flatMap((item) => item.getMultipliers());
     }
 
     getPostEffects() {
-        let result = [];
-        let charIds = this.getPartyChars();
-
-        for (const item of this.buffs.getList()) {
-            result = result.concat(item.getPostEffects());
-        }
-
-        for (let i = 0; i < charIds.length; ++i) {
-            let charId = charIds[i];
-            const char = DB.Chars.getById(charId);
-
-            if (char) {
-                result = result.concat(char.getPartyPostEffects());
-            }
-        }
-
-        return result;
-    }
-
-    setPartyChars(ids) {
-        this.partyCharIds = [];
-
-        for (const id of ids) {
-            if (id && DB.Chars.getById(id)) {
-                this.partyCharIds.push(id);
-            }
-        }
-    }
-
-    getPartyChars() {
-        return [].concat(this.partyCharIds);
-    }
-
-    getSettings() {
-        let result = super.getSettings();
-        let partySize = 1;
-
-        // Core party (affects resonance) - first 3 supports
-        for (let i = 1; i <= 3; ++i) {
-            let charId = this.partyCharIds[i-1];
-            const char = DB.Chars.getById(charId);
-
-            if (char) {
-                ++partySize;
-                result['party_char_'+ i] = charId;
-                result['resonance_element_'+ i] = char.getElement();
-            } else {
-                result['party_char_'+ i] = 0;
-                result['resonance_element_'+ i] = '';
-            }
-        }
-
-        // Extended party (buffs only, no resonance)
-        let extraCount = 0;
-        let extraCharIds = {};
-        for (let i = 4; i <= this.partyCharIds.length; ++i) {
-            let charId = this.partyCharIds[i-1];
-            const char = DB.Chars.getById(charId);
-
-            if (char) {
-                extraCount++;
-                result['party_char_extra_'+ extraCount] = charId;
-                // Mark for condition override - use serializeId (same as getId())
-                result['party_extra_override_'+ char.getId()] = 1;
-                extraCharIds[char.getId()] = true;
-            }
-        }
-
-        // Clear any previously set extra slots and override flags
-        for (const key of Object.keys(result)) {
-            if (key.startsWith('party_char_extra_')) {
-                let idx = parseInt(key.replace('party_char_extra_', ''), 10);
-                if (idx > extraCount) {
-                    result[key] = 0;
-                }
-            } else if (key.startsWith('party_extra_override_')) {
-                let id = parseInt(key.replace('party_extra_override_', ''), 10);
-                if (!extraCharIds[id]) {
-                    result[key] = 0;
-                }
-            }
-        }
-
-        result['party_size'] = partySize;
-        result['party_total_size'] = 1 + this.partyCharIds.length;
-
-        return result;
+        return this.getMemberBuffs().flatMap((item) => item.getPostEffects());
     }
 
     serialize(settings) {
+        settings = Object.fromEntries(Object.entries(settings).filter(([name]) => !isTeamSetting(name)));
         let result = [];
         let condData = this.serializeConditions(settings);
 
         return result.concat(condData);
-    }
-
-    serializeChars(settings) {
-        let charIds = this.getPartyChars();
-        let result = [];
-        let count = 0;
-
-        for (let i = 0; i < charIds.length; ++i) {
-            let id = charIds[i];
-
-            let char = DB.Chars.getById(id);
-            if (char) {
-                ++count;
-                let conditions = char.getPartyConditions();
-                let condData = this.serializeConditions(settings, conditions);
-
-                result.push(id);
-                result = result.concat(condData);
-            }
-        }
-
-        result.unshift(count);
-
-        return result;
     }
 
     serializeCustomBuffs(settings) {
@@ -386,7 +247,7 @@ export class CalcObjectBuffs extends CalcObject {
 
         for (let stat of Object.keys(CUSTOM_STATS)) {
             let value = settings['custom_buffs.'+ stat];
-            if (!value) {
+            if (!value || CUSTOM_STATS[stat].retired) {
                 continue;
             }
 
@@ -408,30 +269,22 @@ export class CalcObjectBuffs extends CalcObject {
         return result;
     }
 
+    // A format-1 build keeps its party inputs until it creates a new team.
+    // Character-only imports still discard the legacy context.
     deserializeChars(input) {
-        let count = input.shift();
-
-        let result = {};
-
+        const count = input.shift();
+        if (!Number.isInteger(count) || count < 0) return null;
         for (let i = 0; i < count; ++i) {
-            let charId = input.shift();
-            let char = DB.Chars.getById(charId);
+            const char = DB.Chars.getById(input.shift());
             if (!char) return null;
-
-            let conditions = char.getPartyConditions();
-
-            // First 3 go to party_char_X, rest go to party_char_extra_X
-            if (i < 3) {
-                result['party_char_'+ (i+1)] = charId;
-            } else {
-                result['party_char_extra_'+ (i-2)] = charId;
-            }
-
-            let charSettings = this.deserializeConditions(input, conditions);
-            result = Object.assign(result, charSettings);
+            const conditions = this.legacyTeam
+                ? legacyConditions(LEGACY_PARTY_DATA[char.getId()])
+                : char.getLegacyPartyConditions();
+            const settings = this.deserializeConditions(input, conditions);
+            if (!settings) return null;
+            if (this.legacyTeam) this.legacyTeam.party.push({charId: char.getId(), settings});
         }
-
-        return result;
+        return {};
     }
 
     deserializeCustomBuffs(input) {
@@ -450,60 +303,47 @@ export class CalcObjectBuffs extends CalcObject {
                 value = value / 10;
             }
 
-            result['custom_buffs.'+ stat] = value;
+            if (!data.retired) {
+                result['custom_buffs.'+ stat] = value;
+            } else if (this.legacyTeam && stat == 'enemy_def_reduce') {
+                this.legacyTeam.defReduce = value;
+            }
         }
 
         return result;
     }
 
-    static deserialize(input) {
-        let result = new CalcObjectBuffs();
-        let settings = result.deserializeConditions(input);
-        if (!settings) return null;
-
-        let charUsed = {};
-        result.partyCharIds = [];
-
-        // Core party members (1-3)
-        for (let i = 1; i <= 3; ++i) {
-            if (settings['party_char_'+ i]) {
-                result.partyCharIds.push(settings['party_char_'+ i]);
-            }
-        }
-
-        // Extra party members
-        let extraIndex = 1;
-        while (settings['party_char_extra_' + extraIndex]) {
-            result.partyCharIds.push(settings['party_char_extra_' + extraIndex]);
-            extraIndex++;
-        }
-
-        if (result.partyCharIds.length == 0) {
-            for (let i = 1; i <= 3; ++i) {
-                let element = settings['old_resonance_element_'+ i];
-
-                if (element) {
-                    delete settings['old_resonance_element_'+ i];
-
-                    for (const char of DB.Chars.getList()) {
-                        let charId = char.getId();
-
-                        if (charUsed[charId]) {
-                            continue;
-                        }
-
-                        if (element == char.getElement()) {
-                            result.partyCharIds.push(charId);
-                            charUsed[charId] = 1;
-                            break;
-                        }
-                    }
+    static deserialize(input, legacy = false) {
+        const result = new CalcObjectBuffs();
+        if (legacy) {
+            // The old tab's own rows (weapon and set buffs, typed bonuses)
+            // are kept by their old names: a new team loads them into its
+            // legacy source (Legacy/Team.loadLegacyTeam).
+            result.legacyTeam = {party: [], settings: {}, buffs: {}, dropped: []};
+            const settings = result.deserializeConditions(input, legacyConditions(LEGACY_BUFF_DATA));
+            if (!settings) return null;
+            const own = {};
+            for (const [name, value] of Object.entries(settings)) {
+                if (isTeamSetting(name)) {
+                    result.legacyTeam.settings[name] = value;
+                } else if (name == 'common.char_status_shield') {
+                    result.legacyTeam.settings.on_field_shield = value;
+                } else if (name.startsWith('custom_buffs.')) {
+                    own[name] = value;
+                } else {
+                    result.legacyTeam.buffs[name] = value;
                 }
             }
+            result.setSettings(own);
+            return result;
         }
-
-        result.setSettings(settings);
-
+        // Party toggles saved with a member before they were team state
+        // still decode, and are dropped: a member holds none, and a team
+        // made from an old build starts with the defaults.
+        const party = DB.Buffs.getList().filter((item) => item.isParty()).flatMap((item) => item.getConditions());
+        const settings = result.deserializeConditions(input, result.getConditions().concat(party, LEGACY_BUFF_CONDITIONS));
+        if (!settings) return null;
+        result.setSettings(Object.fromEntries(Object.entries(settings).filter(([name]) => !isTeamSetting(name))));
         return result;
     }
 }

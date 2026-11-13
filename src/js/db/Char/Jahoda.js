@@ -1,10 +1,12 @@
 import { Condition } from "../../classes/Condition";
+import { ConditionAnd } from "../../classes/Condition/And";
 import { ConditionCalcMoonsign } from "../../classes/Condition/CalcMoonsign";
 import { ConditionAscensionChar } from "../../classes/Condition/Ascension/Char";
 import { ConditionBoolean } from "../../classes/Condition/Boolean";
+import { ConditionOnField } from "../../classes/Condition/Field";
 import { ConditionBooleanCharOrigin } from "../../classes/Condition/Boolean/CharOrigin";
-import { ConditionBooleanLevels } from "../../classes/Condition/Boolean/Levels";
 import { ConditionConstellation } from "../../classes/Condition/Constellation";
+import { ConditionReceiver } from "../../classes/Condition/Receiver";
 import { ConditionStatic } from "../../classes/Condition/Static";
 import { DbObjectChar } from "../../classes/DbObject/Char";
 import { DbObjectConstellation } from "../../classes/DbObject/Constellation";
@@ -16,9 +18,12 @@ import { FeatureDamagePlungeCollision } from "../../classes/Feature2/Damage/Plun
 import { FeatureDamagePlungeShockWave } from "../../classes/Feature2/Damage/Plunge/ShockWave";
 import { FeatureDamageSkill } from "../../classes/Feature2/Damage/Skill";
 import { FeatureMultiplier } from "../../classes/Feature2/Multiplier";
+import { PostEffectStatsStatic } from "../../classes/PostEffect/Stats/Static";
 import { StatTable } from "../../classes/StatTable";
+import { RECEIVERS } from "../../classes/Team/Receivers";
 import { charTables } from "../generated/CharTables";
 import { charTalentTables } from "../generated/CharTalentTables";
+import { percent } from "../Params";
 
 const Talents = new DbObjectTalents({
     attack: {
@@ -107,14 +112,44 @@ const Talents = new DbObjectTalents({
 });
 
 // Passive and constellation values
-const A1PyroBonus = 130;
-const A1HydroBonus = 120;
-const A1CryoSpeed = 10;
-const A4EmBonus = 100;
-const C6CritRate = 5;
-const C6CritDmg = 40;
-const partyC6MoonsignTarget = new ConditionBooleanCharOrigin({
-    origin: ['nodkrai'],
+const A1PyroBonus = percent(charTalentTables.Jahoda.a1.p1);
+const A1HydroBonus = percent(charTalentTables.Jahoda.a1.p2);
+const A1CryoSpeed = -percent(charTalentTables.Jahoda.a1.p3);
+const A4EmBonus = charTalentTables.Jahoda.a4.p1;
+const C6CritRate = percent(charTalentTables.Jahoda.c6.p1);
+const C6CritDmg = percent(charTalentTables.Jahoda.c6.p2);
+
+// C6 The Littlest Luck: CRIT of nearby Moonsign characters at Ascendant
+// Gleam. Game data: Avatar_Jahoda_Constellation_6_buff writes
+// Actor_CriticalExtraDelta and Actor_CriticalHurtExtraDelta: flat bonuses in
+// the extra part, so they are post-effects (a condition's stats are always
+// premod; md/buff_chains.md). Jahoda keeps her own copy; the delivery only
+// reaches Nod-Krai (Moonsign) receivers.
+const c6CritTables = [
+    new StatTable('crit_rate', [0, C6CritRate]),
+    new StatTable('crit_dmg', [0, C6CritDmg]),
+];
+const c6CritConditions = [
+    new ConditionConstellation({constellation: 6}),
+    new ConditionBoolean({name: 'jahoda_c6_crit_bonus'}),
+];
+const c6CritPost = new PostEffectStatsStatic({
+    levelSetting: 'party_moonsign',
+    percent: c6CritTables,
+    conditions: c6CritConditions,
+});
+const c6CritPartyPost = new PostEffectStatsStatic({
+    receivers: RECEIVERS.OTHERS,
+    levelSetting: 'party_moonsign',
+    percent: c6CritTables,
+    conditions: [
+        ...c6CritConditions,
+        new ConditionReceiver({
+            condition: new ConditionBooleanCharOrigin({
+                origin: ['nodkrai'],
+            }),
+        }),
+    ],
 });
 
 export const Jahoda = new DbObjectChar({
@@ -272,12 +307,17 @@ export const Jahoda = new DbObjectChar({
         }),
     ],
     conditions: [
+        // Jahoda enables the generic Moonsign flag for the whole team
+        // (merged with the old partyData copy).
         new Condition({
+            receivers: RECEIVERS.TEAM,
             settings: {
                 allowed_moonsign: 1,
             },
         }),
-        new ConditionCalcMoonsign(),
+        // Moonsign level comes from the real team; every Moonsign member
+        // delivers the same values, so this needs no stack key.
+        new ConditionCalcMoonsign({receivers: RECEIVERS.TEAM}),
         // A1 - Plan to Get Paid
         new ConditionStatic({
             title: 'talent_name.jahoda_plan_to_get_paid',
@@ -290,7 +330,9 @@ export const Jahoda = new DbObjectChar({
             },
             condition: new ConditionAscensionChar({ascension: 1}),
         }),
-        // A4 - Sweet Berry Bounty
+        // A4 - Sweet Berry Bounty: the healed active member (HP above 70%)
+        // gains 100 Mastery. Jahoda keeps her own copy; other members get it
+        // while they are on-field. HP and healing are manual assumptions.
         new ConditionBoolean({
             name: 'jahoda_a1_em_bonus',
             serializeId: 1,
@@ -302,11 +344,29 @@ export const Jahoda = new DbObjectChar({
             },
             condition: new ConditionAscensionChar({ascension: 4}),
         }),
+        new Condition({
+            isHidden: true,
+            receivers: RECEIVERS.OTHERS,
+            stats: {
+                mastery: A4EmBonus,
+            },
+            condition: new ConditionAnd([
+                new ConditionBoolean({name: 'jahoda_a1_em_bonus'}),
+                new ConditionAscensionChar({ascension: 4}),
+                new ConditionReceiver({
+                    condition: new ConditionOnField(),
+                }),
+            ]),
+        }),
         // Moonsign Passive
         new ConditionStatic({
             title: 'talent_name.jahoda_rooftop_dash',
             description: 'talent_descr.jahoda_rooftop_dash',
         }),
+    ],
+    postEffects: [
+        c6CritPost,
+        c6CritPartyPost,
     ],
     constellation: new DbObjectConstellation([
         {
@@ -353,54 +413,15 @@ export const Jahoda = new DbObjectChar({
         },
         {
             conditions: [
-                new ConditionBooleanLevels({
+                // The CRIT is c6CritPost and c6CritPartyPost (extra writes).
+                new ConditionBoolean({
                     name: 'jahoda_c6_crit_bonus',
                     serializeId: 2,
                     title: 'talent_name.jahoda_the_littlest_luck',
                     description: 'talent_descr.jahoda_the_littlest_luck',
-                    levelSetting: 'party_moonsign',
-                    stats: [
-                        new StatTable('crit_rate', [0, C6CritRate]),
-                        new StatTable('crit_dmg', [0, C6CritDmg]),
-                    ],
                 }),
             ],
         },
     ]),
-    partyData: {
-        conditions: [
-            new Condition({
-                settings: {
-                    allowed_moonsign: 1,
-                },
-            }),
-            new ConditionCalcMoonsign(),
-            new ConditionBoolean({
-                name: 'party.jahoda_sweet_berry_bounty',
-                serializeId: 3,
-                title: 'talent_name.jahoda_sweet_berry_bounty',
-                description: 'talent_descr.jahoda_sweet_berry_bounty',
-                info: {ascension: 4},
-                rotation: 'party',
-                stats: {
-                    mastery: A4EmBonus,
-                },
-            }),
-            new ConditionBooleanLevels({
-                name: 'party.jahoda_the_littlest_luck',
-                serializeId: 4,
-                title: 'talent_name.jahoda_the_littlest_luck',
-                description: 'talent_descr.jahoda_the_littlest_luck',
-                info: {constellation: 6},
-                rotation: 'party',
-                hideInactive: true,
-                levelSetting: 'party_moonsign',
-                stats: [
-                    new StatTable('crit_rate', [0, C6CritRate]),
-                    new StatTable('crit_dmg', [0, C6CritDmg]),
-                ],
-                condition: partyC6MoonsignTarget,
-            }),
-        ],
-    },
+    retiredParty: [[3, 'checkbox'], [4, 'checkbox']],
 });

@@ -1,9 +1,11 @@
 import { Condition } from "../../classes/Condition";
+import { ConditionAnd } from "../../classes/Condition/And";
 import { ConditionAscensionChar } from "../../classes/Condition/Ascension/Char";
 import { ConditionBoolean } from "../../classes/Condition/Boolean";
+import { ConditionOnField } from "../../classes/Condition/Field";
 import { ConditionBooleanValue } from "../../classes/Condition/Boolean/Value";
 import { ConditionNumber } from "../../classes/Condition/Number";
-import { ConditionNumberTalent } from "../../classes/Condition/Number/Talent";
+import { ConditionReceiver } from "../../classes/Condition/Receiver";
 import { ConditionStatic } from "../../classes/Condition/Static";
 import { DbObjectChar } from "../../classes/DbObject/Char";
 import { DbObjectConstellation } from "../../classes/DbObject/Constellation";
@@ -19,9 +21,11 @@ import { FeatureMultiplier } from "../../classes/Feature2/Multiplier";
 import { FeaturePostEffectValue } from "../../classes/Feature2/PostEffectValue";
 import { PostEffectStats } from "../../classes/PostEffect/Stats";
 import { StatTable } from "../../classes/StatTable";
+import { RECEIVERS } from "../../classes/Team/Receivers";
 import { ValueTable } from "../../classes/ValueTable";
 import { charTables } from "../generated/CharTables";
 import { charTalentTables } from "../generated/CharTalentTables";
+import { percent } from "../Params";
 
 const Talents = new DbObjectTalents({
     attack: {
@@ -118,12 +122,28 @@ const Talents = new DbObjectTalents({
 });
 
 const BurstPointsMax = 42;
-const A1AtkPercent = 20;
-const A4Heal = 60;
-const C2AtkPercent = 30;
-const C6DmgBonus = 25;
+const A1AtkPercent = percent(charTalentTables.Iansan.a1.p1);
+const A4Heal = percent(charTalentTables.Iansan.a4.p2);
+const C2AtkPercent = percent(charTalentTables.Iansan.c2.p1);
+const C6DmgBonus = percent(charTalentTables.Iansan.c6.p3);
+
+// The Kinetic Energy Scale boosts the ATK of the current active party member.
+// Game data: Avatar_Iansan_ElementalBurst computes _IansanAttackUpValue from
+// FIGHT_PROP_NONEXTRA_ATTACK (premod) x AttackTransRatio_NyxEnough (high) or
+// x NyxValue x NyxTransRation (low), capped by MaxAttackUp, and
+// UNIQUE_Avatar_Iansan_ElementalBurst_AttackUpBuff_OnLocalAvatar writes it as
+// Actor_AttackExtraDelta (extra; extra_scan agrees). GO reads input.premod.atk
+// into teamBuff.total.atk. A first-hand community test (cited in
+// md/buff_chains.md) reports the burst counting Chevreuse's A4 premod ATK%.
+// The default premod read (from: 'atk*' follows reads) and extra write are
+// confirmed, so premod writers count and extra writers (Bennett's burst) do
+// not; no reads/writes params.
+const activeReceiver = new ConditionReceiver({
+    condition: new ConditionOnField(),
+});
 
 const postEffectAtk = new PostEffectStats({
+    receivers: RECEIVERS.TEAM,
     from: 'atk*',
     levelSetting: 'char_skill_burst',
     stacksSetting: 'iansan_points',
@@ -133,7 +153,10 @@ const postEffectAtk = new PostEffectStats({
         multi: 0.01,
     }),
     statCap: Talents.get('burst.iansan_bonus_max'),
-    condition: new ConditionBoolean({name: 'iansan_points'}),
+    conditions: [
+        new ConditionBoolean({name: 'iansan_points'}),
+        activeReceiver,
+    ],
     percentBonus: new ValueTable([0.06]),
     bonusCondition: new ConditionBooleanValue({
         setting: 'iansan_points',
@@ -153,6 +176,8 @@ export const Iansan = new DbObjectChar({
     origin: 'natlan',
     talents: Talents,
     statTable: charTables.Iansan,
+    // Talent damage hits read the total ATK, so plain ATK-scaled
+    // FeatureMultipliers need nothing.
     features: [
         new FeatureDamageNormal({
             multipliers: [
@@ -250,23 +275,32 @@ export const Iansan = new DbObjectChar({
         //         maxBonus: Talents.get('burst.iansan_bonus_max'),
         //     }),
         // }),
+        // Displayed burst ATK bonus: the same premod ATK conversion as the
+        // delivered post-effect above (game: FIGHT_PROP_NONEXTRA_ATTACK into
+        // Actor_AttackExtraDelta), so the default premod read is confirmed.
         new FeaturePostEffectValue({
             category: 'burst',
             name: 'atk_bonus',
             postEffect: postEffectAtk,
             condition: new ConditionBoolean({name: 'iansan_points'}),
         }),
+        // Displayed maximum burst ATK bonus (27% of ATK at 42 points, capped):
+        // same premod read (game: FIGHT_PROP_NONEXTRA_ATTACK), default
+        // confirmed; the empty write-stat name means it only displays.
         new FeaturePostEffectValue({
             category: 'burst',
             name: 'iansan_bonus_max',
             postEffect: new PostEffectStats({
                 from: 'atk*',
-                // global: true,
                 levelSetting: 'char_skill_burst',
                 percent: new StatTable('', [0.27]),
                 statCap: Talents.get('burst.iansan_bonus_max'),
             }),
         }),
+        // A4 Kinetic Energy Gradient Test heal: game (Avatar_Iansan_PermanentSkill_2,
+        // UNIQUE_Avatar_Iansan_PermanentSkill_2_Heal: HealHP with
+        // amountByCasterAttackRatio) and GO (input.total.atk) read the total
+        // ATK, so scaling: 'atk*' is already right and needs nothing.
         new FeatureHeal({
             category: 'other',
             name: 'iansan_heal',
@@ -292,6 +326,10 @@ export const Iansan = new DbObjectChar({
             description: 'talent_descr.iansan_kinetic_energy_scale',
             condition: new ConditionBoolean({name: 'iansan_points'}),
         }),
+        // A1 Enhanced Resistance Training: game
+        // (Avatar_Iansan_PermanentSkill_1,
+        // UNIQUE_Avatar_Iansan_PermanentSkill_1_Buff) writes Actor_AttackRatio
+        // (premod ATK%); flat conditions are always premod, needs nothing.
         new ConditionBoolean({
             name: 'iansan_enhanced_resistance_training',
             serializeId: 2,
@@ -312,6 +350,9 @@ export const Iansan = new DbObjectChar({
             info: {ascension: 4},
             condition: new ConditionAscensionChar({ascension: 4}),
         }),
+    ],
+    postEffects: [
+        postEffectAtk,
     ],
     constellation: new DbObjectConstellation([
         {
@@ -335,6 +376,25 @@ export const Iansan = new DbObjectChar({
                         text_percent: C2AtkPercent,
                     },
                     condition: new ConditionAscensionChar({ascension: 1}),
+                }),
+                // Precise Movement also raises the current active
+                // character's ATK while Iansan is off-field. Iansan herself
+                // keeps no copy: OTHERS plus the active check already yield
+                // the game-text outcome in every field state. Game
+                // (Avatar_Iansan_PermanentSkill_1_C2_Buff) writes
+                // Actor_AttackRatio (premod ATK%); flat conditions are always
+                // premod, needs nothing.
+                new Condition({
+                    isHidden: true,
+                    receivers: RECEIVERS.OTHERS,
+                    stats: {
+                        atk_percent: C2AtkPercent,
+                    },
+                    condition: new ConditionAnd([
+                        new ConditionBoolean({name: 'iansan_enhanced_resistance_training'}),
+                        new ConditionAscensionChar({ascension: 1}),
+                        activeReceiver,
+                    ]),
                 }),
             ],
         },
@@ -379,94 +439,25 @@ export const Iansan = new DbObjectChar({
                         dmg_all: C6DmgBonus,
                     },
                 }),
+                // Extreme Force raises the DMG of the current active
+                // character; Iansan keeps her own copy above. Game
+                // (Avatar_Iansan_Constellation_6,
+                // UNIQUE_Avatar_Iansan_Constellation_6_Buff) is a
+                // ModifyDamageMixin with no Actor channel and no stat read:
+                // flat conditions need nothing.
+                new Condition({
+                    isHidden: true,
+                    receivers: RECEIVERS.OTHERS,
+                    stats: {
+                        dmg_all: C6DmgBonus,
+                    },
+                    condition: new ConditionAnd([
+                        new ConditionBoolean({name: 'iansan_teachings_of_the_collective_of_plenty'}),
+                        activeReceiver,
+                    ]),
+                }),
             ],
         },
     ]),
-    partyData: {
-        loadStats: {
-            stats: ['atk_total'],
-            settings: ['char_skill_burst'],
-        },
-        conditions: [
-            new ConditionNumber({
-                name: 'iansan_atk_total',
-                title: 'talent_name.stats_total_atk',
-                partyStat: 'atk_total',
-                serializeId: 1,
-                rotation: 'party',
-                max: 10000,
-            }),
-            new ConditionNumberTalent({
-                name: 'iansan_char_skill_burst',
-                title: 'talent_name.stats_level_burst',
-                partySetting: 'char_skill_burst',
-                serializeId: 2,
-            }),
-            new ConditionNumber({
-                name: 'party_iansan_points',
-                serializeId: 3,
-                title: 'talent_name.nightsoul_points',
-                rotation: 'party',
-                max: BurstPointsMax,
-            }),
-            new ConditionStatic({
-                title: 'talent_name.iansan_kinetic_energy_scale',
-                description: 'talent_descr.iansan_kinetic_energy_scale',
-                condition: new ConditionBoolean({name: 'party_iansan_points'}),
-            }),
-            new ConditionBoolean({
-                name: 'party.iansan_laziness_is_the_enemy',
-                serializeId: 4,
-                title: 'talent_name.iansan_laziness_is_the_enemy',
-                description: 'talent_descr.iansan_laziness_is_the_enemy_2',
-                rotation: 'party',
-                info: {constellation: 2},
-                stats: {
-                    text_percent: C2AtkPercent,
-                    atk_percent: C2AtkPercent,
-                },
-            }),
-            new ConditionBoolean({
-                name: 'party.iansan_constellation_5',
-                serializeId: 5,
-                title: 'talent_name.iansan_we_can_push_it_further',
-                description: 'talent_descr.char_constellation_burst',
-                settings: {
-                    iansan_char_skill_burst_bonus: 3,
-                },
-                info: {constellation: 5},
-            }),
-            new ConditionBoolean({
-                name: 'party.iansan_teachings_of_the_collective_of_plenty',
-                serializeId: 6,
-                title: 'talent_name.iansan_teachings_of_the_collective_of_plenty',
-                description: 'talent_descr.iansan_teachings_of_the_collective_of_plenty_2',
-                rotation: 'party',
-                info: {constellation: 6},
-                stats: {
-                    dmg_all: C6DmgBonus,
-                },
-            }),
-        ],
-        postEffects: [
-            new PostEffectStats({
-                from: 'iansan_atk_total',
-                levelSetting: 'iansan_char_skill_burst',
-                stacksSetting: 'party_iansan_points',
-                percent: Talents.getMulti({
-                    name: 'atk',
-                    from: 'burst.iansan_conversion_low',
-                    multi: 0.01,
-                }),
-                statCap: Talents.get('burst.iansan_bonus_max'),
-                condition: new ConditionBoolean({name: 'party_iansan_points'}),
-                percentBonus: new ValueTable([0.06]),
-                bonusCondition: new ConditionBooleanValue({
-                    setting: 'party_iansan_points',
-                    cond: 'ge',
-                    value: 42,
-                }),
-            }),
-        ],
-    },
+    retiredParty: [[1, 'number'], [2, 'number'], [3, 'number'], [4, 'checkbox'], [5, 'checkbox'], [6, 'checkbox']],
 });

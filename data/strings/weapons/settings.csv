@@ -17,8 +17,6 @@ weapon_settings;stacks_5;5 зарядов;5 stacks
 
 weapon_settings;unbuffed;Без бонуса;No buff
 weapon_settings;buffed;С бонусом;Buff
-weapon_settings;with_shield;С щитом;Shield
-weapon_settings;no_shield;Без щита;No shield
 weapon_settings;on_field;На поле боя;On field
 weapon_settings;off_field;Вне поля боя;Off field
 weapon_settings;average;Среднее;Average

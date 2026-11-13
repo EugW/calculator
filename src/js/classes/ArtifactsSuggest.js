@@ -1,6 +1,7 @@
 import { Artifact } from "./Artifact";
 import { getPostEffectStatDependencyClosure } from "./Build/Data";
 import { Condition } from "./Condition";
+import { baseStatName } from "./Feature2/Compile/Stats";
 import { FeatureCompiler } from "./Feature2/Compiler";
 import { Stats } from "./Stats";
 import { GPUArtifactOptimizer } from "./GPUArtifactOptimizer";
@@ -60,11 +61,12 @@ export class ArtifactsSuggest {
         // clearArtifacts does not also erase the empty-slot fallbacks. Work on
         // a fresh clone so prepare() is repeatable and never strips the caller's
         // equipped artifacts or modifies its artifact settings.
+        // Set effects read the member's own set-bonus profile, which every
+        // copy below keeps: the start of a program and the rotation inside
+        // a set's variation see the same values.
         this.currentArts = Object.assign({}, this.sourceBuild.getArtifacts());
         this.build = this.sourceBuild.clone();
         this.build.clearArtifacts();
-        // this.addArtifactPostSettings();
-        this.build.artifacts.modifySettings(this.settings.sets_settings);
 
         this.buildData = this.build.getBuildData();
 
@@ -93,14 +95,12 @@ export class ArtifactsSuggest {
 
         for (let variant of this.getVariations()) {
             let vBuild = this.build.clone();
-            let setSettings = Object.assign({}, this.settings.sets_settings);
             let variantNames = [];
             let artSetIds = [];
 
             for (let vItem of variant) {
                 if (vItem.setId) {
                     variantNames.push(vItem.name);
-                    setSettings[ Artifact.settingName(vItem.setId) ] = vItem.pieces;
                     for (let i = 0; i < vItem.pieces; ++i) {
                         artSetIds.push(vItem.setId);
                     }
@@ -116,14 +116,15 @@ export class ArtifactsSuggest {
             }
 
             let variandId = variantNames.sort().join('-') || 'default';
-            vBuild.artifacts.modifySettings(setSettings);
-            let vBuildData = vBuild.getBuildData();
-            this.addDynamicStats(vBuildData.getActivePostEffectsTree());
-            let feature = vBuild.getFeatureByName(this.featureName);
+            let view = vBuild.view();
+            let vBuildData = view.getBuildData();
+            let activePostTree = vBuildData.postEffectTreeByPriority();
+            this.addDynamicStats(activePostTree.flat());
+            let feature = view.getFeatureByName(this.featureName, vBuildData);
 
-            // FIXME rotation detect
+            // A rotation: the post-effects of each of its states.
             if (feature.items) {
-                this.addDynamicStatsFromItems(vBuildData, feature.items);
+                this.addDynamicStatsFromItems(feature.items, feature.viewerSlot);
             }
 
             // Track set info for GPU variation lookup
@@ -139,19 +140,21 @@ export class ArtifactsSuggest {
                 feature: feature,
                 buildData: vBuildData,
                 setInfo: setInfo,
+                activePostTree: activePostTree,
             });
         }
 
         for (let item of variationData) {
-            let activePostTree = item.buildData.postEffectTreeByPriority();
+            let activePostTree = item.activePostTree;
             let constraintData = makeStatConstraintData(
                 statBounds,
-                activePostTree,
+                // Objective preparation rewrites its trees. Constraints need
+                // independent trees so static folding cannot erase inputs.
+                statBounds.length ? item.buildData.postEffectTreeByPriority() : activePostTree,
                 statFilterUsedStats
             );
-            let postTrees = this.filterPostEffects(item.feature, item.buildData);
-
             let tree = item.feature.getTree(item.buildData, compilerOpts);
+            let postTrees = this.filterPostEffects(item.feature, item.buildData, tree, activePostTree);
             let compiler = new FeatureCompiler(tree, postTrees);
 
             let usedStats = [...new Set(compiler.usedStats.concat(constraintData.usedStats))];
@@ -266,30 +269,19 @@ export class ArtifactsSuggest {
         return variationCombinations;
     }
 
-    filterPostEffects(feature, buildData) {
+    filterPostEffects(feature, buildData, tree, postItems) {
         if (feature.isRotation()) {
             return [];
         }
 
-        let postItems = buildData.postEffectTreeByPriority();
-        buildData.postEffects = [];
-        let result = [];
+        postItems ||= buildData.postEffectTreeByPriority();
 
-        for (let items of postItems) {
-            let tree = feature.getTree(buildData);
-            let compiler = new FeatureCompiler(tree, result);
-            let usedStats = compiler.usedStats;
+        // Walk the priorities backwards: an effect is needed when the feature
+        // reads its stat, or when a needed effect of a later priority does.
+        tree ||= feature.getTree(buildData);
+        let targetStats = new FeatureCompiler(tree, []).usedStats;
 
-            for (let item of items) {
-                for (let stat of item.getAssignedStats()) {
-                    if (usedStats.includes(stat)) {
-                        result.push(item);
-                    }
-                }
-            }
-        }
-
-        return result;
+        return getPostEffectStatDependencyClosure(postItems, targetStats).items;
     }
 
     prepareArtifacts() {
@@ -361,54 +353,17 @@ export class ArtifactsSuggest {
     }
 
     prepareArtifactSets() {
-        let setPieces = {};
-        let availableArtifacts = [].concat(this.artifacts);
-        let candidateSlots = new Set(this.artifacts.map((art) => {return art.slot;}));
-
-        for (let [slot, art] of Object.entries(this.currentArts)) {
-            if (art && !candidateSlots.has(slot)) {
-                availableArtifacts.push(art);
-            }
-        }
-
-        for (let art of availableArtifacts) {
-            if (!setPieces[art.set]) {
-                setPieces[art.set] = {};
-            }
-            setPieces[art.set][art.slot] = 1;
-        }
-
-        let setMaxPieces = {};
-        for (let setName of Object.keys(setPieces)) {
-            setMaxPieces[setName] = Object.keys(setPieces[setName]).length;
-        }
-
+        let setMaxPieces = getArtifactSetMaxPieces(this.artifacts, this.currentArts);
 
         this.setData = {};
-        // let baseSettings = Object.assign({}, this.buildData.settings, this.settings.sets_settings);
-        let baseSettings = Object.assign({}, this.buildData.settings);
-
-        // let artPostItems = DB.Buffs.get('Artifacts').getPostEffects();
-        // let postArtNames = [];
-        // for (let item of artPostItems) {
-        //     if (item.params.suggesterPieces) {
-        //         postArtNames.push(item.params.suggesterPieces);
-        //     }
-        // }
-
         let activePostEffects = this.buildData.getActivePostEffects().length;
 
         for (let setId of DB.Artifacts.Sets.getKeys(this.showBeta)) {
-            let set = DB.Artifacts.Sets.get(setId);
-            let bonuses = set.getConditionsByPieces();
-
-            let setStats = new Stats();
-            let setPostStats;
-            let setTotalSettings = {};
+            let bonuses = DB.Artifacts.Sets.get(setId).getConditionsByPieces();
             let artPiecesName = Artifact.settingNameShort(setId);
             let maxPieces = setMaxPieces[setId] || 0;
 
-            let buildData = this.build.getBuildData();
+            if (!maxPieces) continue;
             let prevActivePostEffects = activePostEffects;
             let featureVariation = '';
 
@@ -417,38 +372,16 @@ export class ArtifactsSuggest {
                     break;
                 }
 
-                buildData.addSettings({[Artifact.settingName(setId)]: pieces});
+                // The member wearing these pieces, evaluated once: its set
+                // effects read its profile, as a candidate's do.
+                let buildData = this.setPiecesData(setId, pieces);
+                let setStats = new Stats(buildData.stats);
+                setStats.concat(this.buildData.stats.revert());
+                normalizeSetStats(setStats);
 
+                // A new variation when a control or a post-effect appears:
+                // a control starting off still matters to a rotation step.
                 const conditions = bonuses[pieces];
-                let pieceSettings = {};
-
-                if (conditions.length) {
-                    pieceSettings = Condition.allConditionsOn(conditions, baseSettings);
-                    let calculatedSettings = getCalculatedConditionSettings(conditions, baseSettings);
-                    for (let key of Object.keys(pieceSettings)) {
-                        if (baseSettings.hasOwnProperty(key) && !calculatedSettings.hasOwnProperty(key)) {
-                            pieceSettings[key] = baseSettings[key];
-                        }
-                    }
-                    let localSettings = Object.assign({}, baseSettings, pieceSettings);
-
-                    let stats = new Stats();
-
-                    for (let cond of conditions) {
-                        let data = cond.getData(localSettings);
-                        stats.concat(data.stats);
-                        Object.assign(localSettings, data.settings);
-                    }
-
-                    // stats.truncate(this.usedStats); // TODO нужно пересчитать после обработки всех variation
-                    setStats.concat(stats);
-                    Object.assign(setTotalSettings, pieceSettings);
-                    buildData.addSettings(pieceSettings);
-                }
-
-                setStats = this.calculateSetStats(setId, pieces, setTotalSettings);
-
-                // change variation if new togglable condition or post effect appears
                 let curActivePostEffects = buildData.getActivePostEffects().length;
                 let curSerializableConditions = conditions.filter((i) => {return i.isSerializable();}).length;
                 if (curActivePostEffects > prevActivePostEffects) {
@@ -458,7 +391,7 @@ export class ArtifactsSuggest {
                     featureVariation = artPiecesName + pieces;
                 }
 
-                if (Object.keys(setStats).length || setPostStats || featureVariation) {
+                if (Object.keys(setStats).length || featureVariation) {
                     let s = new Stats(setStats);
 
                     if (!this.setData[setId]) {
@@ -475,7 +408,13 @@ export class ArtifactsSuggest {
         }
     }
 
-    calculateSetStats(setId, pieces, setSettings) {
+    /**
+     * @param {string} setId
+     * @param {number} pieces
+     * @returns {BuildData} program data of the member wearing only these
+     *     pieces of the set, without artifact stats
+     */
+    setPiecesData(setId, pieces) {
         let build = this.build.clone();
         let slots = DB.Artifacts.Slots.getKeys();
         let fakeArtifacts = [];
@@ -484,14 +423,8 @@ export class ArtifactsSuggest {
             fakeArtifacts.push(new Artifact(5, 20, slots[i], setId, '', []));
         }
 
-        build.artifacts.replace(fakeArtifacts);
-        build.artifacts.modifySettings(Object.assign({}, this.settings.sets_settings, setSettings));
-
-        let buildData = build.getBuildData();
-        let stats = new Stats(buildData.stats);
-        stats.concat(this.buildData.stats.revert());
-
-        return normalizeSetStats(stats);
+        build.replaceArtifacts(fakeArtifacts);
+        return build.getBuildData();
     }
 
     prepareDynamicStats() {
@@ -526,22 +459,25 @@ export class ArtifactsSuggest {
         }
     }
 
-    addDynamicStatsFromItems(buildData, items) {
+    /**
+     * @param {Array} items compiled rotation items (RotationCompiler)
+     * @param {number} viewerSlot slot of the member the rotation is compiled for
+     */
+    addDynamicStatsFromItems(items, viewerSlot, visited = new Set()) {
         for (let item of items) {
-
-            if (item.postEffects) {
-                for (let post of item.postEffects) {
+            if (item.type == 'state' && !visited.has(item)) {
+                visited.add(item);
+                let data = item.members.get(viewerSlot);
+                for (let post of data.getActivePostEffects()) {
                     if (!post.getTree) continue;
-                    this.addDynamicStats(post.getTree(buildData));
+                    this.addDynamicStats(post.getTree(data));
                 }
             }
 
-            if (item.items) {
-                this.addDynamicStatsFromItems(buildData, item.items);
-            }
-
-            if (item.conditions) {
-                this.addDynamicStatsFromItems(buildData, item.conditions);
+            for (let key of ['items', 'on', 'off']) {
+                if (item[key]) {
+                    this.addDynamicStatsFromItems(item[key], viewerSlot, visited);
+                }
             }
         }
     }
@@ -550,8 +486,11 @@ export class ArtifactsSuggest {
         let result = [];
 
         for (let stat of usedStats) {
-            if (this.dynamicStats.includes(stat)) continue;
-            if (DYNAMIC_STATS.includes(stat)) continue;
+            // A rotation block's copy of a stat (Rotation/Tree) varies as
+            // the stat it is copied from does.
+            let base = baseStatName(stat);
+            if (this.dynamicStats.includes(base)) continue;
+            if (DYNAMIC_STATS.includes(base)) continue;
             result.push(stat);
         }
 
@@ -1125,15 +1064,33 @@ function removeEmptyArtifacts(results) {
     }
 }
 
-function getCalculatedConditionSettings(conditions, baseSettings) {
-    let result = {};
-
-    for (let cond of conditions) {
-        if (cond.getAllConditionsOn) {
-            Object.assign(result, cond.getAllConditionsOn(baseSettings));
+/**
+ * The most pieces of each set a search can combine: its candidates' distinct
+ * slots, plus the equipped piece of every slot without candidates (the
+ * search keeps that piece).
+ *
+ * @param {Array.<Artifact>} artifacts the candidates
+ * @param {Object.<string, Artifact|null>} [equipped] equipped pieces by slot
+ * @returns {Object.<string, number>} pieces by set
+ */
+export function getArtifactSetMaxPieces(artifacts, equipped = {}) {
+    let candidateSlots = new Set(artifacts.map((art) => art.slot));
+    let available = [].concat(artifacts);
+    for (let [slot, art] of Object.entries(equipped || {})) {
+        if (art && !candidateSlots.has(slot)) {
+            available.push(art);
         }
     }
 
+    let slotsBySet = {};
+    for (let art of available) {
+        (slotsBySet[art.set] ||= new Set()).add(art.slot);
+    }
+
+    let result = {};
+    for (let [setName, slots] of Object.entries(slotsBySet)) {
+        result[setName] = slots.size;
+    }
     return result;
 }
 

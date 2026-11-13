@@ -23,6 +23,7 @@ import { StatTable } from "../../classes/StatTable";
 import { ValueTable } from "../../classes/ValueTable";
 import { charTables } from "../generated/CharTables";
 import { charTalentTables } from "../generated/CharTalentTables";
+import { percent } from "../Params";
 
 const Talents = new DbObjectTalents({
     attack: {
@@ -112,6 +113,15 @@ const c6cond = new ConditionAnd([
     new ConditionConstellation({constellation: 6}),
 ]);
 
+const A1Atk = percent(charTalentTables.Wanderer.a1.p1);
+const A1CritRate = percent(charTalentTables.Wanderer.a1.p3);
+const A4WindArrowDmg = percent(charTalentTables.Wanderer.a4.p3);
+const C1AtkSpeed = percent(charTalentTables.Wanderer.c1.p1);
+const C1WindArrowExtra = percent(charTalentTables.Wanderer.c1.p2);
+const C1WindArrowDmg = percent(charTalentTables.Wanderer.a4.p3 + charTalentTables.Wanderer.c1.p2);
+const C2BurstDmgMax = percent(charTalentTables.Wanderer.c2.p2);
+const C6Dmg = percent(charTalentTables.Wanderer.c6.p1);
+
 export const Wanderer = new DbObjectChar({
     name: 'wanderer',
     serializeId: 63,
@@ -181,7 +191,7 @@ export const Wanderer = new DbObjectChar({
             element: 'anemo',
             multipliers: [
                 new FeatureMultiplierWanderer({
-                    scalingMultiplier: 0.4,
+                    scalingMultiplier: C6Dmg / 100,
                     scalingSource: 'constellation6',
                     leveling: 'char_skill_attack',
                     values: Talents.get('attack.normal_hit_1'),
@@ -195,7 +205,7 @@ export const Wanderer = new DbObjectChar({
             element: 'anemo',
             multipliers: [
                 new FeatureMultiplierWanderer({
-                    scalingMultiplier: 0.4,
+                    scalingMultiplier: C6Dmg / 100,
                     scalingSource: 'constellation6',
                     leveling: 'char_skill_attack',
                     values: Talents.get('attack.normal_hit_2'),
@@ -215,7 +225,7 @@ export const Wanderer = new DbObjectChar({
                     hits: 2,
                     multipliers: [
                         new FeatureMultiplierWanderer({
-                            scalingMultiplier: 0.4,
+                            scalingMultiplier: C6Dmg / 100,
                             scalingSource: 'constellation6',
                             leveling: 'char_skill_attack',
                             values: Talents.get('attack.normal_hit_3'),
@@ -233,7 +243,7 @@ export const Wanderer = new DbObjectChar({
             isChild: true,
             multipliers: [
                 new FeatureMultiplierWanderer({
-                    scalingMultiplier: 0.4,
+                    scalingMultiplier: C6Dmg / 100,
                     scalingSource: 'constellation6',
                     leveling: 'char_skill_attack',
                     values: Talents.get('attack.normal_hit_3'),
@@ -295,7 +305,7 @@ export const Wanderer = new DbObjectChar({
             multipliers: [
                 new FeatureMultiplier({
                     leveling: 'wanderer_passive_level',
-                    values: new ValueTable([35, 60]),
+                    values: new ValueTable([A4WindArrowDmg, C1WindArrowDmg]),
                 }),
             ],
             condition: new ConditionAscensionChar({ascension: 4}),
@@ -333,7 +343,7 @@ export const Wanderer = new DbObjectChar({
                     serializeId: 1,
                     conditions: [
                         new Condition({
-                            stats: {crit_rate: 20},
+                            stats: {crit_rate: A1CritRate},
                         }),
                     ],
                 },
@@ -350,7 +360,7 @@ export const Wanderer = new DbObjectChar({
                     serializeId: 4,
                     conditions: [
                         new Condition({
-                            stats: {atk_percent: 30},
+                            stats: {atk_percent: A1Atk},
                         }),
                     ],
                 },
@@ -365,7 +375,7 @@ export const Wanderer = new DbObjectChar({
             description: 'talent_descr.wanderer_gales_of_reverie',
             info: {ascension: 4},
             stats: {
-                text_percent_dmg: 35,
+                text_percent_dmg: A4WindArrowDmg,
             },
             subConditions: [
                 new ConditionAscensionChar({ascension: 4}),
@@ -381,8 +391,8 @@ export const Wanderer = new DbObjectChar({
                     title: 'talent_name.wanderer_ostentatious_plumage',
                     description: 'talent_descr.wanderer_ostentatious_plumage',
                     stats: {
-                        atk_speed_normal: 10,
-                        text_percent_dmg: 25,
+                        atk_speed_normal: C1AtkSpeed,
+                        text_percent_dmg: C1WindArrowExtra,
                     },
                     settings: {
                         wanderer_passive_level: 2,
@@ -400,7 +410,7 @@ export const Wanderer = new DbObjectChar({
                     serializeId: 4,
                     title: 'talent_name.wanderer_isle_amidst_white_waves',
                     description: 'talent_descr.wanderer_isle_amidst_white_waves',
-                    max: 200,
+                    max: C2BurstDmgMax,
                 }),
             ],
         },
@@ -436,13 +446,10 @@ export const Wanderer = new DbObjectChar({
                     title: 'talent_name.wanderer_the_curtains_melancholic_sway',
                     description: 'talent_descr.wanderer_the_curtains_melancholic_sway',
                     stats: {
-                        text_percent_dmg: 40,
+                        text_percent_dmg: C6Dmg,
                     },
                 }),
             ],
         },
     ]),
-    partyData: {
-        conditions: [],
-    },
 });

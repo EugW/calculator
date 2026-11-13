@@ -11,6 +11,10 @@ import { TravelerCryo } from "../src/js/db/Char/TravelerCryo";
 import { DB } from "../src/js/db/DB";
 import { Rotation } from "../src/js/db/Features/Rotation";
 import { charTalentTables } from "../src/js/db/generated/CharTalentTables";
+import { Team } from "../src/js/classes/Team";
+import { finalStats, makeBuild } from "./support/team";
+
+global.DB = DB;
 
 function applyConditions(data, conditions) {
     for (const condition of conditions) {
@@ -24,8 +28,8 @@ function getFeature(name) {
     return TravelerCryo.getFeatures().find((feature) => feature.getName() === name);
 }
 
-function getCondition(name, party = false) {
-    const conditions = party ? TravelerCryo.getPartyConditions() : TravelerCryo.getAllConditions();
+function getCondition(name) {
+    const conditions = TravelerCryo.getAllConditions();
     return conditions.find((condition) => condition.getName() === name);
 }
 
@@ -36,7 +40,6 @@ function damage(name, settings = {}, stats = {}) {
     const data = new BuildData({
         char_level: 90,
         enemy_level: 90,
-        enemy_res_cryo: 0,
         char_skill_attack: 1,
         char_skill_elemental: 1,
         char_skill_burst: 1,
@@ -138,11 +141,16 @@ test("Illusory Frostmirror and Lucent Ice derive from total ATK and cap at 7% an
     expect(scaled.stats.get("stellarglimmer_multi")).toBeCloseTo(0.035, 6);
     expect(scaled.stats.get("mastery")).toBe(80);
 
-    const party = new BuildData({traveler_cryo_atk_total: 2000}, {});
-    applyConditions(party, TravelerCryo.getPartyConditions());
-    party.postEffects = TravelerCryo.getPartyPostEffects();
-    party.applyPostEffects();
-    expect(party.stats.get("stellarglimmer_multi")).toBeCloseTo(0.07, 6);
+    // Party model retired: the carrier's live ATK now delivers to a real team.
+    const receiver = makeBuild('Ayaka');
+    const traveler = makeBuild('TravelerCryo');
+    const team = Team.fromMember(receiver);
+    team.setMember(1, traveler);
+    const stats = finalStats(traveler);
+    traveler.modifyBuffsSettings({
+        'custom_buffs.atk': 2000 - stats.get('atk_base') - stats.get('atk'),
+    });
+    expect(finalStats(receiver).get("stellarglimmer_multi")).toBeCloseTo(0.07, 6);
 });
 
 test("Ever-Keen Frost infuses and adds 80% ATK to ordinary attacks but excludes Freezing Ice", () => {
@@ -272,16 +280,26 @@ test("C1/C2/C6 expose energy, active-party EM, and other-party umbrella Glimmer 
         applyConditions(self, TravelerCryo.getAllConditions());
         expect(self.stats.get("mastery")).toBe(mastery);
 
-        const party = new BuildData({"party.traveler_cryo_frostfall_reverberation": level}, {});
-        applyConditions(party, TravelerCryo.getPartyConditions());
-        expect(party.stats.get("mastery")).toBe(mastery);
+        // Party model retired: C2 now delivers to a real team.
+        const receiver = makeBuild('Ayaka');
+        const traveler = makeBuild('TravelerCryo');
+        const team = Team.fromMember(receiver);
+        team.setMember(1, traveler);
+        traveler.setCharLevels({level: 90, ascension: 6, constellation: 2});
+        traveler.setCharSettings({traveler_cryo_frostfall_reverberation: level});
+        expect(finalStats(receiver).get("mastery")).toBe(mastery);
     }
 
-    const c6 = new BuildData({"party.traveler_cryo_brumal_grimfrost": 8}, {});
-    applyConditions(c6, TravelerCryo.getPartyConditions());
-    expect(c6.stats.get("dmg_stellarglimmer")).toBe(40);
-    expect(c6.stats.get("dmg_stellarconduct")).toBe(0);
-    expect(c6.stats.get("dmg_stellarswirl")).toBe(0);
+    // Party model retired: C6 now delivers to a real team (OTHERS, 5% per stack).
+    const c6Receiver = makeBuild('Ayaka');
+    const c6Traveler = makeBuild('TravelerCryo');
+    const c6Team = Team.fromMember(c6Receiver);
+    c6Team.setMember(1, c6Traveler);
+    c6Traveler.setCharLevels({level: 90, ascension: 6, constellation: 6});
+    c6Traveler.setCharSettings({traveler_cryo_brumal_grimfrost: 8});
+    expect(finalStats(c6Receiver).get("dmg_stellarglimmer")).toBeCloseTo(0.4, 10);
+    expect(finalStats(c6Receiver).get("dmg_stellarconduct")).toBe(0);
+    expect(finalStats(c6Receiver).get("dmg_stellarswirl")).toBe(0);
 });
 
 test("prior resonance enhancements serialize as one seven-bit multi-select and apply exact stats", () => {
@@ -318,15 +336,13 @@ test("Cryo Traveler condition IDs are immutable and unique across self and party
         ["traveler_special_training", 10],
         ["traveler_aether", 11],
         ["traveler_cryo_frostfall_reverberation", 8],
+        ["traveler_cryo_brumal_grimfrost", 7],
     ]);
     expect(new Set(self.map(condition => condition.getId())).size).toBe(self.length);
 
-    const party = TravelerCryo.getPartyConditions().filter(condition => condition.getId());
-    expect(party.map(condition => [condition.getName(), condition.getId()])).toEqual([
-        ["traveler_cryo_atk_total", 1],
-        ["party.traveler_cryo_frostfall_reverberation", 2],
-        ["party.traveler_cryo_brumal_grimfrost", 3],
-    ]);
+    // Party model retired: no named party conditions remain (only retired IDs).
+    const party = TravelerCryo.getLegacyPartyConditions().filter(condition => condition.getId() && condition.getName() && !condition.getName().startsWith('retired'));
+    expect(party.map(condition => [condition.getName(), condition.getId()])).toEqual([]);
 });
 
 test("Cryo Traveler settings round-trip through character serialization", () => {

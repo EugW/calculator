@@ -6,10 +6,11 @@ import '../../../css/Components/Modal/ArtifactCraft.css';
 import '../../../css/Components/Modal/ArtifactUpgrade.css';
 import { Feature2 } from '../../classes/Feature2';
 import { Artifact } from '../../classes/Artifact';
+import { availableTeamArtifacts } from '../../classes/ArtifactTeamInventory';
 import { Serializer } from '../../classes/Serializer';
 import { getArtifactMaxLevel, isArtifactUnderleveled } from '../../classes/ArtifactUpgradePredictor';
 import { filterUpgradeCandidatesByUsefulMain, getUpgradeMainUsefulStats } from '../../classes/ArtifactUpgradeMainFilter';
-import { WorkerFactoryArtifactActionPredictor } from '../../classes/WorkerFactory/ArtifactActionPredictor';
+import { ArtifactActionBaselineFlow } from './ArtifactActionBaselineFlow';
 import { Accordion, AccordionItem } from '../Components/Accordion';
 import { ArtifactListItem } from '../Components/Artifact';
 import { ArtifactActionAdvancedSettings, ArtifactActionProgress, ArtifactActionRVSummary, formatExpectedGain, formatExpectedGainPercent, mergeActionProgress } from '../Components/ArtifactActionControls';
@@ -49,7 +50,7 @@ export class ArtifactUpgradeModal extends React.Component {
             feature: props.app.getFeature(), featureType: 'average', preserveTopology: true, rvFilters: normalizeArtifactRVFilters(),
             candidates: [], selected: [], page: 0, inventory: [], optimizerSettings: null, gpuBatchSize: undefined,
             progress: {}, result: null, historyEntry: null, error: ''};
-        this.factory = new WorkerFactoryArtifactActionPredictor({
+        this.factory = new ArtifactActionBaselineFlow(this, {
             callback: result => {
                 this.factory.dispose();
                 this.saveHistory(result);
@@ -82,7 +83,8 @@ export class ArtifactUpgradeModal extends React.Component {
         };
         for (const artifact of this.props.app.storage.artifacts.listArtifacts()) add(artifact);
         for (const artifact of Object.values(this.props.app.getArtifacts())) add(artifact);
-        return {candidates, inventory: suggest.artifacts, optimizerSettings: suggest.settings,
+        return {candidates: availableTeamArtifacts(this.props.app.currentSet(), candidates, this.props.app.storage.artifacts),
+            inventory: suggest.artifacts, optimizerSettings: suggest.settings,
             gpuBatchSize: suggest.gpuBatchSize};
     }
     show() {
@@ -111,7 +113,7 @@ export class ArtifactUpgradeModal extends React.Component {
         this.setState({isVisible: false, stage: 'parameters', result: null, historyEntry: null, progress: {}});
     }
     invalidate() {
-        if (!this.state.isVisible || this.state.historyEntry) return;
+        if (this.factory.applying || !this.state.isVisible || this.state.historyEntry) return;
         const scan = this.scanCandidates();
         const candidates = scan.candidates || [];
         this.factory.dispose();
@@ -122,7 +124,7 @@ export class ArtifactUpgradeModal extends React.Component {
                 ...scan, candidates,
                 selected: candidates.map(candidateKey).filter(key => selected.has(key) || !known.has(key)),
                 page: Math.min(state.page, Math.max(0, Math.ceil(candidates.length / UPGRADE_PAGE_SIZE) - 1)),
-                error: scan.error || (state.stage === 'progress' || state.result ? t('stale') : ''),
+                error: scan.error || (['progress', 'baseline'].includes(state.stage) || state.result ? t('stale') : ''),
                 feature: this.props.app.getFeature()};
         });
     }
@@ -206,9 +208,9 @@ export class ArtifactUpgradeModal extends React.Component {
         this.setState({page: Math.max(0, Math.min(pages - 1, Math.trunc(value) || 0))});
     }
     saveHistory(result) {
-        this.props.app.storage.actionHistory.saveRun({kind: 'upgrade', feature: this.state.feature,
-            featureType: this.state.featureType,
-            context: {candidates: this.selectedArtifacts().length}, result}).catch(() => {});
+        this.props.app.storage.actionHistory.saveRun({kind: 'upgrade', feature: result.runSnapshot.feature,
+            featureType: result.runSnapshot.featureType,
+            context: {candidates: result.runSnapshot.upgradeTargets.length}, result}).catch(() => {});
     }
     openHistoryEntry(entry, result) {
         this.showHistoryEntry(entry, result);
@@ -223,21 +225,26 @@ export class ArtifactUpgradeModal extends React.Component {
         return this.state.selected.length > 0 && this.state.inventory.length > 0 && !!this.state.optimizerSettings;
     }
     start() {
-        if (!this.canStart() || this.state.stage === 'progress') return;
+        if (!this.canStart() || this.state.stage !== 'parameters') return;
         let rvFilters;
         try { rvFilters = normalizeArtifactRVFilters(this.state.rvFilters); }
         catch (error) { this.setState({error: errorText(error.message)}); return; }
+        const suggest = UI.BestArtifactTab.getSuggestData();
+        if (!suggest?.settings || !Array.isArray(suggest.artifacts)) {
+            this.setState({error: t('action_missing_filters')});
+            return;
+        }
         const upgradeTargets = this.selectedArtifacts();
         const prepWorkers = normalizePrepWorkers(this.props.app.getSetting('artifact_action_workers'));
         this.factory.dispose();
         this.setState({stage: 'progress', progress: {phase: 'baseline', unit: 'artifacts', slotsCompleted: 0,
             slotsTotal: upgradeTargets.length, workerCount: Math.min(prepWorkers, upgradeTargets.length)},
             result: null, historyEntry: null, error: ''});
-        this.factory.run({kind: 'upgrade', build: this.props.app.currentSet(), inventory: this.state.inventory,
-            optimizerSettings: this.state.optimizerSettings, feature: this.state.feature, featureType: this.state.featureType,
+        this.factory.run({kind: 'upgrade', build: this.props.app.currentSet(), inventory: suggest.artifacts,
+            optimizerSettings: suggest.settings, feature: this.state.feature, featureType: this.state.featureType,
             upgradeTargets,
             pruneOutcomeSets: this.state.preserveTopology, rvFilters, prepWorkers,
-            retainOutcomes: true, useGPU: true, gpuBatchSize: this.state.gpuBatchSize, showBeta: this.props.app.showBetaContent()});
+            retainOutcomes: true, useGPU: true, gpuBatchSize: suggest.gpuBatchSize, showBeta: this.props.app.showBetaContent()});
     }
     renderParameters() {
         const pages = Math.max(1, Math.ceil(this.state.candidates.length / UPGRADE_PAGE_SIZE));
@@ -245,7 +252,7 @@ export class ArtifactUpgradeModal extends React.Component {
         const visible = this.state.candidates.slice(page * UPGRADE_PAGE_SIZE, (page + 1) * UPGRADE_PAGE_SIZE);
         return <>
             <ControlsBar>
-                <Dropdown barClass="resizable" items={Feature2.buildDropdown(this.props.app.currentSet())}
+                <Dropdown barClass="resizable" items={Feature2.buildDropdown(this.props.app.view())}
                     selected={this.state.feature} onChange={item => this.change({feature: item.value})} />
                 <Dropdown barClass="feature-type" items={['normal', 'crit', 'average'].map(value => ({value, text: lang.get('pool_view.type_' + value)}))}
                     selected={this.state.featureType} onChange={item => this.change({featureType: item.value})} />
@@ -335,7 +342,7 @@ export class ArtifactUpgradeModal extends React.Component {
     render() {
         const {isVisible, stage} = this.state;
         const outcomeRow = this.state.result?.rows.find(row => row.targetId === this.state.outcomeRow);
-        return <><DialogContainer addClass="artifact-action-modal artifact-upgrade-modal" width={stage === 'progress' ? 500 : 1000} centered isVisible={isVisible}
+        return <><DialogContainer addClass="artifact-action-modal artifact-upgrade-modal" width={stage === 'progress' ? 500 : 1000} centered isVisible={isVisible && stage !== 'baseline'}
             title={t('upgrade_title')} closeCallback={() => this.close()}>
             {isVisible && <FullHeight>
                 <FullHeightScrollable maxHeight="calc(100dvh - 210px)">
@@ -355,6 +362,7 @@ export class ArtifactUpgradeModal extends React.Component {
                 </ControlsBar></FullHeightStatic>
             </FullHeight>}
         </DialogContainer>
+            {this.factory.renderBaseline()}
             {isVisible && stage === 'results' && outcomeRow?.outcomeDetails &&
                 <ArtifactActionOutcomesModal key={outcomeRow.targetId} kind="upgrade" row={outcomeRow} result={this.state.result}
                     onClose={() => this.setState({outcomeRow: null})} />}

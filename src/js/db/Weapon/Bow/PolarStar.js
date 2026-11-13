@@ -3,6 +3,8 @@ import { ConditionStaticRefine } from "../../../classes/Condition/Static/Refine"
 import { DbObjectWeapon } from "../../../classes/DbObject/Weapon";
 import { StatTable } from "../../../classes/StatTable";
 import { weaponStatTables } from "../../generated/WeaponStatTables";
+import { weaponPassiveTables } from "../../generated/WeaponPassiveTables";
+import { percent } from "../../Params";
 
 export const PolarStar = new DbObjectWeapon({
     name: 'polar_star',
@@ -17,8 +19,8 @@ export const PolarStar = new DbObjectWeapon({
             title: 'talent_name.weapon_polar_star',
             description: 'talent_descr.weapon_polar_star_1',
             stats: [
-                new StatTable('dmg_skill', [12, 15, 18, 21, 24]),
-                new StatTable('dmg_burst', [12, 15, 18, 21, 24]),
+                new StatTable('dmg_skill', percent(weaponPassiveTables.PolarStar.p1)),
+                new StatTable('dmg_burst', percent(weaponPassiveTables.PolarStar.p1)),
             ],
         }),
         new ConditionDropdown({
@@ -35,7 +37,7 @@ export const PolarStar = new DbObjectWeapon({
                     conditions: [
                         new ConditionStaticRefine({
                             stats: [
-                                new StatTable('atk_percent', [10, 12.5, 15, 17.5, 20]),
+                                new StatTable('atk_percent', percent(weaponPassiveTables.PolarStar.p3)),
                             ],
                         }),
                     ],
@@ -47,7 +49,7 @@ export const PolarStar = new DbObjectWeapon({
                     conditions: [
                         new ConditionStaticRefine({
                             stats: [
-                                new StatTable('atk_percent', [20, 25, 30, 35, 40]),
+                                new StatTable('atk_percent', percent(weaponPassiveTables.PolarStar.p4)),
                             ],
                         }),
                     ],
@@ -59,7 +61,7 @@ export const PolarStar = new DbObjectWeapon({
                     conditions: [
                         new ConditionStaticRefine({
                             stats: [
-                                new StatTable('atk_percent', [30, 37.5, 45, 52.5, 60]),
+                                new StatTable('atk_percent', percent(weaponPassiveTables.PolarStar.p5)),
                             ],
                         }),
                     ],
@@ -71,7 +73,7 @@ export const PolarStar = new DbObjectWeapon({
                     conditions: [
                         new ConditionStaticRefine({
                             stats: [
-                                new StatTable('atk_percent', [48, 60, 72, 84, 96]),
+                                new StatTable('atk_percent', percent(weaponPassiveTables.PolarStar.p6)),
                             ],
                         }),
                     ],

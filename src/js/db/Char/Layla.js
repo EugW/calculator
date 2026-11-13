@@ -4,7 +4,6 @@ import { ConditionAscensionChar } from "../../classes/Condition/Ascension/Char";
 import { ConditionBoolean } from "../../classes/Condition/Boolean";
 import { ConditionConstellation } from "../../classes/Condition/Constellation";
 import { ConditionNot } from "../../classes/Condition/Not";
-import { ConditionNumber } from "../../classes/Condition/Number";
 import { ConditionStacks } from "../../classes/Condition/Stacks";
 import { ConditionStatic } from "../../classes/Condition/Static";
 import { DbObjectChar } from "../../classes/DbObject/Char";
@@ -21,12 +20,12 @@ import { FeatureMultiplier } from "../../classes/Feature2/Multiplier";
 import { FeatureMultiplierList } from "../../classes/Feature2/Multiplier/List";
 import { FeatureMultiplierTarget } from "../../classes/Feature2/Multiplier/Target";
 import { FeatureShield } from "../../classes/Feature2/Shield";
-import { PostEffectStats } from "../../classes/PostEffect/Stats";
 import { StatTable } from "../../classes/StatTable";
+import { RECEIVERS } from "../../classes/Team/Receivers";
 import { ValueTable } from "../../classes/ValueTable";
-import { CHARACTER_MAX_POSSIBLE_HP } from "../Constants";
 import { charTables } from "../generated/CharTables";
 import { charTalentTables } from "../generated/CharTalentTables";
+import { percent } from "../Params";
 
 const Talents = new DbObjectTalents({
     attack: {
@@ -120,13 +119,13 @@ const Talents = new DbObjectTalents({
     },
 });
 
-const A1ShieldBonus = 6;
-const A4SkillScale = 1.5;
-const C1ShieldBonus = 20;
-const C1PartyShield = 35;
-const C4NormalBonus = 5;
-const C6SkillBonus = 40;
-const C6BurstBonus = 40;
+const A1ShieldBonus = percent(charTalentTables.Layla.a1.p1);
+const A4SkillScale = percent(charTalentTables.Layla.a4.p1);
+const C1ShieldBonus = percent(charTalentTables.Layla.c1.p1);
+const C1PartyShield = percent(charTalentTables.Layla.c1.p2);
+const C4NormalBonus = percent(charTalentTables.Layla.c4.p1);
+const C6SkillBonus = percent(charTalentTables.Layla.c6.p2);
+const C6BurstBonus = percent(charTalentTables.Layla.c6.p2);
 
 export const Layla = new DbObjectChar({
     name: 'layla',
@@ -319,6 +318,7 @@ export const Layla = new DbObjectChar({
     multipliers: [
         new FeatureMultiplier({
             scaling: 'hp*',
+            receivers: RECEIVERS.TEAM,
             source: 'constellation4',
             values: new ValueTable([C4NormalBonus]),
             condition: new ConditionAnd([
@@ -334,6 +334,7 @@ export const Layla = new DbObjectChar({
         new ConditionStacks({
             name: 'layla_like_nascent_light',
             serializeId: 1,
+            receivers: RECEIVERS.TEAM,
             title: 'talent_name.layla_like_nascent_light',
             description: 'talent_descr.layla_like_nascent_light',
             maxStacks: 4,
@@ -422,48 +423,5 @@ export const Layla = new DbObjectChar({
             ],
         },
     ]),
-    partyData: {
-        loadStats: {
-            stats: ['hp_total'],
-        },
-        conditions: [
-            new ConditionNumber({
-                name: 'layla_max_hp',
-                title: 'talent_name.stats_total_hp',
-                partyStat: 'hp_total',
-                serializeId: 1,
-                max: CHARACTER_MAX_POSSIBLE_HP,
-                class: "gi-inputs-5digit",
-            }),
-            new ConditionStacks({
-                name: 'party.layla_like_nascent_light',
-                serializeId: 2,
-                title: 'talent_name.layla_like_nascent_light',
-                description: 'talent_descr.layla_like_nascent_light',
-                maxStacks: 4,
-                stats: [
-                    new StatTable('shield', [A1ShieldBonus]),
-                ],
-                info: {ascension: 1},
-            }),
-            new ConditionBoolean({
-                name: 'party.layla_starry_illumination',
-                serializeId: 3,
-                title: 'talent_name.layla_starry_illumination',
-                description: 'talent_descr.layla_starry_illumination',
-                info: {constellation: 4},
-            }),
-        ],
-        multipliers: [
-            new FeatureMultiplier({
-                scaling: 'layla_max_hp',
-                source: 'constellation4',
-                values: new ValueTable([C4NormalBonus]),
-                condition: new ConditionBoolean({name: 'party.layla_starry_illumination'}),
-                target: new FeatureMultiplierTarget({
-                    damageTypes: ['normal', 'charged'],
-                }),
-            }),
-        ],
-    },
+    retiredParty: [[1, 'number'], [2, 'stacks'], [3, 'checkbox']],
 });

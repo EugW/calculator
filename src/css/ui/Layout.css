@@ -19,9 +19,17 @@ input {
     font-family: Genshin;
 }
 
+.gi-page {
+    position: relative;
+    --main-left: calc((100% - 1020px) / 2);
+    /* The top margin is on the page, so the main container, the side
+       panel and the nav column all start at the same height. */
+    margin-top: 10px;
+}
+
 .gi-main-container {
-    margin: 10px auto 0 auto;
-    width: 1140px;
+    margin: 0 0 0 var(--main-left);
+    width: 1020px;
     min-height: 600px;
     background-color: rgba(60, 60, 60, 0.4);
     border-radius: 25px;
@@ -29,6 +37,162 @@ input {
 
 .gi-main-container > div {
     float: left;
+}
+
+/* Nav column: one separate column right of the main container, as wide as
+   the team column on the left, an icon with a truncated text label each. */
+.gi-layout-nav {
+    position: absolute;
+    top: 0;
+    left: calc(var(--main-left) + 1020px + 10px);
+    width: 360px;
+    max-height: calc(100vh - 45px);
+    overflow-y: auto;
+    overflow-x: hidden;
+    box-sizing: border-box;
+    background-color: rgba(60, 60, 60, 0.4);
+    border-radius: 25px;
+    padding-bottom: 10px;
+}
+
+.gi-layout-nav-tabs {
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+    gap: 2px;
+    padding: 10px 8px 0;
+}
+
+.gi-tab-item {
+    display: flex;
+    align-items: center;
+    gap: 8px;
+    width: 100%;
+    min-height: 44px;
+    box-sizing: border-box;
+    border-radius: 12px;
+    padding: 2px 6px 2px 2px;
+    cursor: pointer;
+    user-select: none;
+}
+
+.gi-tab-item-inner {
+    width: 44px;
+    height: 44px;
+    flex-shrink: 0;
+    border-radius: 50%;
+    border: 0 none;
+    background-size: cover;
+}
+
+.gi-tab-item-label {
+    flex-grow: 1;
+    min-width: 0;
+    overflow: hidden;
+    text-overflow: ellipsis;
+    white-space: nowrap;
+    font-size: 15px;
+    color: #BEAEA9;
+}
+
+.gi-tab-item:hover .gi-tab-item-label {
+    color: #ECE5D8;
+}
+
+.gi-tab-item.active {
+    background-color: rgba(211, 188, 142, 0.08);
+}
+
+.gi-tab-item.active .gi-tab-item-inner {
+    background-color: #ECE5D8;
+}
+
+.gi-tab-item.active .gi-tab-item-label {
+    color: #D3BC8E;
+}
+
+/* The spacer between the two tab groups becomes a divider. */
+.gi-layout-nav-tabs .flex-spacer {
+    flex-grow: 0;
+    flex-shrink: 0;
+    height: 0;
+    border-top: 1px solid #4B505E;
+    margin: 8px 4px;
+}
+
+/* Where labels no longer fit the nav stays a separate icon-only column. */
+.slim-nav .gi-layout-nav {
+    width: 56px;
+    padding: 0;
+    background: unset;
+    border-radius: 0;
+    max-height: none;
+    overflow: visible;
+}
+
+.slim-nav .gi-tab-item {
+    justify-content: center;
+    min-height: unset;
+    padding: 0;
+    border-radius: 0;
+    background: unset;
+}
+
+.slim-nav .gi-tab-item-inner {
+    width: 50px;
+    height: 50px;
+}
+
+.slim-nav .gi-tab-item-label,
+.slim-nav .gi-nav-header {
+    display: none;
+}
+
+.slim-nav .gi-layout-nav-tabs {
+    gap: 6px;
+    padding: 0;
+}
+
+.slim-nav .gi-layout-nav-tabs .flex-spacer {
+    border-top: 0;
+    margin: 0;
+    flex-grow: 1;
+}
+
+/* Side panel: attached left of the main container when the window is wide
+   enough. The main container moves right just enough to fit it; the nav
+   column stays docked to the main container's right edge. */
+.gi-layout-side {
+    display: none;
+}
+
+.side-panel .gi-page {
+    --side-width: 360px;
+    --side-gap: 10px;
+    --main-left: max(calc(var(--side-width) + var(--side-gap)), calc((100% - 1020px) / 2));
+}
+
+.side-panel .gi-layout-side {
+    display: block;
+    position: absolute;
+    top: 0;
+    left: calc(var(--main-left) - var(--side-width) - var(--side-gap));
+    width: var(--side-width);
+    min-height: 600px;
+    padding-bottom: 8px;
+    box-sizing: border-box;
+    background-color: rgba(60, 60, 60, 0.4);
+    border-radius: 25px;
+    overflow: hidden;
+}
+
+.gi-layout-side-content {
+    position: relative;
+    height: 100%;
+}
+
+.side-panel .gi-side-tab {
+    display: none;
 }
 
 .gi-layout-left-container, .gi-layout-right-container {
@@ -39,6 +203,17 @@ input {
     overflow-x: hidden;
     height: 100%;
     position: relative;
+}
+
+/* The panels fill the main container's height, so rounding their outer
+   corners clips their content to the container's rounded corners, while the
+   footer below them stays visible. */
+.gi-layout-left-container {
+    border-radius: 25px 0 0 25px;
+}
+
+.gi-layout-right-container {
+    border-radius: 0 25px 25px 0;
 }
 
 .gi-layout-right-container .gi-tab-container, .gi-layout-left-container .gi-tab-container {
@@ -55,29 +230,6 @@ input {
     overflow-y: auto;
 }
 
-.gi-layout-left-tabs, .gi-layout-right-tabs {
-    width: 56px;
-    box-sizing: border-box;
-    height: 100%;
-    display: flex;
-    flex-direction: column;
-}
-
-.gi-layout-right-tabs {
-    margin-left: 4px;
-}
-
-.gi-layout-left-tabs {
-    margin-right: 4px;
-}
-
-.gi-tab-item {
-    width: 50px;
-    height: 50px;
-    flex-shrink: unset;
-    flex-grow: unset;
-}
-
 .flex-spacer {
     flex-grow: 1;
 }
@@ -90,37 +242,6 @@ input {
 .flex {
     width: 100%;
     display: flex;
-}
-
-.gi-layout-right-tabs .gi-tab-item {
-    border-left: solid 4px transparent;
-    padding-left: 2px;
-}
-
-.gi-layout-left-tabs .gi-tab-item {
-    border-right: solid 4px transparent;
-    padding-right: 2px;
-}
-
-.gi-layout-right-tabs  .gi-tab-item.active {
-    border-left-color: #D3BC8E;
-}
-
-.gi-layout-left-tabs  .gi-tab-item.active {
-    border-right-color: #D3BC8E;
-}
-
-.gi-tab-item-inner {
-    width: 50px;
-    height: 50px;
-    border-radius: 50%;
-    border: 0 none;
-    cursor: pointer;
-    background-size: cover;
-}
-
-.gi-tab-item.active .gi-tab-item-inner {
-    background-color: #ECE5D8;
 }
 
 body .simplebar-scrollbar::before {
@@ -253,10 +374,6 @@ a:link, a:visited {
 
 .gi-radio-wrapper input[type=radio]:checked + label::before {
     background-color: #FFF7E9;
-}
-
-.tabs-narrow {
-    display: none;
 }
 
 .no-scroll {

@@ -2,6 +2,8 @@ import { ArtifactSet } from "../../../classes/ArtifactSet";
 import { ConditionStatic } from "../../../classes/Condition/Static";
 import { ConditionStacks } from "../../../classes/Condition/Stacks";
 import { StatTable } from "../../../classes/StatTable";
+import { artifactSetTables } from "../../generated/ArtifactSetTables";
+import { percent, times } from "../../Params";
 
 export const CrimsonWitch = new ArtifactSet({
     serializeId: 7,
@@ -21,7 +23,7 @@ export const CrimsonWitch = new ArtifactSet({
                     description: 'set_descr.crimson_witch_of_flames_2',
                     settings: {},
                     stats: {
-                        dmg_pyro: 15,
+                        dmg_pyro: artifactSetTables.CrimsonWitch.pc2.dmg_pyro,
                     },
                 })
             ],
@@ -34,11 +36,11 @@ export const CrimsonWitch = new ArtifactSet({
                     description: 'set_descr.crimson_witch_of_flames_4_1',
                     settings: {},
                     stats: {
-                        dmg_reaction_overloaded: 40,
-                        dmg_reaction_burning: 40,
-                        dmg_reaction_burgeon: 40,
-                        dmg_reaction_vaporize: 15,
-                        dmg_reaction_melt: 15,
+                        dmg_reaction_overloaded: percent(artifactSetTables.CrimsonWitch.pc4.p1),
+                        dmg_reaction_burning: percent(artifactSetTables.CrimsonWitch.pc4.p1),
+                        dmg_reaction_burgeon: percent(artifactSetTables.CrimsonWitch.pc4.p1),
+                        dmg_reaction_vaporize: percent(artifactSetTables.CrimsonWitch.pc4.p2),
+                        dmg_reaction_melt: percent(artifactSetTables.CrimsonWitch.pc4.p2),
                     },
                 }),
                 new ConditionStacks({
@@ -48,7 +50,7 @@ export const CrimsonWitch = new ArtifactSet({
                     description: 'set_descr.crimson_witch_of_flames_4_2',
                     maxStacks: 3,
                     stats: [
-                        new StatTable('dmg_pyro', [7.5]),
+                        new StatTable('dmg_pyro', [percent(times(artifactSetTables.CrimsonWitch.pc4.p3, artifactSetTables.CrimsonWitch.pc4.p4))]),
                     ],
                 })
             ],

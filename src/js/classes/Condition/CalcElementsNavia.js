@@ -1,15 +1,13 @@
-import { Stats } from "../Stats";
 import { Condition } from "../Condition";
+import { Stats } from "../Stats";
+import { teammateElements } from "../Team/Party";
 
 export class ConditionCalcElementsNavia extends Condition {
     getData(settings) {
         let chars = 0;
 
         if (this.isActive(settings)) {
-            for (const name of ['resonance_element_1', 'resonance_element_2', 'resonance_element_3']) {
-                const element = settings[name] || '';
-                if (!element) continue;
-
+            for (const element of teammateElements(settings)) {
                 if (['pyro', 'hydro', 'electro', 'cryo'].includes(element)) {
                     ++chars;
                 }
