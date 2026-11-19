@@ -667,11 +667,7 @@ export const Rotation = new DbObjectRotation({
     'skill.columbina_lunar_crystallize_dmg': 655,
     'burst.columbina_burst_dmg': 656,
     // Zibai
-    'skill.zibai_lunar_phase_shift_hit_1': 657,
-    'skill.zibai_lunar_phase_shift_hit_2': 658,
-    'skill.zibai_lunar_phase_shift_hit_3': 659,
-    'skill.zibai_lunar_phase_shift_hit_4': 660,
-    'skill.zibai_lunar_phase_shift_charged': 661,
+    // 657-661: retired, see aliases below
     'skill.zibai_lunar_phase_shift_4th_additional': 662,
     'skill.zibai_spirit_steed_hit_1': 663,
     'skill.zibai_spirit_steed_hit_2': 664,
@@ -901,4 +897,12 @@ export const Rotation = new DbObjectRotation({
     // Valeriy: 951-952
     'attack.valeriy_direct_fire_mortar': 951,
     'burst.valeriy_thunderburst_shell': 952,
+}, {
+    // Zibai Lunar Phase Shift NA/CA moved from 'skill.zibai_lunar_phase_shift_*' into the
+    // generic attack rows (switched by the 'zibai_lunar_phase_shift' condition)
+    657: 'attack.normal_hit_1',
+    658: 'attack.normal_hit_2',
+    659: 'attack.normal_hit_3',
+    660: 'attack.normal_hit_4',
+    661: 'attack.charged_hit',
 });

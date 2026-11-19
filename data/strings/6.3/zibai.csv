@@ -13,5 +13,6 @@ feature_burst;zibai_burst_hit_1;Урон 1-й атаки навыка;Skill 1-Hi
 feature_burst;zibai_burst_hit_2;Урон 2-й атаки навыка;Skill 2-Hit DMG
 feature_other;zibai_lunar_bonus;Базовый бонус Лунной кристаллизации;Lunar-Crystallize Base Bonus
 
+talent_name;zibai_lunar_phase_shift;Режим Сдвига лунных фаз;Lunar Phase Shift mode
 talent_name;zibai_moonsign_benediction;Дар лунного знамения: Ход солнца и луны;Moonsign Benediction: The Coursing Sun and Moon
 talent_descr;zibai_moonsign_benediction;При активации Гидро-кристаллизации она преобразуется в geo{Лунную кристаллизацию}. Базовый урон увеличивается на %{text_percent} за каждые 100 ед. name{защиты}, максимум %{text_percent_max}.;When triggering Hydro Crystallize, it is converted into geo{Lunar-Crystallize}. Base DMG is increased by %{text_percent} per 100 name{DEF}, max %{text_percent_max}.

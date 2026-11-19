@@ -4,6 +4,7 @@ import { ConditionAscensionChar } from "../../classes/Condition/Ascension/Char";
 import { ConditionBoolean } from "../../classes/Condition/Boolean";
 import { ConditionBooleanValue } from "../../classes/Condition/Boolean/Value";
 import { ConditionConstellation } from "../../classes/Condition/Constellation";
+import { ConditionNot } from "../../classes/Condition/Not";
 import { ConditionNumber } from "../../classes/Condition/Number";
 import { ConditionNumberZibaiC6 } from "../../classes/Condition/Number/Zibai";
 import { ConditionElementsCount } from "../../classes/Condition/ElementsCount";
@@ -127,6 +128,13 @@ const Talents = new DbObjectTalents({
     },
 });
 
+// Lunar Phase Shift mode: Normal/Charged Attacks become Geo DMG scaling off DEF and the Skill
+// talent level. Same-named features are swapped via opposite conditions (see Skirk).
+const phaseShiftCond = new ConditionBoolean({name: 'zibai_lunar_phase_shift'});
+const phaseShiftCondRev = new ConditionNot([
+    new ConditionBoolean({name: 'zibai_lunar_phase_shift'}),
+]);
+
 // Passive scaling constants
 const PassiveLunarScale = 0.7;
 const PassiveLunarScaleCap = 14;
@@ -166,6 +174,7 @@ export const Zibai = new DbObjectChar({
                     values: Talents.get('attack.normal_hit_1'),
                 }),
             ],
+            condition: phaseShiftCondRev,
         }),
         new FeatureDamageNormal({
             multipliers: [
@@ -174,6 +183,7 @@ export const Zibai = new DbObjectChar({
                     values: Talents.get('attack.normal_hit_2'),
                 }),
             ],
+            condition: phaseShiftCondRev,
         }),
         new FeatureDamageNormal({
             name: 'normal_hit_3',
@@ -184,6 +194,7 @@ export const Zibai = new DbObjectChar({
                     values: Talents.get('attack.normal_hit_3'),
                 }),
             ],
+            condition: phaseShiftCondRev,
         }),
         new FeatureDamageNormal({
             multipliers: [
@@ -192,6 +203,7 @@ export const Zibai = new DbObjectChar({
                     values: Talents.get('attack.normal_hit_4'),
                 }),
             ],
+            condition: phaseShiftCondRev,
         }),
         // Charged Attack (Physical, ATK scaling, 2 hits)
         new FeatureDamageCharged({
@@ -202,6 +214,73 @@ export const Zibai = new DbObjectChar({
                     values: Talents.get('attack.charged_hit'),
                 }),
             ],
+            condition: phaseShiftCondRev,
+        }),
+        // Lunar Phase Shift Normal Attacks (DEF scaling, Geo)
+        // Replace the physical Normal/Charged Attacks while the mode is on. Counted as
+        // Normal/Charged Attack DMG in-game, but scale with the Elemental Skill talent level.
+        new FeatureDamageNormal({
+            name: 'normal_hit_1',
+            element: 'geo',
+            multipliers: [
+                new FeatureMultiplier({
+                    scaling: 'def*',
+                    leveling: 'char_skill_elemental',
+                    values: Talents.get('skill.zibai_lunar_phase_shift_hit_1'),
+                }),
+            ],
+            condition: phaseShiftCond,
+        }),
+        new FeatureDamageNormal({
+            name: 'normal_hit_2',
+            element: 'geo',
+            multipliers: [
+                new FeatureMultiplier({
+                    scaling: 'def*',
+                    leveling: 'char_skill_elemental',
+                    values: Talents.get('skill.zibai_lunar_phase_shift_hit_2'),
+                }),
+            ],
+            condition: phaseShiftCond,
+        }),
+        new FeatureDamageNormal({
+            name: 'normal_hit_3',
+            element: 'geo',
+            hits: 2,
+            multipliers: [
+                new FeatureMultiplier({
+                    scaling: 'def*',
+                    leveling: 'char_skill_elemental',
+                    values: Talents.get('skill.zibai_lunar_phase_shift_hit_3'),
+                }),
+            ],
+            condition: phaseShiftCond,
+        }),
+        new FeatureDamageNormal({
+            name: 'normal_hit_4',
+            element: 'geo',
+            multipliers: [
+                new FeatureMultiplier({
+                    scaling: 'def*',
+                    leveling: 'char_skill_elemental',
+                    values: Talents.get('skill.zibai_lunar_phase_shift_hit_4'),
+                }),
+            ],
+            condition: phaseShiftCond,
+        }),
+        // Lunar Phase Shift Charged Attack (DEF scaling, Geo)
+        new FeatureDamageCharged({
+            name: 'charged_hit',
+            element: 'geo',
+            hits: 2,
+            multipliers: [
+                new FeatureMultiplier({
+                    scaling: 'def*',
+                    leveling: 'char_skill_elemental',
+                    values: Talents.get('skill.zibai_lunar_phase_shift_charged'),
+                }),
+            ],
+            condition: phaseShiftCond,
         }),
         // Plunge attacks
         new FeatureDamagePlungeCollision({
@@ -228,77 +307,12 @@ export const Zibai = new DbObjectChar({
                 }),
             ],
         }),
-        // Lunar Phase Shift Normal Attacks (DEF scaling, Geo)
-        new FeatureDamageSkill({
-            name: 'zibai_lunar_phase_shift_hit_1',
-            element: 'geo',
-            dmgStats: ['dmg_normal'],
-            multipliers: [
-                new FeatureMultiplier({
-                    scaling: 'def*',
-                    leveling: 'char_skill_elemental',
-                    values: Talents.get('skill.zibai_lunar_phase_shift_hit_1'),
-                }),
-            ],
-        }),
-        new FeatureDamageSkill({
-            name: 'zibai_lunar_phase_shift_hit_2',
-            element: 'geo',
-            dmgStats: ['dmg_normal'],
-            multipliers: [
-                new FeatureMultiplier({
-                    scaling: 'def*',
-                    leveling: 'char_skill_elemental',
-                    values: Talents.get('skill.zibai_lunar_phase_shift_hit_2'),
-                }),
-            ],
-        }),
-        new FeatureDamageSkill({
-            name: 'zibai_lunar_phase_shift_hit_3',
-            element: 'geo',
-            dmgStats: ['dmg_normal'],
-            hits: 2,
-            multipliers: [
-                new FeatureMultiplier({
-                    scaling: 'def*',
-                    leveling: 'char_skill_elemental',
-                    values: Talents.get('skill.zibai_lunar_phase_shift_hit_3'),
-                }),
-            ],
-        }),
-        new FeatureDamageSkill({
-            name: 'zibai_lunar_phase_shift_hit_4',
-            element: 'geo',
-            dmgStats: ['dmg_normal'],
-            multipliers: [
-                new FeatureMultiplier({
-                    scaling: 'def*',
-                    leveling: 'char_skill_elemental',
-                    values: Talents.get('skill.zibai_lunar_phase_shift_hit_4'),
-                }),
-            ],
-        }),
-        // Lunar Phase Shift Charged Attack (DEF scaling, Geo)
-        new FeatureDamageSkill({
-            name: 'zibai_lunar_phase_shift_charged',
-            element: 'geo',
-            dmgStats: ['dmg_charged'],
-            hits: 2,
-            multipliers: [
-                new FeatureMultiplier({
-                    scaling: 'def*',
-                    leveling: 'char_skill_elemental',
-                    values: Talents.get('skill.zibai_lunar_phase_shift_charged'),
-                }),
-            ],
-        }),
         // Lunar Phase Shift 4th Hit Additional DMG (Lunar-Crystallize)
         // C4: When Scattermoon Splendor is active, deals 250% of original (base + 150% bonus)
         new FeatureReactionLunarCrystallizeLike({
             name: 'zibai_lunar_phase_shift_4th_additional',
             element: 'geo',
             category: 'skill',
-            dmgStats: ['dmg_normal'],
             multipliers: [
                 // Base multiplier
                 new FeatureMultiplier({
@@ -399,6 +413,11 @@ export const Zibai = new DbObjectChar({
             settings: {
                 allowed_lunarcrystallize: 1,
             },
+        }),
+        new ConditionBoolean({
+            name: 'zibai_lunar_phase_shift',
+            serializeId: 6,
+            title: 'talent_name.zibai_lunar_phase_shift',
         }),
         // A1: The Selenic Adeptus Descends - Moonfall effect (4s after E or Moondrift Harmony)
         new ConditionBoolean({

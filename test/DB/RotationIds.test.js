@@ -12,6 +12,23 @@ test('All rotation features have IDs', () => {
     expect( getMissingRotationIds() ).toBeEmptyArray();
 });
 
+test('Rotation aliases reserve retired ids and point to live names', () => {
+    const problems = [];
+
+    for (const [id, name] of Object.entries(Rotation.listAliases())) {
+        for (const liveName of Rotation.listNames()) {
+            if (String(Rotation.getByName(liveName)) === id) {
+                problems.push(`alias id=${id} reused by ${liveName}`);
+            }
+        }
+        if (!Rotation.getByName(name)) {
+            problems.push(`alias id=${id} points to unknown ${name}`);
+        }
+    }
+
+    expect(problems).toBeEmptyArray();
+});
+
 function getDuplicatedIds(obj) {
     let used_ids = {};
 
